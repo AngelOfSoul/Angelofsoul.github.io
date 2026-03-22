@@ -619,6 +619,9 @@ function submitForm() {
   var name = document.getElementById('inp-name').value.trim();
   var email = document.getElementById('inp-email').value.trim();
   var msg = document.getElementById('inp-msg').value.trim();
+  var village = document.getElementById('inp-village').value.trim();
+  var family = document.getElementById('inp-family').value.trim();
+
   if (!name || !email || !msg) {
     alert(currentLang === 'ro' ? 'Te rugam completeaza: Nume, Email si Mesaj.' : 'Please fill in: Name, Email and Message.');
     return;
@@ -627,8 +630,41 @@ function submitForm() {
     alert(currentLang === 'ro' ? 'Adresa de email nu este valida.' : 'Email address is not valid.');
     return;
   }
-  document.getElementById('formBody').style.display = 'none';
-  document.getElementById('formSuccess').style.display = 'block';
+
+  var btn = document.getElementById('btnSubmit');
+  var btnLbl = document.getElementById('btn-lbl');
+  btn.disabled = true;
+  btnLbl.textContent = currentLang === 'ro' ? 'Se trimite...' : 'Sending...';
+
+  var data = {
+    name: name,
+    email: email,
+    message: msg,
+    village: village || '—',
+    family: family || '—',
+    topic: selectedTopic || 'necunoscut'
+  };
+
+  fetch('https://formspree.io/f/xpqygdjn', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json', 'Accept': 'application/json' },
+    body: JSON.stringify(data)
+  })
+  .then(function(resp) {
+    if (resp.ok) {
+      document.getElementById('formBody').style.display = 'none';
+      document.getElementById('formSuccess').style.display = 'block';
+    } else {
+      btn.disabled = false;
+      btnLbl.textContent = currentLang === 'ro' ? 'TRIMITE MESAJUL' : 'SEND MESSAGE';
+      alert(currentLang === 'ro' ? 'Eroare la trimitere. Incercati din nou.' : 'Sending failed. Please try again.');
+    }
+  })
+  .catch(function() {
+    btn.disabled = false;
+    btnLbl.textContent = currentLang === 'ro' ? 'TRIMITE MESAJUL' : 'SEND MESSAGE';
+    alert(currentLang === 'ro' ? 'Eroare de retea. Verificati conexiunea si incercati din nou.' : 'Network error. Check your connection and try again.');
+  });
 }
 
 function toggleFaq(el) {
