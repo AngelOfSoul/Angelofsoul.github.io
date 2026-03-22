@@ -117,6 +117,8 @@ footer .g { color:var(--gold-d); font-style:normal; }
 .photo-count { font-size:12px; color:var(--muted); font-style:italic; margin-left:auto; }
 .add-photo-btn { font-size:12px; padding:5px 14px; background:#1a1208; border:1px solid var(--gold-d); color:var(--gold); font-family:'EB Garamond',serif; border-radius:3px; cursor:pointer; transition:all 0.15s; white-space:nowrap; }
 .add-photo-btn:hover { background:var(--gold); color:#0a0a0a; }
+.float-add { position:fixed; bottom:122px; right:24px; background:#1a1208; border:1px solid var(--gold-d); color:var(--gold); font-family:'EB Garamond',serif; font-size:13px; padding:8px 16px; border-radius:3px; cursor:pointer; z-index:9999; transition:all 0.2s; white-space:nowrap; box-shadow:0 2px 12px #000a; }
+.float-add:hover { background:var(--gold); color:#0a0a0a; border-color:var(--gold); }
 
 /* ── PHOTO GRID ── */
 .photo-grid { display:grid; grid-template-columns:1fr 1fr; gap:8px; margin-bottom:32px; }
@@ -363,7 +365,6 @@ footer .g { color:var(--gold-d); font-style:normal; }
         <option value="oldest" data-ro="Cele mai vechi" data-en="Oldest first">Cele mai vechi</option>
       </select>
       <span class="photo-count" id="photo-count"></span>
-      <button class="add-photo-btn" onclick="openUpload()" data-ro="+ Adauga fotografie" data-en="+ Add photo">+ Adauga fotografie</button>
     </div>
   </div>
 
@@ -376,6 +377,8 @@ footer .g { color:var(--gold-d); font-style:normal; }
   </div>
 
 </div>
+
+<button class="float-add" id="floatAdd" onclick="openUpload()" data-ro="+ Adauga fotografie" data-en="+ Add photo">+ Adauga fotografie</button>
 
 <a class="scroll-top" id="scrollTop" onclick="window.scrollTo({top:0,behavior:'smooth'})" title="Sus">&#8679;</a>
 <a class="scroll-bottom" id="scrollBottom" onclick="window.scrollTo({top:document.body.scrollHeight,behavior:'smooth'})" title="Jos">&#8681;</a>
