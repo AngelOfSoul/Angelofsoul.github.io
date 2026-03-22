@@ -117,6 +117,10 @@ footer .g { color:var(--gold-d); font-style:normal; }
 .photo-count { font-size:12px; color:var(--muted); font-style:italic; margin-left:auto; }
 .add-photo-btn { font-size:12px; padding:5px 14px; background:#1a1208; border:1px solid var(--gold-d); color:var(--gold); font-family:'EB Garamond',serif; border-radius:3px; cursor:pointer; transition:all 0.15s; white-space:nowrap; }
 .add-photo-btn:hover { background:var(--gold); color:#0a0a0a; }
+.add-photo-btn { font-size:12px; padding:5px 14px; background:#1a1208; border:1px solid var(--gold-d); color:var(--gold); font-family:'EB Garamond',serif; border-radius:3px; cursor:pointer; transition:all 0.2s; white-space:nowrap; }
+.add-photo-btn:hover { background:var(--gold); color:#0a0a0a; }
+.add-photo-btn.hidden { display:none; }
+
 .float-add {
   position:fixed !important;
   bottom:120px !important;
@@ -769,10 +773,14 @@ function setLang(lang) {
 function updateScrollBtns() {
   var t = document.getElementById('scrollTop');
   var b = document.getElementById('scrollBottom');
+  var fab = document.getElementById('floatAdd');
+  var staticBtn = document.getElementById('staticAddBtn');
   var scrolled = window.scrollY > 300;
   var atBottom = (window.innerHeight + window.scrollY) >= document.body.scrollHeight - 100;
   if (t) { t.style.opacity = scrolled ? '1' : '0'; t.style.pointerEvents = scrolled ? 'auto' : 'none'; }
   if (b) { b.style.opacity = atBottom ? '0' : '1'; b.style.pointerEvents = atBottom ? 'none' : 'auto'; }
+  if (fab) { fab.style.opacity = scrolled ? '1' : '0'; fab.style.pointerEvents = scrolled ? 'auto' : 'none'; }
+  if (staticBtn) { staticBtn.style.display = scrolled ? 'none' : ''; }
 }
 window.addEventListener('scroll', updateScrollBtns);
 window.addEventListener('load', updateScrollBtns);
@@ -791,7 +799,7 @@ buildRecent();
 buildThisWeek();
 </script>
 
-<button class="float-add" id="floatAdd" onclick="openUpload()">+ Adauga fotografie</button>
+<button class="float-add" id="floatAdd" style="opacity:0;pointer-events:none;" onclick="openUpload()">+ Adauga fotografie</button>
 
 </body>
 </html>
