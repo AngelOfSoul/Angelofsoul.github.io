@@ -71,7 +71,9 @@ nav { background:var(--s1); border-bottom:2px solid var(--gold-d); display:flex;
 footer { background:#050505; border-top:2px solid var(--gold-d); padding:16px 24px; text-align:center; font-family:'EB Garamond',serif; font-size:13px; color:var(--muted); letter-spacing:1.5px; font-style:italic; }
 footer .g { color:var(--gold-d); font-style:normal; }
 
-.main-wrap { max-width:1080px; margin:0 auto; padding:32px 20px; }
+.main-wrap { max-width:1080px; margin:0 auto; padding:32px 20px; display:grid; grid-template-columns:1fr 272px; gap:36px; align-items:start; }
+.main-col {}
+@media(max-width:760px) { .main-wrap { grid-template-columns:1fr; } }
 
 /* ── Search & Filter Bar ── */
 .filter-bar { display:flex; flex-wrap:wrap; gap:12px; align-items:center; margin-bottom:28px; background:var(--s1); border:1px solid var(--b1); border-left:3px solid var(--gold-d); padding:14px 18px; border-radius:2px; }
@@ -226,6 +228,8 @@ footer .g { color:var(--gold-d); font-style:normal; }
 
 <div class="main-wrap">
 
+  <div class="main-col">
+
   <div class="section-head">
     <span class="section-head-title" data-ro="Familiile din Calnic" data-en="Families of Calnic">Familiile din Calnic</span>
   </div>
@@ -253,6 +257,48 @@ footer .g { color:var(--gold-d); font-style:normal; }
   <!-- Cards grid -->
   <div class="families-grid" id="familiesGrid"></div>
   <div class="no-results" id="noResults" data-ro="Nicio familie gasita." data-en="No families found.">Nicio familie gasita.</div>
+
+  </div><!-- end main-col -->
+
+  <!-- Sidebar -->
+  <div class="sidebar-col">
+
+    <div class="section-head">
+      <span class="section-head-title" data-ro="Calnic in cifre" data-en="Calnic by the numbers">Calnic in cifre</span>
+    </div>
+    <div class="stats-grid">
+      <div class="stat-cell"><span class="stat-num">47</span><span class="stat-lbl" data-ro="familii" data-en="families">familii</span></div>
+      <div class="stat-cell"><span class="stat-num">312</span><span class="stat-lbl" data-ro="locuitori" data-en="residents">locuitori</span></div>
+      <div class="stat-cell"><span class="stat-num">1269</span><span class="stat-lbl" data-ro="atestat" data-en="first recorded">atestat</span></div>
+      <div class="stat-cell"><span class="stat-num" style="font-size:13px;">UNESCO</span><span class="stat-lbl" data-ro="cetatea" data-en="citadel">cetatea</span></div>
+    </div>
+
+    <div class="side-orn">— &#10022; —</div>
+
+    <div class="section-head">
+      <span class="section-head-title" data-ro="Despre sat" data-en="About the village">Despre sat</span>
+    </div>
+    <div class="info-row"><span class="info-lbl" data-ro="Judet" data-en="County">Judet</span><span class="info-val">Alba</span></div>
+    <div class="info-row"><span class="info-lbl" data-ro="Regiune" data-en="Region">Regiune</span><span class="info-val">Transilvania</span></div>
+    <div class="info-row"><span class="info-lbl" data-ro="Cetatea" data-en="Citadel">Cetatea</span><span class="info-val" style="color:var(--gold);">Patrimoniu UNESCO</span></div>
+    <div class="info-row"><span class="info-lbl" data-ro="Altitudine" data-en="Altitude">Altitudine</span><span class="info-val">380 m</span></div>
+
+    <div class="side-orn">— &#10022; —</div>
+
+    <div class="section-head">
+      <span class="section-head-title" data-ro="Anunturi" data-en="Announcements">Anunturi</span>
+    </div>
+    <div class="ann">
+      <div class="ann-date" data-ro="Martie 2026" data-en="March 2026">Martie 2026</div>
+      <strong data-ro="Site nou lansat!" data-en="New site launched!">Site nou lansat!</strong>
+      <span data-ro=" — Bine ati venit pe noul site al comunei Calnic." data-en=" — Welcome to the new Calnic village website."> — Bine ati venit pe noul site al comunei Calnic.</span>
+    </div>
+    <div class="ann">
+      <div class="ann-date" data-ro="Martie 2026" data-en="March 2026">Martie 2026</div>
+      <span data-ro="Familiile se pot inregistra incepand de astazi." data-en="Families can register starting today.">Familiile se pot inregistra incepand de astazi.</span>
+    </div>
+
+  </div><!-- end sidebar-col -->
 
 </div>
 
