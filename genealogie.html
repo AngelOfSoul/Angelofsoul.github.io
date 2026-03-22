@@ -219,7 +219,7 @@ footer .g{color:var(--gold-d);font-style:normal;}
       <span class="section-head-title" data-ro="Arborele satului" data-en="Village tree">Arborele satului</span>
     </div>
 
-    <a class="village-banner" href="genealogie-familiile-familie.html">
+    <a class="village-banner" href="genealogie-familie.html">
       <div class="vb-left">
         <div class="vb-icon">&#127807;</div>
         <div>
@@ -314,7 +314,7 @@ document.getElementById('yr').textContent = new Date().getFullYear();
    Replace FAMILIES array with a Supabase fetch:
    const { data } = await supabase.from('families').select('*');
    Map the response to the same structure below.
-   URL for each family: genealogie-familiile-familie.html?family=<id>
+   URL for each family: genealogie-familie.html?family=<id>
 ── END PHASE 2 HOOK ── */
 
 var FAMILIES = [
@@ -350,7 +350,7 @@ function renderFamilies(list) {
     var perLabel = currentLang === 'ro' ? 'Persoane' : 'People';
     var conLabel = currentLang === 'ro' ? 'Conectat la sat' : 'Connected';
     var btnLabel = currentLang === 'ro' ? 'Vezi arborele' : 'View tree';
-    return '<a class="fam-card" href="genealogie-familiile-familie.html?family=' + f.id + '">'
+    return '<a class="fam-card" href="genealogie-familie.html?family=' + f.id + '">'
       + '<div class="fc-top">'
       + '<div class="fc-avatar">' + f.initial + '</div>'
       + '<div class="fc-name">' + f.name + '</div>'
