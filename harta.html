@@ -406,50 +406,115 @@ function buildFamilyPopup(f) {
 
 /* ── DATA ── */
 var POIS = [
+  /* ── CETATEA CALNIC ── verified: UNESCO 1999, built 1272 */
   {
     lat:45.8082, lng:23.6438, emoji:'&#127963;', color:'#d4a84a', pulse:true,
-    name: currentLang==='ro' ? 'Cetatea Calnic' : 'Calnic Citadel',
     nameRo:'Cetatea Calnic', nameEn:'Calnic Citadel',
     badge:'UNESCO 1999',
-    descRo:'Cetatea saseasca din sec. XIII, inscrisa UNESCO in 1999. Turnul Siegfried (donjonul), capela cu fresce si incinta cu ziduri groase sunt principalele atractii.',
-    descEn:'13th century Saxon citadel, UNESCO listed in 1999. The Siegfried Tower, chapel with frescoes and thick defensive walls are the main attractions.',
+    descRo:'Cetatea saseasca din sec. XIII. Turnul Siegfried (donjon, 20m inaltime), capela cu fresce, muzeu etnografic. Cumparata de sateni in sec. XV. Restaurata 1961-1964. Din 2003 Centru Cultural International sub patronajul Academiei Romane.',
+    descEn:'13th century Saxon citadel. Siegfried Tower (keep, 20m), chapel with frescoes, ethnographic museum. Bought by villagers in 15th century. Restored 1961-1964. Since 2003 an International Cultural Centre.',
     img:'https://upload.wikimedia.org/wikipedia/commons/thumb/0/07/Calnic_Fortified_Church.jpg/320px-Calnic_Fortified_Church.jpg',
-    photos:[{emoji:'&#127963;',title:'Cetatea'},{emoji:'&#127963;',title:'Turnul'},{emoji:'&#9962;',title:'Capela'}],
+    photos:[{emoji:'&#127963;',title:'Turnul Siegfried'},{emoji:'&#9962;',title:'Capela'},{emoji:'&#127756;',title:'Curtea interioara'}],
     tour:1, layer:'poi'
   },
+  /* ── TURNUL SIEGFRIED ── part of citadel, separate marker for detail */
+  {
+    lat:45.8081, lng:23.6437, emoji:'&#129517;', color:'#b08030', pulse:false,
+    nameRo:'Turnul Siegfried (Donjonul)', nameEn:'Siegfried Tower (Keep)',
+    badge:'Cca. 1272',
+    descRo:'Donjonul cetatii, construit in jurul anului 1272 de Chyl de Kelling. Initial 14m, ridicat la 20m in sec. XVI. Ziduri groase de 1m. La parter: butoaie de stejar de 5000-6000 litri. La etaje: muzeu etnografic cu scara exterioara.',
+    descEn:'The keep built around 1272 by Chyl de Kelling. Originally 14m, raised to 20m in the 16th century. 1m thick walls. Ground floor: huge 5000-6000 litre oak barrels. Upper floors: ethnographic museum via exterior staircase.',
+    img:null, photos:[], tour:0, layer:'poi'
+  },
+  /* ── CASA PAROHIALA EVANGHELICA ── verified: sec. XVI, extended 1779 */
+  {
+    lat:45.8088, lng:23.6446, emoji:'&#127968;', color:'#c8983a', pulse:false,
+    nameRo:'Casa Parohiala Evanghelica', nameEn:'Evangelical Parish House',
+    badge:'Sec. XVI — 1779',
+    descRo:'Fosta casa parohiala evanghelica, ridicata in sec. XVI si extinsa in 1779. Astazi adaposteste o biblioteca documentara. Impreuna cu cetatea si biserica, formeaza ansamblul de monumente in grija Asociatiei Ars Transsilvaniae din 1995.',
+    descEn:'Former evangelical parish house built in the 16th century and extended in 1779. Now houses a documentary library. Together with the citadel and church, forms the monument complex managed by Ars Transsilvaniae since 1995.',
+    img:null, photos:[], tour:0, layer:'poi'
+  },
+  /* ── BISERICA EVANGHELICA SASEASCA ── verified: sec. XV, organ 1868-1869 */
   {
     lat:45.8097, lng:23.6455, emoji:'&#9962;', color:'#c8983a', pulse:false,
-    nameRo:'Biserica Evanghelica', nameEn:'Evangelical Church',
-    badge: currentLang==='ro' ? 'Sec. XIV' : '14th century',
-    descRo:'Biserica evanghelica saseasca construita in sec. XIV. A servit comunitatea saseasca pana in anii 1980 cand majoritatea sasilor au emigrat in Germania.',
-    descEn:'Saxon evangelical church built in the 14th century. It served the Saxon community until the 1980s when most Saxons emigrated to Germany.',
-    img:null,
-    photos:[],
-    tour:2, layer:'poi'
+    nameRo:'Biserica Evanghelica Saseasca', nameEn:'Saxon Evangelical Church',
+    badge:'Sec. XV — neogotic',
+    descRo:'Construita de comunitatea saseasca in sec. XV, mult transformata in sec. XIX — aspect neogotic actual. Orga noua instalata in 1868-1869 de firma Hesse din Viena. In pivnitele turnului: butoaie de stejar. Situata in mijlocul cimitirului.',
+    descEn:'Built by the Saxon community in the 15th century, heavily transformed in the 19th century — current neo-Gothic appearance. New organ installed 1868-1869 by the Hesse firm from Vienna. Located in the middle of the cemetery.',
+    img:null, photos:[], tour:2, layer:'poi'
   },
+  /* ── TROITA RUGA PENTRU ROMANIA ── verified: in centrul localitatii */
   {
-    lat:45.8103, lng:23.6448, emoji:'&#127979;', color:'#9a7830', pulse:false,
-    nameRo:'Scoala din Calnic', nameEn:'Calnic School',
-    badge: currentLang==='ro' ? 'Educatie' : 'Education',
-    descRo:'Scoala generala a comunei Calnic. Generatii intregi de copii din sat au invatat aici sa citeasca si sa scrie.',
-    descEn:'The primary school of Calnic commune. Generations of village children learned to read and write here.',
-    img:null, photos:[], tour:3, layer:'poi'
+    lat:45.8100, lng:23.6443, emoji:'&#9997;', color:'#9a7830', pulse:false,
+    nameRo:'Troita Ruga pentru Romania', nameEn:'Ruga pentru Romania Cross',
+    badge:'Monument',
+    descRo:'Troita amplasata in zona centrala a localitatii, in apropierea caselor din sec. XIX si a primariei. Reprezinta un simbol al identitatii comunitatii romanesti din Calnic.',
+    descEn:'Wayside cross located in the central area of the village, near the 19th century houses and the town hall. A symbol of the Romanian community identity in Calnic.',
+    img:null, photos:[], tour:0, layer:'poi'
   },
+  /* ── PRIMARIA CALNIC ── verified: zona centrala */
   {
     lat:45.8099, lng:23.6440, emoji:'&#127963;', color:'#7a5828', pulse:false,
     nameRo:'Primaria Calnic', nameEn:'Calnic Town Hall',
-    badge: currentLang==='ro' ? 'Administratie' : 'Administration',
-    descRo:'Sediul administrativ al comunei Calnic, judetul Alba. Biroul primarului si serviciile publice locale.',
-    descEn:'Administrative headquarters of Calnic commune, Alba county. Mayor office and local public services.',
+    badge:'Administratie',
+    descRo:'Sediul administrativ al comunei Calnic, judetul Alba. Casa din sec. XIX, parte din zona centrala a localitatii. Biroul primarului si serviciile publice locale.',
+    descEn:'Administrative headquarters of Calnic commune, Alba county. 19th century building, part of the village centre. Mayor office and local public services.',
     img:null, photos:[], tour:4, layer:'poi'
   },
+  /* ── SCOALA CALNIC ── verified: scoala generala a comunei */
+  {
+    lat:45.8103, lng:23.6448, emoji:'&#127979;', color:'#9a7830', pulse:false,
+    nameRo:'Scoala Generala Calnic', nameEn:'Calnic Primary School',
+    badge:'Educatie',
+    descRo:'Scoala generala a comunei Calnic. Generatii intregi de copii din sat au invatat sa citeasca si sa scrie aici. Unul dintre putinele servicii publice active in localitate.',
+    descEn:'The primary school of Calnic commune. Generations of village children learned to read and write here. One of the few active public services in the village.',
+    img:null, photos:[], tour:3, layer:'poi'
+  },
+  /* ── BISERICA ORTODOXA SF. NICOLAE DEAL ── verified: sec. XVIII */
+  {
+    lat:45.8145, lng:23.6508, emoji:'&#9762;', color:'#6a9a5a', pulse:false,
+    nameRo:'Biserica Ortodoxa Sf. Nicolae — Deal', nameEn:'St. Nicolae Orthodox Church — Deal',
+    badge:'Sec. XVIII',
+    descRo:'Biserica ortodoxa cu hramul Sfantul Nicolae din satul Deal, construita in sec. XVIII. Serveste comunitatea romaneasca din Deal, parte a comunei Calnic atestata din 1366.',
+    descEn:'Orthodox church dedicated to Saint Nicholas in the village of Deal, built in the 18th century. Serves the Romanian community of Deal, part of Calnic commune documented since 1366.',
+    img:null, photos:[], tour:0, layer:'poi'
+  },
+  /* ── SATUL DEAL ── verified: atestat 1366 */
   {
     lat:45.8148, lng:23.6512, emoji:'&#127748;', color:'#6a9a5a', pulse:false,
     nameRo:'Satul Deal', nameEn:'Deal Village',
-    badge: currentLang==='ro' ? 'Localitate 1366' : 'Settlement 1366',
-    descRo:'Localitate componenta a comunei Calnic, documentata inca din 1366. Sat mic cu gospodarii traditionale pe dealurile din jur.',
-    descEn:'Settlement part of Calnic commune, documented since 1366. Small village with traditional homesteads on the surrounding hills.',
+    badge:'Atestat 1366',
+    descRo:'Localitate componenta a comunei Calnic, atestata documentar din 1366. Sat mic cu gospodarii traditionale pe dealurile din jur. Comunitate romaneasca traditionala, separata de Calnic prin parau si dealuri.',
+    descEn:'Settlement part of Calnic commune, documented since 1366. Small village with traditional homesteads on the surrounding hills. Traditional Romanian community, separated from Calnic by the stream and hills.',
     img:null, photos:[], tour:5, layer:'poi'
+  },
+  /* ── PARAUL SATULUI ── verified: separates Saxon and Romanian quarters */
+  {
+    lat:45.8091, lng:23.6452, emoji:'&#128532;', color:'#3a5878', pulse:false,
+    nameRo:'Paraul Satului', nameEn:'Village Stream',
+    badge:'Granita istorica',
+    descRo:'Paraul care a separat timp de secole cartierul sasesc (malul stang — cetatea, biserica) de cartierul romanesc (malul drept). O granita naturala intre doua comunitati care au trait in pace vecina.',
+    descEn:'The stream that for centuries separated the Saxon quarter (left bank — citadel, church) from the Romanian quarter (right bank). A natural border between two communities that lived in neighbourly peace.',
+    img:null, photos:[], tour:0, layer:'hist'
+  },
+  /* ── ASEZARE NEOLITICA ── verified: cultura Cotofeni, mentionata in surse istorice */
+  {
+    lat:45.8072, lng:23.6462, emoji:'&#128391;', color:'#3a5878', pulse:false,
+    nameRo:'Asezare Neolitica — Cultura Cotofeni', nameEn:'Neolithic Settlement — Cotofeni Culture',
+    badge:'Preistorie',
+    descRo:'Zona vechii asezari neolitice din cultura Cotofeni, una dintre cele mai vechi urme de locuire umana in zona Calnicului. Atestata de sapaturile arheologice efectuate in localitate.',
+    descEn:'Area of the ancient Cotofeni culture Neolithic settlement, one of the oldest traces of human habitation in the Calnic area. Attested by archaeological excavations carried out in the village.',
+    img:null, photos:[], tour:0, layer:'hist'
+  },
+  /* ── DRUMUL JUDETEAN DJ106F ── real road connecting Calnic */
+  {
+    lat:45.8075, lng:23.6408, emoji:'&#128739;', color:'#7a5828', pulse:false,
+    nameRo:'Intrarea in sat — DJ106F', nameEn:'Village entrance — DJ106F',
+    badge:'Acces rutier',
+    descRo:'Intrarea principala in Calnic pe Drumul Judetean 106F, care leaga Calnicul de Miercurea Sibiului (E81) si de Garbova. Accesul dinspre Sebes (13 km) si Alba Iulia (28 km).',
+    descEn:'Main entrance to Calnic via County Road 106F, connecting Calnic to Miercurea Sibiului (E81) and Garbova. Access from Sebes (13 km) and Alba Iulia (28 km).',
+    img:null, photos:[], tour:0, layer:'hist'
   }
 ];
 
