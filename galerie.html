@@ -117,7 +117,7 @@ footer .g { color:var(--gold-d); font-style:normal; }
 .photo-count { font-size:12px; color:var(--muted); font-style:italic; margin-left:auto; }
 .add-photo-btn { font-size:12px; padding:5px 14px; background:#1a1208; border:1px solid var(--gold-d); color:var(--gold); font-family:'EB Garamond',serif; border-radius:3px; cursor:pointer; transition:all 0.15s; white-space:nowrap; }
 .add-photo-btn:hover { background:var(--gold); color:#0a0a0a; }
-.float-add { position:fixed; bottom:122px; right:24px; background:#1a1208; border:1px solid var(--gold-d); color:var(--gold); font-family:'EB Garamond',serif; font-size:13px; padding:8px 16px; border-radius:3px; cursor:pointer; z-index:9999; transition:all 0.2s; white-space:nowrap; box-shadow:0 2px 12px #000a; }
+.float-add { position:fixed; bottom:120px; right:24px; background:#1a1208; border:1px solid var(--gold-d); color:var(--gold); font-family:'EB Garamond',serif; font-size:13px; padding:8px 16px; border-radius:3px; cursor:pointer; z-index:9999; transition:all 0.2s; white-space:nowrap; box-shadow:0 2px 12px #000a; }
 .float-add:hover { background:var(--gold); color:#0a0a0a; border-color:var(--gold); }
 
 /* ── PHOTO GRID ── */
@@ -520,7 +520,7 @@ var CATS = [
 
 var photos = [
   {id:0, titleRo:'Cetatea Calnic — vedere panoramica, 1923', titleEn:'Calnic Citadel — panoramic view, 1923', cat:'cetatea', year:1923, byRo:'Familia Popescu', byEn:'Popescu Family', captionRo:'O fotografie rara din arhiva familiei Popescu, realizata in vara anului 1923. Turnul Siegfried se observa in toata maretia sa.', captionEn:'A rare photograph from the Popescu family archive, taken in the summer of 1923.', dedicatieRo:'', dedicatieEn:'', priv:false, addedOrder:5, featured:true},
-  {id:1, titleRo:'Padure de salcam in floare', titleEn:'Acacia forest in bloom', cat:'natura', year:2018, byRo:'Familia Ionescu', byEn:'Ionescu Family', captionRo:'Salcamii din dealurile Calnicului, in plina inflorire de mai.', captionEn:'The acacia trees on Calnic's hills in full May bloom.', dedicatieRo:'', dedicatieEn:'', priv:false, addedOrder:4, featured:false},
+  {id:1, titleRo:'Padure de salcam in floare', titleEn:'Acacia forest in bloom', cat:'natura', year:2018, byRo:'Familia Ionescu', byEn:'Ionescu Family', captionRo:'Salcamii din dealurile Calnicului, in plina inflorire de mai.', captionEn:'The acacia trees on Calnic hills in full May bloom.', dedicatieRo:'', dedicatieEn:'', priv:false, addedOrder:4, featured:false},
   {id:2, titleRo:'Familia Popa — reuniune de familie', titleEn:'Popa family reunion', cat:'familii', year:1978, byRo:'Familia Popa', byEn:'Popa Family', captionRo:'Reuniunea de familie din vara lui 1978, in curtea casei din Deal.', captionEn:'Family reunion summer 1978, in the courtyard of the house in Deal.', dedicatieRo:'In memoria bunicului Gheorghe Popa, 1910-1990', dedicatieEn:'In memory of grandfather Gheorghe Popa, 1910-1990', priv:true, addedOrder:3, featured:false},
   {id:3, titleRo:'Sfintirea bisericii evangelice', titleEn:'Consecration of the evangelical church', cat:'biserica', year:1954, byRo:'Arhiva satului', byEn:'Village archive', captionRo:'Momentul sfintiri bisericii dupa lucrarile de restaurare din 1953-1954.', captionEn:'The consecration moment after restoration works 1953-1954.', dedicatieRo:'', dedicatieEn:'', priv:false, addedOrder:2, featured:false},
   {id:4, titleRo:'Ulita principala a Calnicului', titleEn:'Main street of Calnic', cat:'viata', year:1965, byRo:'Arhiva satului', byEn:'Village archive', captionRo:'Ulita principala, asa cum arata in anii 1960. Se vad casele sasesti pe stanga.', captionEn:'The main street as it looked in the 1960s. Saxon houses visible on the left.', dedicatieRo:'', dedicatieEn:'', priv:false, addedOrder:1, featured:false},
@@ -741,6 +741,8 @@ function setLang(lang) {
     var val = el.getAttribute('data-' + lang);
     if (val !== null) el.textContent = val;
   });
+  var fab = document.getElementById('floatAdd');
+  if (fab) fab.textContent = lang === 'ro' ? '+ Adauga fotografie' : '+ Add photo';
   document.getElementById('yearInput').placeholder = lang === 'ro' ? 'An: ex. 1980' : 'Year: e.g. 1980';
   buildCatBar();
   applyFilters();
