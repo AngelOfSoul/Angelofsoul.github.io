@@ -597,7 +597,7 @@ function applyFilters() {
         '<div class="pt-info"><div class="pt-info-left">'+
         '<div class="pt-title">' + title + '</div>'+
         '<div class="pt-by">' + (currentLang === 'ro' ? 'Donata de' : 'By') + ': <a href="familii.html" onclick="event.stopPropagation()">' + byText + '</a></div>'+
-        '</div><button class="pt-dl" onclick="event.stopPropagation();downloadPhoto(\''  + title.replace(/\'/g,'\\\'') + '\')">&darr;</button></div></div>';
+        '</div><button class="pt-dl" onclick="event.stopPropagation();dlPhoto(' + p.id + ')">&darr;</button></div></div>';
     }).join('');
   }
 }
@@ -666,6 +666,8 @@ function currentPhotoTitle() {
   var p = photos.find(function(x){ return x.id === currentLbIdx; });
   return p ? getPhotoTitle(p) : 'fotografie';
 }
+
+function dlPhoto(id) { var p = photos.find(function(x){ return x.id === id; }); if(p) downloadPhoto(getPhotoTitle(p)); }
 
 function downloadPhoto(title) {
   alert((currentLang === 'ro' ? 'Descarcand: ' : 'Downloading: ') + title + '\n\n' + (currentLang === 'ro' ? '(Functie disponibila dupa conectarea la baza de date)' : '(Feature available after database connection)'));
