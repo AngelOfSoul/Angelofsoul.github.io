@@ -12,8 +12,8 @@
 <meta property="og:locale" content="ro_RO">
 <title>Harta Calnicului — Calnic Online</title>
 <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,600;0,700;1,400&family=EB+Garamond:ital,wght@0,400;0,500;1,400&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"/>
-<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/leaflet@1.9.4/dist/leaflet.css"/>
+<script src="https://cdn.jsdelivr.net/npm/leaflet@1.9.4/dist/leaflet.js"></script>
 <style>
 :root{--bg:#0a0a0a;--s1:#111111;--s2:#161616;--s3:#1c1c1c;--b1:#2a2a2a;--b2:#383838;--gold:#d4a84a;--gold-l:#e0b84a;--gold-d:#b08030;--gold-m:#7a5828;--text:#f0e8d0;--muted:#a09070;}
 *{margin:0;padding:0;box-sizing:border-box;}
@@ -205,7 +205,9 @@ footer .g{color:var(--gold-d);font-style:normal;}
   <a class="nav-link" href="istorie.html">&#128506; <span class="nl" data-ro="Istoria Satului" data-en="Village History">Istoria Satului</span></a>
   <a class="nav-link" href="familii.html">&#128106; <span class="nl" data-ro="Familiile" data-en="Families">Familiile</span></a>
   <a class="nav-link" href="genealogie.html">&#127803; <span class="nl" data-ro="Genealogie" data-en="Genealogy">Genealogie</span></a>
+  <a class="nav-link active" href="harta.html">&#127757; <span class="nl" data-ro="Harta" data-en="Map">Harta</span></a>
   <a class="nav-link" href="galerie.html">&#128248; <span class="nl" data-ro="Galerie" data-en="Gallery">Galerie</span></a>
+  <a class="nav-link" href="contact.html">✉ <span class="nl" data-ro="Contact" data-en="Contact">Contact</span></a>
   <div class="nav-right">
     <a class="nav-login" href="#">&#128274; <span class="nl" data-ro="Contul Familiei" data-en="Family Login">Contul Familiei</span></a>
   </div>
@@ -276,6 +278,12 @@ var currentLang = 'ro';
 
 window.addEventListener('load', function() {
 
+/* ── LEAFLET GUARD ── */
+if (typeof L === 'undefined') {
+  document.getElementById('map').innerHTML = '<div style="display:flex;align-items:center;justify-content:center;height:100%;color:#d4a84a;font-family:EB Garamond,serif;font-size:18px;text-align:center;padding:40px;">Harta nu s-a putut incarca.<br><small style=\'color:#a09070;font-size:14px;\'>Verificati conexiunea la internet si reincarcati pagina.</small></div>';
+  document.getElementById('introOverlay').style.display = 'none';
+  return;
+}
 
 /* ── INTRO ANIMATION ── */
 var prog = 0;
@@ -741,15 +749,13 @@ window._setLang = function setLang(lang) {
 }
 
 /* scroll buttons */
-window._updateScrollBtns = function updateScrollBtns() {
+window._updateScrollBtns = function() {
   var t=document.getElementById('scrollTop'),b=document.getElementById('scrollBottom');
   var scrolled=window.scrollY>300,atBottom=(window.innerHeight+window.scrollY)>=document.body.scrollHeight-100;
   if(t){t.style.opacity=scrolled?'1':'0';t.style.pointerEvents=scrolled?'auto':'none';}
   if(b){b.style.opacity=atBottom?'0':'1';b.style.pointerEvents=atBottom?'none':'auto';}
-}
-window.addEventListener('scroll',updateScrollBtns);
-window.addEventListener('load',updateScrollBtns);
-setTimeout(updateScrollBtns,100);
+};
+setTimeout(window._updateScrollBtns, 100);
 
 }); // end window.onload
 

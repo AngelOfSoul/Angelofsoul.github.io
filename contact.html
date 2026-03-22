@@ -3,18 +3,14 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<meta name="description" content="Istoria satului Calnic, Alba — origini, Cetatea Calnic (UNESCO), comunitatea saseasca si romaneasca, ocupatii traditionale si personalitati legate de sat.">
-<meta name="keywords" content="Calnic istorie, Cetatea Calnic, UNESCO Transilvania, sasi Calnic, Chyl de Kelling, Cultura Cotofeni, sat Alba Romania">
+<meta name="description" content="Contact Calnic Online — trimite-ne un mesaj, raporteaza o eroare sau propune o colaborare pentru proiectul digital al satului Calnic.">
+<meta name="keywords" content="contact Calnic, Calnic Online, sat Alba, mesaj, colaborare">
 <meta name="author" content="Calnic Online">
 <meta name="robots" content="index, follow">
-<meta property="og:title" content="Istoria Calnicului — Calnic Online">
-<meta property="og:description" content="Istoria completa a satului Calnic: de la Cultura Cotofeni si Cetatea UNESCO, la comunitatea saseasca si traditiile locale.">
-<meta property="og:type" content="article">
-<meta property="og:url" content="https://angelofsoul.github.io/istorie.html">
+<meta property="og:title" content="Contact — Calnic Online">
+<meta property="og:type" content="website">
 <meta property="og:locale" content="ro_RO">
-<meta name="twitter:card" content="summary">
-<meta name="twitter:title" content="Istoria Calnicului — Calnic Online">
-<title>Istoria Calnic — Calnic Online</title>
+<title>Contact — Calnic Online</title>
 <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,600;0,700;1,400&family=EB+Garamond:ital,wght@0,400;0,500;1,400&display=swap" rel="stylesheet">
 <style>
 
@@ -98,63 +94,251 @@ footer .g { color:var(--gold-d); font-style:normal; }
   .nav-login .nl { display:none; }
 }
 
-/* History page layout */
-.page-wrap { max-width:860px; margin:0 auto; padding:40px 20px 60px; }
+/* ===== CONTACT PAGE STYLES ===== */
 
-/* Timeline */
-.timeline { position:relative; padding-left:28px; }
-.timeline::before { content:''; position:absolute; left:6px; top:6px; bottom:6px; width:1px; background:linear-gradient(to bottom,var(--gold-d),transparent); }
-.timeline-item { position:relative; margin-bottom:28px; }
-.timeline-item::before { content:''; position:absolute; left:-25px; top:8px; width:8px; height:8px; border-radius:50%; background:var(--gold-d); border:1px solid var(--gold); }
-.timeline-year { font-family:'Playfair Display',serif; font-size:13px; color:var(--gold); letter-spacing:1px; margin-bottom:4px; }
-.timeline-text { font-size:16px; color:var(--text); line-height:1.85; }
-.timeline-text strong { color:var(--gold-l); font-weight:500; }
+.page-hero {
+  background:linear-gradient(to bottom, #050505, #0a0a0a);
+  border-bottom:1px solid var(--b1);
+  padding:48px 24px 40px;
+  text-align:center;
+}
+.page-hero-title {
+  font-family:'Playfair Display',serif;
+  font-size:36px;
+  font-weight:600;
+  color:var(--gold-l);
+  letter-spacing:2px;
+  margin-bottom:10px;
+}
+.page-hero-sub {
+  font-size:16px;
+  color:var(--muted);
+  font-style:italic;
+  letter-spacing:1px;
+}
+.page-hero-orn {
+  color:var(--gold-m);
+  letter-spacing:8px;
+  font-size:12px;
+  margin-top:14px;
+}
 
-/* Info cards */
-.info-card { background:var(--s1); border:1px solid var(--b2); border-left:3px solid var(--gold-d); padding:18px 20px; margin-bottom:16px; border-radius:2px; }
-.info-card-title { font-family:'Playfair Display',serif; font-size:16px; color:var(--gold-l); margin-bottom:8px; }
-.info-card-text { font-size:16px; color:var(--text); line-height:1.85; }
-.info-card-text strong { color:var(--gold-l); font-weight:500; }
+.main-wrap { max-width:980px; margin:0 auto; padding:36px 20px 60px; display:grid; grid-template-columns:1fr 300px; gap:40px; }
+@media(max-width:760px) { .main-wrap { grid-template-columns:1fr; } }
 
-/* UNESCO badge */
-.unesco-badge { display:inline-flex; align-items:center; gap:8px; background:var(--s1); border:1px solid var(--gold-d); padding:6px 14px; border-radius:2px; font-size:12px; color:var(--gold); letter-spacing:1.5px; margin-bottom:20px; }
+/* Form */
+.contact-form-wrap {
+  background:var(--s1);
+  border:1px solid var(--b1);
+  border-top:3px solid var(--gold-d);
+  border-radius:3px;
+  padding:32px 28px;
+}
+.form-row { margin-bottom:22px; }
+.form-label {
+  display:block;
+  font-family:'Playfair Display',serif;
+  font-size:12px;
+  letter-spacing:2px;
+  text-transform:uppercase;
+  color:var(--gold);
+  margin-bottom:7px;
+}
+.form-label span { color:var(--muted); font-size:10px; margin-left:6px; font-style:italic; text-transform:none; letter-spacing:0; }
+.form-input, .form-select, .form-textarea {
+  width:100%;
+  background:var(--s3);
+  border:1px solid var(--b2);
+  border-radius:2px;
+  color:var(--text);
+  font-family:'EB Garamond',serif;
+  font-size:16px;
+  padding:10px 14px;
+  transition:border-color 0.2s;
+  outline:none;
+}
+.form-input:focus, .form-select:focus, .form-textarea:focus {
+  border-color:var(--gold-d);
+  background:#141414;
+}
+.form-select { appearance:none; cursor:pointer; }
+.form-select option { background:#111; }
+.form-textarea { resize:vertical; min-height:130px; line-height:1.6; }
+.form-row-2 { display:grid; grid-template-columns:1fr 1fr; gap:16px; }
+@media(max-width:560px) { .form-row-2 { grid-template-columns:1fr; } }
 
-/* Photos */
-.photo-block { margin-bottom:18px; border-radius:2px; overflow:hidden; border:1px solid var(--b2); }
-.hist-photo { width:100%; height:280px; object-fit:cover; object-position:center; display:block; filter:sepia(15%) contrast(1.05); }
-.photo-credit { padding:7px 12px; background:var(--s1); font-size:11px; color:var(--muted); font-style:italic; display:flex; align-items:center; gap:6px; }
-.photo-placeholder { background:var(--s1); border:1px dashed var(--b2); border-radius:2px; padding:32px; text-align:center; color:var(--muted); font-style:italic; font-size:14px; margin-bottom:16px; }
+/* Character counter */
+.char-count { font-size:11px; color:var(--muted); text-align:right; margin-top:4px; font-style:italic; }
 
-/* Did you know */
-.dyk-box { background:var(--s1); border:1px solid var(--gold-d); border-left:4px solid var(--gold); border-radius:2px; padding:20px 22px; margin:36px 0; }
-.dyk-label { font-family:'Playfair Display',serif; font-size:10px; letter-spacing:3px; text-transform:uppercase; color:var(--gold); margin-bottom:12px; display:flex; align-items:center; gap:10px; }
-.dyk-label::after { content:''; flex:1; height:1px; background:var(--gold-d); opacity:0.4; }
-.dyk-text { font-family:'Playfair Display',serif; font-size:18px; font-style:italic; color:var(--text); line-height:1.7; }
-.dyk-text strong { color:var(--gold-l); font-style:normal; }
-.dyk-sub { margin-top:10px; font-size:13px; color:var(--muted); font-style:italic; }
-.dyk-nav { display:flex; align-items:center; gap:12px; margin-top:14px; }
-.dyk-btn { background:none; border:1px solid var(--gold-d); color:var(--gold); width:28px; height:28px; cursor:pointer; border-radius:2px; font-size:14px; transition:all 0.2s; }
-.dyk-btn:hover { background:var(--gold-d); color:#0a0a0a; }
-.dyk-counter { font-size:11px; color:var(--muted); font-style:italic; }
+/* Topic chips */
+.topic-chips { display:flex; flex-wrap:wrap; gap:8px; margin-top:4px; }
+.topic-chip {
+  border:1px solid var(--b2);
+  border-radius:2px;
+  padding:5px 13px;
+  font-size:13px;
+  color:var(--muted);
+  cursor:pointer;
+  transition:all 0.18s;
+  font-family:'EB Garamond',serif;
+  background:var(--s3);
+  user-select:none;
+}
+.topic-chip:hover { border-color:var(--gold-d); color:var(--text); }
+.topic-chip.selected { border-color:var(--gold); color:var(--gold); background:#1a1400; }
 
-/* People */
-.people-grid { display:grid; grid-template-columns:repeat(auto-fill,minmax(240px,1fr)); gap:14px; }
-.person-card { background:var(--s1); border:1px solid var(--b2); border-top:2px solid var(--gold-d); padding:16px; border-radius:2px; }
-.person-name { font-family:'Playfair Display',serif; font-size:15px; color:var(--gold-l); margin-bottom:4px; }
-.person-years { font-size:12px; color:var(--muted); font-style:italic; margin-bottom:8px; }
-.person-desc { font-size:14px; color:var(--text); line-height:1.7; }
+/* Submit button */
+.btn-submit {
+  width:100%;
+  background:var(--gold-d);
+  border:1px solid var(--gold);
+  color:#050505;
+  font-family:'Playfair Display',serif;
+  font-size:15px;
+  font-weight:700;
+  letter-spacing:3px;
+  text-transform:uppercase;
+  padding:14px 20px;
+  cursor:pointer;
+  transition:all 0.2s;
+  border-radius:2px;
+  margin-top:8px;
+}
+.btn-submit:hover { background:var(--gold); }
+.btn-submit:disabled { opacity:0.4; cursor:not-allowed; }
 
-/* Sources */
-.sources-box { background:var(--s1); border:1px solid var(--b2); border-left:3px solid var(--gold-d); padding:18px 20px; border-radius:2px; }
-.source-item { font-size:14px; color:var(--text); padding-left:16px; border-left:1px solid var(--b2); margin-bottom:10px; }
-.source-item:last-child { margin-bottom:0; }
-.source-item a { color:var(--gold-d); font-size:12px; }
+/* Success state */
+.form-success {
+  display:none;
+  text-align:center;
+  padding:48px 20px;
+}
+.form-success-icon { font-size:48px; margin-bottom:16px; }
+.form-success-title { font-family:'Playfair Display',serif; font-size:24px; color:var(--gold-l); margin-bottom:10px; }
+.form-success-sub { color:var(--muted); font-style:italic; }
 
-.orn { text-align:center; color:var(--b2); font-size:14px; margin:36px 0; letter-spacing:5px; }
+/* Sidebar */
+.sidebar {}
+.contact-card {
+  background:var(--s1);
+  border:1px solid var(--b1);
+  border-left:3px solid var(--gold-d);
+  border-radius:2px;
+  padding:24px 20px;
+  margin-bottom:24px;
+}
+.contact-card-title {
+  font-family:'Playfair Display',serif;
+  font-size:13px;
+  letter-spacing:2px;
+  text-transform:uppercase;
+  color:var(--gold);
+  margin-bottom:16px;
+}
+.contact-item {
+  display:flex;
+  gap:12px;
+  padding:10px 0;
+  border-bottom:1px solid var(--b1);
+  font-size:14px;
+  color:var(--muted);
+  align-items:flex-start;
+}
+.contact-item:last-child { border-bottom:none; }
+.contact-item-icon { font-size:16px; flex-shrink:0; margin-top:2px; }
+.contact-item-body {}
+.contact-item-label { font-size:11px; letter-spacing:1.5px; text-transform:uppercase; color:var(--gold-m); margin-bottom:2px; }
+.contact-item-val { color:var(--text); font-size:15px; }
+
+/* FAQ */
+.faq-item {
+  border-bottom:1px solid var(--b1);
+  padding:14px 0;
+}
+.faq-item:last-child { border-bottom:none; }
+.faq-q {
+  font-family:'Playfair Display',serif;
+  font-size:14px;
+  color:var(--text);
+  cursor:pointer;
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
+  gap:8px;
+  user-select:none;
+}
+.faq-q::after { content:'+'; color:var(--gold); font-size:18px; line-height:1; flex-shrink:0; transition:transform 0.2s; }
+.faq-item.open .faq-q::after { content:'-'; }
+.faq-a {
+  display:none;
+  font-size:14px;
+  color:var(--muted);
+  line-height:1.7;
+  padding-top:10px;
+}
+.faq-item.open .faq-a { display:block; }
+
+/* Village quote */
+.village-quote {
+  background:var(--s1);
+  border:1px solid var(--b1);
+  border-top:2px solid var(--gold-m);
+  border-radius:2px;
+  padding:24px 20px;
+  margin-bottom:24px;
+  text-align:center;
+}
+.village-quote blockquote {
+  font-family:'Playfair Display',serif;
+  font-style:italic;
+  font-size:16px;
+  color:var(--text);
+  line-height:1.7;
+}
+.village-quote cite {
+  display:block;
+  margin-top:10px;
+  font-size:12px;
+  color:var(--muted);
+  letter-spacing:2px;
+  text-transform:uppercase;
+}
+
+/* Response time bar */
+.resp-bar {
+  background:var(--s1);
+  border:1px solid var(--b1);
+  border-radius:2px;
+  padding:18px 20px;
+  margin-bottom:24px;
+}
+.resp-bar-title {
+  font-size:11px;
+  letter-spacing:2px;
+  text-transform:uppercase;
+  color:var(--muted);
+  margin-bottom:12px;
+}
+.resp-track { background:var(--b1); border-radius:2px; height:6px; margin-bottom:6px; overflow:hidden; }
+.resp-fill { height:100%; background:linear-gradient(to right, var(--gold-d), var(--gold)); border-radius:2px; width:70%; }
+.resp-note { font-size:12px; color:var(--muted); font-style:italic; }
+
+/* Note / info box */
+.info-box {
+  background:#0e0d08;
+  border:1px solid var(--gold-m);
+  border-radius:2px;
+  padding:14px 16px;
+  font-size:13px;
+  color:var(--muted);
+  line-height:1.7;
+  margin-top:16px;
+}
+.info-box strong { color:var(--gold); }
+
 </style>
 </head>
 <body>
-
 
 <div class="lang-bar">
   <span class="lang-label">LIMBĂ / LANGUAGE</span>
@@ -211,188 +395,200 @@ footer .g { color:var(--gold-d); font-style:normal; }
 
 <nav>
   <a class="nav-link" href="index.html">&#8962; <span class="nl" data-ro="Acasa" data-en="Home">Acasa</span></a>
-  <a class="nav-link active" href="istorie.html">&#128506; <span class="nl" data-ro="Istoria Satului" data-en="Village History">Istoria Satului</span></a>
+  <a class="nav-link" href="istorie.html">&#128506; <span class="nl" data-ro="Istoria Satului" data-en="Village History">Istoria Satului</span></a>
   <a class="nav-link" href="familii.html">&#128106; <span class="nl" data-ro="Familiile" data-en="Families">Familiile</span></a>
   <a class="nav-link" href="genealogie.html">&#127803; <span class="nl" data-ro="Genealogie" data-en="Genealogy">Genealogie</span></a>
   <a class="nav-link" href="harta.html">&#127757; <span class="nl" data-ro="Harta" data-en="Map">Harta</span></a>
   <a class="nav-link" href="galerie.html">&#128248; <span class="nl" data-ro="Galerie" data-en="Gallery">Galerie</span></a>
-  <a class="nav-link" href="contact.html">✉ <span class="nl" data-ro="Contact" data-en="Contact">Contact</span></a>
+  <a class="nav-link active" href="contact.html">&#9993; <span class="nl" data-ro="Contact" data-en="Contact">Contact</span></a>
   <div class="nav-right">
     <a class="nav-login" href="#">&#128274; <span class="nl" data-ro="Contul Familiei" data-en="Family Login">Contul Familiei</span></a>
   </div>
 </nav>
 
-<div class="page-wrap">
-
-  <div class="section-head"><span class="section-head-title" data-ro="Istoria si originile Calnicului" data-en="History and Origins of Calnic">Istoria si originile Calnicului</span></div>
-
-  <div class="timeline">
-    <div class="timeline-item">
-      <div class="timeline-year">Preistorie</div>
-      <div class="timeline-text" data-ro="Zona Calnicului a fost locuita inca din epoca neolitica. Calnicul este cunoscut in literatura de specialitate prin vestigii apartinand Culturii Cotofeni — o cultura arheologica din epoca bronzului timpuriu, raspandita in spatiul carpato-dunarean intre aproximativ 3500–2500 i.Hr." data-en="The Calnic area has been inhabited since the Neolithic period. Calnic is noted in specialist literature for remains belonging to the Cotofeni Culture — an early Bronze Age culture spread across the Carpathian-Danubian region between approximately 3500–2500 BC.">Zona Calnicului a fost locuita inca din <strong>epoca neolitica</strong>. Calnicul este cunoscut prin vestigii apartinand <strong>Culturii Cotofeni</strong> (3500–2500 i.Hr.).</div>
-    </div>
-    <div class="timeline-item">
-      <div class="timeline-year">Sec. XI–XII</div>
-      <div class="timeline-text" data-ro="Primele urme medievale ale asezarii dateaza din secolele XI–XII. Numele romanesc Calnic provine din slavonul kal sau kalinik, care inseamna lut sau argilos. Etimologia este sustinuta de lingvistul Nicolae Draganu. Denumirea romaneasca este mai veche decat sosirea colonistilor germani sau maghiari in regiune." data-en="The first medieval traces of the settlement date from the 11th-12th centuries. The Romanian name Calnic derives from the Slavic kal or kalinik, meaning clay or muddy. This etymology is supported by linguist Nicolae Draganu. The Romanian name predates the arrival of German or Hungarian settlers.">Primele urme medievale dateaza din sec. XI–XII. Numele <strong>Calnic</strong> provine din slavonul <em>kal</em> (lut/argilos) — atestat de lingvistul <strong>Nicolae Draganu</strong>.</div>
-    </div>
-    <div class="timeline-item">
-      <div class="timeline-year">~1270</div>
-      <div class="timeline-text" data-ro="Nobilul Chyl de Kelling construieste donjonul cetatii, folosit initial ca resedinta nobiliara. Familia Kelling a dat numele german al satului — Kelling — nu si pe cel romanesc. Denumirea maghiara Kalnok este o adaptare fonetica a numelui romanesc." data-en="The nobleman Chyl de Kelling builds the citadel keep, used initially as a noble residence. The Kelling family gave the German name to the village — Kelling — but not the Romanian one. The Hungarian name Kalnok is a phonetic adaptation of the Romanian name.">Nobilul <strong>Chyl de Kelling</strong> construieste donjonul cetatii. Familia sa da numele <strong>german</strong> — Kelling. Numele romanesc Calnic este mai vechi. Maghiarul <strong>Kalnok</strong> este o adaptare fonetica a celui romanesc.</div>
-    </div>
-    <div class="timeline-item">
-      <div class="timeline-year">1269</div>
-      <div class="timeline-text" data-ro="Prima atestare documentara a Calnicului. Membrii familiei Kelling sunt mentionati in documente din 1267, 1269 si 1309 ca mari proprietari funciari ai regiunii." data-en="First documentary mention of Calnic. Members of the Kelling family are recorded in documents from 1267, 1269 and 1309 as major landowners in the region.">Prima <strong>atestare documentara</strong> a Calnicului. Familia Kelling mentionata in documente din <strong>1267, 1269 si 1309</strong>.</div>
-    </div>
-    <div class="timeline-item">
-      <div class="timeline-year">1430</div>
-      <div class="timeline-text" data-ro="Ultimul conte Kelling vinde cetatea comunitatii sasesti locale. Sasii transilvăneni transforma resedinta nobiliara intr-o fortareata de aparare impotriva atacurilor otomane." data-en="The last Count Kelling sells the citadel to the local Saxon community. The Transylvanian Saxons transform the noble residence into a defensive fortress against Ottoman attacks.">Ultimul conte Kelling <strong>vinde cetatea comunitatii sasesti</strong>. Sasii o transforma in fortareata de aparare.</div>
-    </div>
-    <div class="timeline-item">
-      <div class="timeline-year">Sec. XVI</div>
-      <div class="timeline-text" data-ro="Sasii extind cetatea cu un al doilea zid de aparare si un turn sudic, sporind capacitatea de aparare a ansamblului." data-en="The Saxons extend the citadel with a second defensive wall and a southern tower, increasing the defensive capacity of the complex.">Sasii extind cetatea cu un <strong>al doilea zid de aparare</strong> si un turn sudic.</div>
-    </div>
-    <div class="timeline-item">
-      <div class="timeline-year">1599</div>
-      <div class="timeline-text" data-ro="Armatele lui Mihai Viteazul jefuiesc Calnicul in timpul campaniei sale militare in Transilvania. Cetatea este si ea devastata. Sasii din zona au ramas ostili lui Mihai tocmai din cauza acestor distrugeri." data-en="The armies of Mihai Viteazul plunder Calnic during his military campaign in Transylvania. The citadel is also devastated. The local Saxons remained hostile to Mihai precisely because of the destruction suffered by their settlements.">Armatele lui <strong>Mihai Viteazul</strong> jefuiesc si devasteaza Calnicul.</div>
-    </div>
-    <div class="timeline-item">
-      <div class="timeline-year">1658</div>
-      <div class="timeline-text" data-ro="O noua invazie otomana loveste Calnicul. Satul este distrus, insa de aceasta data cetatea rezista si ofera refugiu locuitorilor." data-en="A new Ottoman invasion strikes Calnic. The village is destroyed, but this time the citadel holds and offers refuge to its inhabitants.">Invazie <strong>otomana</strong> — satul e distrus, insa <strong>cetatea rezista</strong> si adaposteste toti locuitorii.</div>
-    </div>
-    <div class="timeline-item">
-      <div class="timeline-year">1961–1964</div>
-      <div class="timeline-text" data-ro="Cetatea este restaurata de Directia Monumentelor Istorice, sub conducerea arhitectului Stefan Bals, concomitent cu sapaturi arheologice coordonate de Radu Heitel." data-en="The citadel is restored by the Historic Monuments Directorate, under architect Stefan Bals, alongside archaeological excavations coordinated by Radu Heitel.">Cetatea este restaurata de <strong>Directia Monumentelor Istorice</strong> (arh. Stefan Bals), cu sapaturi conduse de Radu Heitel.</div>
-    </div>
-    <div class="timeline-item">
-      <div class="timeline-year">1999</div>
-      <div class="timeline-text" data-ro="Cetatea Calnic este inscrisa pe Lista Patrimoniului Mondial UNESCO, ca parte a ansamblului Sate cu biserici fortificate din Transilvania." data-en="Calnic Citadel is inscribed on the UNESCO World Heritage List as part of the ensemble Villages with Fortified Churches in Transylvania.">Inscrierea pe <strong>Lista Patrimoniului Mondial UNESCO</strong> — Sate cu biserici fortificate din Transilvania.</div>
-    </div>
-  </div>
-
-  <div class="orn">— &#10022; —</div>
-
-  <div class="dyk-box">
-    <div class="dyk-label">&#10022; <span id="dyk-lbl">Stiatii ca?</span></div>
-    <div class="dyk-text" id="dyk-text"></div>
-    <div class="dyk-sub" id="dyk-src"></div>
-    <div class="dyk-nav">
-      <button class="dyk-btn" onclick="prevFact()">&#8592;</button>
-      <span class="dyk-counter" id="dyk-ctr">1 / 20</span>
-      <button class="dyk-btn" onclick="nextFact()">&#8594;</button>
-    </div>
-  </div>
-
-  <div class="section-head"><span class="section-head-title" data-ro="Cetatea Calnic" data-en="Calnic Citadel">Cetatea Calnic</span></div>
-  <div class="unesco-badge">&#10022; &nbsp; PATRIMONIU MONDIAL UNESCO — 1999</div>
-
-  <div class="info-card">
-    <div class="info-card-title" data-ro="Turnul Siegfried" data-en="The Siegfried Tower">Turnul Siegfried</div>
-    <div class="info-card-text" data-ro="Cea mai veche parte a cetatii, construita in jurul anului 1270, este donjonul cunoscut sub numele de Turnul Siegfried. Aceasta impresionanta structura paralelelepipedica, cu parter si trei etaje, a servit initial drept resedinta a nobililor Kelling. Turnul atinge o inaltime de peste 20 de metri. Astazi gazduieste un muzeu cu obiecte traditionale sasesti: costume, ceramica si unelte." data-en="The oldest part of the citadel, built around 1270, is the keep known as the Siegfried Tower. This impressive rectangular structure, with a ground floor and three storeys, served initially as the residence of the Kelling nobles. The tower stands over 20 metres tall. Today it houses a museum of traditional Saxon objects: costumes, ceramics and tools.">Cea mai veche parte a cetatii, construita in jurul anului <strong>1270</strong>, este donjonul cunoscut sub numele de <strong>Turnul Siegfried</strong>. Cu parter si trei etaje, atinge o inaltime de peste <strong>20 de metri</strong>. Astazi gazduieste un muzeu de obiecte sasesti.</div>
-  </div>
-
-  <div class="info-card">
-    <div class="info-card-title" data-ro="Arhitectura unica" data-en="Unique Architecture">Arhitectura unica</div>
-    <div class="info-card-text" data-ro="Spre deosebire de majoritatea cetatilor transilvănene construite pe dealuri, Cetatea Calnic se afla intr-o depresiune, mai jos decat dealurile din jur. Aceasta pozitie se explica prin functia sa initiala de resedinta privata, nu de fortareata. Cetatea este inconjurata de un zid oval cu turnuri de paza, o capela medievala si depozite construite de-a lungul zidurilor interioare." data-en="Unlike most Transylvanian citadels built on hilltops, Calnic Citadel sits in a depression, lower than the surrounding hills. This position is explained by its original function as a private residence rather than a fortress. The citadel is surrounded by an oval wall with watchtowers, a medieval chapel and storehouses built along the inner walls.">Spre deosebire de celelalte cetati transilvănene, <strong>Cetatea Calnic se afla intr-o depresiune</strong> — pozitie explicata prin functia sa initiala de resedinta privata. Incinta are zid oval, turnuri de paza si capela medievala.</div>
-  </div>
-
-  <div class="info-card">
-    <div class="info-card-title" data-ro="Capela si frescele" data-en="The Chapel and Frescoes">Capela si frescele</div>
-    <div class="info-card-text" data-ro="La sfarsitul secolului XV, in interiorul cetatii a fost construita o capela gotica cu absida semicirculara. Interiorul capelei pastreaza fresco din inceputul secolului XVI. Tribuna de lemn din partea vestica, datand din 1733, este decorata cu panouri pictate in stil renascentist floral. Cetatea poate fi vizitata tot anul; taxa de intrare este de aproximativ 15 lei." data-en="At the end of the 15th century, a Gothic chapel with a semicircular apse was built inside the citadel. The chapel interior preserves fresco fragments from the early 16th century. The western wooden gallery, dating from 1733, is decorated with painted panels in a floral Renaissance style. The citadel is open year-round; the entry fee is approximately 15 lei.">In interiorul cetatii se afla o <strong>capela gotica</strong> (sf. sec. XV) cu <strong>fresco din sec. XVI</strong>. Tribuna de lemn din <strong>1733</strong> este decorata cu panouri pictate unice. Intrare: ~15 lei.</div>
-  </div>
-
-  <div class="photo-block">
-    <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/d/d4/Calnic_Citadel.JPG/1280px-Calnic_Citadel.JPG"
-      alt="Cetatea Calnic" class="hist-photo"
-      onerror="this.parentElement.innerHTML='<div class=photo-placeholder>Fotografie indisponibila momentan</div>'"/>
-    <div class="photo-credit">
-      <span data-ro="Fotografie: Wikimedia Commons" data-en="Photo: Wikimedia Commons">Fotografie: Wikimedia Commons</span>
-      &nbsp;·&nbsp;<a href="https://creativecommons.org/licenses/by-sa/3.0/" target="_blank">CC BY-SA 3.0</a>
-    </div>
-  </div>
-
-  <div class="orn">— &#10022; —</div>
-
-  <div class="section-head"><span class="section-head-title" data-ro="Biserica Evanghelica" data-en="The Evangelical Church">Biserica Evanghelica</span></div>
-
-  <div class="info-card">
-    <div class="info-card-text" data-ro="In interiorul incintei cetatii se afla biserica evanghelica luterana a Calnicului, parte integranta a patrimoniului UNESCO. Construita initial ca o capela romano-catolica la sfarsitul secolului XV, ea a devenit luterana in urma Reformei din secolul XVI. In 1868-1869, comunitatea a achizitionat o noua orga de la firma Hesse din Viena. Fostul edificiu parohial luteran din vecinatate, construit in secolul XVI si extins in 1779, completeaza ansamblul." data-en="Inside the citadel stands Calnic's Evangelical Lutheran church, an integral part of the UNESCO heritage. Originally built as a Roman Catholic Gothic chapel at the end of the 15th century, it became Lutheran following the Reformation in the 16th century. In 1868-1869 the community acquired a new organ from the Hesse firm in Vienna. The former Lutheran parish house nearby, built in the 16th century and extended in 1779, completes the ensemble.">In incinta cetatii se afla <strong>biserica evanghelica luterana</strong>, parte UNESCO. Initial romano-catolica (sf. sec. XV), devine luterana dupa Reforma. In <strong>1868-1869</strong> comunitatea achizitioneaza o <strong>orga de la firma Hesse din Viena</strong>.</div>
-  </div>
-
-  <div class="photo-block">
-    <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/f/f1/Citadel_2.JPG/1280px-Citadel_2.JPG"
-      alt="Cetatea Calnic interior" class="hist-photo"
-      onerror="this.parentElement.innerHTML='<div class=photo-placeholder>Fotografie indisponibila momentan</div>'"/>
-    <div class="photo-credit">
-      <span data-ro="Fotografie: Wikimedia Commons" data-en="Photo: Wikimedia Commons">Fotografie: Wikimedia Commons</span>
-      &nbsp;·&nbsp;<a href="https://creativecommons.org/licenses/by-sa/3.0/" target="_blank">CC BY-SA 3.0</a>
-    </div>
-  </div>
-
-  <div class="orn">— &#10022; —</div>
-
-  <div class="section-head"><span class="section-head-title" data-ro="Doua comunitati, un sat" data-en="Two Communities, One Village">Doua comunitati, un sat</span></div>
-
-  <div class="info-card">
-    <div class="info-card-title" data-ro="Sasii si romanii" data-en="Saxons and Romanians">Sasii si romanii</div>
-    <div class="info-card-text" data-ro="Calnicul a avut, timp de secole, doua comunitati distincte despartite de paraul din centrul satului. Pe malul stang se afla cartierul sasesc (cetatea, biserica evanghelica, casa parohiala), pe malul drept cartierul romanesc. Recensamantul din 1733 inregistra 220 de familii. Pana in 1857, numarul romanilor il depasise pe cel al sasilor cu aproximativ 200 de suflete." data-en="For centuries, Calnic had two distinct communities separated by the stream running through the village centre. On the left bank stood the Saxon quarter (citadel, evangelical church, parish house), on the right bank the Romanian quarter developed. The 1733 census recorded 220 families. By 1857, the number of Romanians had exceeded that of Saxons by approximately 200 souls.">Calnicul a avut doua comunitati separate de paraul central: <strong>cartierul sasesc</strong> (stanga) si <strong>cartierul romanesc</strong> (dreapta). In <strong>1857</strong>, romanii ii depasisera numeric pe sasi cu ~200 de suflete.</div>
-  </div>
-
-  <div class="info-card">
-    <div class="info-card-title" data-ro="Plecarea sasilor" data-en="The Saxon Departure">Plecarea sasilor</div>
-    <div class="info-card-text" data-ro="Comunitatea saseasca din Calnic a fost prezenta neintrerupt timp de peste 600 de ani. In anii 1980, in contextul politic al Romaniei comuniste, majoritatea sasilor au emigrat in Germania. Astazi, niciun sas nu mai locuieste permanent in Calnic. Cu toate acestea, fosti locuitori revin periodic, inclusiv la prima Intalnire a Sasilor din Calnic." data-en="The Saxon community of Calnic was present without interruption for over 600 years. In the 1980s, within the political context of communist Romania, most Saxons emigrated to Germany. Today, no Saxon lives permanently in Calnic. Nevertheless, former residents and their descendants return periodically, including for the Meeting of Calnic Saxons.">Prezenta saseasca de <strong>peste 600 de ani</strong> s-a incheiat in <strong>anii 1980</strong>, cand majoritatea au emigrat in Germania in contextul comunist. Astazi <strong>niciun sas nu mai locuieste permanent</strong> in Calnic.</div>
-  </div>
-
-  <div class="orn">— &#10022; —</div>
-
-  <div class="section-head"><span class="section-head-title" data-ro="Economie si viata locala" data-en="Economy and Local Life">Economie si viata locala</span></div>
-
-  <div class="info-card">
-    <div class="info-card-title" data-ro="Ocupatii traditionale" data-en="Traditional Occupations">Ocupatii traditionale</div>
-    <div class="info-card-text" data-ro="Principalele ocupatii ale locuitorilor sunt apicultura, pomicultura si viticultura — activitati practicate in zona de generatii. Terenurile fertile si microclimatul bland al vaii Secasului au favorizat aceste indeletniciri de-a lungul veacurilor." data-en="The main occupations of its inhabitants are beekeeping, fruit growing and viticulture — activities practised in the area for generations. The fertile soil and mild microclimate of the Secas valley have favoured these traditional pursuits throughout the centuries.">Principalele ocupatii: <strong>apicultura, pomicultura si viticultura</strong> — practicate de generatii in microclimatul bland al vaii Secasului.</div>
-  </div>
-
-  <div class="info-card">
-    <div class="info-card-title" data-ro="Satul Deal si Asociatia Ars Transilvaniae" data-en="The Village of Deal and Ars Transilvaniae">Satul Deal si Asociatia Ars Transilvaniae</div>
-    <div class="info-card-text" data-ro="Comuna Calnic cuprinde si satul Deal, atestat documentar din 1366. Cetatea Calnic este administrata in prezent de Asociatia Ars Transilvaniae, care organizeaza evenimente culturale si activitati educationale in incinta cetatii." data-en="The commune of Calnic also includes the village of Deal, first documented in 1366. Calnic Citadel is currently managed by the Ars Transilvaniae Association, which organises cultural events and educational activities within the citadel.">Comuna include si satul <strong>Deal</strong> (atestat <strong>1366</strong>). Cetatea este administrata de <strong>Asociatia Ars Transilvaniae</strong>, care organizeaza evenimente culturale si educationale.</div>
-  </div>
-
-  <div class="orn">— &#10022; —</div>
-
-  <div class="section-head"><span class="section-head-title" data-ro="Personalitati legate de Calnic" data-en="Notable Figures of Calnic">Personalitati legate de Calnic</span></div>
-
-  <div class="people-grid">
-    <div class="person-card">
-      <div class="person-name">Chyl de Kelling</div>
-      <div class="person-years">Sec. XIII</div>
-      <div class="person-desc" data-ro="Nobil transilvănean, constructorul donjonului de la Calnic (~1270). Familia sa a dat numele german al satului — Kelling — si a fost una dintre cele mai influente familii nobiliare din regiune." data-en="Transylvanian nobleman, builder of Calnic's keep (~1270). His family gave the German name to the village — Kelling — and were prominent landowners throughout the region.">Nobil transilvănean, constructorul donjonului (~1270). Familia sa a dat numele german al satului — Kelling.</div>
-    </div>
-    <div class="person-card">
-      <div class="person-name" data-ro="Comunitatea Saseasca" data-en="The Saxon Community">Comunitatea Saseasca</div>
-      <div class="person-years">Sec. XIV–XX</div>
-      <div class="person-desc" data-ro="Sasii transilvăneni au modelat identitatea Calnicului timp de secole, transformand cetatea nobiliara intr-un simbol al rezistentei comunitare si pastrand traditii culturale unice pana in secolul XX." data-en="The Transylvanian Saxons shaped Calnic's identity for centuries, turning a noble citadel into a symbol of communal resilience and preserving their rich cultural traditions until the 20th century.">Sasii transilvăneni au modelat identitatea Calnicului timp de secole, pastrand traditii culturale unice pana in sec. XX.</div>
-    </div>
-    <div class="person-card">
-      <div class="person-name" data-ro="Adauga o personalitate" data-en="Suggest a Notable Figure">+ Adauga o personalitate</div>
-      <div class="person-years" data-ro="Cunoasteti pe cineva din Calnic?" data-en="Know someone notable from Calnic?">Cunoasteti pe cineva din Calnic?</div>
-      <div class="person-desc" data-ro="Daca stiti de personalitati istorice sau contemporane legate de Calnic, contactati administratorul pentru a le adauga aici." data-en="If you know of historical or contemporary figures connected to Calnic, contact the admin to have them added here.">Contactati administratorul pentru a adauga personalitati legate de Calnic.</div>
-    </div>
-  </div>
-
-  <div class="orn">— &#10022; —</div>
-
-  <div class="section-head"><span class="section-head-title" data-ro="Surse si referinte" data-en="Sources and References">Surse si referinte</span></div>
-  <div class="sources-box">
-    <p style="font-size:14px;color:var(--muted);font-style:italic;margin-bottom:14px;" data-ro="Informatiile de pe aceasta pagina au fost prelucrate si rescrise pe baza urmatoarelor surse. Continutul original apartine autorilor respectivi." data-en="The information on this page has been researched and rewritten based on the following sources. Original content belongs to the respective authors.">Informatiile de pe aceasta pagina au fost prelucrate si rescrise pe baza urmatoarelor surse.</p>
-    <div class="source-item"><span style="color:var(--gold);font-style:italic;">Primaria Calnic</span> — Site oficial al comunei Calnic, Alba<br><a href="http://www.primaria-calnic.ro" target="_blank">primaria-calnic.ro</a></div>
-    <div class="source-item"><span style="color:var(--gold);font-style:italic;">UNESCO World Heritage Centre</span> — Villages with Fortified Churches in Transylvania<br><a href="https://whc.unesco.org/en/list/895" target="_blank">whc.unesco.org</a></div>
-    <div class="source-item"><span style="color:var(--gold);font-style:italic;">Wikipedia Romania</span> — Articolul Calnic, Alba (verificarea datelor istorice, nu copiat)<br><a href="https://ro.wikipedia.org/wiki/C%C3%A2lnic,_Alba" target="_blank">ro.wikipedia.org</a></div>
-    <div class="source-item"><span style="color:var(--gold);font-style:italic;">Draganu, Nicolae</span> — Lingvist roman, autor al etimologiei numelui Calnic din slavonul kal.</div>
-    <div class="source-item"><span style="color:var(--gold);font-style:italic;">Ministerul Culturii</span> — Lista monumentelor istorice din judetul Alba<br><a href="https://www.cultura.ro" target="_blank">cultura.ro</a></div>
-    <p style="font-size:12px;color:var(--muted);margin-top:14px;font-style:italic;" data-ro="Doriti sa contribuiti cu informatii verificate? Contactati administratorul site-ului." data-en="Would you like to contribute verified information? Contact the site administrator.">Doriti sa contribuiti cu informatii verificate? Contactati administratorul site-ului.</p>
-  </div>
-
+<div class="page-hero">
+  <div class="page-hero-title" id="hero-title" data-ro="Contact" data-en="Contact Us">Contact</div>
+  <div class="page-hero-sub" id="hero-sub" data-ro="Suntem bucurosi sa va auzim" data-en="We are happy to hear from you">Suntem bucurosi sa va auzim</div>
+  <div class="page-hero-orn">&#10022; &#10022; &#10022;</div>
 </div>
 
+<div class="main-wrap">
+
+  <!-- LEFT: Contact form -->
+  <div>
+
+    <div class="section-head" style="margin-top:0;">
+      <span class="section-head-title" id="sh-form" data-ro="Trimite un mesaj" data-en="Send a message">Trimite un mesaj</span>
+    </div>
+
+    <div class="contact-form-wrap">
+
+      <!-- The actual form (no <form> tag — pure JS) -->
+      <div id="formBody">
+
+        <div class="form-row">
+          <label class="form-label" id="lbl-topic" data-ro="Subiect mesaj" data-en="Message topic">Subiect mesaj</label>
+          <div class="topic-chips" id="topicChips">
+            <span class="topic-chip" data-val="familie" data-ro="Familia mea" data-en="My family" onclick="selectTopic(this)">Familia mea</span>
+            <span class="topic-chip" data-val="foto" data-ro="Foto / Galerie" data-en="Photo / Gallery" onclick="selectTopic(this)">Foto / Galerie</span>
+            <span class="topic-chip" data-val="genealogie" data-ro="Genealogie" data-en="Genealogy" onclick="selectTopic(this)">Genealogie</span>
+            <span class="topic-chip" data-val="eroare" data-ro="Eroare pe site" data-en="Bug / Error" onclick="selectTopic(this)">Eroare pe site</span>
+            <span class="topic-chip" data-val="colaborare" data-ro="Colaborare" data-en="Collaboration" onclick="selectTopic(this)">Colaborare</span>
+            <span class="topic-chip" data-val="altceva" data-ro="Altceva" data-en="Other" onclick="selectTopic(this)">Altceva</span>
+          </div>
+        </div>
+
+        <div class="form-row-2">
+          <div class="form-row" style="margin-bottom:0;">
+            <label class="form-label" id="lbl-name" data-ro="Nume" data-en="Name">Nume</label>
+            <input class="form-input" id="inp-name" type="text" placeholder="Ion Popescu" autocomplete="name"/>
+          </div>
+          <div class="form-row" style="margin-bottom:0;">
+            <label class="form-label" id="lbl-village" data-ro="Sat / Localitate" data-en="Village / Town">Sat / Localitate <span id="lbl-village-opt" data-ro="optional" data-en="optional">optional</span></label>
+            <input class="form-input" id="inp-village" type="text" placeholder="Calnic" autocomplete="off"/>
+          </div>
+        </div>
+
+        <div class="form-row" style="margin-top:18px;">
+          <label class="form-label" id="lbl-email" data-ro="Adresa de email" data-en="Email address">Adresa de email</label>
+          <input class="form-input" id="inp-email" type="email" placeholder="ionpopescu@email.ro" autocomplete="email"/>
+        </div>
+
+        <div class="form-row">
+          <label class="form-label" id="lbl-family" data-ro="Familia din Calnic" data-en="Family from Calnic">Familia din Calnic <span id="lbl-family-opt" data-ro="optional" data-en="optional">optional</span></label>
+          <input class="form-input" id="inp-family" type="text" placeholder="ex: Familia Muresan" autocomplete="off"/>
+        </div>
+
+        <div class="form-row">
+          <label class="form-label" id="lbl-msg" data-ro="Mesajul tau" data-en="Your message">Mesajul tau</label>
+          <textarea class="form-textarea" id="inp-msg" maxlength="1200" placeholder="" id="inp-msg" oninput="updateCount()"></textarea>
+          <div class="char-count"><span id="charCount">0</span>/1200</div>
+        </div>
+
+        <div class="info-box" id="privacy-note">
+          <strong data-ro="Nota:" data-en="Note:">Nota:</strong>
+          <span data-ro=" Informatiile trimise sunt folosite exclusiv pentru a raspunde mesajului tau. Nu stocam date fara consimtamant." data-en=" Information submitted is used only to reply to your message. We do not store data without consent."> Informatiile trimise sunt folosite exclusiv pentru a raspunde mesajului tau. Nu stocam date fara consimtamant.</span>
+        </div>
+
+        <button class="btn-submit" id="btnSubmit" onclick="submitForm()">
+          <span id="btn-lbl" data-ro="TRIMITE MESAJUL" data-en="SEND MESSAGE">TRIMITE MESAJUL</span>
+        </button>
+
+      </div><!-- end formBody -->
+
+      <!-- Success state -->
+      <div class="form-success" id="formSuccess">
+        <div class="form-success-icon">&#10003;</div>
+        <div class="form-success-title" id="succ-title" data-ro="Mesaj trimis!" data-en="Message sent!">Mesaj trimis!</div>
+        <p class="form-success-sub" id="succ-sub" data-ro="Multumim! Vom reveni in cel mai scurt timp." data-en="Thank you! We will get back to you soon.">Multumim! Vom reveni in cel mai scurt timp.</p>
+      </div>
+
+    </div><!-- end contact-form-wrap -->
+
+    <!-- FAQ section -->
+    <div class="section-head">
+      <span class="section-head-title" id="sh-faq" data-ro="Intrebari frecvente" data-en="Frequently asked questions">Intrebari frecvente</span>
+    </div>
+
+    <div id="faqList">
+      <div class="faq-item">
+        <div class="faq-q" onclick="toggleFaq(this)" data-ro="Cum pot adauga familia mea pe site?" data-en="How can I add my family to the site?">Cum pot adauga familia mea pe site?</div>
+        <div class="faq-a" data-ro="In aceasta etapa a proiectului, inregistrarea familiilor se face prin contact direct. Trimite-ne un mesaj cu numele familiei si vom crea profilul vostru." data-en="At this stage of the project, family registration is done through direct contact. Send us a message with your family name and we will create your profile.">In aceasta etapa a proiectului, inregistrarea familiilor se face prin contact direct. Trimite-ne un mesaj cu numele familiei si vom crea profilul vostru.</div>
+      </div>
+      <div class="faq-item">
+        <div class="faq-q" onclick="toggleFaq(this)" data-ro="Pot adauga fotografii vechi din Calnic?" data-en="Can I add old photographs from Calnic?">Pot adauga fotografii vechi din Calnic?</div>
+        <div class="faq-a" data-ro="Da! Fotografiile vechi sunt extrem de valoroase pentru arhiva digitala a satului. Poti folosi pagina Galerie sau ne contactezi direct pentru fotografii rare." data-en="Yes! Old photographs are extremely valuable for the village digital archive. You can use the Gallery page or contact us directly for rare photographs.">Da! Fotografiile vechi sunt extrem de valoroase pentru arhiva digitala a satului. Poti folosi pagina Galerie sau ne contactezi direct pentru fotografii rare.</div>
+      </div>
+      <div class="faq-item">
+        <div class="faq-q" onclick="toggleFaq(this)" data-ro="Datele mele de familie sunt in siguranta?" data-en="Is my family data safe?">Datele mele de familie sunt in siguranta?</div>
+        <div class="faq-a" data-ro="Absolut. Fiecare familie controleaza ce este public si ce ramane privat. Datele private sunt accesibile doar cu PIN-ul familiei. Nu vindem si nu impartasim date cu terte parti." data-en="Absolutely. Each family controls what is public and what stays private. Private data is accessible only with the family PIN. We do not sell or share data with third parties.">Absolut. Fiecare familie controleaza ce este public si ce ramane privat. Datele private sunt accesibile doar cu PIN-ul familiei. Nu vindem si nu impartasim date cu terte parti.</div>
+      </div>
+      <div class="faq-item">
+        <div class="faq-q" onclick="toggleFaq(this)" data-ro="Suntem o familie din diaspora. Putem participa?" data-en="We are a diaspora family. Can we participate?">Suntem o familie din diaspora. Putem participa?</div>
+        <div class="faq-a" data-ro="Cu siguranta! Proiectul a fost creat si pentru familiile plecate din sat. Orice legatura cu Calnicul este binevenita — fie ca e vorba de strabunici, amintiri sau fotografii." data-en="Absolutely! The project was created also for families who left the village. Any connection to Calnic is welcome — whether it is great-grandparents, memories or photographs.">Cu siguranta! Proiectul a fost creat si pentru familiile plecate din sat. Orice legatura cu Calnicul este binevenita — fie ca e vorba de strabunici, amintiri sau fotografii.</div>
+      </div>
+      <div class="faq-item">
+        <div class="faq-q" onclick="toggleFaq(this)" data-ro="Am gasit o eroare sau informatii gresite pe site." data-en="I found a bug or incorrect information on the site.">Am gasit o eroare sau informatii gresite pe site.</div>
+        <div class="faq-a" data-ro="Multumim ca ai sesizat! Te rugam sa ne contactezi prin formularul de mai sus, selectand subiectul Eroare pe site. Vom corecta in cel mai scurt timp." data-en="Thank you for noticing! Please contact us through the form above, selecting the Bug / Error topic. We will correct it as soon as possible.">Multumim ca ai sesizat! Te rugam sa ne contactezi prin formularul de mai sus, selectand subiectul Eroare pe site. Vom corecta in cel mai scurt timp.</div>
+      </div>
+    </div>
+
+  </div><!-- end left col -->
+
+  <!-- RIGHT: Sidebar -->
+  <div class="sidebar">
+
+    <div class="village-quote">
+      <blockquote id="vq-text" data-ro="Calnicul nu e doar un sat — e o memorie vie, pastrata de fiecare familie care a trait pe aceste dealuri." data-en="Calnic is not just a village — it is a living memory, kept by every family that has lived on these hills.">Calnicul nu e doar un sat — e o memorie vie, pastrata de fiecare familie care a trait pe aceste dealuri.</blockquote>
+      <cite id="vq-cite" data-ro="Proiectul Calnic Online" data-en="The Calnic Online Project">Proiectul Calnic Online</cite>
+    </div>
+
+    <div class="contact-card">
+      <div class="contact-card-title" id="card-info-title" data-ro="Informatii utile" data-en="Useful information">Informatii utile</div>
+      <div class="contact-item">
+        <span class="contact-item-icon">&#128205;</span>
+        <div class="contact-item-body">
+          <div class="contact-item-label" data-ro="Sat" data-en="Village">Sat</div>
+          <div class="contact-item-val">Calnic, jud. Alba</div>
+        </div>
+      </div>
+      <div class="contact-item">
+        <span class="contact-item-icon">&#127758;</span>
+        <div class="contact-item-body">
+          <div class="contact-item-label" data-ro="Regiune" data-en="Region">Regiune</div>
+          <div class="contact-item-val">Transilvania, Romania</div>
+        </div>
+      </div>
+      <div class="contact-item">
+        <span class="contact-item-icon">&#127963;</span>
+        <div class="contact-item-body">
+          <div class="contact-item-label" data-ro="Cetatea" data-en="Citadel">Cetatea</div>
+          <div class="contact-item-val" style="color:var(--gold);">Patrimoniu UNESCO</div>
+        </div>
+      </div>
+      <div class="contact-item">
+        <span class="contact-item-icon">&#128241;</span>
+        <div class="contact-item-body">
+          <div class="contact-item-label" data-ro="Platforme" data-en="Platforms">Platforme</div>
+          <div class="contact-item-val">GitHub Pages</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="resp-bar">
+      <div class="resp-bar-title" id="resp-title" data-ro="Timp de raspuns obisnuit" data-en="Typical response time">Timp de raspuns obisnuit</div>
+      <div class="resp-track"><div class="resp-fill"></div></div>
+      <div class="resp-note" id="resp-note" data-ro="De obicei raspundem in 2-3 zile." data-en="We usually respond within 2-3 days.">De obicei raspundem in 2-3 zile.</div>
+    </div>
+
+    <div class="contact-card">
+      <div class="contact-card-title" id="card-pages-title" data-ro="Pagini utile" data-en="Useful pages">Pagini utile</div>
+      <div class="contact-item">
+        <span class="contact-item-icon">&#128106;</span>
+        <div class="contact-item-body">
+          <a href="familii.html" id="link-familii" data-ro="Registrul Familiilor" data-en="Family Directory">Registrul Familiilor</a>
+          <div class="contact-item-label" data-ro="Adauga sau cauta familia ta" data-en="Find or add your family">Adauga sau cauta familia ta</div>
+        </div>
+      </div>
+      <div class="contact-item">
+        <span class="contact-item-icon">&#128248;</span>
+        <div class="contact-item-body">
+          <a href="galerie.html" id="link-galerie" data-ro="Galeria foto" data-en="Photo Gallery">Galeria foto</a>
+          <div class="contact-item-label" data-ro="Incarca fotografii vechi din sat" data-en="Upload old village photos">Incarca fotografii vechi din sat</div>
+        </div>
+      </div>
+      <div class="contact-item">
+        <span class="contact-item-icon">&#127803;</span>
+        <div class="contact-item-body">
+          <a href="genealogie.html" id="link-genealogie" data-ro="Arborele genealogic" data-en="Family Tree">Arborele genealogic</a>
+          <div class="contact-item-label" data-ro="Construieste genealogia familiei" data-en="Build your family genealogy">Construieste genealogia familiei</div>
+        </div>
+      </div>
+    </div>
+
+  </div><!-- end sidebar -->
+
+</div><!-- end main-wrap -->
 
 <a class="scroll-top" id="scrollTop" onclick="window.scrollTo({top:0,behavior:'smooth'})" title="Sus">&#8679;</a>
 <a class="scroll-bottom" id="scrollBottom" onclick="window.scrollTo({top:document.body.scrollHeight,behavior:'smooth'})" title="Jos">&#8681;</a>
@@ -406,92 +602,68 @@ footer .g { color:var(--gold-d); font-style:normal; }
 <script>
 document.getElementById('yr').textContent = new Date().getFullYear();
 
-/* DYK */
-var facts = {
-  ro: [
-    {text: 'Cetatea Calnic este singura cetate transilvaneana construita <strong>intr-o depresiune</strong>, mai jos decat dealurile din jur. Motivul? A fost construita initial ca resedinta privata, nu ca fortareata.', src: 'Wikipedia EN — Calnic Citadel'},
-    {text: 'Cetatea a avut candva un <strong>sant cu apa</strong> in jurul ei, accesibil doar printr-un pod mobil. Astazi santul a disparut, dar structura zidurilor mai tradeaza pozitia sa originala.', src: 'Wikipedia EN — Calnic Citadel'},
-    {text: 'Calnicul este mentionat documentar pentru prima oara in <strong>1269</strong> — cu cel putin un an inainte de constructia cetatii. Asta inseamna ca satul este mai vechi decat fortareata care l-a facut celebru.', src: 'Primaria Calnic'},
-    {text: 'Calnic este <strong>una din cele sapte</strong> asezari cu biserici fortificate din Transilvania inscrise in patrimoniul UNESCO — alaturi de Biertan, Viscri, Prejmer, Saschiz, Valea Viilor si Darju.', src: 'UNESCO World Heritage List'},
-    {text: 'Sasii transilvăneni nu erau de fapt din Saxonia! Primii colonisti proveneau din Flandra, Luxemburg, Lorena si Moselle. Numele de <strong>sasi</strong> le-a fost dat eronat si a ramas in istorie.', src: 'Wikipedia — Transylvanian Saxons'},
-    {text: 'Tribuna de lemn din interiorul capelei cetatii, datand din <strong>1733</strong>, este decorata cu panouri pictate manual in stil renascentist floral — fiecare panou unic, niciodata repetat.', src: 'Wikipedia EN — Calnic Citadel'},
-    {text: 'Donjonul Siegfried din Calnic a primit <strong>doua niveluri suplimentare</strong> dupa ce sasii au preluat cetatea in 1430 — tocmai pentru ca aparatorii sa poata trage dincolo de ziduri.', src: 'Wikipedia EN — Calnic Citadel'},
-    {text: 'Desi multi cred ca sasii au fost chemati in Transilvania din cauza atacurilor otomane, de fapt ei au sosit cu <strong>200 de ani inainte</strong> de primele invazii otomane.', src: 'Wikipedia — Transylvanian Saxons'},
-    {text: 'Calnic se numea <strong>Kelling</strong> in germana si <strong>Kalnok</strong> in maghiara. Trei comunitati, trei limbi, trei nume — pentru acelasi sat de cateva sute de suflete.', src: 'Primaria Calnic'},
-    {text: 'Statul roman comunist vindea practic cetatenii germani etnici Germaniei de Vest — pretul era in jur de <strong>8.000-11.000 de marci</strong> pe persoana. De aceea sasii au plecat masiv in anii 1980.', src: 'Wikipedia — Transylvanian Saxons'},
-    {text: 'Din cele peste <strong>300 de biserici fortificate</strong> construite initial in Transilvania, mai mult de 150 au supravietuit pana astazi. Calnic este unul dintre cele mai bine conservate exemple.', src: 'UNESCO / Wikipedia'},
-    {text: 'Cetatea Calnic este administrata din <strong>1995</strong> de o fundatie a Universitatii Babes-Bolyai din Cluj-Napoca — una dintre cele mai vechi universitati din Europa Centrala.', src: 'Wikipedia EN — Calnic Citadel'},
-    {text: 'Turnul Siegfried are <strong>parter plus trei etaje</strong> si o inaltime de peste 20 de metri. A fost construit circa 1270 si este cea mai veche structura din incinta cetatii.', src: 'Wikipedia EN — Calnic Citadel'},
-    {text: 'Sasii au construit cetatile nu pentru a castiga batalii, ci pentru a <strong>rezista asediilor</strong> — in interiorul zidurilor existau hambare, cisterne si apartamente pentru toate familiile.', src: 'Transylvanian Inn'},
-    {text: 'Dialectul vorbit de sasii transilvăneni — <strong>Siebenburgisch-Sachsisch</strong> — este cel mai apropiat de luxemburgheza dintre toate dialectele germanice.', src: 'Wikipedia — Transylvanian Saxons'},
-    {text: 'Sasii transilvăneni au votat in <strong>februarie 1919</strong> alaturi de romani pentru unirea Transilvaniei cu Romania.', src: 'Wikipedia — Transylvanian Saxons'},
-    {text: 'Calnic se afla la <strong>380 de metri altitudine</strong>, in valea Secasului — un microclimat bland care a favorizat apicultura, pomicultura si viticultura timp de secole.', src: 'Primaria Calnic'},
-    {text: 'Capela gotica din interiorul cetatii pastreaza <strong>fresco din secolul XVI</strong> — printre putinele picturi murale medievale supravietuitoare din zona Albei.', src: 'Wikipedia EN — Calnic Citadel'},
-    {text: 'In 2022, mai exista doar aproximativ <strong>11.400 de sasi transilvăneni</strong> in Romania — fata de sute de mii in perioada interbelica.', src: 'Wikipedia — Transylvanian Saxons'},
-    {text: 'Calnic este atestat in <strong>1269</strong>, dar zona a fost locuita din epoca neolitica. Vestigiile Culturii Cotofeni (3500-2500 i.Hr.) il plaseaza printre cele mai vechi locuri de locuire din Alba.', src: 'Primaria Calnic / Surse arheologice'}
-  ],
-  en: [
-    {text: 'Calnic Citadel is the only Transylvanian fortress built <strong>in a depression</strong>, lower than the surrounding hills. The reason? It was originally built as a private noble residence, not a fortress.', src: 'Wikipedia EN — Calnic Citadel'},
-    {text: 'The citadel once had a <strong>water-filled moat</strong> around it, accessible only by a drawbridge. The moat has long since disappeared, but the wall structure still reveals its original position.', src: 'Wikipedia EN — Calnic Citadel'},
-    {text: 'Calnic is first mentioned in documents in <strong>1269</strong> — at least a year before the citadel was built. This means the village is older than the fortress that made it famous.', src: 'Primaria Calnic'},
-    {text: 'Calnic is <strong>one of seven</strong> Saxon villages with fortified churches in Transylvania inscribed on the UNESCO World Heritage List — alongside Biertan, Viscri, Prejmer, Saschiz, Valea Viilor and Darju.', src: 'UNESCO World Heritage List'},
-    {text: 'The Transylvanian Saxons were not actually from Saxony! The first settlers came from Flanders, Luxembourg, Lorraine and the Moselle region. The name Saxons was incorrectly applied and simply stuck.', src: 'Wikipedia — Transylvanian Saxons'},
-    {text: 'The wooden gallery inside the citadel chapel, dating from <strong>1733</strong>, is decorated with hand-painted panels in a floral Renaissance style — each panel unique, never repeated.', src: 'Wikipedia EN — Calnic Citadel'},
-    {text: 'The Siegfried Tower received <strong>two additional levels</strong> after the Saxons took over in 1430 — so defenders could fire weapons beyond the outer walls.', src: 'Wikipedia EN — Calnic Citadel'},
-    {text: 'Many assume the Saxons came to Transylvania because of Ottoman attacks — but they actually arrived <strong>200 years before</strong> the first Ottoman invasions.', src: 'Wikipedia — Transylvanian Saxons'},
-    {text: 'Calnic was called <strong>Kelling</strong> in German and <strong>Kalnok</strong> in Hungarian. Three communities, three languages, three names — for the same village of a few hundred souls.', src: 'Primaria Calnic'},
-    {text: 'Communist Romania effectively sold its ethnic German citizens to West Germany for around <strong>8,000-11,000 Deutsche Marks</strong> per person — which is why most Calnic Saxons left in the 1980s.', src: 'Wikipedia — Transylvanian Saxons'},
-    {text: 'Of the more than <strong>300 fortified churches</strong> originally built in Transylvania, over 150 survive today. Calnic is one of the best-preserved examples.', src: 'UNESCO / Wikipedia'},
-    {text: 'Calnic Citadel has been managed since <strong>1995</strong> by a foundation of Babes-Bolyai University in Cluj-Napoca — one of the oldest universities in Central Europe.', src: 'Wikipedia EN — Calnic Citadel'},
-    {text: 'The Siegfried Tower has <strong>a ground floor plus three storeys</strong> and stands over 20 metres tall. Built around 1270, it is the oldest structure within the citadel walls.', src: 'Wikipedia EN — Calnic Citadel'},
-    {text: 'The Saxons built their fortified churches not to win battles, but to <strong>outlast sieges</strong> — inside the walls there were storehouses, cisterns and accommodation for every family.', src: 'Transylvanian Inn'},
-    {text: 'The dialect spoken by Transylvanian Saxons — <strong>Siebenburgisch-Sachsisch</strong> — is most closely related to Luxembourgish among all Germanic dialects.', src: 'Wikipedia — Transylvanian Saxons'},
-    {text: 'The Transylvanian Saxons voted in <strong>February 1919</strong> alongside Romanians for the union of Transylvania with Romania.', src: 'Wikipedia — Transylvanian Saxons'},
-    {text: 'Calnic sits at <strong>380 metres altitude</strong> in the Secas valley — a mild microclimate that has favoured beekeeping, fruit growing and viticulture for centuries.', src: 'Primaria Calnic'},
-    {text: 'The Gothic chapel inside the citadel preserves <strong>16th century frescoes</strong> — among the few surviving medieval wall paintings in the Alba County region.', src: 'Wikipedia EN — Calnic Citadel'},
-    {text: 'By 2022, only around <strong>11,400 Transylvanian Saxons</strong> remain in Romania — compared to hundreds of thousands in the interwar period.', src: 'Wikipedia — Transylvanian Saxons'},
-    {text: 'Calnic is documented from <strong>1269</strong>, but the area has been inhabited since the Neolithic. Cotofeni Culture remains (3500-2500 BC) place it among the oldest inhabited sites in Alba County.', src: 'Primaria Calnic / Archaeological sources'}
-  ]
-};
+var selectedTopic = '';
 
-var curFact = 0;
-var curLang = 'ro';
-
-function showFact(i, lang) {
-  var f = facts[lang][i];
-  var t = document.getElementById('dyk-text');
-  var src = document.getElementById('dyk-src');
-  var ctr = document.getElementById('dyk-ctr');
-  var lbl = document.getElementById('dyk-lbl');
-  if (t) t.innerHTML = f.text;
-  if (src) src.textContent = (lang === 'ro' ? 'Sursa: ' : 'Source: ') + f.src;
-  if (ctr) ctr.textContent = (i + 1) + ' / ' + facts[lang].length;
-  if (lbl) lbl.textContent = lang === 'ro' ? 'Stiati ca?' : 'Did you know?';
+function selectTopic(el) {
+  document.querySelectorAll('.topic-chip').forEach(function(c) { c.classList.remove('selected'); });
+  el.classList.add('selected');
+  selectedTopic = el.getAttribute('data-val');
 }
-function nextFact() { curFact = (curFact + 1) % facts[curLang].length; showFact(curFact, curLang); }
-function prevFact() { curFact = (curFact - 1 + facts[curLang].length) % facts[curLang].length; showFact(curFact, curLang); }
 
-/* Lang */
+function updateCount() {
+  var msg = document.getElementById('inp-msg');
+  document.getElementById('charCount').textContent = msg.value.length;
+}
+
+function submitForm() {
+  var name = document.getElementById('inp-name').value.trim();
+  var email = document.getElementById('inp-email').value.trim();
+  var msg = document.getElementById('inp-msg').value.trim();
+  if (!name || !email || !msg) {
+    alert(currentLang === 'ro' ? 'Te rugam completeaza: Nume, Email si Mesaj.' : 'Please fill in: Name, Email and Message.');
+    return;
+  }
+  if (!email.includes('@')) {
+    alert(currentLang === 'ro' ? 'Adresa de email nu este valida.' : 'Email address is not valid.');
+    return;
+  }
+  document.getElementById('formBody').style.display = 'none';
+  document.getElementById('formSuccess').style.display = 'block';
+}
+
+function toggleFaq(el) {
+  var item = el.parentElement;
+  var wasOpen = item.classList.contains('open');
+  document.querySelectorAll('.faq-item').forEach(function(i) { i.classList.remove('open'); });
+  if (!wasOpen) item.classList.add('open');
+}
+
+var currentLang = 'ro';
 
 function setLang(lang) {
+  currentLang = lang;
   document.getElementById('btn-ro').classList.toggle('active', lang === 'ro');
   document.getElementById('btn-en').classList.toggle('active', lang === 'en');
   document.querySelectorAll('[data-ro]').forEach(function(el) {
     var val = el.getAttribute('data-' + lang);
-    if (val) el.textContent = val;
+    if (val !== null) {
+      if (el.tagName === 'INPUT' || el.tagName === 'TEXTAREA') {
+        el.placeholder = val;
+      } else {
+        el.textContent = val;
+      }
+    }
+  });
+  // Update topic chip text
+  document.querySelectorAll('.topic-chip').forEach(function(c) {
+    var val = c.getAttribute('data-' + lang);
+    if (val) c.textContent = val;
+    if (c.classList.contains('selected')) c.textContent = val;
   });
 }
 
-function setLangFull(lang) {
-  curLang = lang;
-  setLang(lang);
-  showFact(curFact, lang);
-}
-
-document.getElementById('btn-ro').addEventListener('click', function() { setLangFull('ro'); });
-document.getElementById('btn-en').addEventListener('click', function() { setLangFull('en'); });
-
-/* Scroll */
+document.getElementById('btn-ro').addEventListener('click', function() { setLang('ro'); });
+document.getElementById('btn-en').addEventListener('click', function() { setLang('en'); });
 
 function updateScrollBtns() {
   var t = document.getElementById('scrollTop');
@@ -504,10 +676,6 @@ function updateScrollBtns() {
 window.addEventListener('scroll', updateScrollBtns);
 window.addEventListener('load', updateScrollBtns);
 setTimeout(updateScrollBtns, 100);
-
-/* Init */
-setLang('ro');
-showFact(0, 'ro');
 </script>
 </body>
 </html>
