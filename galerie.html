@@ -314,13 +314,14 @@ footer .g { color:var(--gold-d); font-style:normal; }
 </header>
 
 <nav>
-  <a class="nav-link" href="index.html">&#8962; <span class="nl" data-ro="Acasa" data-en="Home">Acasa</span></a>
+  <a class="nav-link" href="index.html">&#8962; <span class="nl" data-ro="Acasa" data-en="Homepage">Acasa</span></a>
   <a class="nav-link" href="istorie.html">&#128506; <span class="nl" data-ro="Istoria Satului" data-en="Village History">Istoria Satului</span></a>
-  <a class="nav-link" href="familii.html">&#128106; <span class="nl" data-ro="Familiile" data-en="Families">Familiile</span></a>
+  <a class="nav-link" href="familiile.html">&#128106; <span class="nl" data-ro="Familiile" data-en="Families">Familiile</span></a>
   <a class="nav-link" href="genealogie.html">&#127803; <span class="nl" data-ro="Genealogie" data-en="Genealogy">Genealogie</span></a>
   <a class="nav-link" href="harta.html">&#127757; <span class="nl" data-ro="Harta" data-en="Map">Harta</span></a>
   <a class="nav-link active" href="galerie.html">&#128248; <span class="nl" data-ro="Galerie" data-en="Gallery">Galerie</span></a>
   <a class="nav-link" href="contact.html">✉ <span class="nl" data-ro="Contact" data-en="Contact">Contact</span></a>
+  <a class="nav-link" href="intrebari.html">&#10067; <span class="nl" data-ro="Intrebari" data-en="FAQ">Intrebari</span></a>
   <div class="nav-right">
     <a class="nav-login" href="#">&#128274; <span class="nl" data-ro="Contul Familiei" data-en="Family Login">Contul Familiei</span></a>
   </div>
@@ -362,7 +363,7 @@ footer .g { color:var(--gold-d); font-style:normal; }
       <div class="featured-info">
         <div class="featured-info-left">
           <div class="title" data-ro="Cetatea Calnic — vedere panoramica, 1923" data-en="Calnic Citadel — panoramic view, 1923">Cetatea Calnic — vedere panoramica, 1923</div>
-          <div class="meta"><span data-ro="Donata de" data-en="Donated by">Donata de</span>: <a href="familii.html" style="color:var(--gold-d);font-size:13px;">Familia Popescu</a> &nbsp;&#183;&nbsp; <span data-ro="Categorie" data-en="Category">Categorie</span>: <span data-ro="Cetatea Calnic" data-en="Calnic Citadel">Cetatea Calnic</span></div>
+          <div class="meta"><span data-ro="Donata de" data-en="Donated by">Donata de</span>: <a href="familiile.html" style="color:var(--gold-d);font-size:13px;">Familia Popescu</a> &nbsp;&#183;&nbsp; <span data-ro="Categorie" data-en="Category">Categorie</span>: <span data-ro="Cetatea Calnic" data-en="Calnic Citadel">Cetatea Calnic</span></div>
           <div class="caption" data-ro="O fotografie rara din arhiva familiei Popescu, realizata in vara anului 1923. Se poate observa turnul Siegfried in toata maretia sa." data-en="A rare photograph from the Popescu family archive, taken in the summer of 1923. The Siegfried tower can be seen in all its majesty.">O fotografie rara din arhiva familiei Popescu, realizata in vara anului 1923. Se poate observa turnul Siegfried in toata maretia sa.</div>
         </div>
         <div class="feat-actions">
@@ -621,7 +622,7 @@ function applyFilters() {
         '<div class="pt-year">' + p.year + '</div></div>'+
         '<div class="pt-info"><div class="pt-info-left">'+
         '<div class="pt-title">' + title + '</div>'+
-        '<div class="pt-by">' + (currentLang === 'ro' ? 'Donata de' : 'By') + ': <a href="familii.html" onclick="event.stopPropagation()">' + byText + '</a></div>'+
+        '<div class="pt-by">' + (currentLang === 'ro' ? 'Donata de' : 'By') + ': <a href="familiile.html" onclick="event.stopPropagation()">' + byText + '</a></div>'+
         '</div><button class="pt-dl" onclick="event.stopPropagation();dlPhoto(' + p.id + ')">&darr;</button></div></div>';
     }).join('');
   }
@@ -650,7 +651,7 @@ function openLb(id) {
   var ded = currentLang === 'ro' ? p.dedicatieRo : p.dedicatieEn;
   var dedEl = document.getElementById('lb-dedication');
   dedEl.textContent = ded ? '✦ ' + ded : ''; dedEl.style.display = ded ? 'block' : 'none';
-  document.getElementById('lb-by').innerHTML = '<a href="familii.html">' + (currentLang === 'ro' ? p.byRo : p.byEn) + '</a>';
+  document.getElementById('lb-by').innerHTML = '<a href="familiile.html">' + (currentLang === 'ro' ? p.byRo : p.byEn) + '</a>';
   document.getElementById('lb-year').textContent = p.year || (currentLang === 'ro' ? 'Necunoscut' : 'Unknown');
   document.getElementById('lb-cat').textContent = getCatLabel(p.cat, currentLang);
   document.getElementById('lb-vis').textContent = p.priv ? (currentLang === 'ro' ? 'Privata' : 'Private') : (currentLang === 'ro' ? 'Publica' : 'Public');

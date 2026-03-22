@@ -8,7 +8,7 @@
 <meta name="author" content="Calnic Online">
 <meta property="og:title" content="Genealogie — Calnic Online">
 <meta property="og:type" content="website">
-<meta property="og:url" content="https://angelofsoul.github.io/genealogie-familie.html">
+<meta property="og:url" content="https://angelofsoul.github.io/genealogie-familiile-familie.html">
 <meta property="og:locale" content="ro_RO">
 <title>Arborele Familiei — Calnic Online</title>
 <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,600;0,700;1,400&family=EB+Garamond:ital,wght@0,400;0,500;1,400&display=swap" rel="stylesheet">
@@ -240,13 +240,14 @@ footer .g{color:var(--gold-d);font-style:normal;}
 </header>
 
 <nav>
-  <a class="nav-link" href="index.html">&#8962; <span class="nl" data-ro="Acasa" data-en="Home">Acasa</span></a>
+  <a class="nav-link" href="index.html">&#8962; <span class="nl" data-ro="Acasa" data-en="Homepage">Acasa</span></a>
   <a class="nav-link" href="istorie.html">&#128506; <span class="nl" data-ro="Istoria Satului" data-en="Village History">Istoria Satului</span></a>
-  <a class="nav-link" href="familii.html">&#128106; <span class="nl" data-ro="Familiile" data-en="Families">Familiile</span></a>
+  <a class="nav-link" href="familiile.html">&#128106; <span class="nl" data-ro="Familiile" data-en="Families">Familiile</span></a>
   <a class="nav-link active" href="genealogie.html">&#127803; <span class="nl" data-ro="Genealogie" data-en="Genealogy">Genealogie</span></a>
   <a class="nav-link" href="harta.html">&#127757; <span class="nl" data-ro="Harta" data-en="Map">Harta</span></a>
   <a class="nav-link" href="galerie.html">&#128248; <span class="nl" data-ro="Galerie" data-en="Gallery">Galerie</span></a>
   <a class="nav-link" href="contact.html">✉ <span class="nl" data-ro="Contact" data-en="Contact">Contact</span></a>
+  <a class="nav-link" href="intrebari.html">&#10067; <span class="nl" data-ro="Intrebari" data-en="FAQ">Intrebari</span></a>
   <div class="nav-right">
     <a class="nav-login" href="#">&#128274; <span class="nl" data-ro="Contul Familiei" data-en="Family Login">Contul Familiei</span></a>
   </div>
@@ -668,7 +669,7 @@ document.getElementById('yr').textContent = new Date().getFullYear();
    var params = new URLSearchParams(window.location.search);
    var familyId = params.get('family'); // e.g. 'popescu'
    Then fetch family data from Supabase and populate PEOPLE + tree.
-   Level 1 (genealogie.html) links here as: genealogie-familie.html?family=popescu
+   Level 1 (genealogie.html) links here as: genealogie-familiile-familie.html?family=popescu
 ── END PHASE 2 HOOK ── */
 
 var currentLang = 'ro';
