@@ -256,6 +256,64 @@ footer .g { color:var(--gold-d); font-style:normal; }
   .um-row2 { grid-template-columns:1fr; }
   .lb-meta { grid-template-columns:1fr; }
 }
+
+/* ── MOBILE NAV / HAMBURGER ── */
+.hamburger {
+  display: none;
+  background: none;
+  border: 1px solid var(--b2);
+  color: var(--gold);
+  padding: 6px 10px;
+  cursor: pointer;
+  font-size: 20px;
+  margin-left: auto;
+  border-radius: 2px;
+  transition: all 0.2s;
+}
+.hamburger:hover { border-color: var(--gold-d); background: var(--s2); }
+.nav-mobile-menu {
+  display: none;
+  flex-direction: column;
+  background: var(--s1);
+  border-bottom: 2px solid var(--gold-d);
+  width: 100%;
+}
+.nav-mobile-menu.open { display: flex; }
+.nav-mobile-link {
+  padding: 13px 20px;
+  font-family: 'EB Garamond', serif;
+  font-size: 16px;
+  color: var(--text);
+  border-bottom: 1px solid var(--b1);
+  text-decoration: none;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  transition: all 0.15s;
+}
+.nav-mobile-link:hover { background: var(--s2); color: var(--gold-l); text-decoration: none; }
+.nav-mobile-link.active { color: var(--gold); background: var(--s2); border-left: 3px solid var(--gold); }
+.nav-mobile-login {
+  padding: 13px 20px;
+  font-family: 'EB Garamond', serif;
+  font-size: 16px;
+  color: var(--gold);
+  border-bottom: 1px solid var(--b1);
+  text-decoration: none;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+@media(max-width:740px) {
+  nav { flex-wrap: nowrap; overflow: hidden; }
+  .nav-link { display: none !important; }
+  .nav-right { display: none !important; }
+  .hamburger { display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
+}
+@media(min-width:741px) {
+  .hamburger { display: none !important; }
+  .nav-mobile-menu { display: none !important; }
+}
 </style>
 </head>
 <body>
@@ -325,7 +383,19 @@ footer .g { color:var(--gold-d); font-style:normal; }
   <div class="nav-right">
     <a class="nav-login" href="#">&#128274; <span class="nl" data-ro="Contul Familiei" data-en="Family Login">Contul Familiei</span></a>
   </div>
+  <button class="hamburger" id="hamburgerBtn">&#9776;</button>
 </nav>
+<div class="nav-mobile-menu" id="navMobileMenu">
+  <a class="nav-mobile-link" href="index.html">&#8962; Acasa</a>
+  <a class="nav-mobile-link" href="istorie.html">&#128506; Istoria Satului</a>
+  <a class="nav-mobile-link" href="familiile.html">&#128106; Familiile</a>
+  <a class="nav-mobile-link" href="genealogie.html">&#127803; Genealogie</a>
+  <a class="nav-mobile-link" href="harta.html">&#127757; Harta</a>
+  <a class="nav-mobile-link active" href="galerie.html">&#128248; Galerie</a>
+  <a class="nav-mobile-link" href="contact.html">&#9993; Contact</a>
+  <a class="nav-mobile-link" href="intrebari.html">&#10067; Intrebari</a>
+  <a class="nav-mobile-login" href="#">&#128274; Contul Familiei</a>
+</div>
 
 <div class="main-wrap">
 
@@ -797,6 +867,16 @@ buildCatBar();
 applyFilters();
 buildRecent();
 buildThisWeek();
+
+// Hamburger menu
+var ham = document.getElementById('hamburgerBtn');
+var mobileMenu = document.getElementById('navMobileMenu');
+if (ham && mobileMenu) {
+  ham.addEventListener('click', function() {
+    mobileMenu.classList.toggle('open');
+    ham.textContent = mobileMenu.classList.contains('open') ? '✕' : '☰';
+  });
+}
 </script>
 
 <button class="float-add" id="floatAdd" onclick="openUpload()">+ Adauga fotografie</button>
