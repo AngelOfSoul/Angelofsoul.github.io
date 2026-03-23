@@ -820,35 +820,42 @@ document.addEventListener('supabase:ready', function() {
   var familyId = params.get('family');
   if (!window.supabase || !familyId) return;
   Promise.all([
-    window.supabase.from('families').select('id,name,village').eq('id', familyId).single(),
+    window.supabase.from('families').select('id, name, village').eq('id', familyId).single(),
     window.supabase.from('members').select('*').eq('family_id', familyId).order('birth_year')
   ]).then(function(results) {
     var famRes = results[0];
     var memRes = results[1];
-    if (famRes.error || !famRes.data) return;
-    var fam = famRes.data;
-    var titleEl = document.getElementById('familyTitle');
-    if (titleEl) titleEl.textContent = fam.name;
-    if (memRes.data && memRes.data.length) {
-      var newPeople = {};
-      memRes.data.forEach(function(m) {
-        newPeople[m.id] = {
-          img: null,
-          init: (m.initial || m.name.charAt(0)).toUpperCase(),
-          name: m.name,
-          years: (m.birth_year || '?') + (m.is_deceased ? ' \u2014 ' + (m.death_year || '?') : ' \u2014 viu'),
-          birth: m.birth_year ? String(m.birth_year) : 'Necunoscut',
-          death: m.death_year ? String(m.death_year) : (m.is_deceased ? 'Necunoscut' : '\u2014'),
-          marriage: '',
-          prof: m.role || '',
-          loc: fam.village || 'Calnic',
-          village: true,
-          bio: '',
-          story: ''
-        };
-      });
-      PEOPLE = newPeople;
+    if (famRes.error || !famRes.data) {
+      console.info('[Calnic] Family not found in Supabase — showing demo data');
+      return;
     }
+    var fam = famRes.data;
+    var titleEl = document.querySelector('.page-title');
+    if (titleEl) titleEl.textContent = fam.name;
+    var subtitleEl = document.querySelector('.page-subtitle');
+    if (subtitleEl) subtitleEl.textContent = fam.village || 'Calnic';
+    if (memRes.error || !memRes.data || memRes.data.length === 0) return;
+    var newPeople = {};
+    memRes.data.forEach(function(m) {
+      var birthY = m.birth_year ? String(m.birth_year) : '';
+      var deathY = m.death_year ? String(m.death_year) : (m.is_deceased ? '' : 'viu');
+      var years = birthY && deathY ? birthY + ' \u2014 ' + deathY : birthY || '';
+      newPeople[m.id] = {
+        img: null,
+        init: (m.initial || (m.name ? m.name.charAt(0) : '?')).toUpperCase(),
+        name: m.name || '',
+        years: years,
+        birth: birthY || '\u2014',
+        death: m.is_deceased ? (deathY || '\u2014') : '\u2014',
+        marriage: '\u2014',
+        prof: m.role || '',
+        loc: fam.village || 'Calnic',
+        village: true,
+        bio: '',
+        story: ''
+      };
+    });
+    PEOPLE = newPeople;
   });
 });
 
