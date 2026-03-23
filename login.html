@@ -656,6 +656,15 @@ function showLoggedIn(user) {
 }
 
 /* LOGIN */
+/* Show step 2 panel (shared helper) */
+function showStep2Panel(userId) {
+  pendingUserId = userId;
+  document.querySelector('.tab-bar').style.display = 'none';
+  document.getElementById('panelLogin').style.display = 'none';
+  document.getElementById('panelRegister').style.display = 'none';
+  document.getElementById('panelStep2').style.display = '';
+}
+
 async function doLogin(e) {
   e.preventDefault();
   if (!window.supabase) {
@@ -675,17 +684,11 @@ async function doLogin(e) {
       showMsg('loginMsg', currentLang === 'ro' ? 'Autentificat cu succes! Redirectionare...' : 'Signed in! Redirecting...', 'success');
       var userId = result.data.user && result.data.user.id;
       if (userId) {
-        var famCheck = await window.supabase.from('families').select('id').eq('owner_id', userId).single();
-        if (famCheck.data && famCheck.data.id) {
+        var famCheck = await window.supabase.from('families').select('id').eq('owner_id', userId).maybeSingle();
+        if (!famCheck.error && famCheck.data && famCheck.data.id) {
           setTimeout(function() { window.location.href = 'dashboard.html'; }, 1200);
         } else {
-          pendingUserId = userId;
-          setTimeout(function() {
-            document.getElementById('panelLogin').style.display = 'none';
-            document.getElementById('authBox').style.display = '';
-            document.querySelector('.tab-bar').style.display = 'none';
-            document.getElementById('panelStep2').style.display = '';
-          }, 500);
+          setTimeout(function() { showStep2Panel(userId); }, 500);
         }
       } else {
         setTimeout(function() { window.location.href = 'dashboard.html'; }, 1200);
@@ -750,9 +753,7 @@ async function doRegister(e) {
     showMsg('registerMsg', currentLang === 'ro'
       ? 'Cont creat! Completeaza profilul familiei.'
       : 'Account created! Complete your family profile.', 'success');
-    document.getElementById('panelRegister').style.display = 'none';
-    document.querySelector('.tab-bar').style.display = 'none';
-    document.getElementById('panelStep2').style.display = '';
+    showStep2Panel(pendingUserId);
   } catch(err) {
     showMsg('registerMsg', err.message || 'Eroare necunoscuta', 'error');
   } finally {
@@ -764,6 +765,10 @@ async function doRegister(e) {
 async function doFamilyProfile(e) {
   e.preventDefault();
   if (!window.supabase) { showMsg('step2Msg', 'Supabase nu este configurat.', 'error'); return; }
+  if (!pendingUserId) {
+    showMsg('step2Msg', currentLang === 'ro' ? 'Sesiune invalida. Reincarca pagina.' : 'Invalid session. Please reload the page.', 'error');
+    return;
+  }
   var name   = document.getElementById('s2Name').value.trim();
   var since  = document.getElementById('s2Since').value ? parseInt(document.getElementById('s2Since').value, 10) : null;
   var descRo = document.getElementById('s2DescRo').value.trim();
@@ -783,6 +788,7 @@ async function doFamilyProfile(e) {
     if (insRes.error) {
       showMsg('step2Msg', insRes.error.message, 'error');
     } else {
+      pendingUserId = null;
       showMsg('step2Msg', currentLang === 'ro' ? 'Profil creat cu succes! Redirectionare...' : 'Profile created! Redirecting...', 'success');
       setTimeout(function() { window.location.href = 'dashboard.html'; }, 1200);
     }
