@@ -3,251 +3,265 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<meta name="description" content="Arborele genealogic al familiei — Calnic Online.">
-<meta name="keywords" content="Calnic, genealogie, arbore familial, Alba, Transilvania, Romania">
+<meta name="description" content="Evenimente Calnic — calendarul evenimentelor satului Calnic, Alba, Transilvania. Sarbatori, traditii, intalniri de familie si evenimente culturale.">
+<meta name="keywords" content="evenimente Calnic, sarbatori, traditii, sat Alba, calendar, Romania">
 <meta name="author" content="Calnic Online">
-<meta property="og:title" content="Genealogie — Calnic Online">
+<meta name="robots" content="index, follow">
+<meta property="og:title" content="Evenimente — Calnic Online">
 <meta property="og:type" content="website">
-<meta property="og:url" content="https://angelofsoul.github.io/genealogie-familie.html">
 <meta property="og:locale" content="ro_RO">
-<title>Arborele Familiei — Calnic Online</title>
+<meta property="og:url" content="https://angelofsoul.github.io/evenimente.html">
+<title>Evenimente — Calnic Online</title>
 <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,600;0,700;1,400&family=EB+Garamond:ital,wght@0,400;0,500;1,400&display=swap" rel="stylesheet">
 <style>
-:root{--bg:#0a0a0a;--s1:#111111;--s2:#161616;--s3:#1c1c1c;--b1:#2a2a2a;--b2:#383838;--gold:#d4a84a;--gold-l:#e0b84a;--gold-d:#b08030;--gold-m:#7a5828;--text:#f0e8d0;--muted:#a09070;}
-*{margin:0;padding:0;box-sizing:border-box;}
-body{background:var(--bg);color:var(--text);font-family:'EB Garamond',Georgia,serif;font-size:17px;line-height:1.75;min-height:100vh;}
-a{color:var(--gold);text-decoration:none;}
-a:hover{color:var(--gold-l);}
-.lang-bar{background:#050505;border-bottom:1px solid var(--b1);padding:5px 24px;display:flex;justify-content:flex-end;align-items:center;gap:8px;}
-.lang-label{font-size:11px;letter-spacing:2px;color:#c8a870;}
-.lang-btn{background:none;border:1px solid #585040;color:var(--text);padding:2px 11px;cursor:pointer;font-family:'EB Garamond',serif;font-size:12px;letter-spacing:1px;transition:all 0.2s;border-radius:1px;}
-.lang-btn.active{background:var(--gold-d);border-color:var(--gold-l);color:#050505;font-weight:700;}
-.lang-btn:hover:not(.active){border-color:var(--gold);}
-.site-header{background:#050505;border-bottom:2px solid var(--gold-d);display:flex;align-items:center;justify-content:center;gap:28px;padding:10px 32px;min-height:110px;}
-.banner-img{height:90px;width:auto;display:block;flex-shrink:0;border-radius:2px;border:1px solid var(--b2);}
-.header-divider{width:1px;height:75px;background:linear-gradient(to bottom,transparent,var(--gold-d),transparent);flex-shrink:0;opacity:0.5;}
-.header-motto{display:flex;flex-direction:column;align-items:center;gap:6px;flex-shrink:0;}
-.header-sub{font-family:'EB Garamond',serif;font-style:italic;font-size:15px;color:var(--text);letter-spacing:3px;}
-nav{background:var(--s1);border-bottom:2px solid var(--gold-d);display:flex;flex-wrap:wrap;align-items:stretch;}
-.nav-link{padding:11px 16px;font-family:'EB Garamond',serif;font-size:14px;letter-spacing:0.5px;color:var(--text);cursor:pointer;border-right:1px solid var(--b1);transition:all 0.18s;display:flex;align-items:center;gap:6px;text-decoration:none;}
-.nav-link:hover{background:var(--s2);color:var(--gold-l);}
-.nav-link.active{background:var(--s2);color:var(--gold);border-bottom:2px solid var(--gold);}
-.nav-right{margin-left:auto;display:flex;}
-.nav-login{padding:11px 18px;font-family:'EB Garamond',serif;font-size:14px;color:var(--gold);cursor:pointer;border-left:1px solid var(--b1);transition:all 0.18s;display:flex;align-items:center;gap:6px;text-decoration:none;}
-.nav-login:hover{background:#2a0a0a;color:var(--text);}
-.section-head{display:flex;align-items:center;gap:14px;margin-bottom:20px;}
-.section-head::before{content:'';width:24px;height:1px;background:var(--gold);flex-shrink:0;}
-.section-head::after{content:'';flex:1;height:1px;background:var(--b2);}
-.section-head-title{font-family:'Playfair Display',serif;font-size:12px;font-weight:600;letter-spacing:3px;text-transform:uppercase;color:var(--gold);white-space:nowrap;}
-.scroll-top{position:fixed;bottom:28px;right:24px;background:#111111;border:1px solid #b08030;color:#d4a84a;width:40px;height:40px;border-radius:2px;cursor:pointer;font-size:20px;display:flex;align-items:center;justify-content:center;opacity:0;transition:opacity 0.3s;z-index:9999;text-decoration:none;}
-.scroll-top:hover{background:#b08030;color:#0a0a0a;}
-.scroll-bottom{position:fixed;bottom:74px;right:24px;background:#111111;border:1px solid #383838;color:#a09070;width:40px;height:40px;border-radius:2px;cursor:pointer;font-size:20px;display:flex;align-items:center;justify-content:center;opacity:1;transition:opacity 0.3s;z-index:9999;text-decoration:none;}
-.scroll-bottom:hover{border-color:#b08030;color:#d4a84a;}
-footer{background:#050505;border-top:2px solid var(--gold-d);padding:16px 24px;text-align:center;font-family:'EB Garamond',serif;font-size:13px;color:var(--muted);letter-spacing:1.5px;font-style:italic;}
-footer .g{color:var(--gold-d);font-style:normal;}
-.main-wrap{max-width:1200px;margin:0 auto;padding:32px 20px;}
 
-/* ── TOOLBAR ── */
-.tree-toolbar{background:var(--s1);border:1px solid var(--b1);border-left:3px solid var(--gold-d);padding:12px 18px;display:flex;flex-wrap:wrap;gap:10px;align-items:center;margin-bottom:20px;border-radius:2px;}
-.tree-title{font-family:'Playfair Display',serif;font-size:15px;color:var(--gold);flex:1;letter-spacing:1px;}
-.tree-btn{font-size:12px;padding:5px 14px;background:#1a1208;border:1px solid var(--gold-d);color:var(--gold);font-family:'EB Garamond',serif;border-radius:3px;cursor:pointer;transition:all 0.15s;white-space:nowrap;}
-.tree-btn:hover{background:var(--gold);color:#0a0a0a;}
-.tree-btn.vil{border-color:#2a4a2a;color:#6a9a5a;background:#0d1a0d;}
-.tree-btn.vil:hover{background:#6a9a5a;color:#0a0a0a;}
-.tree-hint{font-size:11px;color:#504030;font-family:'EB Garamond',serif;font-style:italic;}
-
-/* ── LEGEND ── */
-.legend-bar{display:flex;flex-wrap:wrap;gap:14px;margin-bottom:16px;padding:10px 14px;background:var(--s1);border:1px solid var(--b1);border-radius:2px;}
-.leg{display:flex;align-items:center;gap:6px;font-size:11px;color:var(--muted);font-family:'EB Garamond',serif;}
-
-/* ── TREE CANVAS ── */
-.tree-canvas-wrap{background:#0a0a0a;border:1px solid var(--b1);border-radius:4px;overflow:auto;position:relative;cursor:grab;}
-.tree-canvas-wrap:active{cursor:grabbing;}
-.tree-canvas{position:relative;}
-
-/* ── PERSON CARD ── */
-.pc{position:absolute;width:130px;cursor:pointer;transition:transform 0.2s;}
-.pc:hover{transform:translateY(-4px);}
-.pc.deceased .pc-box{opacity:0.72;}
-.pc-box{background:#0f0f0f;border:1px solid #c8983a;border-radius:7px;overflow:hidden;transition:border-color 0.2s,box-shadow 0.2s;}
-.pc:hover .pc-box{border-color:var(--gold);box-shadow:0 4px 16px #d4a84a18;}
-.pc.highlighted .pc-box{border:2px solid var(--gold);box-shadow:0 0 14px #d4a84a22;}
-.pc.private .pc-box{border-color:#3a2a1a;}
-.pc:hover.private .pc-box{border-color:#6a4a2a;}
-/* card header role bar */
-.pc-role{height:22px;display:flex;align-items:center;padding:0 8px;border-bottom:1px solid #1a1208;position:relative;}
-.pc-role-label{font-size:9px;font-family:'EB Garamond',serif;letter-spacing:0.5px;line-height:1;}
-.pc-role.normal{background:#1a1208;}.pc-role.normal .pc-role-label{color:#9a7830;}
-.pc-role.parent{background:#1e1810;}.pc-role.parent .pc-role-label{color:#c8983a;}
-.pc-role.current{background:#1e1810;}.pc-role.current .pc-role-label{color:var(--gold);}
-.pc-role.private-role{background:#1a0a0a;}.pc-role.private-role .pc-role-label{color:#604030;}
-.pc-s-badge{position:absolute;right:5px;top:50%;transform:translateY(-50%);width:13px;height:13px;border-radius:50%;background:#0d1a0d;border:1px solid #2a4a2a;display:flex;align-items:center;justify-content:center;font-size:7px;color:#4a8a4a;font-family:'EB Garamond',serif;}
-/* card photo */
-.pc-photo-wrap{padding:8px 8px 0;display:flex;justify-content:center;}
-.pc-photo{width:54px;height:54px;border-radius:50%;border:1.5px solid #c8983a;overflow:hidden;display:flex;align-items:center;justify-content:center;background:#1a1208;flex-shrink:0;}
-.pc.highlighted .pc-photo{border-color:var(--gold);border-width:2px;}
-.pc.private .pc-photo{border-color:#3a2a1a;}
-.pc-photo img{width:100%;height:100%;object-fit:cover;}
-.pc-init{font-family:'Playfair Display',serif;font-size:22px;color:var(--gold);line-height:1;}
-.pc-lock{font-size:18px;color:#3a2a1a;line-height:1;}
-/* card info */
-.pc-info{padding:6px 8px 7px;text-align:center;}
-.pc-name{font-family:'Playfair Display',serif;font-size:11.5px;color:var(--text);line-height:1.25;margin-bottom:3px;}
-.pc-years{font-size:9px;color:var(--muted);margin-bottom:4px;font-family:'EB Garamond',serif;}
-.pc-loc{font-size:9px;color:#6a9a5a;background:#0d1a0d;border:1px solid #1a3a1a;border-radius:2px;padding:1px 5px;display:inline-block;margin-bottom:2px;}
-.pc-prof{font-size:9px;color:#c8983a;font-family:'EB Garamond',serif;font-style:italic;}
-.pc-priv-note{font-size:8px;color:#504030;font-family:'EB Garamond',serif;margin-top:2px;}
-/* village bar at bottom */
-.pc-vbar{height:4px;background:#1a1208;}
-.pc-vbar.on{background:linear-gradient(to right,#1a3a1a,#2a6a2a,#1a3a1a);}
-
-/* add placeholder */
-.padd{position:absolute;width:130px;cursor:pointer;}
-.padd-box{background:#0a0a0a;border:1.5px dashed #2a1e08;border-radius:7px;display:flex;flex-direction:column;align-items:center;justify-content:center;transition:all 0.15s;}
-.padd:hover .padd-box{border-color:var(--gold);background:#0f0f0f;}
-.padd-plus{font-size:24px;color:#2a1e08;line-height:1;transition:color 0.15s;}
-.padd:hover .padd-plus{color:var(--gold);}
-.padd-lbl{font-size:9px;color:#2a1e08;margin-top:5px;font-family:'EB Garamond',serif;transition:color 0.15s;text-align:center;}
-.padd:hover .padd-lbl{color:var(--muted);}
-
-/* ── DETAIL PANEL ── */
-.dp-overlay{display:none;position:fixed;inset:0;background:#000000f2;z-index:10000;align-items:center;justify-content:center;}
-.dp-overlay.open{display:flex;}
-.dp-box{background:#111;border:1px solid #c8983a;border-radius:12px;width:92%;max-width:500px;max-height:90vh;overflow-y:auto;}
-.dp-top{height:4px;background:linear-gradient(to right,#7a5828,#d4a84a,#c8983a,#d4a84a,#7a5828);}
-.dp-body{padding:20px;}
-.dp-hero{display:flex;gap:16px;margin-bottom:14px;}
-.dp-photo{width:86px;height:86px;border-radius:50%;border:2.5px solid #c8983a;overflow:hidden;flex-shrink:0;display:flex;align-items:center;justify-content:center;background:#1a1208;}
-.dp-photo img{width:100%;height:100%;object-fit:cover;}
-.dp-photo-i{font-family:'Playfair Display',serif;font-size:34px;color:var(--gold);}
-.dp-name{font-family:'Playfair Display',serif;font-size:19px;color:var(--text);margin-bottom:3px;}
-.dp-yrs{font-size:13px;color:var(--muted);font-family:'EB Garamond',serif;}
-.dp-badges{display:flex;flex-wrap:wrap;gap:4px;margin-top:7px;}
-.dba{font-size:10px;padding:2px 8px;border-radius:3px;font-family:'EB Garamond',serif;}
-.dba-loc{background:#0d1a0d;color:#6a9a5a;border:1px solid #1a3a1a;}
-.dba-prof{background:#1a1208;color:#c8983a;border:1px solid #3a2810;}
-.dba-vil{background:#0d200d;color:#4a8a4a;border:1px solid #1a4a1a;}
-.dba-priv{background:#1a0a0a;color:#604030;border:1px solid #3a1a10;}
-.dp-sec{border-top:1px solid #2a2010;padding-top:11px;margin-top:11px;}
-.dp-sec-title{font-size:10px;color:#504030;letter-spacing:2px;text-transform:uppercase;margin-bottom:8px;font-family:'EB Garamond',serif;}
-.dp-row{display:flex;justify-content:space-between;margin-bottom:5px;gap:12px;}
-.dp-lbl{font-size:12px;color:#605040;font-family:'EB Garamond',serif;flex-shrink:0;}
-.dp-val{font-size:12px;color:#b8a888;font-family:'EB Garamond',serif;text-align:right;}
-.dp-bio{font-size:13px;color:#b8a888;line-height:1.65;font-style:italic;font-family:'EB Garamond',serif;}
-.dp-story{font-size:13px;color:var(--muted);line-height:1.65;background:#0d0d0d;border-left:2px solid #c8983a;padding:9px 13px;border-radius:0 4px 4px 0;margin-top:6px;font-family:'EB Garamond',serif;}
-.dp-acts{display:flex;gap:7px;flex-wrap:wrap;margin-top:14px;padding-top:11px;border-top:1px solid #2a2010;}
-.da{flex:1;min-width:70px;padding:8px 6px;font-family:'EB Garamond',serif;font-size:12px;border-radius:4px;cursor:pointer;text-align:center;border:1px solid #3a2810;transition:all 0.15s;}
-.da-g{background:#1a1208;color:var(--gold);}
-.da-g:hover{background:var(--gold);color:#0a0a0a;}
-.da-gr{background:#0d1a0d;color:#6a9a5a;border-color:#1a3a1a;}
-.da-gr:hover{background:#6a9a5a;color:#0a0a0a;}
-.da-m{background:transparent;color:var(--muted);}
-.da-m:hover{border-color:var(--gold-d);color:var(--text);}
-
-/* ── ADD PERSON MODAL ── */
-.am-overlay{display:none;position:fixed;inset:0;background:#000000f2;z-index:10000;align-items:center;justify-content:center;}
-.am-overlay.open{display:flex;}
-.am-box{background:#111;border:1px solid #c8983a;border-radius:12px;width:92%;max-width:460px;padding:24px;max-height:92vh;overflow-y:auto;}
-.am-title{font-family:'Playfair Display',serif;font-size:17px;color:var(--gold);margin-bottom:16px;padding-bottom:10px;border-bottom:1px solid #2a2010;}
-.am-f{margin-bottom:12px;}
-.am-l{font-size:11px;color:var(--muted);display:block;margin-bottom:4px;letter-spacing:0.5px;text-transform:uppercase;font-family:'EB Garamond',serif;}
-.am-i,.am-s,.am-ta{width:100%;background:#1a1208;border:1px solid #3a2810;color:var(--text);font-family:'EB Garamond',serif;font-size:13px;padding:7px 11px;border-radius:3px;outline:none;}
-.am-i:focus,.am-s:focus,.am-ta:focus{border-color:var(--gold-d);}
-.am-i::placeholder,.am-ta::placeholder{color:#504030;}
-.am-ta{min-height:60px;resize:vertical;}
-.am-r2{display:grid;grid-template-columns:1fr 1fr;gap:10px;}
-.am-vis{display:flex;align-items:center;justify-content:space-between;background:#1a1208;border:1px solid #3a2810;border-radius:3px;padding:9px 12px;margin-bottom:12px;}
-.am-vis-l{font-size:13px;color:var(--text);font-family:'EB Garamond',serif;}
-.am-vis-s{font-size:10px;color:#504030;margin-top:2px;font-family:'EB Garamond',serif;}
-.vtg{display:flex;gap:4px;}
-.vt{font-size:10px;padding:3px 10px;border-radius:2px;cursor:pointer;font-family:'EB Garamond',serif;border:1px solid #3a2810;color:var(--muted);background:transparent;transition:all 0.15s;}
-.vt.pub{background:#1a2a1a;color:#6a9a5a;border-color:#2a4a2a;}
-.vt.priv{background:#2a1a0a;color:#c8883a;border-color:#4a2a0a;}
-.vt.vil{background:#0d200d;color:#4a8a4a;border-color:#1a4a1a;}
-.am-acts{display:flex;gap:8px;margin-top:16px;padding-top:12px;border-top:1px solid #2a2010;}
-.am-save{flex:2;padding:9px;background:#1a1208;border:1px solid var(--gold-d);color:var(--gold);font-family:'EB Garamond',serif;font-size:13px;border-radius:4px;cursor:pointer;transition:all 0.15s;}
-.am-save:hover{background:var(--gold);color:#0a0a0a;}
-.am-cancel{flex:1;padding:9px;background:transparent;border:1px solid #3a2810;color:var(--muted);font-family:'EB Garamond',serif;font-size:13px;border-radius:4px;cursor:pointer;}
-.am-cancel:hover{border-color:var(--gold-d);color:var(--text);}
-
-/* village page note */
-.village-note{background:var(--s1);border:1px solid var(--b1);border-left:3px solid #2a4a2a;padding:12px 16px;border-radius:2px;margin-bottom:24px;font-size:13px;color:var(--muted);font-family:'EB Garamond',serif;}
-.village-note strong{color:#6a9a5a;}
-
-@media(max-width:740px){
-  .site-header{padding:10px 16px;gap:14px;min-height:80px;}
-  .banner-img{height:65px;}
-  .header-sub{font-size:12px;letter-spacing:1.5px;}
-  .nav-link .nl{display:none;}
-  .nav-login .nl{display:none;}
-  .am-r2{grid-template-columns:1fr;}
+:root {
+  --bg:      #0a0a0a;
+  --s1:      #111111;
+  --s2:      #161616;
+  --s3:      #1c1c1c;
+  --b1:      #2a2a2a;
+  --b2:      #383838;
+  --gold:    #d4a84a;
+  --gold-l:  #e0b84a;
+  --gold-d:  #b08030;
+  --gold-m:  #7a5828;
+  --text:    #f0e8d0;
+  --muted:   #a09070;
 }
 
-/* ── MOBILE NAV / HAMBURGER ── */
-.hamburger {
-  display: none;
-  background: none;
-  border: 1px solid var(--b2);
-  color: var(--gold);
-  padding: 6px 10px;
-  cursor: pointer;
-  font-size: 20px;
-  margin-left: auto;
-  border-radius: 2px;
-  transition: all 0.2s;
-}
-.hamburger:hover { border-color: var(--gold-d); background: var(--s2); }
-.nav-mobile-menu {
-  display: none;
-  flex-direction: column;
-  background: var(--s1);
-  border-bottom: 2px solid var(--gold-d);
-  width: 100%;
-}
-.nav-mobile-menu.open { display: flex; }
-.nav-mobile-link {
-  padding: 13px 20px;
-  font-family: 'EB Garamond', serif;
-  font-size: 16px;
-  color: var(--text);
-  border-bottom: 1px solid var(--b1);
-  text-decoration: none;
-  display: flex;
-  align-items: center;
-  gap: 10px;
-  transition: all 0.15s;
-}
-.nav-mobile-link:hover { background: var(--s2); color: var(--gold-l); text-decoration: none; }
-.nav-mobile-link.active { color: var(--gold); background: var(--s2); border-left: 3px solid var(--gold); }
-.nav-mobile-login {
-  padding: 13px 20px;
-  font-family: 'EB Garamond', serif;
-  font-size: 16px;
-  color: var(--gold);
-  border-bottom: 1px solid var(--b1);
-  text-decoration: none;
-  display: flex;
-  align-items: center;
-  gap: 10px;
-}
+* { margin:0; padding:0; box-sizing:border-box; }
+body { background:var(--bg); color:var(--text); font-family:'EB Garamond',Georgia,serif; font-size:17px; line-height:1.75; min-height:100vh; }
+a { color:var(--gold); text-decoration:none; }
+a:hover { color:var(--gold-l); }
+
+.lang-bar { background:#050505; border-bottom:1px solid var(--b1); padding:5px 24px; display:flex; justify-content:flex-end; align-items:center; gap:8px; }
+.lang-label { font-size:11px; letter-spacing:2px; color:#c8a870; }
+.lang-btn { background:none; border:1px solid #585040; color:var(--text); padding:2px 11px; cursor:pointer; font-family:'EB Garamond',serif; font-size:12px; letter-spacing:1px; transition:all 0.2s; border-radius:1px; }
+.lang-btn.active { background:var(--gold-d); border-color:var(--gold-l); color:#050505; font-weight:700; }
+.lang-btn:hover:not(.active) { border-color:var(--gold); }
+
+.site-header { background:#050505; border-bottom:2px solid var(--gold-d); display:flex; align-items:center; justify-content:center; gap:28px; padding:10px 32px; min-height:110px; }
+.banner-img { height:90px; width:auto; display:block; flex-shrink:0; border-radius:2px; border:1px solid var(--b2); }
+.header-divider { width:1px; height:75px; background:linear-gradient(to bottom,transparent,var(--gold-d),transparent); flex-shrink:0; opacity:0.5; }
+.header-motto { display:flex; flex-direction:column; align-items:center; gap:6px; flex-shrink:0; }
+.header-sub { font-family:'EB Garamond',serif; font-style:italic; font-size:15px; color:var(--text); letter-spacing:3px; }
+
+nav { background:var(--s1); border-bottom:2px solid var(--gold-d); display:flex; flex-wrap:wrap; align-items:stretch; }
+.nav-link { padding:11px 16px; font-family:'EB Garamond',serif; font-size:14px; letter-spacing:0.5px; color:var(--text); cursor:pointer; border-right:1px solid var(--b1); transition:all 0.18s; display:flex; align-items:center; gap:6px; text-decoration:none; }
+.nav-link:hover { background:var(--s2); color:var(--gold-l); text-decoration:none; }
+.nav-link.active { background:var(--s2); color:var(--gold); border-bottom:2px solid var(--gold); }
+.nav-right { margin-left:auto; display:flex; }
+.nav-login { padding:11px 18px; font-family:'EB Garamond',serif; font-size:14px; color:var(--gold); cursor:pointer; border-left:1px solid var(--b1); transition:all 0.18s; display:flex; align-items:center; gap:6px; text-decoration:none; }
+.nav-login:hover { background:#2a0a0a; color:var(--text); text-decoration:none; }
+
+.scroll-top { position:fixed; bottom:28px; right:24px; background:#111111; border:1px solid #b08030; color:#d4a84a; width:40px; height:40px; border-radius:2px; cursor:pointer; font-size:20px; display:flex; align-items:center; justify-content:center; opacity:0; transition:opacity 0.3s; z-index:9999; text-decoration:none; }
+.scroll-top:hover { background:#b08030; color:#0a0a0a; }
+.scroll-bottom { position:fixed; bottom:74px; right:24px; background:#111111; border:1px solid #383838; color:#a09070; width:40px; height:40px; border-radius:2px; cursor:pointer; font-size:20px; display:flex; align-items:center; justify-content:center; opacity:1; transition:opacity 0.3s; z-index:9999; text-decoration:none; }
+.scroll-bottom:hover { border-color:#b08030; color:#d4a84a; }
+
+footer { background:#050505; border-top:2px solid var(--gold-d); padding:16px 24px; text-align:center; font-family:'EB Garamond',serif; font-size:13px; color:var(--muted); letter-spacing:1.5px; font-style:italic; }
+footer .g { color:var(--gold-d); font-style:normal; }
+
+.section-head { display:flex; align-items:center; gap:14px; margin-bottom:20px; margin-top:40px; }
+.section-head:first-child { margin-top:0; }
+.section-head::before { content:''; width:24px; height:1px; background:var(--gold); flex-shrink:0; }
+.section-head::after  { content:''; flex:1; height:1px; background:var(--b2); }
+.section-head-title { font-family:'Playfair Display',serif; font-size:12px; font-weight:600; letter-spacing:3px; text-transform:uppercase; color:var(--gold); white-space:nowrap; }
+
+/* Hamburger */
+.hamburger { display:none; background:none; border:1px solid var(--b2); color:var(--gold); padding:6px 10px; cursor:pointer; font-size:20px; margin-left:auto; border-radius:2px; transition:all 0.2s; }
+.hamburger:hover { border-color:var(--gold-d); background:var(--s2); }
+.nav-mobile-menu { display:none; flex-direction:column; background:var(--s1); border-bottom:2px solid var(--gold-d); width:100%; }
+.nav-mobile-menu.open { display:flex; }
+.nav-mobile-link { padding:13px 20px; font-family:'EB Garamond',serif; font-size:16px; color:var(--text); border-bottom:1px solid var(--b1); text-decoration:none; display:flex; align-items:center; gap:10px; transition:all 0.15s; }
+.nav-mobile-link:hover { background:var(--s2); color:var(--gold-l); text-decoration:none; }
+.nav-mobile-link.active { color:var(--gold); background:var(--s2); border-left:3px solid var(--gold); }
+.nav-mobile-login { padding:13px 20px; font-family:'EB Garamond',serif; font-size:16px; color:var(--gold); border-bottom:1px solid var(--b1); text-decoration:none; display:flex; align-items:center; gap:10px; }
+
 @media(max-width:740px) {
-  nav { flex-wrap: nowrap; overflow: hidden; }
-  .nav-link { display: none !important; }
-  .nav-right { display: none !important; }
-  .hamburger { display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
+  .site-header { padding:10px 16px; gap:14px; min-height:80px; }
+  .banner-img { height:65px; }
+  .header-sub { font-size:12px; letter-spacing:1.5px; }
+  nav { flex-wrap:nowrap; overflow:hidden; }
+  .nav-link { display:none !important; }
+  .nav-right { display:none !important; }
+  .hamburger { display:flex; align-items:center; justify-content:center; flex-shrink:0; }
 }
 @media(min-width:741px) {
-  .hamburger { display: none !important; }
-  .nav-mobile-menu { display: none !important; }
+  .hamburger { display:none !important; }
+  .nav-mobile-menu { display:none !important; }
+}
+
+/* ===== PAGE STYLES ===== */
+
+.page-hero {
+  background:linear-gradient(to bottom, #050505, #0a0a0a);
+  border-bottom:1px solid var(--b1);
+  padding:52px 24px 44px;
+  text-align:center;
+}
+.page-hero-title {
+  font-family:'Playfair Display',serif;
+  font-size:40px;
+  font-weight:600;
+  color:var(--gold-l);
+  letter-spacing:2px;
+  margin-bottom:12px;
+}
+.page-hero-sub {
+  font-size:17px;
+  color:var(--muted);
+  font-style:italic;
+  letter-spacing:1px;
+  max-width:600px;
+  margin:0 auto;
+}
+.page-hero-orn { color:var(--gold-m); letter-spacing:8px; font-size:12px; margin-top:16px; }
+
+.main-wrap { max-width:1000px; margin:0 auto; padding:40px 24px 60px; }
+
+/* Filter chips */
+.filter-bar { display:flex; flex-wrap:wrap; gap:8px; margin-bottom:32px; align-items:center; }
+.filter-chip {
+  background:var(--s1);
+  border:1px solid var(--b2);
+  color:var(--muted);
+  font-family:'EB Garamond',serif;
+  font-size:13px;
+  letter-spacing:0.5px;
+  padding:5px 16px;
+  border-radius:2px;
+  cursor:pointer;
+  transition:all 0.18s;
+}
+.filter-chip:hover { border-color:var(--gold-d); color:var(--text); }
+.filter-chip.active { background:var(--gold-d); border-color:var(--gold); color:#050505; font-weight:700; }
+.filter-label { font-size:12px; color:var(--muted); letter-spacing:2px; font-style:italic; margin-right:4px; }
+
+/* Upcoming banner */
+.upcoming-banner {
+  background:var(--s1);
+  border:1px solid var(--b1);
+  border-top:3px solid var(--gold);
+  border-radius:2px;
+  padding:22px 24px;
+  margin-bottom:32px;
+  display:flex;
+  align-items:center;
+  gap:20px;
+}
+.ub-date-box {
+  background:#050505;
+  border:1px solid var(--gold-d);
+  border-radius:2px;
+  width:60px;
+  min-width:60px;
+  text-align:center;
+  padding:10px 6px;
+}
+.ub-day { font-family:'Playfair Display',serif; font-size:26px; color:var(--gold); line-height:1; }
+.ub-month { font-size:11px; letter-spacing:2px; text-transform:uppercase; color:var(--muted); margin-top:3px; }
+.ub-body { flex:1; }
+.ub-cat { font-size:11px; letter-spacing:2px; text-transform:uppercase; color:var(--gold-d); margin-bottom:4px; }
+.ub-title { font-family:'Playfair Display',serif; font-size:18px; color:var(--gold-l); margin-bottom:4px; }
+.ub-desc { font-size:14px; color:var(--muted); font-style:italic; }
+.ub-badge { background:var(--gold-d); color:#050505; font-size:10px; letter-spacing:2px; padding:2px 8px; border-radius:1px; font-weight:700; align-self:flex-start; flex-shrink:0; }
+
+/* Events grid */
+.events-grid { display:grid; grid-template-columns:repeat(2,1fr); gap:20px; }
+.event-card {
+  background:var(--s1);
+  border:1px solid var(--b1);
+  border-radius:2px;
+  padding:20px;
+  transition:all 0.2s;
+  position:relative;
+}
+.event-card:hover { border-color:var(--gold-d); background:var(--s2); }
+.event-card.past { opacity:0.65; }
+.ec-date { display:flex; align-items:center; gap:12px; margin-bottom:14px; }
+.ec-day { font-family:'Playfair Display',serif; font-size:22px; color:var(--gold); line-height:1; min-width:30px; text-align:center; }
+.ec-month-year { font-size:12px; color:var(--muted); }
+.ec-month { display:block; letter-spacing:1.5px; text-transform:uppercase; }
+.ec-year { display:block; font-style:italic; }
+.ec-divider { width:1px; height:38px; background:var(--b2); flex-shrink:0; }
+.ec-meta { flex:1; }
+.ec-cat { font-size:10px; letter-spacing:2.5px; text-transform:uppercase; color:var(--gold-d); margin-bottom:3px; }
+.ec-title { font-family:'Playfair Display',serif; font-size:16px; color:var(--text); line-height:1.3; }
+.ec-body { font-size:14px; color:var(--muted); line-height:1.7; border-top:1px solid var(--s3); padding-top:12px; }
+.ec-footer { display:flex; align-items:center; gap:10px; margin-top:12px; padding-top:10px; border-top:1px solid var(--s3); }
+.ec-tag { font-size:11px; letter-spacing:1px; padding:2px 8px; border:1px solid var(--b2); color:var(--muted); border-radius:1px; }
+.ec-past-label { font-size:10px; letter-spacing:2px; color:var(--b2); font-style:italic; margin-left:auto; }
+
+/* Suggestion form */
+.suggest-box {
+  background:var(--s1);
+  border:1px solid var(--b1);
+  border-top:3px solid var(--gold-d);
+  border-radius:2px;
+  padding:28px 28px 24px;
+  margin-top:8px;
+}
+.suggest-title { font-family:'Playfair Display',serif; font-size:20px; color:var(--gold); margin-bottom:6px; }
+.suggest-sub { font-size:14px; color:var(--muted); font-style:italic; margin-bottom:24px; }
+.form-row { display:grid; grid-template-columns:1fr 1fr; gap:16px; margin-bottom:16px; }
+.form-group { display:flex; flex-direction:column; gap:6px; }
+.form-label { font-size:12px; letter-spacing:1.5px; text-transform:uppercase; color:var(--muted); }
+.form-input { background:var(--s2); border:1px solid var(--b2); color:var(--text); font-family:'EB Garamond',serif; font-size:15px; padding:10px 14px; border-radius:2px; transition:border-color 0.2s; }
+.form-input:focus { outline:none; border-color:var(--gold-d); }
+.form-input::placeholder { color:var(--b2); }
+.form-select { background:var(--s2); border:1px solid var(--b2); color:var(--text); font-family:'EB Garamond',serif; font-size:15px; padding:10px 14px; border-radius:2px; cursor:pointer; }
+.form-select:focus { outline:none; border-color:var(--gold-d); }
+.form-textarea { background:var(--s2); border:1px solid var(--b2); color:var(--text); font-family:'EB Garamond',serif; font-size:15px; padding:10px 14px; border-radius:2px; resize:vertical; min-height:100px; transition:border-color 0.2s; width:100%; }
+.form-textarea:focus { outline:none; border-color:var(--gold-d); }
+.form-submit {
+  background:var(--gold-d);
+  border:1px solid var(--gold);
+  color:#050505;
+  font-family:'Playfair Display',serif;
+  font-size:14px;
+  font-weight:700;
+  letter-spacing:2px;
+  text-transform:uppercase;
+  padding:12px 32px;
+  cursor:pointer;
+  border-radius:2px;
+  transition:all 0.2s;
+  margin-top:8px;
+}
+.form-submit:hover { background:var(--gold); }
+.form-note { font-size:12px; color:var(--muted); font-style:italic; margin-top:12px; }
+.form-success { display:none; background:#0a1a0a; border:1px solid #2a5a2a; border-radius:2px; padding:16px 20px; color:#6ab06a; font-size:14px; margin-top:12px; }
+
+/* Empty state */
+.empty-state { text-align:center; padding:48px 20px; color:var(--muted); font-style:italic; }
+.empty-state-icon { font-size:32px; margin-bottom:12px; }
+.empty-state-text { font-size:15px; }
+
+/* No events match filter */
+.no-results { display:none; }
+
+@media(max-width:700px) {
+  .events-grid { grid-template-columns:1fr; }
+  .form-row { grid-template-columns:1fr; }
+  .page-hero-title { font-size:28px; }
+  .upcoming-banner { flex-direction:column; align-items:flex-start; gap:12px; }
+  .ub-badge { align-self:auto; }
+}
+@media(max-width:480px) {
+  .main-wrap { padding:24px 14px 40px; }
+  .suggest-box { padding:20px 16px; }
+  .filter-bar { gap:6px; }
 }
 </style>
 </head>
 <body>
 
 <div class="lang-bar">
-  <span class="lang-label">LIMB&#258; / LANGUAGE</span>
-  <button class="lang-btn active" onclick="setLang('ro')" id="btn-ro">RO</button>
-  <button class="lang-btn" onclick="setLang('en')" id="btn-en">EN</button>
+  <span class="lang-label">LIMBA / LANGUAGE</span>
+  <button class="lang-btn active" id="btn-ro">RO</button>
+  <button class="lang-btn" id="btn-en">EN</button>
 </div>
 
 <header class="site-header">
@@ -301,11 +315,11 @@ footer .g{color:var(--gold-d);font-style:normal;}
   <a class="nav-link" href="index.html">&#8962; <span class="nl" data-ro="Acasa" data-en="Homepage">Acasa</span></a>
   <a class="nav-link" href="istorie.html">&#128506; <span class="nl" data-ro="Istoria Satului" data-en="Village History">Istoria Satului</span></a>
   <a class="nav-link" href="familiile.html">&#128106; <span class="nl" data-ro="Familiile" data-en="Families">Familiile</span></a>
-  <a class="nav-link active" href="genealogie.html">&#127803; <span class="nl" data-ro="Genealogie" data-en="Genealogy">Genealogie</span></a>
+  <a class="nav-link" href="genealogie.html">&#127803; <span class="nl" data-ro="Genealogie" data-en="Genealogy">Genealogie</span></a>
   <a class="nav-link" href="harta.html">&#127757; <span class="nl" data-ro="Harta" data-en="Map">Harta</span></a>
   <a class="nav-link" href="galerie.html">&#128248; <span class="nl" data-ro="Galerie" data-en="Gallery">Galerie</span></a>
-  <a class="nav-link" href="evenimente.html">&#128197; <span class="nl" data-ro="Evenimente" data-en="Events">Evenimente</span></a>
-  <a class="nav-link" href="contact.html">✉ <span class="nl" data-ro="Contact" data-en="Contact">Contact</span></a>
+  <a class="nav-link active" href="evenimente.html">&#128197; <span class="nl" data-ro="Evenimente" data-en="Events">Evenimente</span></a>
+  <a class="nav-link" href="contact.html">&#9993; <span class="nl" data-ro="Contact" data-en="Contact">Contact</span></a>
   <a class="nav-link" href="intrebari.html">&#10067; <span class="nl" data-ro="Intrebari" data-en="FAQ">Intrebari</span></a>
   <div class="nav-right">
     <a class="nav-login" href="#">&#128274; <span class="nl" data-ro="Contul Familiei" data-en="Family Login">Contul Familiei</span></a>
@@ -316,313 +330,118 @@ footer .g{color:var(--gold-d);font-style:normal;}
   <a class="nav-mobile-link" href="index.html">&#8962; Acasa</a>
   <a class="nav-mobile-link" href="istorie.html">&#128506; Istoria Satului</a>
   <a class="nav-mobile-link" href="familiile.html">&#128106; Familiile</a>
-  <a class="nav-mobile-link active" href="genealogie.html">&#127803; Genealogie</a>
+  <a class="nav-mobile-link" href="genealogie.html">&#127803; Genealogie</a>
   <a class="nav-mobile-link" href="harta.html">&#127757; Harta</a>
   <a class="nav-mobile-link" href="galerie.html">&#128248; Galerie</a>
-  <a class="nav-mobile-link" href="evenimente.html">&#128197; Evenimente</a>
+  <a class="nav-mobile-link active" href="evenimente.html">&#128197; Evenimente</a>
   <a class="nav-mobile-link" href="contact.html">&#9993; Contact</a>
   <a class="nav-mobile-link" href="intrebari.html">&#10067; Intrebari</a>
   <a class="nav-mobile-login" href="#">&#128274; Contul Familiei</a>
 </div>
 
-<div class="main-wrap">
-
-  <div class="section-head">
-    <span class="section-head-title" data-ro="Genealogie" data-en="Genealogy">Genealogie</span>
-  </div>
-
-  <div class="village-note">
-    <strong data-ro="Arborele Satului" data-en="Village Tree">Arborele Satului</strong>
-    <span data-ro=" — familiile isi pot conecta arborele propriu la arborele mare al satului. Persoanele marcate cu " data-en=" — families can connect their tree to the village tree. Persons marked with "> — familiile isi pot conecta arborele propriu la arborele mare al satului. Persoanele marcate cu </span>
-    <strong style="color:#4a8a4a;">S</strong>
-    <span data-ro=" sunt vizibile in arborele satului." data-en=" are visible in the village tree."> sunt vizibile in arborele satului.</span>
-  </div>
-
-  <!-- LEGEND -->
-  <div class="legend-bar">
-    <div class="leg"><svg width="30" height="4"><line x1="0" y1="2" x2="30" y2="2" stroke="#d4a84a" stroke-width="3"/></svg><span data-ro="Casatorie" data-en="Marriage">Casatorie</span></div>
-    <div class="leg"><svg width="30" height="4"><line x1="0" y1="2" x2="30" y2="2" stroke="#c8983a" stroke-width="1.5"/></svg><span data-ro="Parinte-Copil" data-en="Parent-Child">Parinte-Copil</span></div>
-    <div class="leg"><svg width="30" height="4"><line x1="0" y1="2" x2="30" y2="2" stroke="#3a5878" stroke-width="1.5" stroke-dasharray="4 3"/></svg><span data-ro="Linie privata" data-en="Private line">Linie privata</span></div>
-    <div class="leg">
-      <svg width="14" height="14"><circle cx="7" cy="7" r="6" fill="#0d1a0d" stroke="#2a4a2a" stroke-width="1"/><text x="7" y="10" text-anchor="middle" font-size="6" fill="#4a8a4a" font-family="EB Garamond">S</text></svg>
-      <span data-ro="Arborele Satului" data-en="Village Tree">Arborele Satului</span>
-    </div>
-    <div class="leg"><span style="font-size:10px;color:#9a7830;">&#8593; BUNIC / TATA</span> <span data-ro="= rol in familie" data-en="= role in family">= rol in familie</span></div>
-    <div class="leg"><svg width="14" height="14"><text x="7" y="11" text-anchor="middle" font-size="11" fill="#d4a84a">&#9825;</text></svg><span data-ro="= cuplu" data-en="= couple">= cuplu</span></div>
-  </div>
-
-  <!-- TOOLBAR -->
-  <div style="margin-bottom:12px;">
-    <a href="genealogie.html" style="display:inline-flex;align-items:center;gap:6px;font-family:'EB Garamond',serif;font-size:13px;color:var(--muted);border:1px solid var(--b1);padding:5px 14px;border-radius:2px;transition:all 0.2s;background:var(--s1);" onmouseover="this.style.color='var(--gold)';this.style.borderColor='var(--gold-d)'" onmouseout="this.style.color='var(--muted)';this.style.borderColor='var(--b1)'">&#8592; <span data-ro="Toti arborii" data-en="All trees">Toti arborii</span></a>
-  </div>
-  <div class="tree-toolbar">
-    <div class="tree-title" id="tree-title">&#127807; <span data-ro="Arborele Familiei Popescu" data-en="Popescu Family Tree">Arborele Familiei Popescu</span></div>
-    <button class="tree-btn" onclick="openAdd()" data-ro="+ Adauga persoana" data-en="+ Add person">+ Adauga persoana</button>
-    <button class="tree-btn vil" data-ro="&#127807; Conecteaza la Sat" data-en="&#127807; Connect to Village">&#127807; Conecteaza la Sat</button>
-    <button class="tree-btn" onclick="exportTree()" data-ro="&#8659; Export" data-en="&#8659; Export">&#8659; Export</button>
-    <span class="tree-hint" data-ro="Scroll pentru zoom · Trage pentru navigare" data-en="Scroll to zoom · Drag to navigate">Scroll pentru zoom · Trage pentru navigare</span>
-  </div>
-
-  <!-- TREE CANVAS -->
-  <div class="tree-canvas-wrap" id="treeWrap" style="height:620px;">
-    <div class="tree-canvas" id="treeCanvas" style="width:1200px;height:600px;">
-
-      <!-- SVG CONNECTORS — drawn first, cards drawn on top -->
-      <svg style="position:absolute;top:0;left:0;width:1200px;height:600px;pointer-events:none;" id="connSvg">
-
-        <!--
-        CARD: 130px wide, 80px tall
-        GAP between cards: 20px (horizontal), 100px (vertical between gens)
-        Card center x = left + 65
-
-        GEN I (y=30, bottom=110, center-y=70):
-          Pair1: Ion(x=40,cx=105) Maria(x=180,cx=245) marriage-mid-x=162 marriage-y=70
-          Pair2: VasM(x=500,cx=565) AnaI(x=640,cx=705) marriage-mid-x=605 priv marriage-y=70
-
-        GEN II (y=210, bottom=290, center-y=250):
-          Vasile: centered under Pair1-mid(162) → x=97, cx=162
-          Elena:  centered under Pair2-mid(605) → x=540, cx=605
-          marriage-mid-x = (162+65+540)/2 ... 
-          Vasile right edge = 97+130 = 227
-          Elena left edge = 540
-          marriage-mid-x = (227+540)/2 = 383, marriage-y=250
-
-        Routing bar Gen1->Gen2: y=160
-        Routing bar Gen2->Gen3: y=390
-
-        GEN III (y=430):
-          4 items total width = 4*130+3*20 = 580
-          centered under 383: start = 383-290 = 93
-          Petre:    x=93,  cx=158
-          Ana:      x=243, cx=308
-          Gheorghe: x=393, cx=458
-          Add:      x=543, cx=608
-          bar from 158 to 608, midpoint = (158+608)/2 = 383 ✓
-          badge center x=383
-        -->
-
-        <!-- ── GEN I MARRIAGES ── -->
-        <!-- Ion right(170,70) to Maria left(180,70) gap=10, mid=175 -->
-        <line x1="170" y1="70" x2="180" y2="70" stroke="#d4a84a" stroke-width="3"/>
-        <circle cx="175" cy="70" r="9" fill="#1a1208" stroke="#d4a84a" stroke-width="1.5"/>
-        <text x="175" y="74" text-anchor="middle" font-size="11" fill="#d4a84a" font-family="EB Garamond">&#9825;</text>
-
-        <!-- VasM right(630,70) to AnaI left(640,70) private dashed -->
-        <line x1="630" y1="70" x2="640" y2="70" stroke="#3a5878" stroke-width="2" stroke-dasharray="4 3"/>
-        <circle cx="635" cy="70" r="7" fill="#0a0d1a" stroke="#3a5878" stroke-width="1"/>
-        <text x="635" y="74" text-anchor="middle" font-size="9" fill="#3a5878" font-family="EB Garamond">&#9825;</text>
-
-        <!-- ── GEN I → GEN II ── -->
-        <!-- Pair1 mid(175) bottom of marriage bar y=70 → down to routing y=160 → to Vasile top cx(162,210) -->
-        <!-- From marriage mid going down then to Vasile top center -->
-        <path d="M175 79 L175 160 L162 160 L162 210" stroke="#c8983a" stroke-width="1.5" fill="none"/>
-
-        <!-- Pair2 mid(635) → routing y=160 → Elena top cx(605,210) private dashed -->
-        <path d="M635 77 L635 160 L605 160 L605 210" stroke="#3a5878" stroke-width="1.5" fill="none" stroke-dasharray="5 3" opacity="0.7"/>
-
-        <!-- ── GEN II MARRIAGE ── -->
-        <!-- Vasile right(227,250) to Elena left(540,250): long gold line, mid=383 -->
-        <line x1="227" y1="250" x2="540" y2="250" stroke="#d4a84a" stroke-width="3"/>
-        <circle cx="383" cy="250" r="9" fill="#1a1208" stroke="#d4a84a" stroke-width="1.5"/>
-        <text x="383" y="254" text-anchor="middle" font-size="11" fill="#d4a84a" font-family="EB Garamond">&#9825;</text>
-
-        <!-- ── GEN II → GEN III ── -->
-        <!-- Marriage mid(383,250) bottom(383,290) → routing y=390 -->
-        <line x1="383" y1="259" x2="383" y2="390" stroke="#c8983a" stroke-width="1.5"/>
-
-        <!-- Horizontal bar: Petre cx(158) to Add cx(608), y=390 -->
-        <line x1="158" y1="390" x2="608" y2="390" stroke="#c8983a" stroke-width="1.2"/>
-
-        <!-- Vertical drops to each child top y=430 -->
-        <line x1="158" y1="390" x2="158" y2="430" stroke="#c8983a" stroke-width="1.2"/>
-        <line x1="308" y1="390" x2="308" y2="430" stroke="#c8983a" stroke-width="1.2"/>
-        <line x1="458" y1="390" x2="458" y2="430" stroke="#c8983a" stroke-width="1.2"/>
-        <line x1="608" y1="390" x2="608" y2="430" stroke="#c8983a" stroke-width="0.8" stroke-dasharray="3 3" opacity="0.35"/>
-
-        <!-- "3 copii" badge centered at x=383 (midpoint of 158..608 = 766/2 = 383) -->
-        <rect x="358" y="381" width="50" height="18" rx="4" fill="#0f0f0f" stroke="#c8983a" stroke-width="0.8"/>
-        <text x="383" y="394" text-anchor="middle" font-size="9" fill="#c8983a" font-family="EB Garamond">3 copii</text>
-
-      </svg>
-
-      <!-- ══ GEN I CARDS ══ -->
-
-      <!-- Ion Popescu: x=40 cx=105 -->
-      <div class="pc deceased" style="left:40px;top:30px;" onclick="openDetail('ion')">
-        <div class="pc-box">
-          <div class="pc-role normal">
-            <span class="pc-role-label">&#8593; BUNIC</span>
-            <span class="pc-s-badge">S</span>
-          </div>
-          <div class="pc-photo-wrap"><div class="pc-photo"><img src="https://i.pravatar.cc/54?img=70" alt="Ion" loading="lazy"/></div></div>
-          <div class="pc-info">
-            <div class="pc-name">Ion Popescu</div>
-            <div class="pc-years">1890 &mdash; 1965</div>
-            <span class="pc-loc">Calnic</span>
-            <div class="pc-prof">Agricultor</div>
-          </div>
-          <div class="pc-vbar on"></div>
-        </div>
-      </div>
-
-      <!-- Maria Rus: x=180 cx=245 -->
-      <div class="pc deceased" style="left:180px;top:30px;" onclick="openDetail('maria')">
-        <div class="pc-box">
-          <div class="pc-role normal">
-            <span class="pc-role-label">&#8593; BUNICA</span>
-            <span class="pc-s-badge">S</span>
-          </div>
-          <div class="pc-photo-wrap"><div class="pc-photo"><img src="https://i.pravatar.cc/54?img=47" alt="Maria" loading="lazy"/></div></div>
-          <div class="pc-info">
-            <div class="pc-name">Maria Rus</div>
-            <div class="pc-years">1895 &mdash; 1970</div>
-            <span class="pc-loc">Deal</span>
-            <div class="pc-prof">Tesatoare</div>
-          </div>
-          <div class="pc-vbar on"></div>
-        </div>
-      </div>
-
-      <!-- Vasile Muresan private: x=500 cx=565 -->
-      <div class="pc deceased private" style="left:500px;top:30px;" onclick="openDetail('priv1')">
-        <div class="pc-box">
-          <div class="pc-role private-role">
-            <span class="pc-role-label">&#8811; BUNIC &middot; PRIVAT</span>
-          </div>
-          <div class="pc-photo-wrap"><div class="pc-photo"><span class="pc-lock">&#128274;</span></div></div>
-          <div class="pc-info">
-            <div class="pc-name">Vasile Muresan</div>
-            <div class="pc-years">1888 &mdash; 1960</div>
-            <span class="pc-loc">Deal</span>
-            <div class="pc-priv-note">&#128274; Detalii private</div>
-          </div>
-          <div class="pc-vbar"></div>
-        </div>
-      </div>
-
-      <!-- Ana Ionescu private: x=640 cx=705 -->
-      <div class="pc deceased private" style="left:640px;top:30px;" onclick="openDetail('priv2')">
-        <div class="pc-box">
-          <div class="pc-role private-role">
-            <span class="pc-role-label">&#8811; BUNICA &middot; PRIVAT</span>
-          </div>
-          <div class="pc-photo-wrap"><div class="pc-photo"><span class="pc-lock">&#128274;</span></div></div>
-          <div class="pc-info">
-            <div class="pc-name">Ana Ionescu</div>
-            <div class="pc-years">1892 &mdash; 1968</div>
-            <span class="pc-loc">Calnic</span>
-            <div class="pc-priv-note">&#128274; Detalii private</div>
-          </div>
-          <div class="pc-vbar"></div>
-        </div>
-      </div>
-
-      <!-- ══ GEN II CARDS ══ -->
-
-      <!-- Vasile Popescu: x=97 cx=162 -->
-      <div class="pc deceased highlighted" style="left:97px;top:210px;" onclick="openDetail('vasile')">
-        <div class="pc-box">
-          <div class="pc-role parent">
-            <span class="pc-role-label">&#8593; TATA</span>
-            <span class="pc-s-badge">S</span>
-          </div>
-          <div class="pc-photo-wrap"><div class="pc-photo"><img src="https://i.pravatar.cc/54?img=68" alt="Vasile" loading="lazy"/></div></div>
-          <div class="pc-info">
-            <div class="pc-name">Vasile Popescu</div>
-            <div class="pc-years">1920 &mdash; 1995</div>
-            <span class="pc-loc">Calnic</span>
-            <div class="pc-prof">Tamplar</div>
-          </div>
-          <div class="pc-vbar on"></div>
-        </div>
-      </div>
-
-      <!-- Elena Muresan: x=540 cx=605 -->
-      <div class="pc highlighted" style="left:540px;top:210px;" onclick="openDetail('elena')">
-        <div class="pc-box">
-          <div class="pc-role parent">
-            <span class="pc-role-label">&#8593; MAMA</span>
-          </div>
-          <div class="pc-photo-wrap"><div class="pc-photo"><img src="https://i.pravatar.cc/54?img=45" alt="Elena" loading="lazy"/></div></div>
-          <div class="pc-info">
-            <div class="pc-name">Elena Muresan</div>
-            <div class="pc-years">1922 &mdash; viu</div>
-            <span class="pc-loc">Deal</span>
-            <div class="pc-prof">Invatatoare</div>
-          </div>
-          <div class="pc-vbar"></div>
-        </div>
-      </div>
-
-      <!-- ══ GEN III CARDS ══ -->
-
-      <!-- Petre: x=93 cx=158 -->
-      <div class="pc highlighted" style="left:93px;top:430px;" onclick="openDetail('petre')">
-        <div class="pc-box">
-          <div class="pc-role current">
-            <span class="pc-role-label">&#9825; ACEASTA FAMILIE</span>
-            <span class="pc-s-badge">S</span>
-          </div>
-          <div class="pc-photo-wrap"><div class="pc-photo"><img src="https://i.pravatar.cc/54?img=52" alt="Petre" loading="lazy"/></div></div>
-          <div class="pc-info">
-            <div class="pc-name">Petre Popescu</div>
-            <div class="pc-years">1948 &mdash; viu</div>
-            <span class="pc-loc">Calnic</span>
-            <div class="pc-prof">Apicultor</div>
-          </div>
-          <div class="pc-vbar on"></div>
-        </div>
-      </div>
-
-      <!-- Ana: x=243 cx=308 -->
-      <div class="pc" style="left:243px;top:430px;" onclick="openDetail('ana')">
-        <div class="pc-box">
-          <div class="pc-role normal">
-            <span class="pc-role-label">SORA</span>
-          </div>
-          <div class="pc-photo-wrap"><div class="pc-photo"><img src="https://i.pravatar.cc/54?img=41" alt="Ana" loading="lazy"/></div></div>
-          <div class="pc-info">
-            <div class="pc-name">Ana Popescu</div>
-            <div class="pc-years">1951 &mdash; viu</div>
-            <span class="pc-loc">Deal</span>
-            <div class="pc-prof">Medic</div>
-          </div>
-          <div class="pc-vbar"></div>
-        </div>
-      </div>
-
-      <!-- Gheorghe: x=393 cx=458 -->
-      <div class="pc" style="left:393px;top:430px;" onclick="openDetail('gheorghe')">
-        <div class="pc-box">
-          <div class="pc-role normal">
-            <span class="pc-role-label">FRATE</span>
-          </div>
-          <div class="pc-photo-wrap"><div class="pc-photo"><img src="https://i.pravatar.cc/54?img=59" alt="Gheorghe" loading="lazy"/></div></div>
-          <div class="pc-info">
-            <div class="pc-name">Gheorghe Popescu</div>
-            <div class="pc-years">1950 &mdash; viu</div>
-            <span class="pc-loc">Germania</span>
-            <div class="pc-prof">Inginer</div>
-          </div>
-          <div class="pc-vbar"></div>
-        </div>
-      </div>
-
-      <!-- Add placeholder: x=543 cx=608 — same height as cards -->
-      <div class="padd" style="left:543px;top:430px;" onclick="openAdd()">
-        <div class="padd-box" style="height:168px;">
-          <div class="padd-plus">+</div>
-          <div class="padd-lbl" data-ro="Adauga persoana" data-en="Add person">Adauga persoana</div>
-        </div>
-      </div>
-
-    </div>
-  </div>
-
+<div class="page-hero">
+  <div class="page-hero-title" id="hero-title" data-ro="Evenimente" data-en="Events">Evenimente</div>
+  <div class="page-hero-sub" id="hero-sub" data-ro="Sarbatori, traditii si intalniri ale comunitatii din Calnic" data-en="Celebrations, traditions and community gatherings in Calnic">Sarbatori, traditii si intalniri ale comunitatii din Calnic</div>
+  <div class="page-hero-orn">&#10022; &#10022; &#10022;</div>
 </div>
 
-<a class="scroll-top" id="scrollTop" onclick="window.scrollTo({top:0,behavior:'smooth'})" title="Sus">&#8679;</a>
-<a class="scroll-bottom" id="scrollBottom" onclick="window.scrollTo({top:document.body.scrollHeight,behavior:'smooth'})" title="Jos">&#8681;</a>
+<div class="main-wrap">
+
+  <!-- Upcoming next event banner -->
+  <div class="section-head"><span class="section-head-title" id="sh-upcoming" data-ro="Urmatorul eveniment" data-en="Next event">Urmatorul eveniment</span></div>
+
+  <div class="upcoming-banner" id="nextEventBanner">
+    <div class="ub-date-box">
+      <div class="ub-day" id="ub-day">24</div>
+      <div class="ub-month" id="ub-month">IUN</div>
+    </div>
+    <div class="ub-body">
+      <div class="ub-cat" id="ub-cat" data-ro="TRADITIE" data-en="TRADITION">TRADITIE</div>
+      <div class="ub-title" id="ub-title" data-ro="Sanziene &#8212; Noaptea de Sanziene" data-en="Midsummer Night &#8212; Saint John&#39;s Eve">Sanziene &#8212; Noaptea de Sanziene</div>
+      <div class="ub-desc" id="ub-desc" data-ro="Sarbatoarea straveche a solstitiului de vara. Fetele impletesc coroane de flori galbene si le lasa pe apa, dupa traditia mostenita din batrani in Calnic." data-en="The ancient midsummer solstice celebration. Girls weave crowns of yellow flowers and release them on the water, following the tradition passed down through generations in Calnic.">Sarbatoarea straveche a solstitiului de vara. Fetele impletesc coroane de flori galbene si le lasa pe apa, dupa traditia mostenita din batrani in Calnic.</div>
+    </div>
+    <div class="ub-badge" id="ub-badge" data-ro="IN CURAND" data-en="COMING SOON">IN CURAND</div>
+  </div>
+
+  <!-- Filter chips -->
+  <div class="section-head"><span class="section-head-title" id="sh-all" data-ro="Toate evenimentele" data-en="All events">Toate evenimentele</span></div>
+
+  <div class="filter-bar">
+    <span class="filter-label" id="filter-label" data-ro="Filtreaza:" data-en="Filter:">Filtreaza:</span>
+    <button class="filter-chip active" data-cat="all" data-ro="Toate" data-en="All">Toate</button>
+    <button class="filter-chip" data-cat="traditie" data-ro="Traditii" data-en="Traditions">Traditii</button>
+    <button class="filter-chip" data-cat="religios" data-ro="Religios" data-en="Religious">Religios</button>
+    <button class="filter-chip" data-cat="cultural" data-ro="Cultural" data-en="Cultural">Cultural</button>
+    <button class="filter-chip" data-cat="comunitar" data-ro="Comunitar" data-en="Community">Comunitar</button>
+    <button class="filter-chip" data-cat="comemorare" data-ro="Comemorare" data-en="Memorial">Comemorare</button>
+  </div>
+
+  <div class="events-grid" id="eventsGrid"></div>
+  <div class="no-results" id="noResults">
+    <div class="empty-state">
+      <div class="empty-state-icon">&#128197;</div>
+      <div class="empty-state-text" id="no-results-text" data-ro="Nu exista evenimente in aceasta categorie." data-en="No events in this category.">Nu exista evenimente in aceasta categorie.</div>
+    </div>
+  </div>
+
+  <!-- Past events -->
+  <div class="section-head" id="past-head"><span class="section-head-title" id="sh-past" data-ro="Evenimente trecute" data-en="Past events">Evenimente trecute</span></div>
+  <div class="events-grid" id="pastEventsGrid"></div>
+
+  <!-- Suggest event form -->
+  <div class="section-head"><span class="section-head-title" id="sh-suggest" data-ro="Propune un eveniment" data-en="Suggest an event">Propune un eveniment</span></div>
+
+  <div class="suggest-box">
+    <div class="suggest-title" id="suggest-title" data-ro="Stii de un eveniment important?" data-en="Know of an important event?">Stii de un eveniment important?</div>
+    <div class="suggest-sub" id="suggest-sub" data-ro="Trimite-ne detaliile si il vom adauga in calendar." data-en="Send us the details and we will add it to the calendar.">Trimite-ne detaliile si il vom adauga in calendar.</div>
+    <form id="suggestForm" action="https://formspree.io/f/xpqygdjn" method="POST">
+      <div class="form-row">
+        <div class="form-group">
+          <label class="form-label" id="lbl-name" data-ro="Numele tau" data-en="Your name">Numele tau</label>
+          <input class="form-input" type="text" name="name" id="inp-name" placeholder="Ion Popescu" required>
+        </div>
+        <div class="form-group">
+          <label class="form-label" id="lbl-email" data-ro="Email" data-en="Email">Email</label>
+          <input class="form-input" type="email" name="email" id="inp-email" placeholder="ion@email.com" required>
+        </div>
+      </div>
+      <div class="form-row">
+        <div class="form-group">
+          <label class="form-label" id="lbl-event" data-ro="Numele evenimentului" data-en="Event name">Numele evenimentului</label>
+          <input class="form-input" type="text" name="event_name" id="inp-event" placeholder="Hramul bisericii" required>
+        </div>
+        <div class="form-group">
+          <label class="form-label" id="lbl-date" data-ro="Data aproximativa" data-en="Approximate date">Data aproximativa</label>
+          <input class="form-input" type="text" name="event_date" id="inp-date" placeholder="15 august 2026">
+        </div>
+      </div>
+      <div class="form-group" style="margin-bottom:16px;">
+        <label class="form-label" id="lbl-cat" data-ro="Categorie" data-en="Category">Categorie</label>
+        <select class="form-select" name="category" id="sel-cat">
+          <option value="traditie" data-ro="Traditie" data-en="Tradition">Traditie</option>
+          <option value="religios" data-ro="Religios" data-en="Religious">Religios</option>
+          <option value="cultural" data-ro="Cultural" data-en="Cultural">Cultural</option>
+          <option value="comunitar" data-ro="Comunitar" data-en="Community">Comunitar</option>
+          <option value="comemorare" data-ro="Comemorare" data-en="Memorial">Comemorare</option>
+        </select>
+      </div>
+      <div class="form-group" style="margin-bottom:8px;">
+        <label class="form-label" id="lbl-desc" data-ro="Descriere scurta" data-en="Short description">Descriere scurta</label>
+        <textarea class="form-textarea" name="description" id="inp-desc" placeholder="Descrie evenimentul in cateva randuri..."></textarea>
+      </div>
+      <input type="hidden" name="_subject" value="Calnic Online - Eveniment nou propus">
+      <button type="submit" class="form-submit" id="btn-submit" data-ro="Trimite propunerea" data-en="Submit suggestion">Trimite propunerea</button>
+      <div class="form-note" id="form-note" data-ro="Propunerea va fi revizuita si adaugata in calendar daca este relevanta pentru comunitatea din Calnic." data-en="The suggestion will be reviewed and added to the calendar if relevant to the Calnic community.">Propunerea va fi revizuita si adaugata in calendar daca este relevanta pentru comunitatea din Calnic.</div>
+      <div class="form-success" id="formSuccess">
+        <span id="success-msg" data-ro="Multumim! Propunerea ta a fost trimisa." data-en="Thank you! Your suggestion has been sent.">Multumim! Propunerea ta a fost trimisa.</span>
+      </div>
+    </form>
+  </div>
+
+</div><!-- /main-wrap -->
+
+<a class="scroll-top" id="scrollTop" href="#" title="Sus">&#8679;</a>
+<a class="scroll-bottom" id="scrollBottom" href="#" title="Jos">&#8681;</a>
 
 <footer>
   <span class="g">Calnic</span> &nbsp;&#183;&nbsp; Alba &nbsp;&#183;&nbsp; Romania &nbsp;&#183;&nbsp; <span id="yr"></span>
@@ -630,189 +449,171 @@ footer .g{color:var(--gold-d);font-style:normal;}
   <span data-ro="Sat cu suflet, memorie vie" data-en="A village with soul, a living memory">Sat cu suflet, memorie vie</span>
 </footer>
 
-<!-- DETAIL PANEL -->
-<div class="dp-overlay" id="dpOverlay" onclick="if(event.target===this)closeDp()">
-  <div class="dp-box">
-    <div class="dp-top"></div>
-    <div class="dp-body">
-      <div class="dp-hero">
-        <div class="dp-photo" id="dpPhoto"></div>
-        <div>
-          <div class="dp-name" id="dpName"></div>
-          <div class="dp-yrs" id="dpYrs"></div>
-          <div class="dp-badges" id="dpBadges"></div>
-        </div>
-      </div>
-      <div class="dp-sec">
-        <div class="dp-sec-title" data-ro="Date personale" data-en="Personal details">Date personale</div>
-        <div class="dp-row"><span class="dp-lbl" data-ro="Nastere" data-en="Birth">Nastere</span><span class="dp-val" id="dpBirth"></span></div>
-        <div class="dp-row"><span class="dp-lbl" data-ro="Deces" data-en="Death">Deces</span><span class="dp-val" id="dpDeath"></span></div>
-        <div class="dp-row"><span class="dp-lbl" data-ro="Casatorie" data-en="Marriage">Casatorie</span><span class="dp-val" id="dpMarriage"></span></div>
-        <div class="dp-row"><span class="dp-lbl" data-ro="Profesie" data-en="Profession">Profesie</span><span class="dp-val" id="dpProf"></span></div>
-      </div>
-      <div class="dp-sec">
-        <div class="dp-sec-title" data-ro="Biografie" data-en="Biography">Biografie</div>
-        <div class="dp-bio" id="dpBio"></div>
-      </div>
-      <div class="dp-sec">
-        <div class="dp-sec-title" data-ro="Amintire din familie" data-en="Family memory">Amintire din familie</div>
-        <div class="dp-story" id="dpStory"></div>
-      </div>
-      <div class="dp-acts">
-        <button class="da da-g" data-ro="&#128247; Adauga foto" data-en="&#128247; Add photo">&#128247; Adauga foto</button>
-        <button class="da da-g" data-ro="&#128221; Editeaza" data-en="&#128221; Edit">&#128221; Editeaza</button>
-        <button class="da da-gr" data-ro="&#127807; Arborele Satului" data-en="&#127807; Village Tree">&#127807; Arborele Satului</button>
-        <button class="da da-m" onclick="closeDp()" data-ro="Inchide" data-en="Close">Inchide</button>
-      </div>
-    </div>
-  </div>
-</div>
-
-<!-- ADD PERSON MODAL -->
-<div class="am-overlay" id="amOverlay" onclick="if(event.target===this)closeAm()">
-  <div class="am-box">
-    <div class="am-title" data-ro="+ Adauga persoana in arbore" data-en="+ Add person to tree">+ Adauga persoana in arbore</div>
-    <div class="am-f">
-      <label class="am-l" data-ro="Nume complet *" data-en="Full name *">Nume complet *</label>
-      <input class="am-i" id="amName" placeholder="ex. Ion Popescu"/>
-    </div>
-    <div class="am-r2">
-      <div class="am-f">
-        <label class="am-l" data-ro="An nastere" data-en="Birth year">An nastere</label>
-        <input class="am-i" id="amBirth" placeholder="ex. 1920"/>
-      </div>
-      <div class="am-f">
-        <label class="am-l" data-ro="An deces" data-en="Death year">An deces</label>
-        <input class="am-i" id="amDeath" placeholder="viu sau 1995"/>
-      </div>
-    </div>
-    <div class="am-r2">
-      <div class="am-f">
-        <label class="am-l" data-ro="Localitate" data-en="Location">Localitate</label>
-        <select class="am-s" id="amLoc">
-          <option>Calnic</option>
-          <option>Deal</option>
-          <option data-ro="Alta localitate" data-en="Other location">Alta localitate</option>
-        </select>
-      </div>
-      <div class="am-f">
-        <label class="am-l" data-ro="Profesie" data-en="Profession">Profesie</label>
-        <input class="am-i" id="amProf" placeholder="ex. Agricultor"/>
-      </div>
-    </div>
-    <div class="am-f">
-      <label class="am-l" data-ro="Relatie cu familia" data-en="Relation to family">Relatie cu familia</label>
-      <select class="am-s" id="amRel">
-        <option data-ro="Parinte" data-en="Parent">Parinte</option>
-        <option data-ro="Copil" data-en="Child">Copil</option>
-        <option data-ro="Sot / Sotie" data-en="Spouse">Sot / Sotie</option>
-        <option data-ro="Bunic / Bunica" data-en="Grandparent">Bunic / Bunica</option>
-        <option data-ro="Frate / Sora" data-en="Sibling">Frate / Sora</option>
-        <option data-ro="Alt membru" data-en="Other member">Alt membru</option>
-      </select>
-    </div>
-    <div class="am-f">
-      <label class="am-l" data-ro="Biografie scurta" data-en="Short biography">Biografie scurta</label>
-      <textarea class="am-ta" id="amBio" placeholder="Cateva cuvinte despre aceasta persoana..."></textarea>
-    </div>
-    <div class="am-vis">
-      <div>
-        <div class="am-vis-l" data-ro="Vizibilitate" data-en="Visibility">Vizibilitate</div>
-        <div class="am-vis-s" data-ro="Cine poate vedea aceasta persoana" data-en="Who can see this person">Cine poate vedea aceasta persoana</div>
-      </div>
-      <div class="vtg">
-        <span class="vt pub" id="vtPub" onclick="setVis('pub')" data-ro="Public" data-en="Public">Public</span>
-        <span class="vt" id="vtPriv" onclick="setVis('priv')" data-ro="Privat" data-en="Private">Privat</span>
-        <span class="vt" id="vtVil" onclick="setVis('vil')" data-ro="+ Sat" data-en="+ Village">+ Sat</span>
-      </div>
-    </div>
-    <div class="am-acts">
-      <button class="am-save" onclick="savePerson()" data-ro="Salveaza in arbore" data-en="Save to tree">Salveaza in arbore</button>
-      <button class="am-cancel" onclick="closeAm()" data-ro="Anuleaza" data-en="Cancel">Anuleaza</button>
-    </div>
-  </div>
-</div>
-
 <script>
 document.getElementById('yr').textContent = new Date().getFullYear();
 
-/* ── PHASE 2 HOOK ──
-   When Supabase is connected, read family from URL:
-   var params = new URLSearchParams(window.location.search);
-   var familyId = params.get('family'); // e.g. 'popescu'
-   Then fetch family data from Supabase and populate PEOPLE + tree.
-   Level 1 (genealogie.html) links here as: genealogie-familie.html?family=popescu
-── END PHASE 2 HOOK ── */
-
 var currentLang = 'ro';
 
-var PEOPLE = {
-  ion:{img:'https://i.pravatar.cc/86?img=70',init:'I',name:'Ion Popescu',years:'1890 — 1965',birth:'12 Martie 1890, Calnic',death:'4 Noiembrie 1965, Calnic',marriage:'1914, cu Maria Rus',prof:'Agricultor, apicultor',loc:'Calnic',village:true,bio:'Om al pamantului, Ion Popescu a trait toata viata in Calnic, cultivand pamantul si ingrijind stupina mostenita de la parintii sai. Era cunoscut in sat pentru prunele cu care facea cel mai bun rachiu din zona.',story:'"Bunicul spunea ca albinele stiu mai bine decat orice meteo cand vine ploaia. Si avea dreptate." — Petre Popescu'},
-  maria:{img:'https://i.pravatar.cc/86?img=47',init:'M',name:'Maria Rus',years:'1895 — 1970',birth:'3 Iulie 1895, Deal',death:'18 Ianuarie 1970, Calnic',marriage:'1914, cu Ion Popescu',prof:'Gospodina, tesatoare',loc:'Deal',village:true,bio:'Venita din Deal, Maria s-a mutat in Calnic dupa casatorie. Era cunoscuta pentru covoarele tesute manual pe care le vindea la targul din Alba Iulia.',story:'"Bunica Maria stia 40 de modele de tesut. Eu am invatat de la ea doar 3, dar le pastrez cu sfintenie." — Elena Muresan'},
-  vasile:{img:'https://i.pravatar.cc/86?img=68',init:'V',name:'Vasile Popescu',years:'1920 — 1995',birth:'8 Aprilie 1920, Calnic',death:'22 Septembrie 1995, Calnic',marriage:'1946, cu Elena Muresan',prof:'Tamplar, mester popular',loc:'Calnic',village:true,bio:'Vasile Popescu a invatat meseria de tamplar de la tatal sau si a construit mobilier pentru zeci de familii din sat. Dulapurile sale sculptate se regasesc si astazi in casele batranesti din Calnic.',story:'"Tata spunea ca lemnul are suflet si trebuie sa-l asculti inainte sa-l tai." — Petre Popescu'},
-  elena:{img:'https://i.pravatar.cc/86?img=45',init:'E',name:'Elena Muresan',years:'1922 — viu',birth:'15 Octombrie 1922, Deal',death:'—',marriage:'1946, cu Vasile Popescu',prof:'Invatatoare, 38 ani',loc:'Deal',village:false,bio:'Elena Muresan a predat la scoala din Calnic timp de 38 de ani. Generatii intregi de copii din sat au invatat sa citeasca si sa scrie cu dascalita Elena.',story:'"Doamna Elena ne punea sa memoram poezii. Ma suparau atunci. Acum le stiu pe de rost si le spun nepotilor." — Un fost elev'},
-  petre:{img:'https://i.pravatar.cc/86?img=52',init:'P',name:'Petre Popescu',years:'1948 — viu',birth:'3 Mai 1948, Calnic',death:'—',marriage:'1972, cu Ana Moldovan',prof:'Apicultor — 120 stupi',loc:'Calnic',village:true,bio:'Petre Popescu a mostenit stupina bunicului Ion si a dezvoltat-o la 120 de stupi. Mierea de salcam Popescu este cunoscuta in toata zona Albei.',story:'Familia de baza — aceasta este familia noastra!'},
-  ana:{img:'https://i.pravatar.cc/86?img=41',init:'A',name:'Ana Popescu',years:'1951 — viu',birth:'20 Iulie 1951, Deal',death:'—',marriage:'1972, cu Petre Popescu',prof:'Medic de familie',loc:'Deal',village:false,bio:'Ana Popescu s-a stabilit in Calnic dupa casatorie si a servit ca medic de familie al comunei timp de 30 de ani.',story:'"Doctora Ana venea si la miezul noptii daca era nevoie. Un om exceptional." — Locuitorii din Calnic'},
-  gheorghe:{img:'https://i.pravatar.cc/86?img=59',init:'G',name:'Gheorghe Popescu',years:'1950 — viu',birth:'11 Noiembrie 1950, Calnic',death:'—',marriage:'1975, cu Ingrid Muller',prof:'Inginer mecanic',loc:'Germania',village:false,bio:'Gheorghe Popescu a plecat in Germania in 1985 si s-a stabilit la Munchen. Revine in Calnic in fiecare vara si mentine legatura cu radacinile familiei.',story:'"Oriunde as fi, Calnicul este acasa." — Gheorghe Popescu'},
-  priv1:{img:null,init:'?',name:'Vasile Muresan',years:'1888 — 1960',birth:'Privat',death:'Privat',marriage:'Privat',prof:'Privat',loc:'Deal',village:false,bio:'Familia a ales sa pastreze detaliile private.',story:'Unele amintiri raman in familie.'},
-  priv2:{img:null,init:'?',name:'Ana Ionescu',years:'1892 — 1968',birth:'Privat',death:'Privat',marriage:'Privat',prof:'Privat',loc:'Calnic',village:false,bio:'Familia a ales sa pastreze detaliile private.',story:'Unele amintiri raman in familie.'}
-};
+var MONTHS_RO = ['Ian','Feb','Mar','Apr','Mai','Iun','Iul','Aug','Sep','Oct','Nov','Dec'];
+var MONTHS_EN = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
 
-function openDetail(id) {
-  var p = PEOPLE[id]; if (!p) return;
-  document.getElementById('dpPhoto').innerHTML = p.img
-    ? '<img loading="lazy" src="'+p.img+'" alt="'+p.name+'"/>'
-    : '<span class="dp-photo-i">'+p.init+'</span>';
-  document.getElementById('dpName').textContent = p.name;
-  document.getElementById('dpYrs').textContent = p.years;
-  document.getElementById('dpBirth').textContent = p.birth;
-  document.getElementById('dpDeath').textContent = p.death;
-  document.getElementById('dpMarriage').textContent = p.marriage;
-  document.getElementById('dpProf').textContent = p.prof;
-  document.getElementById('dpBio').textContent = p.bio;
-  document.getElementById('dpStory').textContent = p.story;
-  var b = '<span class="dba dba-loc">'+p.loc+'</span>';
-  if (p.prof && p.prof !== 'Privat') b += '<span class="dba dba-prof">'+p.prof+'</span>';
-  if (p.village) b += '<span class="dba dba-vil">&#127807; Arborele Satului</span>';
-  if (!p.img) b += '<span class="dba dba-priv">&#128274; Privat</span>';
-  document.getElementById('dpBadges').innerHTML = b;
-  document.getElementById('dpOverlay').classList.add('open');
-  document.body.style.overflow = 'hidden';
-}
-function closeDp() {
-  document.getElementById('dpOverlay').classList.remove('open');
-  document.body.style.overflow = '';
+var EVENTS = [
+  {
+    day: 24, month: 5, year: 2026,
+    cat: 'traditie',
+    titleRo: 'Ziua Iei &#8212; Sarbatoarea Iei Romanesti',
+    titleEn: 'Romanian Blouse Day &#8212; National Ie Celebration',
+    descRo: 'Comunitatea din Calnic sarbatoreste Ziua Iei, purtand cu mandrie costumul traditional transilvanean. Fotografie de grup in fata cetatesii.',
+    descEn: 'The Calnic community celebrates Romanian Blouse Day, proudly wearing traditional Transylvanian costume. Group photo in front of the citadel.',
+    tags: ['traditie', 'port'],
+    upcoming: true
+  },
+  {
+    day: 24, month: 6, year: 2026,
+    cat: 'traditie',
+    titleRo: 'Sanziene &#8212; Noaptea de Sanziene',
+    titleEn: 'Midsummer Night &#8212; Saint John\u2019s Eve',
+    descRo: 'Sarbatoarea straveche a solstitiului de vara. Fetele impletesc coroane de flori galbene si le lasa pe apa, dupa traditia din Calnic.',
+    descEn: 'The ancient midsummer solstice celebration. Girls weave crowns of yellow flowers and release them on the water.',
+    tags: ['traditie', 'vara'],
+    upcoming: true
+  },
+  {
+    day: 15, month: 8, year: 2026,
+    cat: 'religios',
+    titleRo: 'Adormirea Maicii Domnului &#8212; Hramul Bisericii',
+    titleEn: 'Dormition of the Mother of God &#8212; Church Feast Day',
+    descRo: 'Hramul Bisericii Ortodoxe din Calnic. Slujba de dimineata, procesiune si masa comuna in curtea bisericii.',
+    descEn: 'Feast day of the Orthodox Church in Calnic. Morning service, procession and communal meal in the churchyard.',
+    tags: ['religios', 'comunitar'],
+    upcoming: true
+  },
+  {
+    day: 1, month: 10, year: 2026,
+    cat: 'cultural',
+    titleRo: 'Ziua Recoltei &#8212; Toamna la Calnic',
+    titleEn: 'Harvest Day &#8212; Autumn in Calnic',
+    descRo: 'Sarbatoarea roadelor toamnei: must de struguri, mere, miere de albine si dovleci. Expozitie de produse traditionale si muzica populara.',
+    descEn: 'Harvest celebration: grape must, apples, honey and pumpkins. Exhibition of traditional products and folk music.',
+    tags: ['cultural', 'toamna'],
+    upcoming: true
+  },
+  {
+    day: 25, month: 12, year: 2026,
+    cat: 'religios',
+    titleRo: 'Craciunul &#8212; Colinde si Betleem',
+    titleEn: 'Christmas &#8212; Carols and Nativity Play',
+    descRo: 'Seara de colinde in sat, cu grupuri de colindatori mergand din casa in casa. Piesa de teatru cu Nasterea Domnului la caminul cultural.',
+    descEn: 'Evening of carols in the village, with groups of carolers going from house to house. Nativity play at the cultural center.',
+    tags: ['religios', 'iarna'],
+    upcoming: true
+  },
+  {
+    day: 18, month: 6, year: 2025,
+    cat: 'comunitar',
+    titleRo: 'Intalnirea Familiilor Calnicene din Diaspora',
+    titleEn: 'Gathering of Calnic Families from the Diaspora',
+    descRo: 'Prima intalnire anuala a familiilor din Calnic stabilite in strainatate. Participanti din Germania, Austria, Franta si Italia.',
+    descEn: 'First annual gathering of Calnic families living abroad. Participants from Germany, Austria, France and Italy.',
+    tags: ['comunitar', 'diaspora'],
+    upcoming: false
+  },
+  {
+    day: 9, month: 5, year: 2025,
+    cat: 'comemorare',
+    titleRo: 'Ziua Europei &#8212; Comemorarea Cetatesii',
+    titleEn: 'Europe Day &#8212; Citadel Commemoration',
+    descRo: 'Comemorarea aniversarii UNESCO (1999) a Cetatii Calnic. Tur ghidat gratuit si depunere de flori la intrarea in cetate.',
+    descEn: 'Commemoration of the UNESCO (1999) anniversary of Calnic Citadel. Free guided tour and flower tribute at the citadel entrance.',
+    tags: ['comemorare', 'UNESCO'],
+    upcoming: false
+  },
+  {
+    day: 7, month: 1, year: 2025,
+    cat: 'traditie',
+    titleRo: 'Plugusorul si Sorcova &#8212; Anul Nou pe Ulita',
+    titleEn: 'New Year Traditions &#8212; Carols and Well-Wishing',
+    descRo: 'Copiii si tinerii din sat au mers cu plugusorul si sorcova, pastrand vii obiceiurile de Anul Nou specifice Transilvaniei.',
+    descEn: 'Children and youth from the village went caroling and well-wishing, keeping alive the New Year traditions of Transylvania.',
+    tags: ['traditie', 'iarna'],
+    upcoming: false
+  }
+];
+
+function renderEvents(lang, catFilter) {
+  var upcoming = EVENTS.filter(function(e){ return e.upcoming; });
+  var past = EVENTS.filter(function(e){ return !e.upcoming; });
+
+  if (catFilter && catFilter !== 'all') {
+    upcoming = upcoming.filter(function(e){ return e.cat === catFilter; });
+    past = past.filter(function(e){ return e.cat === catFilter; });
+  }
+
+  var months = lang === 'ro' ? MONTHS_RO : MONTHS_EN;
+
+  function buildCard(e, isPast) {
+    var title = lang === 'ro' ? e.titleRo : e.titleEn;
+    var desc = lang === 'ro' ? e.descRo : e.descEn;
+    var catLabel = lang === 'ro' ? getCatRo(e.cat) : getCatEn(e.cat);
+    var tagsHtml = e.tags.map(function(t){ return '<span class="ec-tag">' + t + '</span>'; }).join('');
+    var pastLabel = isPast ? '<span class="ec-past-label">' + (lang === 'ro' ? 'trecut' : 'past') + '</span>' : '';
+    return '<div class="event-card' + (isPast ? ' past' : '') + '" data-cat="' + e.cat + '">' +
+      '<div class="ec-date">' +
+        '<div class="ec-day">' + e.day + '</div>' +
+        '<div class="ec-divider"></div>' +
+        '<div class="ec-meta">' +
+          '<div class="ec-cat">' + catLabel + '</div>' +
+          '<div class="ec-month-year"><span class="ec-month">' + months[e.month - 1] + '</span><span class="ec-year">' + e.year + '</span></div>' +
+        '</div>' +
+      '</div>' +
+      '<div class="ec-title">' + title + '</div>' +
+      '<div class="ec-body">' + desc + '</div>' +
+      '<div class="ec-footer">' + tagsHtml + pastLabel + '</div>' +
+    '</div>';
+  }
+
+  var upcomingGrid = document.getElementById('eventsGrid');
+  var pastGrid = document.getElementById('pastEventsGrid');
+  var noResults = document.getElementById('noResults');
+  var pastHead = document.getElementById('past-head');
+
+  if (upcoming.length === 0 && past.length === 0) {
+    upcomingGrid.innerHTML = '';
+    pastGrid.innerHTML = '';
+    noResults.style.display = 'block';
+    pastHead.style.display = 'none';
+  } else {
+    noResults.style.display = 'none';
+    upcomingGrid.innerHTML = upcoming.map(function(e){ return buildCard(e, false); }).join('');
+    if (past.length > 0) {
+      pastGrid.innerHTML = past.map(function(e){ return buildCard(e, true); }).join('');
+      pastHead.style.display = '';
+    } else {
+      pastGrid.innerHTML = '';
+      pastHead.style.display = 'none';
+    }
+  }
 }
 
-function openAdd() {
-  document.getElementById('amOverlay').classList.add('open');
-  document.body.style.overflow = 'hidden';
+function getCatRo(cat) {
+  var map = { traditie:'TRADITIE', religios:'RELIGIOS', cultural:'CULTURAL', comunitar:'COMUNITAR', comemorare:'COMEMORARE' };
+  return map[cat] || cat.toUpperCase();
 }
-function closeAm() {
-  document.getElementById('amOverlay').classList.remove('open');
-  document.body.style.overflow = '';
-}
-
-function setVis(v) {
-  document.getElementById('vtPub').className = 'vt' + (v==='pub' ? ' pub' : '');
-  document.getElementById('vtPriv').className = 'vt' + (v==='priv' ? ' priv' : '');
-  document.getElementById('vtVil').className = 'vt' + (v==='vil' ? ' vil' : '');
+function getCatEn(cat) {
+  var map = { traditie:'TRADITION', religios:'RELIGIOUS', cultural:'CULTURAL', comunitar:'COMMUNITY', comemorare:'MEMORIAL' };
+  return map[cat] || cat.toUpperCase();
 }
 
-function savePerson() {
-  var name = document.getElementById('amName').value.trim();
-  if (!name) { alert(currentLang === 'ro' ? 'Te rugam sa introduci un nume.' : 'Please enter a name.'); return; }
-  alert(currentLang === 'ro'
-    ? 'Persoana salvata! (Demo — va fi conectata la baza de date Supabase)' 
-    : 'Person saved! (Demo — will connect to Supabase database)');
-  closeAm();
-}
+var activeFilter = 'all';
 
-function exportTree() {
-  alert(currentLang === 'ro'
-    ? 'Export ca imagine — disponibil dupa conectarea la baza de date.'
-    : 'Export as image — available after database connection.');
-}
+document.querySelectorAll('.filter-chip').forEach(function(chip) {
+  chip.addEventListener('click', function() {
+    document.querySelectorAll('.filter-chip').forEach(function(c){ c.classList.remove('active'); });
+    chip.classList.add('active');
+    activeFilter = chip.getAttribute('data-cat');
+    renderEvents(currentLang, activeFilter);
+  });
+});
 
 function setLang(lang) {
   currentLang = lang;
@@ -822,7 +623,15 @@ function setLang(lang) {
     var val = el.getAttribute('data-' + lang);
     if (val !== null) el.textContent = val;
   });
+  document.querySelectorAll('.filter-chip[data-ro]').forEach(function(el) {
+    var val = el.getAttribute('data-' + lang);
+    if (val !== null) el.textContent = val;
+  });
+  renderEvents(lang, activeFilter);
 }
+
+document.getElementById('btn-ro').addEventListener('click', function() { setLang('ro'); });
+document.getElementById('btn-en').addEventListener('click', function() { setLang('en'); });
 
 function updateScrollBtns() {
   var t = document.getElementById('scrollTop');
@@ -836,11 +645,6 @@ window.addEventListener('scroll', updateScrollBtns);
 window.addEventListener('load', updateScrollBtns);
 setTimeout(updateScrollBtns, 100);
 
-document.addEventListener('keydown', function(e) {
-  if (e.key === 'Escape') { closeDp(); closeAm(); }
-});
-
-// Hamburger menu
 var ham = document.getElementById('hamburgerBtn');
 var mobileMenu = document.getElementById('navMobileMenu');
 if (ham && mobileMenu) {
@@ -849,6 +653,41 @@ if (ham && mobileMenu) {
     ham.textContent = mobileMenu.classList.contains('open') ? '✕' : '☰';
   });
 }
+
+document.getElementById('suggestForm').addEventListener('submit', function(e) {
+  e.preventDefault();
+  var btn = document.getElementById('btn-submit');
+  var origText = btn.textContent;
+  btn.textContent = currentLang === 'ro' ? 'Se trimite...' : 'Sending...';
+  btn.disabled = true;
+  var data = new FormData(this);
+  fetch(this.action, { method:'POST', body:data, headers:{ 'Accept':'application/json' } })
+    .then(function(r) {
+      if (r.ok) {
+        document.getElementById('formSuccess').style.display = 'block';
+        document.getElementById('suggestForm').reset();
+      } else {
+        btn.textContent = currentLang === 'ro' ? 'Eroare. Incearca din nou.' : 'Error. Please try again.';
+        btn.disabled = false;
+      }
+    })
+    .catch(function() {
+      btn.textContent = currentLang === 'ro' ? 'Eroare. Incearca din nou.' : 'Error. Please try again.';
+      btn.disabled = false;
+    });
+});
+
+// Scroll buttons
+document.getElementById('scrollTop').addEventListener('click', function(e) {
+  e.preventDefault();
+  window.scrollTo({ top:0, behavior:'smooth' });
+});
+document.getElementById('scrollBottom').addEventListener('click', function(e) {
+  e.preventDefault();
+  window.scrollTo({ top:document.body.scrollHeight, behavior:'smooth' });
+});
+
+renderEvents('ro', 'all');
 </script>
 </body>
 </html>
