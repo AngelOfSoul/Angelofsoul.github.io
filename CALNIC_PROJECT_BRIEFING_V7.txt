@@ -135,6 +135,7 @@ PHASE 1 — Visual pages
         genealogie.html, genealogie-familie.html, harta.html,
         contact.html, familiile-familie.html, intrebari.html,
         login.html, 404.html
+  NOTE: evenimente.html will NOT be built — decision confirmed.
 
 PHASE 2 — Backend (Supabase)
   Done: supabase.js created
@@ -274,9 +275,7 @@ genealogie-familie.html   <- individual family tree
 familiile.html            <- main families directory
 familiile-familie.html    <- individual family profile
 
-Future:
-evenimente.html           <- main events page
-evenimente-eveniment.html <- individual event (if needed)
+NOTE: No further pages planned beyond those listed above.
 
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
@@ -397,6 +396,7 @@ WHAT CHANGED IN V7 (vs V6)
 - All pages audited and confirmed present
 - families table uses UUID ?id= param (not ?family= string)
 - PHASE 2 HOOK renamed to SUPABASE HOOK throughout
+- evenimente.html permanently removed from plan (not needed)
 
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
@@ -411,7 +411,7 @@ HIGH:
 MEDIUM:
   - PIN system UI wired to check_family_pin()
   - Photo upload -> Supabase Storage bucket
-  - galerie.html -> load photos from Supabase Storage
+  - galerie.html -> load photos from Supabase
   - genealogie-familie.html -> load/save tree data from Supabase
   - Language persistence via localStorage (currently resets to RO)
 
@@ -419,7 +419,6 @@ LOW:
   - harta.html -> add real family location pins from database
   - SEO: add og:image meta with real village photo
   - contact.html -> already wired to Formspree (working)
-  - evenimente.html -> village events calendar (not yet built)
 
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
@@ -432,6 +431,6 @@ TO START NEXT SESSION
 SUGGESTED NEXT:
   -> Family registration flow + dashboard
   -> OR wire familiile.html to Supabase
-  -> OR build evenimente.html (village events calendar)
+  -> OR wire familiile-familie.html to Supabase
 
 =======================================================================
