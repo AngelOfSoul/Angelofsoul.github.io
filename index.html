@@ -570,10 +570,11 @@ var missionEn = 'Calnic Online is the <strong>living book of the village</strong
 var aboutRo = 'Calnic Online a fost creat de cineva care crede ca amintirile nu trebuie sa se piarda odata cu trecerea timpului. Fiecare dintre noi isi poate gasi aici un loc in care sa isi aminteasca de cei dragi — si sa lase in urma un memento al oamenilor si al locului unde s-a nascut.';
 var aboutEn = 'Calnic Online was created by someone who believes that memories should not be lost with the passing of time. Each of us can find here a place to remember those we love — and to leave behind a memento of the people and the place where we were born.';
 
-var currentLang = 'ro';
+var currentLang = localStorage.getItem('calnic-lang') || 'ro';
 
 function setLang(lang) {
   currentLang = lang;
+  localStorage.setItem('calnic-lang', lang);
   document.getElementById('btn-ro').classList.toggle('active', lang === 'ro');
   document.getElementById('btn-en').classList.toggle('active', lang === 'en');
   document.querySelectorAll('[data-ro]').forEach(function(el) {
@@ -586,6 +587,7 @@ function setLang(lang) {
 
 document.getElementById('btn-ro').addEventListener('click', function() { setLang('ro'); });
 document.getElementById('btn-en').addEventListener('click', function() { setLang('en'); });
+setLang(currentLang);
 
 function updateScrollBtns() {
   var t = document.getElementById('scrollTop');
