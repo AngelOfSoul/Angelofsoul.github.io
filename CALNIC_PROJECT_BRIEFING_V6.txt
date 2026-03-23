@@ -1,0 +1,322 @@
+═══════════════════════════════════════════════════════════════════════
+CALNIC VILLAGE WEBSITE — PROJECT BRIEFING V6
+Last updated: March 2026 — Full audit passed ✅
+═══════════════════════════════════════════════════════════════════════
+
+WHAT IS THIS PROJECT?
+─────────────────────
+A digital village memory book for Calnic, a village in Alba County,
+Transylvania, Romania. Each family can have a public profile and a
+private space. Goal: preserve memories, genealogy and photos for
+future generations.
+
+Bilingual: Romanian (primary) + English (secondary), RO/EN toggle.
+Always treat the site as fully live and functional.
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+LIVE SITE & GITHUB
+───────────────────
+URL:         https://angelofsoul.github.io
+GitHub:      https://github.com/AngelOfSoul/Angelofsoul.github.io
+Upload link: https://github.com/AngelOfSoul/Angelofsoul.github.io/upload/main
+Platform:    GitHub Pages (free, unlimited, forever)
+
+CRITICAL RULES FOR EVERY SESSION:
+- Always give upload link after delivering any file
+- Always communicate in English
+- Show live preview BEFORE building final file
+- Run node --check on all JS before delivering
+- Fix ALL affected pages when something changes
+- Before context limit is reached: create updated briefing + changelog
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+ANNUAL COSTS
+─────────────
+GitHub Pages     0 lei/year
+Google Fonts     0 lei/year
+Supabase         0 lei/year
+cron-job.org     0 lei/year
+Formspree        0 lei/year  (50 msg/month free, forever)
+.ro domain       ~50-80 lei/year
+TOTAL:           ~50-80 lei/year
+
+Buy .ro domain: RoTLD.ro or Hostingr.ro
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+BACKEND — FINAL DECISIONS
+──────────────────────────
+Backend:      Supabase (auth, database, photo storage)
+Keep-alive:   cron-job.org (ping every 3 days)
+Contact form: Formspree — endpoint: https://formspree.io/f/xpqygdjn
+Photos:       Stored compressed in Supabase (NOT Cloudinary)
+Security:     Row-level security — families see only their own data
+
+PIN SYSTEM (Phase 2):
+- Family chooses their own PIN (4-8 chars/digits)
+- Random PIN suggestion available if they cannot decide
+- PIN stored HASHED in Supabase — nobody can see it, including admin
+- Admin can only trigger reset link to family email
+- MUST show on familiile-familie.html:
+  RO: "PIN-ul este cunoscut doar de membrii familiei.
+       Administratorul site-ului nu are acces la continutul privat."
+  EN: "The PIN is known only by family members.
+       The site administrator has no access to private content."
+
+NOT chosen: Firebase (risk of shutdown)
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+BUILD PHASES
+─────────────
+PHASE 1 — Visual pages
+  ✅ index.html
+  ✅ istorie.html
+  ✅ familiile.html
+  ✅ galerie.html
+  ✅ genealogie.html
+  ✅ genealogie-familie.html
+  ✅ harta.html
+  ✅ contact.html
+  ✅ familiile-familie.html
+  ✅ intrebari.html
+  ⬜ evenimente.html        ← next to build
+
+PHASE 2 — Backend
+  ⬜ Supabase account + tables
+  ⬜ Authentication
+  ⬜ Family self-registration
+  ⬜ PIN system (family chooses, hashed storage)
+  ⬜ Connect all pages to Supabase
+  ⬜ login.html
+  ⬜ dashboard.html
+
+PHASE 3 — Keep-alive
+  ⬜ cron-job.org setup (after Supabase)
+
+PHASE 4 — Domain + launch
+  ⬜ Buy .ro domain
+  ⬜ Connect to GitHub Pages (~24 hours)
+  ⬜ Do this last
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+ALL PAGES — CURRENT STATE
+──────────────────────────
+
+1. index.html — Homepage
+   - Mission, who it's for (4 cards), how it works (5 steps)
+   - Public vs Private table, features grid (7 cards)
+   - Free forever, anonymous about section
+   - CTA → familiile.html
+
+2. istorie.html — Village History
+   - Full timeline prehistory → 1999 UNESCO
+   - 20 rotating "Did you know?" facts
+   - Cetatea, Church, Saxon + Romanian communities
+
+3. familiile.html — Families Directory (MAIN families page)
+   - Search, filter, sort, alphabet bar
+   - Gold border cards with Transylvanian SVG motif
+   - Stats sidebar: 47 familii, 312 locuitori, 1269, UNESCO
+   - 5 placeholder families
+   - Links to: familiile-familie.html?family=ID
+
+4. galerie.html — Photo Gallery
+   - Featured photo, recently added strip, 7 categories
+   - Lightbox with zoom/download/share
+   - Upload form with drag/drop
+   - 8 placeholder SVG photos
+
+5. genealogie.html — Genealogy Level 1 (selector)
+   - Village tree banner (full width, featured first)
+   - Family cards grid with search/filter/sort
+   - PHASE 2 HOOK: replace FAMILIES array with Supabase fetch
+   - Links to: genealogie-familie.html?family=ID
+
+6. genealogie-familie.html — Genealogy Level 2+3
+   - Full tree canvas (Variant C), person detail panel
+   - Add person form, back button → genealogie.html
+   - PHASE 2 HOOK: read ?family= param, fetch from Supabase
+   - URL: genealogie-familie.html?family=popescu
+
+7. harta.html — Interactive Map
+   - ArcGIS satellite + OpenStreetMap toggle
+   - Animated fly-in, gold markers, guided tour
+   - Leaflet CDN: jsDelivr (NOT unpkg)
+   - Guard: friendly error if Leaflet fails to load
+
+8. contact.html — Contact Page
+   - 6 topic chips, form fields, char counter (0/1200)
+   - Real email via Formspree xpqygdjn
+   - Loading state → success / error handling
+   - FAQ section links to intrebari.html
+
+9. familiile-familie.html — Individual Family Profile
+   - URL: familiile-familie.html?family=popescu
+   - Hero: avatar, name, village, stats, badges
+   - Breadcrumb: Acasa > Familiile > Familia X
+   - Story, members (deceased faded), public photos
+   - Tree preview → genealogie-familie.html?family=ID
+   - Family connections + timeline
+   - PIN private access box + privacy note
+   - PHASE 2 HOOK: read ?family=, fetch Supabase, PIN check
+
+10. intrebari.html — FAQ Page
+    - 18 questions in 7 categories (search + filter chips)
+    - Categories: Inregistrare, Privat, Fotografii,
+      Genealogie, Tehnic, Diaspora
+    - Sidebar: page links + contact button
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+FILE NAMING CONVENTION
+────────────────────────
+[section].html            ← main section page
+[section]-[sub].html      ← sub-page of that section
+
+genealogie.html           ← main genealogy selector
+genealogie-familie.html   ← individual family tree
+
+familiile.html            ← main families directory
+familiile-familie.html    ← individual family profile
+
+Future:
+evenimente.html           ← main events page
+evenimente-eveniment.html ← individual event (if needed)
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+NAV STRUCTURE — ALL PAGES
+───────────────────────────
+8 links, identical on every page, in this exact order:
+
+  Acasa | Istoria Satului | Familiile | Genealogie | Harta |
+  Galerie | Contact | Intrebari | [Login — far right]
+
+EN versions:
+  Homepage | Village History | Families | Genealogy | Map |
+  Gallery | Contact | FAQ | [Family Login]
+
+Active state rules:
+  Each page highlights its own nav link.
+  genealogie-familie.html  → highlights genealogie.html
+  familiile-familie.html   → NO active link (sub-page)
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+PAGE CONNECTIONS MAP
+─────────────────────
+index.html
+  └→ familiile.html (CTA + features card)
+  └→ all pages (features grid)
+
+familiile.html
+  └→ familiile-familie.html?family=ID
+
+familiile-familie.html?family=ID
+  └→ genealogie-familie.html?family=ID
+  └→ galerie.html (photos)
+  └→ familiile-familie.html?family=OTHER
+  └→ familiile.html (breadcrumb)
+
+genealogie.html
+  └→ genealogie-familie.html?family=ID
+  └→ familiile.html (add family)
+
+genealogie-familie.html?family=ID
+  └→ genealogie.html (back button)
+
+contact.html
+  └→ intrebari.html
+
+intrebari.html
+  └→ contact.html
+  └→ all pages (sidebar)
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+PLACEHOLDER REPLACEMENT — AFTER PHASE 2
+─────────────────────────────────────────
+familiile.html        → real families, real stats sidebar
+galerie.html          → real photos, real category counts
+genealogie.html       → FAMILIES array → Supabase fetch
+genealogie-familie.html → PEOPLE → Supabase by ?family=
+familiile-familie.html  → FAM/MEMBERS/TIMELINE → Supabase
+                          PIN check → Supabase hashed verify
+intrebari.html        → update registration FAQ answer
+All pages             → announcements sidebar → real news
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+DESIGN STYLE — CRITICAL
+─────────────────────────
+Overall: Obsidian & Gold — dark, elegant, premium memorial site.
+
+CSS Variables (same in every file):
+--bg:      #0a0a0a    --s1:     #111111    --s2:    #161616
+--s3:      #1c1c1c    --b1:     #2a2a2a    --b2:    #383838
+--gold:    #d4a84a    --gold-l: #e0b84a    --gold-d:#b08030
+--gold-m:  #7a5828    --text:   #f0e8d0    --muted: #a09070
+
+Fonts: Playfair Display (headings) + EB Garamond (body)
+       Both from Google Fonts — always include in <head>
+
+Banner: embedded as base64 in all pages (always loads)
+SVG ornament: Transylvanian motif in header of every page
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+TECHNICAL RULES — CRITICAL
+────────────────────────────
+- Pure HTML + CSS + JS only — no frameworks
+- All files standalone .html, banner always base64 embedded
+- NO Romanian special chars (ș ț ă â î) inside JS strings
+- NO apostrophes inside single-quoted JS strings
+- NO onerror="this.style.display='none'" pattern
+- External libraries always in <head>
+- Map/heavy JS always in window.addEventListener('load')
+- Leaflet CDN: cdn.jsdelivr.net/npm/leaflet@1.9.4/ ONLY
+- setLang() must update ALL text including dynamic content
+- Scroll buttons use style.opacity (not CSS classes)
+- Always run node --check before delivering
+- OG meta URLs: https://angelofsoul.github.io/ (never netlify)
+- PHASE 2 HOOK comments mark Supabase integration points
+- Always show upload link after every file delivery
+- Treat site as fully live — no "coming soon" framing
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+VILLAGE INFORMATION
+────────────────────
+Village:    Calnic (German: Kelling, Hungarian: Kalnok)
+County:     Alba, Transilvania, Romania
+Founded:    First documented 1269
+Altitude:   380m
+Citadel:    Cetatea Calnic — UNESCO 1999
+            lat: 45.8082, lng: 23.6438
+Center:     lat: 45.8089, lng: 23.6447
+Hamlet:     Deal (documented 1366)
+Economy:    Beekeeping, fruit growing, viticulture
+History:    Saxons (left bank) + Romanians (right bank)
+            Saxons emigrated to Germany in 1980s
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+TO START NEXT SESSION
+──────────────────────
+1. Open new chat with Claude
+2. Upload CALNIC_PROJECT_BRIEFING_V6.txt
+3. Upload ALL 10 HTML files:
+   index.html, istorie.html, familiile.html, galerie.html,
+   genealogie.html, genealogie-familie.html, harta.html,
+   contact.html, familiile-familie.html, intrebari.html
+4. Describe what you want next
+
+SUGGESTED NEXT:
+  → Build evenimente.html (village events calendar)
+  → OR start Phase 2 (Supabase setup)
+
+═══════════════════════════════════════════════════════════════════════
