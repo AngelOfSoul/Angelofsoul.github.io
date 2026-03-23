@@ -828,6 +828,7 @@ function buildThisWeek() {
 
 function setLang(lang) {
   currentLang = lang;
+  localStorage.setItem('calnic-lang', lang);
   document.getElementById('btn-ro').classList.toggle('active', lang === 'ro');
   document.getElementById('btn-en').classList.toggle('active', lang === 'en');
   document.querySelectorAll('[data-ro]').forEach(function(el) {
@@ -863,10 +864,7 @@ document.addEventListener('keydown', function(e) {
   if (e.key === 'Escape') closeLbX();
 });
 
-buildCatBar();
-applyFilters();
-buildRecent();
-buildThisWeek();
+setLang(currentLang);
 
 // Hamburger menu
 var ham = document.getElementById('hamburgerBtn');

@@ -345,7 +345,7 @@ footer .g{color:var(--gold-d);font-style:normal;}
 
 <script>
 document.getElementById('yr').textContent = new Date().getFullYear();
-var currentLang = 'ro';
+var currentLang = localStorage.getItem('calnic-lang') || 'ro';
 
 window.addEventListener('load', function() {
 
@@ -776,6 +776,7 @@ function prevTour() { tourIdx=(tourIdx-1+tourData.length)%tourData.length; goTou
 /* ── LANGUAGE ── */
 window._setLang = function setLang(lang) {
   currentLang = lang;
+  localStorage.setItem('calnic-lang', lang);
   document.getElementById('btn-ro').classList.toggle('active', lang==='ro');
   document.getElementById('btn-en').classList.toggle('active', lang==='en');
   document.querySelectorAll('[data-ro]').forEach(function(el) {
@@ -827,6 +828,8 @@ window._updateScrollBtns = function() {
   if(b){b.style.opacity=atBottom?'0':'1';b.style.pointerEvents=atBottom?'none':'auto';}
 };
 setTimeout(window._updateScrollBtns, 100);
+
+window._setLang(currentLang);
 
 }); // end window.onload
 
