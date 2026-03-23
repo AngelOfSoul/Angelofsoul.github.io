@@ -835,6 +835,7 @@ window._setLang(currentLang);
 
 function setLang(lang) { if(window._setLang) window._setLang(lang); }
 function updateScrollBtns() { if(window._updateScrollBtns) window._updateScrollBtns(); }
+setLang(currentLang);
 window.addEventListener('scroll', updateScrollBtns);
 window.addEventListener('load', updateScrollBtns);
 

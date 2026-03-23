@@ -566,8 +566,9 @@ footer .g { color:var(--gold-d); font-style:normal; }
         </div>
       </div>
     </div>
+    <div id="um-msg" style="display:none;padding:8px 12px;border-radius:3px;font-size:13px;font-family:'EB Garamond',serif;margin-bottom:10px;"></div>
     <div class="um-actions">
-      <button class="um-save" onclick="savePhoto()" data-ro="Salveaza fotografia" data-en="Save photo">Salveaza fotografia</button>
+      <button class="um-save" id="um-save-btn" onclick="savePhoto()" data-ro="Salveaza fotografia" data-en="Save photo">Salveaza fotografia</button>
       <button class="um-cancel" onclick="closeUploadBtn()" data-ro="Anuleaza" data-en="Cancel">Anuleaza</button>
     </div>
   </div>
@@ -682,12 +683,13 @@ function applyFilters() {
     empty.style.display = 'none';
     grid.innerHTML = filtered.map(function(p, i) {
       var svgIdx = p.id % SVG_SHAPES.length;
+      var mediaHtml = p.imgUrl ? '<img src="' + p.imgUrl.replace(/"/g, '&quot;') + '" alt="" style="width:100%;height:100%;object-fit:cover;" />' : SVG_SHAPES[svgIdx];
       var lockHtml = p.priv ? '<div class="pt-lock">&#128274; ' + (currentLang === 'ro' ? 'Privata' : 'Private') + '</div>' : '';
       var catLabel = getCatLabel(p.cat, currentLang);
       var byText = currentLang === 'ro' ? p.byRo : p.byEn;
       var title = getPhotoTitle(p);
       return '<div class="photo-tile" onclick="openLb(' + p.id + ')" data-id="' + p.id + '">'+
-        '<div class="pt-img">' + SVG_SHAPES[svgIdx] + lockHtml +
+        '<div class="pt-img">' + mediaHtml + lockHtml +
         '<div class="pt-cat">' + catLabel + '</div>' +
         '<div class="pt-year">' + p.year + '</div></div>'+
         '<div class="pt-info"><div class="pt-info-left">'+
@@ -699,12 +701,13 @@ function applyFilters() {
 }
 
 function buildRecent() {
-  var sorted = photos.slice().sort(function(a,b){ return b.addedOrder - a.addedOrder; }).slice(0,5);
+  var sorted = photos.slice().sort(function(a,b){ return b.addedOrder - a.addedOrder; }).slice(0,8);
   var row = document.getElementById('recent-row');
   row.innerHTML = sorted.map(function(p) {
     var svgIdx = p.id % SVG_SHAPES.length;
+    var mediaHtml = p.imgUrl ? '<img src="' + p.imgUrl.replace(/"/g, '&quot;') + '" alt="" style="width:100%;height:70px;object-fit:cover;border-radius:4px;" />' : SVG_SHAPES[svgIdx];
     var title = getPhotoTitle(p);
-    return '<div class="recent-thumb" onclick="openLb(' + p.id + ')"><div class="ri">' + SVG_SHAPES[svgIdx] + '</div><div class="rt">' + title + '</div></div>';
+    return '<div class="recent-thumb" onclick="openLb(' + p.id + ')"><div class="ri">' + mediaHtml + '</div><div class="rt">' + title + '</div></div>';
   }).join('');
 }
 
@@ -712,8 +715,13 @@ function openLb(id) {
   var p = photos.find(function(x){ return x.id === id; });
   if (!p) return;
   currentLbIdx = id;
-  var svgIdx = p.id % SVG_SHAPES.length;
-  document.getElementById('lb-svg').outerHTML = SVG_SHAPES[svgIdx].replace('<svg ', '<svg id="lb-svg" ');
+  var lbMedia = document.getElementById('lb-svg');
+  if (p.imgUrl) {
+    lbMedia.outerHTML = '<img id="lb-svg" src="' + p.imgUrl.replace(/"/g, '&quot;') + '" alt="" style="width:100%;height:100%;object-fit:contain;transition:transform 0.3s;" />';
+  } else {
+    var svgIdx = p.id % SVG_SHAPES.length;
+    lbMedia.outerHTML = SVG_SHAPES[svgIdx].replace('<svg ', '<svg id="lb-svg" ');
+  }
   document.getElementById('lb-title').textContent = getPhotoTitle(p);
   var cap = currentLang === 'ro' ? p.captionRo : p.captionEn;
   var capEl = document.getElementById('lb-caption');
@@ -782,7 +790,14 @@ function sharePhoto(id) {
 
 function openUpload() { document.getElementById('um-overlay').classList.add('open'); document.body.style.overflow = 'hidden'; }
 function closeUpload(e) { if (e && e.target !== document.getElementById('um-overlay')) return; closeUploadBtn(); }
-function closeUploadBtn() { document.getElementById('um-overlay').classList.remove('open'); document.body.style.overflow = ''; }
+function closeUploadBtn() {
+  document.getElementById('um-overlay').classList.remove('open');
+  document.body.style.overflow = '';
+  var msg = document.getElementById('um-msg');
+  if (msg) { msg.style.display = 'none'; msg.textContent = ''; }
+  var btn = document.getElementById('um-save-btn');
+  if (btn) { btn.disabled = false; btn.textContent = currentLang === 'ro' ? 'Salveaza fotografia' : 'Save photo'; }
+}
 
 function setVis(v) {
   visChoice = v;
@@ -799,11 +814,90 @@ function handleFile(input) {
   }
 }
 
+function showUmMsg(text, type) {
+  var el = document.getElementById('um-msg');
+  if (!el) return;
+  el.textContent = text;
+  el.style.display = 'block';
+  el.style.background = type === 'err' ? '#2a0a0a' : '#0a1a0a';
+  el.style.color = type === 'err' ? '#d06040' : '#6a9a5a';
+  el.style.border = '1px solid ' + (type === 'err' ? '#4a1a10' : '#2a4a2a');
+}
+
+function compressImage(file, callback) {
+  var reader = new FileReader();
+  reader.onload = function(e) {
+    var img = new Image();
+    img.onload = function() {
+      var canvas = document.createElement('canvas');
+      var maxSize = 1200;
+      var w = img.width, h = img.height;
+      if (w > maxSize || h > maxSize) {
+        if (w >= h) { h = Math.round(h * maxSize / w); w = maxSize; }
+        else { w = Math.round(w * maxSize / h); h = maxSize; }
+      }
+      canvas.width = w; canvas.height = h;
+      canvas.getContext('2d').drawImage(img, 0, 0, w, h);
+      canvas.toBlob(callback, 'image/jpeg', 0.82);
+    };
+    img.src = e.target.result;
+  };
+  reader.readAsDataURL(file);
+}
+
 function savePhoto() {
   var title = document.getElementById('um-titlu').value.trim();
-  if (!title) { alert(currentLang === 'ro' ? 'Te rugam sa adaugi un titlu.' : 'Please add a title.'); return; }
-  alert(currentLang === 'ro' ? 'Fotografia a fost salvata! (Demo — va fi conectata la baza de date)' : 'Photo saved! (Demo — will connect to database)');
-  closeUploadBtn();
+  if (!title) {
+    showUmMsg(currentLang === 'ro' ? 'Te rugam sa adaugi un titlu.' : 'Please add a title.', 'err');
+    return;
+  }
+  var fileInput = document.getElementById('fileInput');
+  if (!window.supabase || !window.isSupabaseConfigured() || !fileInput.files || !fileInput.files[0]) {
+    alert(currentLang === 'ro' ? 'Fotografia a fost salvata! (Demo \u2014 conecteaza Supabase pentru stocare reala)' : 'Photo saved! (Demo \u2014 connect Supabase for real storage)');
+    closeUploadBtn();
+    return;
+  }
+  var saveBtn = document.getElementById('um-save-btn');
+  saveBtn.disabled = true;
+  saveBtn.textContent = currentLang === 'ro' ? 'Se incarca...' : 'Uploading...';
+  showUmMsg(currentLang === 'ro' ? 'Se comprima si incarca fotografia...' : 'Compressing and uploading photo...', 'info');
+  var year     = parseInt(document.getElementById('um-an').value) || null;
+  var cat      = document.getElementById('um-cat').value;
+  var caption  = document.getElementById('um-caption').value.trim();
+  var ded      = document.getElementById('um-dedicatie').value.trim();
+  var isPrivate = (visChoice === 'priv');
+  compressImage(fileInput.files[0], function(blob) {
+    window.supabase.auth.getUser().then(function(userRes) {
+      var userId = userRes && userRes.data && userRes.data.user ? userRes.data.user.id : null;
+      var path = (userId || 'public') + '/' + Date.now() + '.jpg';
+      window.supabase.storage.from('photos').upload(path, blob, { contentType: 'image/jpeg', upsert: false })
+        .then(function(storRes) {
+          if (storRes.error) {
+            saveBtn.disabled = false;
+            saveBtn.textContent = currentLang === 'ro' ? 'Salveaza fotografia' : 'Save photo';
+            showUmMsg((currentLang === 'ro' ? 'Eroare la incarcare: ' : 'Upload error: ') + storRes.error.message, 'err');
+            return;
+          }
+          var meta = {
+            path: path, title_ro: title, title_en: title,
+            caption_ro: caption, caption_en: caption,
+            dedicatie_ro: ded, dedicatie_en: ded,
+            year: year, category: cat, is_private: isPrivate
+          };
+          if (userId) meta.uploader_id = userId;
+          window.supabase.from('photos').insert(meta).then(function(insRes) {
+            saveBtn.disabled = false;
+            saveBtn.textContent = currentLang === 'ro' ? 'Salveaza fotografia' : 'Save photo';
+            if (insRes.error) {
+              showUmMsg((currentLang === 'ro' ? 'Eroare la salvare: ' : 'Save error: ') + insRes.error.message, 'err');
+              return;
+            }
+            closeUploadBtn();
+            loadPhotosFromSupabase();
+          });
+        });
+    });
+  });
 }
 
 function openReport() { document.getElementById('rep-overlay').classList.add('open'); }
@@ -866,6 +960,40 @@ document.addEventListener('keydown', function(e) {
 
 setLang(currentLang);
 
+/* ── Load real photos from Supabase on ready ── */
+function loadPhotosFromSupabase() {
+  if (!window.supabase || !window.isSupabaseConfigured()) return;
+  window.supabase.from('photos')
+    .select('*')
+    .eq('is_private', false)
+    .order('uploaded_at', { ascending: false })
+    .then(function(res) {
+      if (res.error || !res.data || !res.data.length) return;
+      photos = res.data.map(function(r, i) {
+        var urlRes = window.supabase.storage.from('photos').getPublicUrl(r.path);
+        var imgUrl = urlRes && urlRes.data ? urlRes.data.publicUrl : null;
+        return {
+          id: i, dbId: r.id,
+          titleRo: r.title_ro || r.caption_ro || ('Fotografie ' + (i + 1)),
+          titleEn: r.title_en || r.caption_en || ('Photo ' + (i + 1)),
+          cat: r.category || 'vechi',
+          year: r.year || 0,
+          byRo: '', byEn: '',
+          captionRo: r.caption_ro || '',
+          captionEn: r.caption_en || '',
+          dedicatieRo: r.dedicatie_ro || '',
+          dedicatieEn: r.dedicatie_en || '',
+          priv: r.is_private || false,
+          addedOrder: res.data.length - i,
+          featured: i === 0,
+          imgUrl: imgUrl
+        };
+      });
+      setLang(currentLang);
+    });
+}
+document.addEventListener('supabase:ready', loadPhotosFromSupabase);
+
 // Hamburger menu
 var ham = document.getElementById('hamburgerBtn');
 var mobileMenu = document.getElementById('navMobileMenu');
@@ -879,5 +1007,6 @@ if (ham && mobileMenu) {
 
 <button class="float-add" id="floatAdd" onclick="openUpload()">+ Adauga fotografie</button>
 
+<script src="supabase.js"></script>
 </body>
 </html>
