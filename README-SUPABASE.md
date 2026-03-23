@@ -154,7 +154,46 @@ in the Supabase SQL Editor.
 
 ---
 
-## 7. How the pages work
+## 8. Set up photo storage
+
+This step wires the gallery upload form to Supabase Storage.
+
+### 8a. Create the Storage bucket
+
+1. In the Supabase dashboard, go to **Storage → New bucket**.
+2. Name it exactly `photos`.
+3. Toggle **Public bucket** to **ON** (so public photos load without auth headers).
+4. Click **Create bucket**.
+
+### 8b. Add Storage policies
+
+In the Supabase dashboard → **Storage → photos → Policies**, add two policies:
+
+| Policy name | Operation | Expression |
+|---|---|---|
+| Public read | SELECT | `true` |
+| Authenticated upload | INSERT | `auth.uid() IS NOT NULL` |
+
+### 8c. Create the photos table and RLS
+
+Run the SQL in `setup-photos-storage.sql` in the **SQL Editor**.
+
+This creates:
+- `photos` table with all fields used by `galerie.html`
+- RLS policies: public read, auth insert/update/delete
+
+### 8d. How it works
+
+After completing steps 8a–8c:
+- The **"Adaugă fotografie"** button in `galerie.html` compresses the selected image
+  (max 1200 px, JPEG 82%) and uploads it to the `photos` Storage bucket.
+- The metadata row is inserted into the `photos` table.
+- The gallery automatically reloads with real photos from the database.
+- If no photos exist in the database yet, the gallery shows built-in demo data.
+
+---
+
+## 9. How the pages work
 
 | Page | Behaviour |
 |------|-----------|
@@ -162,9 +201,11 @@ in the Supabase SQL Editor.
 | `familiile-familie.html` | Loads a single family by `?family=<uuid>`; falls back to Familia Popescu demo data |
 | `login.html` | Full sign-in / registration page using Supabase Auth |
 
+| `galerie.html` | Loads real photos from Supabase Storage; falls back to 8 demo photos if no photos in DB; upload form compresses + uploads to Storage bucket |
+
 ---
 
-## 8. Troubleshooting
+## 10. Troubleshooting
 
 - **"Supabase not connected — showing demo data"** in browser console → your `supabase.js` still has placeholder values, or your browser is offline.
 - **CORS error** → ensure your Site URL is correctly set in the Supabase Auth settings.
