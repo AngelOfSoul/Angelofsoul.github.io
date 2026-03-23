@@ -38,8 +38,10 @@ const SUPABASE_ANON_KEY = 'YOUR_SUPABASE_ANON_KEY';
 /*
  * isSupabaseConfigured()
  * Returns true only when the placeholders have been replaced with real values.
+ * Can be used by any page to conditionally show/hide Supabase-dependent UI:
+ *   if (isSupabaseConfigured()) { ... }
  */
-function isSupabaseConfigured() {
+window.isSupabaseConfigured = function isSupabaseConfigured() {
   return SUPABASE_URL !== 'YOUR_SUPABASE_URL' &&
          SUPABASE_ANON_KEY !== 'YOUR_SUPABASE_ANON_KEY';
-}
+};

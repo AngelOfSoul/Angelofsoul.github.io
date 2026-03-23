@@ -616,7 +616,7 @@ function showLoggedIn(user) {
   document.getElementById('authBox').style.display = 'none';
   document.getElementById('loggedInBox').style.display = '';
   var emailEl = document.getElementById('loggedInEmail');
-  emailEl.textContent = user.email || '';
+  if (emailEl) emailEl.textContent = user.email || '';
 }
 
 /* LOGIN */
@@ -704,6 +704,8 @@ async function doRegister(e) {
     }
     var userId = signUpRes.data.user && signUpRes.data.user.id;
     if (userId) {
+      /* pin_hash stores a base64 encoding of the PIN (per spec).
+         Server-side verification uses the check_family_pin RPC which performs the comparison. */
       var famData = { name: name, village: village, owner_id: userId, pin_hash: btoa(pin) };
       if (since) famData.since = since;
       var insRes = await window.supabase.from('families').insert([famData]);

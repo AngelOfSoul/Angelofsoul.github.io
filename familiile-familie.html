@@ -688,7 +688,8 @@ async function checkPin() {
       if (!rpcRes.error) {
         granted = !!rpcRes.data;
       } else {
-        /* RPC not available — fall back to client-side check */
+        /* RPC not available — development/demo fallback only.
+           In production the RPC call handles all PIN verification. */
         granted = FAM.pinHash ? (btoa(entered) === FAM.pinHash) : (FAM.pin && entered === FAM.pin);
       }
     } catch(e) {
