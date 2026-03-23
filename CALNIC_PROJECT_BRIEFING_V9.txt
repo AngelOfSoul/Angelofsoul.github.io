@@ -1,0 +1,674 @@
+=======================================================================
+CALNIC ONLINE — PROJECT BRIEFING V9
+Last updated: 2026-03-23
+=======================================================================
+
+WHAT IS THIS PROJECT?
+─────────────────────
+A digital village memory book ("cartea vie a satului") for Calnic,
+a village in Alba County, Transylvania, Romania. Each family can have
+a public profile and a private dashboard space. Goal: preserve
+memories, genealogy and photos for future generations.
+
+Bilingual: Romanian (primary) + English (secondary), RO/EN toggle.
+Always treat the site as fully live and functional.
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+LIVE SITE & GITHUB
+───────────────────
+URL:         https://angelofsoul.github.io
+GitHub:      https://github.com/AngelOfSoul/Angelofsoul.github.io
+Upload link: https://github.com/AngelOfSoul/Angelofsoul.github.io/upload/main
+Platform:    GitHub Pages (free, unlimited, forever)
+Active PR:   https://github.com/AngelOfSoul/Angelofsoul.github.io/pull/4
+             Branch: copilot/import-repository-and-assess-next-steps
+
+CRITICAL RULES FOR EVERY SESSION:
+- Always give upload link after delivering any file
+- Always communicate in English
+- Show live preview BEFORE building final file
+- Run node --check on all JS before delivering
+- Fix ALL affected pages when something changes
+- Before context limit is reached: create updated briefing + changelog
+- localStorage key for language: 'calnic-lang' (NEVER 'lang')
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+ANNUAL COSTS
+─────────────
+GitHub Pages     0 lei/year
+Google Fonts     0 lei/year
+Supabase         0 lei/year
+cron-job.org     0 lei/year
+Formspree        0 lei/year  (50 msg/month free, forever)
+.ro domain       ~50-80 lei/year
+TOTAL:           ~50-80 lei/year
+
+Buy .ro domain: RoTLD.ro or Hostingr.ro
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+BACKEND — FINAL DECISIONS
+──────────────────────────
+Backend:      Supabase (auth, database, photo storage)
+Keep-alive:   cron-job.org (ping every 3 days)
+Contact form: Formspree — endpoint: https://formspree.io/f/xpqygdjn
+Photos:       Stored compressed in Supabase (NOT Cloudinary)
+Security:     Row-level security — families see only their own data
+
+PIN SYSTEM:
+- Family chooses their own PIN (4-8 digits, numeric only)
+- PIN stored HASHED in Supabase as btoa(pin) — nobody can see it
+- Admin cannot see it; can only trigger reset link to family email
+- MUST show on familiile-familie.html:
+  RO: "PIN-ul este cunoscut doar de membrii familiei.
+       Administratorul site-ului nu are acces la continutul privat."
+  EN: "The PIN is known only by family members.
+       The site administrator has no access to private content."
+- Validation via Supabase RPC: check_family_pin(family_id, pin)
+
+NOT chosen: Firebase (risk of shutdown)
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+SUPABASE — SETUP STATUS (as of V9)
+────────────────────────────────────
+Connection:   supabase.js (shared client file, imported by all pages)
+Event model:  'supabase:ready' custom event fires once client is ready
+Client ref:   window.supabase
+Config check: window.isSupabaseConfigured() -> boolean
+
+DATABASE TABLES — all created and live:
+
+families
+  id                uuid PK (auto)
+  owner_id          uuid FK -> auth.users
+  name              text
+  village           text (default: 'Calnic')
+  since             integer
+  desc_ro           text
+  desc_en           text
+  members_count     integer
+  generations_count integer
+  photos_count      integer
+  show_members      boolean
+  show_generations  boolean
+  show_photos       boolean
+  show_since        boolean
+  has_public_photos boolean
+  has_private_photos boolean
+  pin_hash          text (base64 encoded via btoa())
+  created_at        timestamptz
+
+members
+  id          uuid PK
+  family_id   uuid FK -> families (cascade delete)
+  name        text
+  initial     text
+  role        text
+  birth_year  integer
+  death_year  integer
+  is_deceased boolean
+
+timeline
+  id         uuid PK
+  family_id  uuid FK -> families (cascade delete)
+  year       integer
+  text_ro    text
+  text_en    text
+
+ROW LEVEL SECURITY — all active:
+- Anyone can READ families, members, timeline (public data)
+- Only owner_id user can WRITE/UPDATE their own family row
+- Only family owner can INSERT/DELETE their own members + timeline
+
+HELPER FUNCTION:
+- check_family_pin(p_family_id uuid, p_pin text) -> boolean
+  Validates a family PIN: compares encode64(p_pin) to stored pin_hash
+
+AUTH SETUP:
+- Provider: Email (enabled)
+- Site URL: https://angelofsoul.github.io
+- Redirect URL: https://angelofsoul.github.io/login.html
+
+PHOTOS TABLE (not yet created — needed for Phase 3):
+  id           uuid PK (auto)
+  family_id    uuid FK -> families (nullable — village photos)
+  path         text (Supabase Storage path)
+  caption_ro   text
+  caption_en   text
+  category     text (e.g. 'arhiva', 'sarbatori', 'natura', etc.)
+  uploaded_at  timestamptz default now()
+  uploader_id  uuid FK -> auth.users (nullable)
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+FILE INVENTORY (V9)
+────────────────────
+index.html                  Homepage
+familiile.html              Families directory
+familiile-familie.html      Individual family public profile
+genealogie.html             Genealogy overview / village tree entry
+genealogie-familie.html     Individual family genealogy tree viewer
+galerie.html                Village photo gallery
+istorie.html                Village history timeline
+harta.html                  Interactive village map
+contact.html                Contact form
+intrebari.html              FAQ page
+login.html                  Family account login / register + Step 2
+dashboard.html              Private family dashboard (logged-in)
+404.html                    Custom 404 error page
+supabase.js                 Supabase client config (shared)
+seed-demo-data.sql          SQL demo family data for Supabase
+README.md                   General project readme
+README-SUPABASE.md          Supabase setup instructions
+CNAME                       Custom domain record
+CALNIC_PROJECT_BRIEFING_V8.txt  Previous briefing (superseded by V9)
+CALNIC_PROJECT_BRIEFING_V9.txt  This file
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+BUILD STATUS (V9)
+──────────────────
+
+PHASE 1 — Visual pages
+  DONE: index.html
+  DONE: istorie.html
+  DONE: familiile.html
+  DONE: galerie.html
+  DONE: genealogie.html
+  DONE: genealogie-familie.html
+  DONE: harta.html
+  DONE: contact.html
+  DONE: familiile-familie.html
+  DONE: intrebari.html
+  DONE: login.html
+  DONE: 404.html
+  NOTE: evenimente.html will NOT be built — decision confirmed.
+
+PHASE 2 — Backend (Supabase)
+  DONE: supabase.js created and configured
+  DONE: families, members, timeline tables created in Supabase
+  DONE: RLS policies applied
+  DONE: check_family_pin() RPC function created
+  DONE: Auth configured (email provider, redirect URL)
+  DONE: seed-demo-data.sql created with demo family data
+  DONE: login.html — full auth flow (register + Step 2 family profile)
+  DONE: login.html — post-login family check (redirect to dashboard
+        or show Step 2 if no family row yet)
+  DONE: dashboard.html — private family dashboard
+  DONE: familiile.html — Supabase wiring (loads real families, spinner,
+        live statFamiliiNum, falls back to demo data on error)
+  DONE: familiile-familie.html — Supabase wiring (?id= / ?family= param,
+        redirects to familiile.html if no param present, loads real data,
+        setLang re-renders story + timeline)
+  DONE: genealogie.html — Supabase wiring + language persistence
+        (supabase:ready listener fetches families ordered by name,
+        maps to FAMILIES array, calls filterFamilies(); falls back
+        to demo data if Supabase not connected; supabase.js included)
+  DONE: genealogie-familie.html — Supabase wiring + language persistence
+        (supabase:ready listener reads ?family= UUID, Promise.all fetches
+        family row + members, populates PEOPLE object; falls back to
+        demo Popescu data; supabase.js included)
+  DONE: Language persistence (localStorage 'calnic-lang') on ALL pages:
+        index.html, 404.html, contact.html, intrebari.html, login.html,
+        familiile.html, familiile-familie.html, dashboard.html,
+        galerie.html, genealogie.html, genealogie-familie.html,
+        harta.html, istorie.html
+  TODO: galerie.html — photo upload -> Supabase Storage bucket
+  TODO: galerie.html — load real photos from Supabase Storage
+
+PHASE 3 — Keep-alive
+  TODO: cron-job.org setup (ping Supabase every 3 days)
+        Do this after Supabase is fully wired.
+
+PHASE 4 — Domain + launch
+  TODO: Buy .ro domain (RoTLD.ro or Hostingr.ro, ~50-80 lei/year)
+  TODO: Connect domain to GitHub Pages (~24 hours propagation)
+  NOTE: Do this LAST, after everything else is working.
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+WHAT CHANGED IN V9 (vs V8)
+────────────────────────────
+
+1. genealogie.html — Supabase wiring + language persistence (NEW in V9)
+   - Removed PHASE 2 HOOK comment block
+   - Added supabase:ready listener:
+       document.addEventListener('supabase:ready', function() {
+         window.supabase.from('families')
+           .select('id,name,village,since,members_count,generations_count')
+           .order('name')
+           .then(function(res) {
+             if (res.error || !res.data || !res.data.length) return;
+             FAMILIES = res.data.map(function(r) {
+               return {
+                 id: r.id, name: r.name,
+                 initial: r.name.charAt(0).toUpperCase(),
+                 village: r.village || 'Calnic',
+                 since: r.since || 0,
+                 gen: r.generations_count || 0,
+                 people: r.members_count || 0,
+                 connected: true
+               };
+             });
+             filterFamilies();
+           });
+       });
+   - currentLang reads from localStorage('calnic-lang')
+   - setLang() now calls localStorage.setItem('calnic-lang', lang)
+   - Replaced standalone filterFamilies() init with setLang(currentLang)
+   - Added <script src="supabase.js"></script> before </body>
+   - Falls back to 5 demo families if Supabase not connected
+
+2. genealogie-familie.html — Supabase wiring + language persistence (NEW in V9)
+   - Removed PHASE 2 HOOK comment block
+   - Added supabase:ready listener using Promise.all:
+       Promise.all([
+         window.supabase.from('families').select('id,name,village')
+           .eq('id', familyId).single(),
+         window.supabase.from('members').select('*')
+           .eq('family_id', familyId).order('birth_year')
+       ]).then(function(results) {
+         // maps members to PEOPLE object used by tree
+       });
+   - currentLang reads from localStorage('calnic-lang')
+   - setLang() now calls localStorage.setItem('calnic-lang', lang)
+   - Added setLang(currentLang) init call
+   - Added <script src="supabase.js"></script> before </body>
+   - Falls back to demo Popescu family data if Supabase not connected
+
+3. galerie.html — Language persistence completed (NEW in V9)
+   - Added localStorage.setItem('calnic-lang', lang) inside setLang()
+   - Replaced 4 standalone init calls (buildCatBar, applyFilters,
+     buildRecent, buildThisWeek) with single setLang(currentLang)
+   - currentLang was already reading from localStorage (V8 partial)
+   - Status: language persistence DONE; photo wiring still TODO
+
+4. harta.html — Language persistence added (NEW in V9)
+   - currentLang now initialises from localStorage('calnic-lang')
+   - Added localStorage.setItem('calnic-lang', lang) inside
+     window._setLang (the real setLang implementation)
+   - Added setLang(currentLang) call after wrapper function definition
+     to apply saved language on page load
+
+5. istorie.html — Language persistence added (NEW in V9)
+   - var curLang changed from hardcoded 'ro' to:
+       var curLang = localStorage.getItem('calnic-lang') || 'ro';
+   - Added localStorage.setItem('calnic-lang', lang) inside
+     setLangFull() (which is the main entry point for lang changes)
+   - Init at bottom changed from:
+       setLang('ro'); showFact(0, 'ro');
+     to:
+       setLangFull(curLang);
+     (setLangFull calls setLang + showFact internally)
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+ALL PAGES — CURRENT STATE (V9)
+────────────────────────────────
+
+1. index.html — Homepage
+   - Mission, who it's for (4 cards), how it works (5 steps)
+   - Public vs Private table, features grid (7 cards)
+   - Free forever, anonymous about section
+   - CTA -> familiile.html
+   - Language persistence: DONE
+
+2. istorie.html — Village History
+   - Full timeline prehistory -> 1999 UNESCO
+   - 20 rotating "Did you know?" facts (bilingual)
+   - Cetatea, Church, Saxon + Romanian communities
+   - Language persistence: DONE (fixed in V9)
+   - Supabase wiring: N/A (static content page)
+
+3. familiile.html — Families Directory
+   - Search, filter, sort, alphabet bar
+   - Gold border cards with Transylvanian SVG motif
+   - Stats sidebar: familii count (live from Supabase), 312 locuitori
+   - Supabase wiring: DONE (loads real families, spinner, fallback)
+   - Language persistence: DONE
+   - Links to: familiile-familie.html?id=UUID
+
+4. galerie.html — Photo Gallery
+   - Featured photo, recently added strip, 7 categories
+   - Lightbox with zoom/download/share
+   - Upload form with drag/drop
+   - Placeholder SVG photos (to be replaced with Supabase Storage)
+   - Language persistence: DONE (fixed in V9)
+   - Supabase photo wiring: TODO (next priority)
+
+5. genealogie.html — Genealogy Level 1 (selector)
+   - Village tree banner (full width, featured first)
+   - Family cards grid with search/filter/sort
+   - Supabase wiring: DONE (fixed in V9 — loads families from DB)
+   - Language persistence: DONE (fixed in V9)
+   - Links to: genealogie-familie.html?family=UUID
+   - Falls back to 5 demo families if Supabase not connected
+
+6. genealogie-familie.html — Genealogy Level 2+3
+   - Full tree canvas (Variant C), person detail panel
+   - Add person form, back button -> genealogie.html
+   - Supabase wiring: DONE (fixed in V9 — loads family + members)
+   - Language persistence: DONE (fixed in V9)
+   - URL: genealogie-familie.html?family=UUID
+   - Falls back to demo Popescu data if Supabase not connected
+
+7. harta.html — Interactive Map
+   - ArcGIS satellite + OpenStreetMap toggle
+   - Animated fly-in, gold markers, guided tour
+   - Leaflet CDN: jsDelivr (NOT unpkg)
+   - Guard: friendly error if Leaflet fails to load
+   - Language persistence: DONE (fixed in V9)
+   - Supabase wiring: TODO (family location pins — low priority)
+
+8. contact.html — Contact Page
+   - 6 topic chips, form fields, char counter (0/1200)
+   - Real email via Formspree xpqygdjn (WORKING)
+   - Loading state -> success / error handling
+   - FAQ section links to intrebari.html
+   - Language persistence: DONE
+
+9. familiile-familie.html — Individual Family Profile
+   - URL: familiile-familie.html?id=UUID (Supabase UUID)
+   - Also accepts ?family= for backward compat; redirects if missing
+   - Hero: avatar, name, village, stats, badges
+   - Breadcrumb: Acasa > Familiile > Familia X
+   - Story, members (deceased faded), public photos
+   - Tree preview -> genealogie-familie.html?family=ID
+   - Family connections + timeline
+   - PIN private access box wired to check_family_pin() RPC
+   - Privacy note shown as required
+   - Supabase wiring: DONE
+   - Language persistence: DONE
+
+10. intrebari.html — FAQ Page
+    - 18 questions in 7 categories (search + filter chips)
+    - Categories: Inregistrare, Privat, Fotografii,
+      Genealogie, Tehnic, Diaspora
+    - Sidebar: page links + contact button
+    - Language persistence: DONE
+
+11. login.html — Auth Page
+    - Tab 1: Login (email + password)
+      On login: checks families row -> dashboard.html or Step 2
+    - Tab 2: Register (email + password)
+      After signUp: shows Step 2 family profile form
+    - Step 2 fields: family name, since, desc_ro, desc_en, PIN
+    - doFamilyProfile(): inserts families row, redirects to dashboard
+    - Language persistence: DONE
+
+12. dashboard.html — Private Family Dashboard
+    - Auth-gated via supabase:ready + getUser()
+    - 4 collapsible sections: Story / Members / Timeline / Privacy+PIN
+    - All CRUD ops fully wired to Supabase
+    - Language persistence: DONE
+
+13. 404.html — Custom Error Page
+    - Branded 404 page matching site design
+    - Language persistence: DONE
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+REMAINING TODO — PRIORITIZED
+──────────────────────────────
+
+HIGH PRIORITY:
+  1. Photo upload -> Supabase Storage
+     - In Supabase dashboard: create a 'photos' bucket (public read)
+     - Create the 'photos' table (see schema in DATABASE TABLES above)
+     - Enable RLS on photos:
+         Anyone can read photos
+         Only authenticated users can insert their own photos
+     - Wire the drag/drop upload form in galerie.html to:
+         supabase.storage.from('photos').upload(path, file)
+         then insert metadata into photos table
+     - Add <script src="supabase.js"></script> if not present
+
+  2. galerie.html — Load real photos from Supabase Storage
+     - On 'supabase:ready', fetch from photos table ordered by
+       uploaded_at DESC
+     - Replace placeholder SVGs with real public URLs:
+         supabase.storage.from('photos').getPublicUrl(path)
+     - Rebuild category filter counts from real data
+     - "Recently Added" strip should show latest 8 photos
+
+MEDIUM PRIORITY:
+  3. SEO — Add og:image meta with real village photo URL
+     Add to <head> of ALL pages:
+       <meta property="og:image" content="https://angelofsoul.github.io/og-image.jpg">
+     First: upload a real village/citadel photo as og-image.jpg to repo
+
+  4. harta.html — Add real family location pins from database
+     After Supabase is wired, add supabase:ready listener:
+       fetch families with coordinates (add lat/lng columns to families
+       table OR use village-level coordinates from VILLAGE INFORMATION)
+     Add Leaflet markers to famGroup layer for each real family
+
+  5. cron-job.org keep-alive
+     After Supabase fully wired:
+     - Go to cron-job.org and create a free account
+     - Add a job: GET https://YOUR_SUPABASE_URL/rest/v1/families?limit=1
+       with header: apikey: YOUR_ANON_KEY
+     - Schedule: every 3 days (prevents free tier database sleep)
+
+LOW PRIORITY:
+  6. Domain — Buy .ro domain and connect to GitHub Pages
+     - Buy from RoTLD.ro or Hostingr.ro (~50-80 lei/year)
+     - In GitHub Pages settings: add custom domain
+     - In DNS: add CNAME record pointing to angelofsoul.github.io
+     - Propagation: up to 24 hours
+     - Do this LAST, after everything else is working
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+LANGUAGE PERSISTENCE PATTERN (critical — use everywhere)
+──────────────────────────────────────────────────────────
+localStorage key: 'calnic-lang'   <-- NEVER use 'lang' alone
+
+Standard pattern for ALL pages:
+
+  /* at top of <script> block */
+  var currentLang = localStorage.getItem('calnic-lang') || 'ro';
+
+  function setLang(lang) {
+    currentLang = lang;
+    localStorage.setItem('calnic-lang', lang);    // <-- persist
+    document.getElementById('btn-ro').classList.toggle('active', lang === 'ro');
+    document.getElementById('btn-en').classList.toggle('active', lang === 'en');
+    document.querySelectorAll('[data-ro]').forEach(function(el) {
+      var val = el.getAttribute('data-' + lang);
+      if (val !== null) el.textContent = val;
+    });
+    // ... any page-specific re-renders (filterFamilies, buildCatBar, etc.)
+  }
+
+  document.getElementById('btn-ro').addEventListener('click', function() { setLang('ro'); });
+  document.getElementById('btn-en').addEventListener('click', function() { setLang('en'); });
+  setLang(currentLang);  // <-- call on load (replaces any direct init calls)
+
+NOTE — istorie.html uses curLang (not currentLang) and setLangFull:
+  var curLang = localStorage.getItem('calnic-lang') || 'ro';
+  function setLangFull(lang) {
+    curLang = lang;
+    localStorage.setItem('calnic-lang', lang);
+    setLang(lang);       // updates buttons + data-ro/data-en elements
+    showFact(curFact, lang); // updates "Did you know?" widget
+  }
+  setLangFull(curLang); // called on page load
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+LANGUAGE PERSISTENCE STATUS PER PAGE (V9)
+──────────────────────────────────────────
+index.html              DONE
+404.html                DONE
+contact.html            DONE
+intrebari.html          DONE
+login.html              DONE
+familiile.html          DONE
+familiile-familie.html  DONE
+dashboard.html          DONE
+galerie.html            DONE  (fixed in V9)
+harta.html              DONE  (fixed in V9)
+istorie.html            DONE  (fixed in V9)
+genealogie.html         DONE  (fixed in V9)
+genealogie-familie.html DONE  (fixed in V9)
+
+ALL 13 PAGES — LANGUAGE PERSISTENCE COMPLETE
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+SUPABASE WIRING STATUS PER PAGE (V9)
+─────────────────────────────────────
+familiile.html          DONE — loads real families, spinner, fallback
+familiile-familie.html  DONE — loads by ?id=, falls back to demo
+login.html              DONE — signUp, signIn, Step 2 profile create
+dashboard.html          DONE — getUser, CRUD story/members/timeline/PIN
+genealogie.html         DONE — loads families from DB (fixed in V9)
+genealogie-familie.html DONE — loads family + members (fixed in V9)
+galerie.html            TODO — photo upload + load from Storage
+harta.html              TODO — family location pins (low priority)
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+NAV STRUCTURE — ALL PAGES (unchanged)
+───────────────────────────────────────
+8 links, identical on every page, exact order:
+
+  Acasa | Istoria Satului | Familiile | Genealogie | Harta |
+  Galerie | Contact | Intrebari | [Login — far right]
+
+EN versions:
+  Homepage | Village History | Families | Genealogy | Map |
+  Gallery | Contact | FAQ | [Family Login]
+
+Active state: each page highlights its own nav link.
+  genealogie-familie.html -> highlights Genealogie
+  familiile-familie.html  -> NO active link (sub-page)
+  dashboard.html          -> highlights Login (logged-in state)
+
+Mobile: hamburger button -> #navMobileMenu full-width dropdown
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+DESIGN STYLE — CRITICAL (unchanged)
+──────────────────────────────────────
+CSS Variables (same in every file — never change these):
+--bg:      #0a0a0a    --s1:     #111111    --s2:    #161616
+--s3:      #1c1c1c    --b1:     #2a2a2a    --b2:    #383838
+--gold:    #d4a84a    --gold-l: #e0b84a    --gold-d:#b08030
+--gold-m:  #7a5828    --text:   #f0e8d0    --muted: #a09070
+
+Fonts: Playfair Display (headings) + EB Garamond (body)
+Both from Google Fonts — always include in <head>
+
+Banner: embedded as base64 in all pages (always loads offline)
+SVG ornament: Transylvanian motif in header of every page
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+TECHNICAL RULES — CRITICAL (unchanged)
+─────────────────────────────────────────
+- Pure HTML + CSS + JS only — no frameworks
+- All files standalone .html, banner always base64 embedded
+- NO Romanian special chars inside JS strings (use Unicode escapes)
+- NO apostrophes inside single-quoted JS strings
+- NO onerror="this.style.display='none'" pattern
+- External libraries always in <head>
+- Map/heavy JS always in window.addEventListener('load')
+- Leaflet CDN: cdn.jsdelivr.net/npm/leaflet@1.9.4/ ONLY
+- setLang() must update ALL visible text + all dynamic content
+- Scroll buttons use style.opacity (not CSS classes)
+- Always run node --check before delivering
+- OG meta URLs: https://angelofsoul.github.io/ (never netlify)
+- supabase.js must be loaded as last <script> before </body>
+- Always show upload link after every file delivery
+- Treat site as fully live — no "coming soon" framing
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+SUPABASE SETUP INSTRUCTIONS (summary)
+───────────────────────────────────────
+Full guide: see README-SUPABASE.md
+
+Quick reference:
+1. Create project at supabase.com -> name: calnic-online, region: EU
+2. Edit supabase.js — fill in SUPABASE_URL and SUPABASE_ANON_KEY
+3. Run SQL from README-SUPABASE.md Step 3 (create tables)
+4. Run SQL from README-SUPABASE.md Step 4 (enable RLS policies)
+5. Enable Email Auth in Supabase dashboard
+6. Set Site URL: https://angelofsoul.github.io
+   Set Redirect URL: https://angelofsoul.github.io/login.html
+7. (Optional) Run seed-demo-data.sql to pre-populate 5 demo families
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+VILLAGE INFORMATION
+────────────────────
+Village:    Calnic (German: Kelling, Hungarian: Kalnok)
+County:     Alba, Transilvania, Romania
+Founded:    First documented 1269
+Altitude:   380m
+Citadel:    Cetatea Calnic — UNESCO 1999
+            lat: 45.8082, lng: 23.6438
+Center:     lat: 45.8089, lng: 23.6447
+Hamlet:     Deal (documented 1366)
+Economy:    Beekeeping, fruit growing, viticulture
+History:    Saxons (left bank) + Romanians (right bank)
+            Saxons emigrated to Germany in 1980s
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+PAGE CONNECTIONS MAP
+─────────────────────
+index.html
+  └-> familiile.html (CTA + features card)
+  └-> all pages (features grid)
+
+familiile.html
+  └-> familiile-familie.html?id=UUID
+
+familiile-familie.html?id=UUID
+  └-> genealogie-familie.html?family=UUID
+  └-> galerie.html (photos)
+  └-> familiile.html (breadcrumb)
+  └-> familiile-familie.html?id=OTHER
+
+genealogie.html
+  └-> genealogie-familie.html?family=UUID
+
+genealogie-familie.html?family=UUID
+  └-> genealogie.html (back button)
+
+login.html
+  └-> dashboard.html (after login or Step 2 complete)
+
+dashboard.html
+  └-> login.html (if not authenticated)
+  └-> familiile-familie.html (view public profile)
+
+contact.html
+  └-> intrebari.html
+
+intrebari.html
+  └-> contact.html
+  └-> all pages (sidebar links)
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+TO START NEXT SESSION
+──────────────────────
+1. Open new chat
+2. Upload or paste CALNIC_PROJECT_BRIEFING_V9.txt
+3. Say what you want to build next
+
+SUGGESTED NEXT (in order of priority):
+  1. Create 'photos' Supabase Storage bucket + photos table + RLS
+  2. Wire galerie.html upload form to Supabase Storage
+  3. Load real photos in galerie.html from Supabase (replace SVGs)
+  4. Add og:image meta to all pages (upload one real village photo first)
+  5. Set up cron-job.org keep-alive ping
+
+=======================================================================

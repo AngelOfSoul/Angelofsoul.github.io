@@ -526,7 +526,7 @@ var facts = {
 };
 
 var curFact = 0;
-var curLang = 'ro';
+var curLang = localStorage.getItem('calnic-lang') || 'ro';
 
 function showFact(i, lang) {
   var f = facts[lang][i];
@@ -555,6 +555,7 @@ function setLang(lang) {
 
 function setLangFull(lang) {
   curLang = lang;
+  localStorage.setItem('calnic-lang', lang);
   setLang(lang);
   showFact(curFact, lang);
 }
@@ -577,8 +578,7 @@ window.addEventListener('load', updateScrollBtns);
 setTimeout(updateScrollBtns, 100);
 
 /* Init */
-setLang('ro');
-showFact(0, 'ro');
+setLangFull(curLang);
 
 // Hamburger menu
 var ham = document.getElementById('hamburgerBtn');
