@@ -308,7 +308,7 @@ footer .g { color:var(--gold-d); font-style:normal; }
   <a class="nav-link" href="contact.html">✉ <span class="nl" data-ro="Contact" data-en="Contact">Contact</span></a>
   <a class="nav-link" href="intrebari.html">&#10067; <span class="nl" data-ro="Intrebari" data-en="FAQ">Intrebari</span></a>
   <div class="nav-right">
-    <a class="nav-login" href="#">&#128274; <span class="nl" data-ro="Contul Familiei" data-en="Family Login">Contul Familiei</span></a>
+    <a class="nav-login" href="login.html">&#128274; <span class="nl" data-ro="Contul Familiei" data-en="Family Login">Contul Familiei</span></a>
   </div>
   <button class="hamburger" id="hamburgerBtn">&#9776;</button>
 </nav>
@@ -321,7 +321,7 @@ footer .g { color:var(--gold-d); font-style:normal; }
   <a class="nav-mobile-link" href="galerie.html">&#128248; Galerie</a>
   <a class="nav-mobile-link" href="contact.html">&#9993; Contact</a>
   <a class="nav-mobile-link" href="intrebari.html">&#10067; Intrebari</a>
-  <a class="nav-mobile-login" href="#">&#128274; Contul Familiei</a>
+  <a class="nav-mobile-login" href="login.html">&#128274; Contul Familiei</a>
 </div>
 
 <div class="main-wrap">
@@ -417,9 +417,10 @@ var MOTIF_TOP = '<svg viewBox="0 0 300 26" xmlns="http://www.w3.org/2000/svg" st
 
 var MOTIF_BOT = '<svg viewBox="0 0 300 14" xmlns="http://www.w3.org/2000/svg" style="width:100%;display:block;flex-shrink:0"><rect width="300" height="14" fill="#0f0f0f"/><line x1="0" y1="0.5" x2="300" y2="0.5" stroke="#2a2010" stroke-width="0.5"/><g fill="#9a7830" opacity="0.45"><rect x="145" y="4" width="4" height="4" transform="rotate(45 147 6)"/><rect x="135" y="5" width="2.5" height="2.5" transform="rotate(45 136.25 6.25)"/><rect x="157" y="5" width="2.5" height="2.5" transform="rotate(45 158.25 6.25)"/></g></svg>';
 
-// ── FAMILY DATA ──
-var families = [
+// ── FAMILY DATA (demo fallback — replaced by Supabase on load) ──
+var DEMO_FAMILIES = [
   {
+    id: 'demo-popescu',
     name: 'Popescu',
     village: 'Calnic',
     since: 1874,
@@ -437,6 +438,7 @@ var families = [
     privPhotos: true
   },
   {
+    id: 'demo-muresan',
     name: 'Muresan',
     village: 'Deal',
     since: 1912,
@@ -454,6 +456,7 @@ var families = [
     privPhotos: false
   },
   {
+    id: 'demo-ionescu',
     name: 'Ionescu',
     village: 'Calnic',
     since: 1960,
@@ -471,6 +474,7 @@ var families = [
     privPhotos: true
   },
   {
+    id: 'demo-moldovan',
     name: 'Moldovan',
     village: 'Calnic',
     since: 1888,
@@ -488,6 +492,7 @@ var families = [
     privPhotos: false
   },
   {
+    id: 'demo-popa',
     name: 'Popa',
     village: 'Deal',
     since: 1935,
@@ -505,6 +510,48 @@ var families = [
     privPhotos: true
   }
 ];
+
+var families = DEMO_FAMILIES.slice();
+
+/* ── SUPABASE LOAD ──
+   Runs after supabase.js fires the 'supabase:ready' event.
+   On success, replaces the demo families array and re-renders.
+   On failure, keeps the demo data and logs a console note. */
+document.addEventListener('supabase:ready', function() {
+  if (!window.supabase) return;
+  window.supabase
+    .from('families')
+    .select('id, name, village, since, members_count, generations_count, photos_count, show_members, show_generations, show_photos, show_since, has_public_photos, has_private_photos, desc_ro, desc_en')
+    .order('name')
+    .then(function(res) {
+      if (res.error || !res.data || res.data.length === 0) {
+        console.info('[Calnic] Supabase not connected — showing demo data');
+        return;
+      }
+      families = res.data.map(function(r, idx) {
+        return {
+          id:              r.id,
+          name:            r.name,
+          village:         r.village || 'Calnic',
+          since:           r.since,
+          addedOrder:      idx + 1,
+          descRo:          r.desc_ro || '',
+          descEn:          r.desc_en || '',
+          members:         r.members_count,
+          generations:     r.generations_count,
+          photos:          r.photos_count,
+          showMembers:     r.show_members !== false,
+          showGenerations: r.show_generations !== false,
+          showPhotos:      r.show_photos !== false,
+          showSince:       r.show_since !== false,
+          pubPhotos:       !!r.has_public_photos,
+          privPhotos:      !!r.has_private_photos
+        };
+      });
+      buildAlphaBar();
+      filterFamilies();
+    });
+});
 
 var currentLang = 'ro';
 var currentAlpha = 'all';
@@ -554,7 +601,8 @@ function buildCard(f) {
   var spacer = (!f.descRo && !showStats) ? '<div class="spacer"></div>' : '';
   var btnText = lang === 'ro' ? 'Vezi familia &rarr;' : 'View family &rarr;';
 
-  return '<a class="fc" href="#" onclick="return false;">'
+  var cardHref = f.id ? 'familiile-familie.html?family=' + f.id : '#';
+  return '<a class="fc" href="' + cardHref + '">'
     + MOTIF_TOP
     + '<div class="head">'
     +   '<div class="av">' + f.name[0] + '</div>'
@@ -608,7 +656,7 @@ function filterFamilies() {
     noRes.style.display = 'none';
     var html = filtered.map(buildCard).join('');
     var addLbl = lang === 'ro' ? 'Inregistreaza-ti familia' : 'Register your family';
-    html += '<a class="fc-add" href="#"><div class="fc-add-plus">+</div><div class="fc-add-lbl">' + addLbl + '</div></a>';
+    html += '<a class="fc-add" href="login.html"><div class="fc-add-plus">+</div><div class="fc-add-lbl">' + addLbl + '</div></a>';
     grid.innerHTML = html;
     var total = lang === 'ro'
       ? filtered.length + ' ' + (filtered.length === 1 ? 'familie' : 'familii')
@@ -652,6 +700,28 @@ setTimeout(updateScrollBtns, 100);
 buildAlphaBar();
 filterFamilies();
 
+/* ── NAV SESSION CHECK ── */
+document.addEventListener('supabase:ready', function() {
+  if (!window.supabase) return;
+  window.supabase.auth.getSession().then(function(res) {
+    var session = res.data && res.data.session;
+    if (!session || !session.user) return;
+    var navLogin = document.querySelector('a.nav-login');
+    var mobileLogin = document.querySelector('a.nav-mobile-login');
+    var label = '\ud83d\udc64 ' + (session.user.email || 'Contul meu');
+    if (navLogin) {
+      navLogin.href = 'login.html';
+      var span = navLogin.querySelector('.nl');
+      if (span) { span.setAttribute('data-ro', 'Contul meu'); span.setAttribute('data-en', 'My account'); span.textContent = 'Contul meu'; }
+      else navLogin.textContent = '\ud83d\udc64 Contul meu';
+    }
+    if (mobileLogin) {
+      mobileLogin.href = 'login.html';
+      mobileLogin.textContent = '\ud83d\udc64 Contul meu';
+    }
+  });
+});
+
 // Hamburger menu
 var ham = document.getElementById('hamburgerBtn');
 var mobileMenu = document.getElementById('navMobileMenu');
@@ -662,5 +732,9 @@ if (ham && mobileMenu) {
   });
 }
 </script>
+
+<!-- Load Supabase client -->
+<script src="supabase.js"></script>
+
 </body>
 </html>

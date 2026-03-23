@@ -310,7 +310,7 @@ footer .g{color:var(--gold-d);font-style:normal;}
   <a class="nav-link" href="contact.html">✉ <span class="nl" data-ro="Contact" data-en="Contact">Contact</span></a>
   <a class="nav-link" href="intrebari.html">&#10067; <span class="nl" data-ro="Intrebari" data-en="FAQ">Intrebari</span></a>
   <div class="nav-right">
-    <a class="nav-login" href="#">&#128274; <span class="nl" data-ro="Contul Familiei" data-en="Family Login">Contul Familiei</span></a>
+    <a class="nav-login" href="login.html">&#128274; <span class="nl" data-ro="Contul Familiei" data-en="Family Login">Contul Familiei</span></a>
   </div>
   <button class="hamburger" id="hamburgerBtn">&#9776;</button>
 </nav>
@@ -323,7 +323,7 @@ footer .g{color:var(--gold-d);font-style:normal;}
   <a class="nav-mobile-link" href="galerie.html">&#128248; Galerie</a>
   <a class="nav-mobile-link" href="contact.html">&#9993; Contact</a>
   <a class="nav-mobile-link" href="intrebari.html">&#10067; Intrebari</a>
-  <a class="nav-mobile-login" href="#">&#128274; Contul Familiei</a>
+  <a class="nav-mobile-login" href="login.html">&#128274; Contul Familiei</a>
 </div>
 
 <!-- Breadcrumb -->
@@ -494,17 +494,16 @@ footer .g{color:var(--gold-d);font-style:normal;}
 <script>
 document.getElementById('yr').textContent = new Date().getFullYear();
 
-/* ── PHASE 2 HOOK ──
-   Read ?family= from URL and load real data from Supabase:
-   var params = new URLSearchParams(window.location.search);
-   var familyId = params.get('family');
-   const { data } = await supabase.from('families').select('*').eq('id', familyId);
-   Populate FAM, MEMBERS, TIMELINE from response.
-   PIN check: await supabase.rpc('check_family_pin', { family_id: familyId, pin: enteredPin })
-── END PHASE 2 HOOK ── */
+/* ── SUPABASE LOAD ──
+   Reads ?family= from URL and loads live data from Supabase.
+   Falls back to the built-in demo data if Supabase is not configured or returns an error. */
 
-var FAM = {
-  id: 'popescu',
+var params   = new URLSearchParams(window.location.search);
+var familyId = params.get('family');
+
+/* Demo fallback data (Familia Popescu) */
+var DEMO_FAM = {
+  id: 'demo-popescu',
   name: 'Familia Popescu',
   initial: 'P',
   village: 'Calnic',
@@ -516,7 +515,7 @@ var FAM = {
   pin: '1874'
 };
 
-var MEMBERS = [
+var DEMO_MEMBERS = [
   { name:'Ion Popescu',     initial:'I', role:'Cap de familie', years:'1948 —',      deceased:false },
   { name:'Maria Popescu',   initial:'M', role:'Sotie',          years:'1952 —',      deceased:false },
   { name:'Gheorghe Popescu',initial:'G', role:'Tata',           years:'1920 — 1998', deceased:true  },
@@ -524,12 +523,128 @@ var MEMBERS = [
   { name:'Dan Popescu',     initial:'D', role:'Fiu',            years:'1981 —',      deceased:false }
 ];
 
-var TIMELINE = [
+var DEMO_TIMELINE = [
   { year:1874, textRo:'Familia se stabileste in Calnic, venind din zona Sebesului.', textEn:'The family settles in Calnic, coming from the Sebes area.' },
   { year:1920, textRo:'Se construieste casa familiei pe dealul din vestul satului.', textEn:'The family home is built on the hill west of the village.' },
   { year:1976, textRo:'Ion Popescu se casatoreste cu Maria Muresan.', textEn:'Ion Popescu marries Maria Muresan.' },
   { year:2002, textRo:'Ana Popescu se casatoreste cu Mihai Stan.', textEn:'Ana Popescu marries Mihai Stan.' }
 ];
+
+var FAM     = DEMO_FAM;
+var MEMBERS = DEMO_MEMBERS.slice();
+var TIMELINE = DEMO_TIMELINE.slice();
+
+/* Populate DOM from loaded data */
+function populateDOM() {
+  document.getElementById('fam-avatar').textContent = FAM.initial || (FAM.name ? FAM.name[0] : '?');
+  document.getElementById('fam-name').textContent   = FAM.name || '';
+  var metaParts = [FAM.village || 'Calnic'];
+  if (FAM.since) metaParts.push(currentLang === 'ro' ? 'prezenti din ' + FAM.since : 'since ' + FAM.since);
+  if (FAM.gen)   metaParts.push(FAM.gen + ' ' + (currentLang === 'ro' ? 'generatii' : 'generations'));
+  document.getElementById('fam-meta').innerHTML = metaParts.join('  ·  ');
+  if (FAM.story) document.getElementById('fam-story').textContent = currentLang === 'ro' ? (FAM.storyRo || FAM.story) : (FAM.storyEn || FAM.story);
+  var statsEl = document.querySelector('.fam-hero-stats');
+  if (statsEl) {
+    var membLbl = currentLang === 'ro' ? 'membri' : 'members';
+    var photLbl = currentLang === 'ro' ? 'poze' : 'photos';
+    var genLbl  = currentLang === 'ro' ? 'generatii' : 'generations';
+    statsEl.innerHTML =
+      '<div class="fam-stat"><span class="fam-stat-num">' + (FAM.members || '—') + '</span><span class="fam-stat-lbl" data-ro="membri" data-en="members">' + membLbl + '</span></div>' +
+      '<div class="fam-stat"><span class="fam-stat-num">' + (FAM.photos || '—') + '</span><span class="fam-stat-lbl" data-ro="poze" data-en="photos">' + photLbl + '</span></div>' +
+      '<div class="fam-stat"><span class="fam-stat-num">' + (FAM.gen || '—') + '</span><span class="fam-stat-lbl" data-ro="generatii" data-en="generations">' + genLbl + '</span></div>';
+  }
+  renderMembers();
+  renderTimeline();
+}
+
+/* Load from Supabase if configured */
+document.addEventListener('supabase:ready', function() {
+  if (!window.supabase) {
+    if (!familyId) showNoFamilyMsg();
+    else populateDOM();
+    return;
+  }
+  if (!familyId) {
+    showNoFamilyMsg();
+    return;
+  }
+  Promise.all([
+    window.supabase.from('families').select('*').eq('id', familyId).single(),
+    window.supabase.from('members').select('*').eq('family_id', familyId).order('birth_year'),
+    window.supabase.from('timeline').select('*').eq('family_id', familyId).order('year')
+  ]).then(function(results) {
+    var famRes     = results[0];
+    var membersRes = results[1];
+    var timelineRes = results[2];
+
+    if (famRes.error) {
+      console.info('[Calnic] Supabase not connected — showing demo data');
+      populateDOM();
+      return;
+    }
+
+    var r = famRes.data;
+    FAM = {
+      id:        r.id,
+      name:      r.name,
+      initial:   r.name ? r.name[0] : '?',
+      village:   r.village || 'Calnic',
+      since:     r.since,
+      gen:       r.generations_count,
+      members:   r.members_count,
+      photos:    r.photos_count,
+      connected: true,
+      pin:       null,
+      pinHash:   r.pin_hash,
+      storyRo:   r.desc_ro || '',
+      storyEn:   r.desc_en || '',
+      story:     r.desc_ro || '',
+      ownerId:   r.owner_id
+    };
+
+    MEMBERS = (membersRes.data || []).map(function(m) {
+      var birthStr = m.birth_year ? String(m.birth_year) : '';
+      var deathStr = m.death_year ? String(m.death_year) : '';
+      var years = birthStr + (deathStr ? ' — ' + deathStr : (birthStr ? ' —' : ''));
+      return {
+        name: m.name,
+        initial: m.initial || (m.name ? m.name[0] : '?'),
+        role: m.role || '',
+        years: years,
+        deceased: !!m.is_deceased
+      };
+    });
+
+    TIMELINE = (timelineRes.data || []).map(function(t) {
+      return { year: t.year, textRo: t.text_ro || '', textEn: t.text_en || '' };
+    });
+
+    document.title = FAM.name + ' — Calnic Online';
+    populateDOM();
+
+    /* Show edit button if current user is the family owner */
+    window.supabase.auth.getUser().then(function(res) {
+      if (res.data && res.data.user && res.data.user.id === FAM.ownerId) {
+        var editBtn = document.createElement('a');
+        editBtn.href = 'editeaza-familia.html?family=' + familyId;
+        editBtn.textContent = currentLang === 'ro' ? '✎ Editeaza familia' : '✎ Edit family';
+        editBtn.style.cssText = 'display:inline-block;margin-top:12px;padding:8px 18px;background:var(--s2);border:1px solid var(--b2);color:var(--gold);font-family:'EB Garamond',serif;font-size:14px;border-radius:2px;';
+        var heroInfo = document.querySelector('.fam-hero-info');
+        if (heroInfo) heroInfo.appendChild(editBtn);
+      }
+    });
+  });
+});
+
+function showNoFamilyMsg() {
+  var container = document.querySelector('.fam-hero-name') && document.querySelector('.fam-hero-name').closest('.fam-hero') || document.body;
+  var msg = document.createElement('div');
+  msg.style.cssText = 'padding:32px;text-align:center;color:var(--muted);font-style:italic;';
+  msg.innerHTML = currentLang === 'ro'
+    ? 'Nicio familie specificata. <a href="familiile.html">Vezi toate familiile →</a>'
+    : 'No family specified. <a href="familiile.html">View all families →</a>';
+  document.querySelector('.fam-hero') && document.querySelector('.fam-hero').after(msg);
+}
 
 var currentLang = 'ro';
 var privateUnlocked = false;
@@ -557,10 +672,35 @@ function renderTimeline() {
   }).join('');
 }
 
-function checkPin() {
+async function checkPin() {
   var entered = document.getElementById('pinInput').value.trim();
   var errEl = document.getElementById('pinError');
-  if (entered === FAM.pin) {
+
+  var granted = false;
+
+  /* Try Supabase RPC first */
+  if (window.supabase && familyId) {
+    try {
+      var rpcRes = await window.supabase.rpc('check_family_pin', {
+        p_family_id: familyId,
+        p_pin: entered
+      });
+      if (!rpcRes.error) {
+        granted = !!rpcRes.data;
+      } else {
+        /* RPC not available — development/demo fallback only.
+           In production the RPC call handles all PIN verification. */
+        granted = FAM.pinHash ? (btoa(entered) === FAM.pinHash) : (FAM.pin && entered === FAM.pin);
+      }
+    } catch(e) {
+      granted = FAM.pinHash ? (btoa(entered) === FAM.pinHash) : (FAM.pin && entered === FAM.pin);
+    }
+  } else {
+    /* No Supabase — use demo pin */
+    granted = FAM.pin ? (entered === FAM.pin) : false;
+  }
+
+  if (granted) {
     privateUnlocked = true;
     document.querySelector('.private-box').innerHTML = '<div class="pb-icon">&#128275;</div>'
       + '<div class="pb-title" style="color:#6a9a5a;">' + (currentLang === 'ro' ? 'Acces acordat' : 'Access granted') + '</div>'
@@ -588,8 +728,8 @@ function setLang(lang) {
 document.getElementById('btn-ro').addEventListener('click', function() { setLang('ro'); });
 document.getElementById('btn-en').addEventListener('click', function() { setLang('en'); });
 
-renderMembers();
-renderTimeline();
+/* Initial render using demo data (replaced when Supabase loads) */
+populateDOM();
 
 function updateScrollBtns() {
   var t = document.getElementById('scrollTop');
@@ -603,6 +743,28 @@ window.addEventListener('scroll', updateScrollBtns);
 window.addEventListener('load', updateScrollBtns);
 setTimeout(updateScrollBtns, 100);
 
+/* ── NAV SESSION CHECK ── */
+document.addEventListener('supabase:ready', function() {
+  if (!window.supabase) return;
+  window.supabase.auth.getSession().then(function(res) {
+    var session = res.data && res.data.session;
+    if (!session || !session.user) return;
+    var navLogin = document.querySelector('a.nav-login');
+    var mobileLogin = document.querySelector('a.nav-mobile-login');
+    var label = '\ud83d\udc64 ' + (session.user.email || 'Contul meu');
+    if (navLogin) {
+      navLogin.href = 'login.html';
+      var span = navLogin.querySelector('.nl');
+      if (span) { span.setAttribute('data-ro', 'Contul meu'); span.setAttribute('data-en', 'My account'); span.textContent = 'Contul meu'; }
+      else navLogin.textContent = '\ud83d\udc64 Contul meu';
+    }
+    if (mobileLogin) {
+      mobileLogin.href = 'login.html';
+      mobileLogin.textContent = '\ud83d\udc64 Contul meu';
+    }
+  });
+});
+
 // Hamburger menu
 var ham = document.getElementById('hamburgerBtn');
 var mobileMenu = document.getElementById('navMobileMenu');
@@ -613,5 +775,9 @@ if (ham && mobileMenu) {
   });
 }
 </script>
+
+<!-- Load Supabase client -->
+<script src="supabase.js"></script>
+
 </body>
 </html>
