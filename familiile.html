@@ -139,6 +139,9 @@ footer .g { color:var(--gold-d); font-style:normal; }
 
 /* ── No results ── */
 .no-results { text-align:center; padding:60px 20px; color:var(--muted); font-style:italic; font-size:15px; display:none; }
+.grid-loading { display:flex; align-items:center; justify-content:center; gap:12px; padding:48px 20px; color:var(--muted); font-style:italic; font-size:15px; }
+.grid-spinner { width:22px; height:22px; border:2px solid var(--b2); border-top-color:var(--gold); border-radius:50%; animation:spin 0.8s linear infinite; flex-shrink:0; }
+@keyframes spin { to { transform:rotate(360deg); } }
 
 /* ── Alphabet filter ── */
 .alpha-bar { display:flex; flex-wrap:wrap; gap:4px; margin-bottom:20px; }
@@ -354,6 +357,7 @@ footer .g { color:var(--gold-d); font-style:normal; }
 
   <!-- Cards grid -->
   <div class="families-grid" id="familiesGrid"></div>
+  <div class="grid-loading" id="gridLoading" style="display:none;"><div class="grid-spinner"></div><span>Se incarca date noi...</span></div>
   <div class="no-results" id="noResults" data-ro="Nicio familie gasita." data-en="No families found.">Nicio familie gasita.</div>
 
   </div><!-- end main-col -->
@@ -365,7 +369,7 @@ footer .g { color:var(--gold-d); font-style:normal; }
       <span class="section-head-title" data-ro="Calnic in cifre" data-en="Calnic by the numbers">Calnic in cifre</span>
     </div>
     <div class="stats-grid">
-      <div class="stat-cell"><span class="stat-num">47</span><span class="stat-lbl" data-ro="familii" data-en="families">familii</span></div>
+      <div class="stat-cell"><span class="stat-num" id="statFamiliiNum">47</span><span class="stat-lbl" data-ro="familii" data-en="families">familii</span></div>
       <div class="stat-cell"><span class="stat-num">312</span><span class="stat-lbl" data-ro="locuitori" data-en="residents">locuitori</span></div>
       <div class="stat-cell"><span class="stat-num">1269</span><span class="stat-lbl" data-ro="atestat" data-en="first recorded">atestat</span></div>
       <div class="stat-cell"><span class="stat-num" style="font-size:13px;">UNESCO</span><span class="stat-lbl" data-ro="cetatea" data-en="citadel">cetatea</span></div>
@@ -519,6 +523,8 @@ var families = DEMO_FAMILIES.slice();
    On failure, keeps the demo data and logs a console note. */
 document.addEventListener('supabase:ready', function() {
   if (!window.supabase) return;
+  var gridLoading = document.getElementById('gridLoading');
+  if (gridLoading) gridLoading.style.display = 'flex';
   window.supabase
     .from('families')
     .select('id, name, village, since, members_count, generations_count, photos_count, show_members, show_generations, show_photos, show_since, has_public_photos, has_private_photos, desc_ro, desc_en')
@@ -526,6 +532,8 @@ document.addEventListener('supabase:ready', function() {
     .then(function(res) {
       if (res.error || !res.data || res.data.length === 0) {
         console.info('[Calnic] Supabase not connected — showing demo data');
+        buildAlphaBar();
+        filterFamilies();
         return;
       }
       families = res.data.map(function(r, idx) {
@@ -548,12 +556,14 @@ document.addEventListener('supabase:ready', function() {
           privPhotos:      !!r.has_private_photos
         };
       });
+      var statEl = document.getElementById('statFamiliiNum');
+      if (statEl) statEl.textContent = families.length;
       buildAlphaBar();
       filterFamilies();
     });
 });
 
-var currentLang = 'ro';
+var currentLang = localStorage.getItem('calnic-lang') || 'ro';
 var currentAlpha = 'all';
 
 // ── BUILD ALPHABET BAR ──
@@ -647,6 +657,8 @@ function filterFamilies() {
   var grid = document.getElementById('familiesGrid');
   var noRes = document.getElementById('noResults');
   var count = document.getElementById('resultsCount');
+  var gridLoading = document.getElementById('gridLoading');
+  if (gridLoading) gridLoading.style.display = 'none';
 
   if (filtered.length === 0) {
     grid.innerHTML = '';
@@ -668,6 +680,7 @@ function filterFamilies() {
 // ── LANGUAGE ──
 function setLang(lang) {
   currentLang = lang;
+  localStorage.setItem('calnic-lang', lang);
   document.getElementById('btn-ro').classList.toggle('active', lang === 'ro');
   document.getElementById('btn-en').classList.toggle('active', lang === 'en');
 
@@ -697,8 +710,7 @@ window.addEventListener('load', updateScrollBtns);
 setTimeout(updateScrollBtns, 100);
 
 // ── INIT ──
-buildAlphaBar();
-filterFamilies();
+setLang(currentLang);
 
 /* ── NAV SESSION CHECK ── */
 document.addEventListener('supabase:ready', function() {

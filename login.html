@@ -336,6 +336,24 @@ footer .g { color:var(--gold-d); font-style:normal; }
   .login-wrap { padding: 0 12px 32px; }
   .login-hero-title { font-size: 22px; }
 }
+
+.pb-textarea {
+  width: 100%;
+  background: var(--s2);
+  border: 1px solid var(--b2);
+  color: var(--text);
+  font-family: 'EB Garamond', serif;
+  font-size: 15px;
+  padding: 8px 12px;
+  border-radius: 2px;
+  outline: none;
+  resize: vertical;
+  min-height: 70px;
+  transition: border-color 0.2s;
+}
+.pb-textarea:focus { border-color: var(--gold-d); }
+.pb-textarea::placeholder { color: var(--muted); }
+.step-note { font-size:13px; color:var(--muted); font-style:italic; text-align:center; padding:8px 0 4px; }
 </style>
 </head>
 <body>
@@ -426,7 +444,7 @@ footer .g { color:var(--gold-d); font-style:normal; }
     <div class="li-title" data-ro="&#128100; Esti autentificat" data-en="&#128100; You are signed in">&#128100; Esti autentificat</div>
     <div class="li-sub" id="loggedInEmail"></div>
     <div class="li-actions">
-      <a class="cta-btn" href="familiile.html" id="profileLink" data-ro="Profilul familiei mele" data-en="My family profile">Profilul familiei mele</a>
+      <a class="cta-btn" href="dashboard.html" id="profileLink" data-ro="Profilul familiei mele" data-en="My family profile">Profilul familiei mele</a>
       <button class="cta-btn-sec" id="logoutBtn" data-ro="Deconectare" data-en="Sign out">Deconectare</button>
     </div>
   </div>
@@ -473,22 +491,6 @@ footer .g { color:var(--gold-d); font-style:normal; }
     <div id="panelRegister" style="display:none;">
       <form class="auth-form" id="registerForm" onsubmit="doRegister(event)">
         <div class="form-group">
-          <label class="form-label" for="regName" data-ro="Numele familiei" data-en="Family name">Numele familiei</label>
-          <input class="pb-input" type="text" id="regName" required
-                 placeholder="Familia Popescu"/>
-        </div>
-        <div class="form-group">
-          <label class="form-label" for="regVillage" data-ro="Sat / Localitate" data-en="Village / Location">Sat / Localitate</label>
-          <input class="pb-input" type="text" id="regVillage"
-                 placeholder="Calnic"/>
-        </div>
-        <div class="form-group">
-          <label class="form-label" for="regSince" data-ro="In Calnic din anul (optional)" data-en="In Calnic since year (optional)">In Calnic din anul (optional)</label>
-          <input class="pb-input" type="number" id="regSince" min="1200" max="2099"
-                 placeholder="1874"/>
-        </div>
-        <hr class="section-divider"/>
-        <div class="form-group">
           <label class="form-label" for="regEmail" data-ro="Adresa de email" data-en="Email address">Adresa de email</label>
           <input class="pb-input" type="email" id="regEmail" autocomplete="email" required
                  placeholder="familia@exemplu.ro"/>
@@ -503,22 +505,52 @@ footer .g { color:var(--gold-d); font-style:normal; }
           <input class="pb-input" type="password" id="regPasswordConfirm" autocomplete="new-password" required
                  placeholder="••••••••"/>
         </div>
-        <hr class="section-divider"/>
-        <div class="form-group">
-          <label class="form-label" for="regPin">
-            <span data-ro="PIN familie (4&#8211;8 cifre)" data-en="Family PIN (4&#8211;8 digits)">PIN familie (4&#8211;8 cifre)</span>
-            <span class="pin-info"
-              data-tip="PIN-ul familiei este un cod numeric de 4-8 cifre pe care membrii familiei il vor folosi pentru a accesa continut privat. Nu este parola contului — este separat si mai simplu de retinut.">i</span>
-          </label>
-          <input class="pb-input" type="password" id="regPin" inputmode="numeric" pattern="[0-9]{4,8}" required
-                 minlength="4" maxlength="8" placeholder="4–8 cifre numerice"/>
-        </div>
         <div id="registerMsg" class="form-msg"></div>
         <button class="pb-submit" type="submit" id="registerBtn">
           <span data-ro="INREGISTREAZA" data-en="REGISTER">INREGISTREAZA</span>
         </button>
       </form>
     </div>
+
+    <!-- ── STEP 2: FAMILY PROFILE ── -->
+    <div id="panelStep2" style="display:none;">
+    <form class="auth-form" id="step2Form" onsubmit="doFamilyProfile(event)">
+      <div class="login-hero">
+        <div class="login-hero-title" data-ro="Profilul familiei tale" data-en="Your family profile">Profilul familiei tale</div>
+        <div class="login-hero-sub" data-ro="Completeaza datele familiei" data-en="Complete your family details">Completeaza datele familiei</div>
+      </div>
+      <div class="form-group">
+        <label class="form-label" for="s2Name" data-ro="Numele familiei" data-en="Family name">Numele familiei</label>
+        <input class="pb-input" type="text" id="s2Name" required placeholder="Familia Popescu"/>
+      </div>
+      <div class="form-group">
+        <label class="form-label" for="s2Since" data-ro="In Calnic din anul (optional)" data-en="In Calnic since year (optional)">In Calnic din anul (optional)</label>
+        <input class="pb-input" type="number" id="s2Since" min="1200" max="2099" placeholder="1874"/>
+      </div>
+      <div class="form-group">
+        <label class="form-label" for="s2DescRo" data-ro="Descriere scurta (RO, optional)" data-en="Short description (RO, optional)">Descriere scurta (RO, optional)</label>
+        <textarea class="pb-textarea" id="s2DescRo" maxlength="600" rows="3" placeholder="Povestea familiei noastre..."></textarea>
+      </div>
+      <div class="form-group">
+        <label class="form-label" for="s2DescEn" data-ro="Descriere scurta (EN, optional)" data-en="Short description (EN, optional)">Descriere scurta (EN, optional)</label>
+        <textarea class="pb-textarea" id="s2DescEn" maxlength="600" rows="3" placeholder="Our family story..."></textarea>
+      </div>
+      <div class="form-group">
+        <label class="form-label" for="s2Pin">
+          <span data-ro="PIN familie (4&#8211;8 cifre)" data-en="Family PIN (4&#8211;8 digits)">PIN familie (4&#8211;8 cifre)</span>
+          <span class="pin-info"
+            data-tip="PIN-ul familiei este un cod numeric de 4-8 cifre pe care membrii familiei il vor folosi pentru a accesa continut privat. Nu este parola contului — este separat si mai simplu de retinut.">i</span>
+        </label>
+        <input class="pb-input" type="password" id="s2Pin" inputmode="numeric" pattern="[0-9]{4,8}" required
+               minlength="4" maxlength="8" placeholder="4-8 cifre numerice"/>
+      </div>
+      <div id="step2Msg" class="form-msg"></div>
+      <button class="pb-submit" type="submit" id="step2Btn">
+        <span data-ro="CREEAZA PROFILUL FAMILIEI" data-en="CREATE FAMILY PROFILE">CREEAZA PROFILUL FAMILIEI</span>
+      </button>
+    </form>
+    </div>
+
   </div><!-- end authBox -->
 
 </div><!-- end login-wrap -->
@@ -536,9 +568,10 @@ footer .g { color:var(--gold-d); font-style:normal; }
 document.getElementById('yr').textContent = new Date().getFullYear();
 
 /* ── LANGUAGE ── */
-var currentLang = 'ro';
+var currentLang = localStorage.getItem('calnic-lang') || 'ro';
 function setLang(lang) {
   currentLang = lang;
+  localStorage.setItem('calnic-lang', lang);
   document.getElementById('btn-ro').classList.toggle('active', lang === 'ro');
   document.getElementById('btn-en').classList.toggle('active', lang === 'en');
   document.querySelectorAll('[data-ro]').forEach(function(el) {
@@ -548,6 +581,7 @@ function setLang(lang) {
 }
 document.getElementById('btn-ro').addEventListener('click', function() { setLang('ro'); });
 document.getElementById('btn-en').addEventListener('click', function() { setLang('en'); });
+setLang(currentLang);
 
 /* ── TAB SWITCHER ── */
 function showTab(tab) {
@@ -582,6 +616,8 @@ if (ham && mobileMenu) {
 }
 
 /* ── SUPABASE AUTH ── */
+var pendingUserId = null;
+
 function showMsg(id, text, type) {
   var el = document.getElementById(id);
   el.textContent = text;
@@ -617,9 +653,20 @@ function showLoggedIn(user) {
   document.getElementById('loggedInBox').style.display = '';
   var emailEl = document.getElementById('loggedInEmail');
   if (emailEl) emailEl.textContent = user.email || '';
+  var profileLink = document.getElementById('profileLink');
+  if (profileLink) profileLink.href = 'dashboard.html';
 }
 
 /* LOGIN */
+/* Show step 2 panel (shared helper) */
+function showStep2Panel(userId) {
+  pendingUserId = userId;
+  document.querySelector('.tab-bar').style.display = 'none';
+  document.getElementById('panelLogin').style.display = 'none';
+  document.getElementById('panelRegister').style.display = 'none';
+  document.getElementById('panelStep2').style.display = '';
+}
+
 async function doLogin(e) {
   e.preventDefault();
   if (!window.supabase) {
@@ -637,7 +684,17 @@ async function doLogin(e) {
       showMsg('loginMsg', result.error.message, 'error');
     } else {
       showMsg('loginMsg', currentLang === 'ro' ? 'Autentificat cu succes! Redirectionare...' : 'Signed in! Redirecting...', 'success');
-      setTimeout(function() { window.location.href = 'familiile.html'; }, 1200);
+      var userId = result.data.user && result.data.user.id;
+      if (userId) {
+        var famCheck = await window.supabase.from('families').select('id').eq('owner_id', userId).maybeSingle();
+        if (!famCheck.error && famCheck.data && famCheck.data.id) {
+          setTimeout(function() { window.location.href = 'dashboard.html'; }, 1200);
+        } else {
+          setTimeout(function() { showStep2Panel(userId); }, 500);
+        }
+      } else {
+        setTimeout(function() { window.location.href = 'dashboard.html'; }, 1200);
+      }
     }
   } catch(err) {
     showMsg('loginMsg', err.message || 'Eroare necunoscuta', 'error');
@@ -678,20 +735,12 @@ async function doRegister(e) {
       : 'Supabase is not configured. Please set up supabase.js to enable registration.', 'error');
     return;
   }
-  var name    = document.getElementById('regName').value.trim();
-  var village = document.getElementById('regVillage').value.trim() || 'Calnic';
-  var since   = document.getElementById('regSince').value ? parseInt(document.getElementById('regSince').value, 10) : null;
-  var email   = document.getElementById('regEmail').value.trim();
-  var pass    = document.getElementById('regPassword').value;
-  var passC   = document.getElementById('regPasswordConfirm').value;
-  var pin     = document.getElementById('regPin').value;
+  var email = document.getElementById('regEmail').value.trim();
+  var pass  = document.getElementById('regPassword').value;
+  var passC = document.getElementById('regPasswordConfirm').value;
 
   if (pass !== passC) {
     showMsg('registerMsg', currentLang === 'ro' ? 'Parolele nu coincid.' : 'Passwords do not match.', 'error');
-    return;
-  }
-  if (!/^[0-9]{4,8}$/.test(pin)) {
-    showMsg('registerMsg', currentLang === 'ro' ? 'PIN-ul trebuie sa fie 4-8 cifre numerice.' : 'PIN must be 4-8 numeric digits.', 'error');
     return;
   }
 
@@ -702,24 +751,53 @@ async function doRegister(e) {
       showMsg('registerMsg', signUpRes.error.message, 'error');
       return;
     }
-    var userId = signUpRes.data.user && signUpRes.data.user.id;
-    if (userId) {
-      /* pin_hash stores a base64 encoding of the PIN (per spec).
-         Server-side verification uses the check_family_pin RPC which performs the comparison. */
-      var famData = { name: name, village: village, owner_id: userId, pin_hash: btoa(pin) };
-      if (since) famData.since = since;
-      var insRes = await window.supabase.from('families').insert([famData]);
-      if (insRes.error) {
-        console.warn('[Calnic] Could not insert family record:', insRes.error.message);
-      }
-    }
+    pendingUserId = signUpRes.data.user && signUpRes.data.user.id;
     showMsg('registerMsg', currentLang === 'ro'
-      ? 'Inregistrare reusita! Verifica email-ul pentru a confirma contul.'
-      : 'Registration successful! Check your email to confirm your account.', 'success');
+      ? 'Cont creat! Completeaza profilul familiei.'
+      : 'Account created! Complete your family profile.', 'success');
+    showStep2Panel(pendingUserId);
   } catch(err) {
     showMsg('registerMsg', err.message || 'Eroare necunoscuta', 'error');
   } finally {
     setLoading('registerBtn', false);
+  }
+}
+
+/* FAMILY PROFILE (Step 2) */
+async function doFamilyProfile(e) {
+  e.preventDefault();
+  if (!window.supabase) { showMsg('step2Msg', 'Supabase nu este configurat.', 'error'); return; }
+  if (!pendingUserId) {
+    showMsg('step2Msg', currentLang === 'ro' ? 'Sesiune invalida. Reincarca pagina.' : 'Invalid session. Please reload the page.', 'error');
+    return;
+  }
+  var name   = document.getElementById('s2Name').value.trim();
+  var since  = document.getElementById('s2Since').value ? parseInt(document.getElementById('s2Since').value, 10) : null;
+  var descRo = document.getElementById('s2DescRo').value.trim();
+  var descEn = document.getElementById('s2DescEn').value.trim();
+  var pin    = document.getElementById('s2Pin').value;
+  if (!/^[0-9]{4,8}$/.test(pin)) {
+    showMsg('step2Msg', currentLang === 'ro' ? 'PIN-ul trebuie sa fie 4-8 cifre numerice.' : 'PIN must be 4-8 numeric digits.', 'error');
+    return;
+  }
+  setLoading('step2Btn', true);
+  try {
+    var famData = { name: name, village: 'Calnic', owner_id: pendingUserId, pin_hash: btoa(pin) };
+    if (since) famData.since = since;
+    if (descRo) famData.desc_ro = descRo;
+    if (descEn) famData.desc_en = descEn;
+    var insRes = await window.supabase.from('families').insert([famData]);
+    if (insRes.error) {
+      showMsg('step2Msg', insRes.error.message, 'error');
+    } else {
+      pendingUserId = null;
+      showMsg('step2Msg', currentLang === 'ro' ? 'Profil creat cu succes! Redirectionare...' : 'Profile created! Redirecting...', 'success');
+      setTimeout(function() { window.location.href = 'dashboard.html'; }, 1200);
+    }
+  } catch(err) {
+    showMsg('step2Msg', err.message || 'Eroare necunoscuta', 'error');
+  } finally {
+    setLoading('step2Btn', false);
   }
 }
 
