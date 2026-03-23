@@ -407,14 +407,7 @@ footer .g{color:var(--gold-d);font-style:normal;}
 <script>
 document.getElementById('yr').textContent = new Date().getFullYear();
 
-/* ── PHASE 2 HOOK ──
-   Replace FAMILIES array with a Supabase fetch:
-   const { data } = await supabase.from('families').select('*');
-   Map the response to the same structure below.
-   URL for each family: genealogie-familie.html?family=<id>
-── END PHASE 2 HOOK ── */
-
-var FAMILIES = [
+var DEMO_FAMILIES = [
   { id:'popescu', name:'Familia Popescu', initial:'P', village:'Calnic', since:1874, gen:4, people:12, connected:true },
   { id:'muresan', name:'Familia Muresan', initial:'M', village:'Calnic', since:1901, gen:3, people:8, connected:true },
   { id:'buta',    name:'Familia Buta',    initial:'B', village:'Deal',   since:1923, gen:3, people:9, connected:false },
@@ -422,7 +415,41 @@ var FAMILIES = [
   { id:'ionescu', name:'Familia Ionescu', initial:'I', village:'Calnic', since:1955, gen:2, people:5, connected:false }
 ];
 
-var currentLang = 'ro';
+var FAMILIES = DEMO_FAMILIES.slice();
+
+/* ── SUPABASE LOAD ──
+   Runs after supabase.js fires the 'supabase:ready' event.
+   On success, replaces the demo families array and re-renders.
+   On failure, keeps the demo data and logs a console note. */
+document.addEventListener('supabase:ready', function() {
+  if (!window.supabase) return;
+  window.supabase
+    .from('families')
+    .select('id, name, village, since, members_count, generations_count')
+    .order('name')
+    .then(function(res) {
+      if (res.error || !res.data || res.data.length === 0) {
+        console.info('[Calnic] Supabase not connected — showing demo data');
+        return;
+      }
+      FAMILIES = res.data.map(function(r) {
+        var nm = r.name || '';
+        return {
+          id:      r.id,
+          name:    nm,
+          initial: nm.charAt(0).toUpperCase(),
+          village: r.village || 'Calnic',
+          since:   r.since || 0,
+          gen:     r.generations_count || 0,
+          people:  r.members_count || 0,
+          connected: true
+        };
+      });
+      filterFamilies();
+    });
+});
+
+var currentLang = localStorage.getItem('calnic-lang') || 'ro';
 
 function renderFamilies(list) {
   var grid = document.getElementById('familiesGrid');
@@ -480,6 +507,7 @@ function filterFamilies() {
 
 function setLang(lang) {
   currentLang = lang;
+  localStorage.setItem('calnic-lang', lang);
   document.getElementById('btn-ro').classList.toggle('active', lang === 'ro');
   document.getElementById('btn-en').classList.toggle('active', lang === 'en');
   document.querySelectorAll('[data-ro]').forEach(function(el) {
@@ -492,7 +520,7 @@ function setLang(lang) {
 document.getElementById('btn-ro').addEventListener('click', function(){ setLang('ro'); });
 document.getElementById('btn-en').addEventListener('click', function(){ setLang('en'); });
 
-filterFamilies();
+setLang(currentLang);
 
 function updateScrollBtns() {
   var t = document.getElementById('scrollTop');
@@ -516,5 +544,6 @@ if (ham && mobileMenu) {
   });
 }
 </script>
+<script src="supabase.js"></script>
 </body>
 </html>

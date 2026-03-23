@@ -646,7 +646,7 @@ function showNoFamilyMsg() {
   document.querySelector('.fam-hero') && document.querySelector('.fam-hero').after(msg);
 }
 
-var currentLang = 'ro';
+var currentLang = localStorage.getItem('calnic-lang') || 'ro';
 var privateUnlocked = false;
 
 function renderMembers() {
@@ -716,6 +716,7 @@ function clearPinError() {
 
 function setLang(lang) {
   currentLang = lang;
+  localStorage.setItem('calnic-lang', lang);
   document.getElementById('btn-ro').classList.toggle('active', lang === 'ro');
   document.getElementById('btn-en').classList.toggle('active', lang === 'en');
   document.querySelectorAll('[data-ro]').forEach(function(el) {
@@ -730,6 +731,7 @@ document.getElementById('btn-en').addEventListener('click', function() { setLang
 
 /* Initial render using demo data (replaced when Supabase loads) */
 populateDOM();
+setLang(currentLang);
 
 function updateScrollBtns() {
   var t = document.getElementById('scrollTop');

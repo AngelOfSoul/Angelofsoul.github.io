@@ -553,7 +553,7 @@ document.addEventListener('supabase:ready', function() {
     });
 });
 
-var currentLang = 'ro';
+var currentLang = localStorage.getItem('calnic-lang') || 'ro';
 var currentAlpha = 'all';
 
 // ── BUILD ALPHABET BAR ──
@@ -668,6 +668,7 @@ function filterFamilies() {
 // ── LANGUAGE ──
 function setLang(lang) {
   currentLang = lang;
+  localStorage.setItem('calnic-lang', lang);
   document.getElementById('btn-ro').classList.toggle('active', lang === 'ro');
   document.getElementById('btn-en').classList.toggle('active', lang === 'en');
 
@@ -698,7 +699,7 @@ setTimeout(updateScrollBtns, 100);
 
 // ── INIT ──
 buildAlphaBar();
-filterFamilies();
+setLang(currentLang);
 
 /* ── NAV SESSION CHECK ── */
 document.addEventListener('supabase:ready', function() {
