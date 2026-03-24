@@ -591,6 +591,10 @@ function showTab(tab) {
   document.getElementById('tabLogin').classList.toggle('active', isLogin);
   document.getElementById('tabRegister').classList.toggle('active', !isLogin);
 }
+(function() {
+  var params = new URLSearchParams(window.location.search);
+  if (params.get('tab') === 'register') { showTab('register'); }
+})();
 
 /* ── SCROLL BUTTONS ── */
 function updateScrollBtns() {
