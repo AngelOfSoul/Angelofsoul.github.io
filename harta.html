@@ -118,6 +118,8 @@ footer .g{color:var(--gold-d);font-style:normal;}
 .pop-acts{display:flex;gap:6px;}
 .pop-btn{flex:1;font-size:10px;padding:5px;background:#1a1208;border:1px solid #c8983a;color:var(--gold);font-family:'EB Garamond',serif;border-radius:3px;cursor:pointer;text-align:center;text-decoration:none;display:block;}
 .pop-btn:hover{background:var(--gold);color:#0a0a0a;}
+.pop-btn-maps{display:block;width:100%;margin-top:6px;font-size:10px;padding:5px;background:#0a1a0a;border:1px solid #2a6a2a;color:#82c46a;font-family:'EB Garamond',serif;border-radius:3px;cursor:pointer;text-align:center;text-decoration:none;}
+.pop-btn-maps:hover{background:#2a6a2a;color:#f0e8d0;text-decoration:none;}
 .pop-family-row{display:flex;align-items:center;gap:6px;padding:5px 0;border-bottom:1px solid #2a2010;}
 .pop-family-row:last-child{border-bottom:none;}
 .pop-fam-av{width:24px;height:24px;border-radius:50%;background:#1a1208;border:1px solid #c8983a;display:flex;align-items:center;justify-content:center;font-family:'Playfair Display',serif;font-size:11px;color:var(--gold);flex-shrink:0;}
@@ -476,6 +478,7 @@ function buildPopup(opts) {
     + '<a class="pop-btn" href="galerie.html">&#128247; '+( currentLang==='ro' ? 'Galerie' : 'Gallery')+'</a>'
     + '<a class="pop-btn" href="istorie.html">&#128196; '+( currentLang==='ro' ? 'Istorie' : 'History')+'</a>'
     + '</div>'
+    + '<a class="pop-btn-maps" href="https://www.google.com/maps?q='+opts.lat+','+opts.lng+'&ll='+opts.lat+','+opts.lng+'&z=18" target="_blank" rel="noopener">&#127758; '+( currentLang==='ro' ? 'Deschide in Google Maps' : 'Open in Google Maps')+'</a>'
     + '</div></div>';
 }
 
@@ -490,6 +493,7 @@ function buildFamilyPopup(f) {
     + '<div class="pop-desc">'+f.desc+'</div>'
     + '<div class="pop-acts"><a class="pop-btn" href="familiile.html">&#128106; '+( currentLang==='ro' ? 'Profil familie' : 'Family profile')+'</a>'
     + '<a class="pop-btn" href="genealogie.html">&#127803; '+( currentLang==='ro' ? 'Arbore' : 'Tree')+'</a></div>'
+    + '<a class="pop-btn-maps" href="https://www.google.com/maps?q='+f.lat+','+f.lng+'&ll='+f.lat+','+f.lng+'&z=18" target="_blank" rel="noopener">&#127758; '+( currentLang==='ro' ? 'Deschide in Google Maps' : 'Open in Google Maps')+'</a>'
     + '</div></div>';
 }
 
@@ -652,7 +656,9 @@ POIS.forEach(function(p) {
     desc: p.descRo,
     emoji: p.emoji,
     img: p.img,
-    photos: p.photos
+    photos: p.photos,
+    lat: p.lat,
+    lng: p.lng
   }), {maxWidth:240, className:'gold-popup'});
   m._poiData = p;
 });
@@ -673,7 +679,9 @@ HISTORIC.forEach(function(h) {
     desc: h.descRo,
     emoji: '&#128506;',
     img: null,
-    photos: []
+    photos: [],
+    lat: h.lat,
+    lng: h.lng
   }), {maxWidth:240});
   m._histData = h;
 });
@@ -815,7 +823,9 @@ window._setLang = function setLang(lang) {
         desc: lang==='ro' ? p.descRo : p.descEn,
         emoji: p.emoji,
         img: p.img,
-        photos: p.photos
+        photos: p.photos,
+        lat: p.lat,
+        lng: p.lng
       }));
     }
   });
@@ -836,7 +846,9 @@ window._setLang = function setLang(lang) {
         badge: lang==='ro' ? 'Sit istoric' : 'Historic site',
         desc: lang==='ro' ? h.descRo : h.descEn,
         emoji: '&#128506;',
-        img: null, photos:[]
+        img: null, photos:[],
+        lat: h.lat,
+        lng: h.lng
       }));
     }
   });
