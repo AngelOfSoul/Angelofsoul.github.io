@@ -824,6 +824,76 @@ function setLang(lang) {
   });
 }
 
+/* ── HTML-escape helper to prevent XSS in dynamic content ── */
+function escHtml(s) {
+  return String(s == null ? '' : s)
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;')
+    .replace(/'/g, '&#39;');
+}
+
+/* ── Render real members as a grid of cards in the tree canvas ── */
+function renderDynamicTree(famVillage, people) {
+  var canvas = document.getElementById('treeCanvas');
+  var wrap = document.getElementById('treeWrap');
+  if (!canvas || !wrap) return;
+  var ids = Object.keys(people);
+  if (!ids.length) return;
+
+  var cardW = 130, cardH = 168, gapX = 20, gapY = 30;
+  var perRow = Math.min(ids.length, 5);
+  var totalItems = ids.length + 1; /* +1 for the "add" button */
+  var rows = Math.ceil(totalItems / perRow);
+  var padX = 40, padY = 30;
+  var totalW = Math.max(700, padX * 2 + perRow * cardW + (perRow - 1) * gapX);
+  var totalH = Math.max(300, padY * 2 + rows * cardH + (rows - 1) * gapY);
+
+  canvas.style.width = totalW + 'px';
+  canvas.style.height = totalH + 'px';
+  wrap.style.height = Math.min(totalH + 40, 680) + 'px';
+
+  var html = '<svg style="position:absolute;top:0;left:0;width:' + totalW + 'px;height:' + totalH + 'px;pointer-events:none;"></svg>';
+
+  ids.forEach(function(id, i) {
+    var col = i % perRow;
+    var row = Math.floor(i / perRow);
+    var x = padX + col * (cardW + gapX);
+    var y = padY + row * (cardH + gapY);
+    var p = people[id];
+    /* Use data-id to avoid inline onclick with user-controlled IDs */
+    html += '<div class="pc' + (p.deceased ? ' deceased' : '') + '" style="left:' + x + 'px;top:' + y + 'px;" data-id="' + escHtml(id) + '">';
+    html += '<div class="pc-box">';
+    html += '<div class="pc-role normal"><span class="pc-role-label">' + (p.prof ? escHtml(p.prof.toUpperCase()) : '&nbsp;') + '</span></div>';
+    html += '<div class="pc-photo-wrap"><div class="pc-photo"><span style="font-size:22px;font-family:\'Playfair Display\',serif;color:var(--gold);">' + escHtml(p.init || '?') + '</span></div></div>';
+    html += '<div class="pc-info">';
+    html += '<div class="pc-name">' + escHtml(p.name) + '</div>';
+    if (p.years) html += '<div class="pc-years">' + escHtml(p.years) + '</div>';
+    html += '<span class="pc-loc">' + escHtml(p.loc || famVillage) + '</span>';
+    html += '</div>';
+    html += '<div class="pc-vbar' + (p.village ? ' on' : '') + '"></div>';
+    html += '</div></div>';
+  });
+
+  /* "Add person" button at the end */
+  var ai = ids.length;
+  var ax = padX + (ai % perRow) * (cardW + gapX);
+  var ay = padY + Math.floor(ai / perRow) * (cardH + gapY);
+  html += '<div class="padd" style="left:' + ax + 'px;top:' + ay + 'px;" onclick="openAdd()">';
+  html += '<div class="padd-box" style="height:' + cardH + 'px;">';
+  html += '<div class="padd-plus">+</div>';
+  html += '<div class="padd-lbl" data-ro="Adauga persoana" data-en="Add person">Adauga persoana</div>';
+  html += '</div></div>';
+
+  canvas.innerHTML = html;
+
+  /* Attach click handlers via DOM after innerHTML is set */
+  canvas.querySelectorAll('.pc[data-id]').forEach(function(el) {
+    el.addEventListener('click', function() { openDetail(el.getAttribute('data-id')); });
+  });
+}
+
 document.addEventListener('supabase:ready', function() {
   var params = new URLSearchParams(window.location.search);
   var familyId = params.get('family');
@@ -839,10 +909,10 @@ document.addEventListener('supabase:ready', function() {
       return;
     }
     var fam = famRes.data;
-    var titleEl = document.querySelector('.page-title');
-    if (titleEl) titleEl.textContent = fam.name;
-    var subtitleEl = document.querySelector('.page-subtitle');
-    if (subtitleEl) subtitleEl.textContent = fam.village || 'Calnic';
+    /* Update tree toolbar title */
+    var treeTitleEl = document.getElementById('tree-title');
+    if (treeTitleEl) treeTitleEl.innerHTML = '&#127807; ' + escHtml(fam.name);
+    document.title = fam.name + ' \u2014 Calnic Online';
     if (memRes.error || !memRes.data || memRes.data.length === 0) return;
     var newPeople = {};
     memRes.data.forEach(function(m) {
@@ -865,6 +935,7 @@ document.addEventListener('supabase:ready', function() {
       };
     });
     PEOPLE = newPeople;
+    renderDynamicTree(fam.village || 'Calnic', newPeople);
   });
 });
 
