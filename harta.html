@@ -404,8 +404,8 @@ var street = L.tileLayer(
   {maxZoom:19, attribution:'&copy; OpenStreetMap contributors'}
 );
 var labels = L.tileLayer(
-  'https://stamen-tiles-{s}.a.ssl.fastly.net/toner-labels/{z}/{x}/{y}.png',
-  {maxZoom:19, opacity:0.5}
+  'https://tiles.stadiamaps.com/tiles/stamen_toner_labels/{z}/{x}/{y}{r}.png',
+  {maxZoom:20, opacity:0.5, attribution:'Map tiles by <a href="https://stamen.com">Stamen Design</a>, via <a href="https://stadiamaps.com">Stadia Maps</a>. Data &copy; <a href="https://openstreetmap.org">OpenStreetMap</a> contributors'}
 );
 
 satellite.addTo(map);

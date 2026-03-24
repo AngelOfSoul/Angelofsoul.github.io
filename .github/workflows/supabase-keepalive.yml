@@ -1,0 +1,28 @@
+name: Supabase Keep-Alive
+
+# Ping the Supabase REST endpoint every 3 days so the free-tier project
+# does not go to sleep (Supabase pauses inactive free projects after 1 week).
+on:
+  schedule:
+    - cron: '0 8 */3 * *'   # 08:00 UTC every 3rd day
+  workflow_dispatch:          # allow manual trigger from Actions tab
+
+jobs:
+  ping:
+    runs-on: ubuntu-latest
+    permissions: {}
+    env:
+      SUPABASE_URL: https://qjgvhirmnxpqqcllzukp.supabase.co
+    steps:
+      - name: Ping Supabase REST endpoint
+        run: |
+          STATUS=$(curl -s -o /dev/null -w "%{http_code}" \
+            "${SUPABASE_URL}/rest/v1/" \
+            -H "apikey: ${{ secrets.SUPABASE_ANON_KEY }}" \
+            --max-time 15)
+          echo "HTTP status: $STATUS"
+          if [ "$STATUS" -lt 200 ] || [ "$STATUS" -ge 500 ]; then
+            echo "Unexpected status $STATUS — ping may have failed."
+            exit 1
+          fi
+          echo "Supabase is awake."
