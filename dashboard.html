@@ -201,7 +201,29 @@ footer .g { color:var(--gold-d); font-style:normal; }
 .dash-photo-title { font-size:12px; color:var(--text); white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
 .dash-photo-meta { font-size:11px; color:var(--muted); margin-top:2px; }
 .dash-photo-del { width:100%; background:none; border:none; border-top:1px solid var(--b1); color:#a05050; font-size:12px; padding:5px; cursor:pointer; font-family:'EB Garamond',serif; transition:all 0.15s; }
-.dash-photo-del:hover { background:#3a1818; color:#e08080; }</style>
+.dash-photo-del:hover { background:#3a1818; color:#e08080; }
+
+/* ── PASSWORD TOGGLE ── */
+.pw-wrap { position: relative; }
+.pw-wrap .df-input { padding-right: 38px; }
+.pw-toggle {
+  position: absolute;
+  right: 8px;
+  top: 50%;
+  transform: translateY(-50%);
+  background: none;
+  border: none;
+  color: var(--muted);
+  cursor: pointer;
+  padding: 3px;
+  line-height: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: color 0.2s;
+}
+.pw-toggle:hover { color: var(--gold); }
+.pw-toggle svg { display: block; }</style>
 </head>
 <body>
 
@@ -398,11 +420,17 @@ footer .g { color:var(--gold-d); font-style:normal; }
           <div class="df-row">
             <div class="df-group">
               <label class="df-label" data-ro="PIN nou (4-8 cifre)" data-en="New PIN (4-8 digits)">PIN nou (4-8 cifre)</label>
-              <input class="df-input" type="password" id="newPinInput" inputmode="numeric" pattern="[0-9]{4,8}" minlength="4" maxlength="8" required placeholder="4-8 cifre"/>
+              <div class="pw-wrap">
+                <input class="df-input" type="password" id="newPinInput" inputmode="numeric" pattern="[0-9]{4,8}" minlength="4" maxlength="8" required placeholder="4-8 cifre"/>
+                <button type="button" class="pw-toggle" onclick="togglePassword('newPinInput', this)" aria-label="Arata PIN" tabindex="-1"><svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg></button>
+              </div>
             </div>
             <div class="df-group">
               <label class="df-label" data-ro="Confirma PIN" data-en="Confirm PIN">Confirma PIN</label>
-              <input class="df-input" type="password" id="confirmPinInput" inputmode="numeric" pattern="[0-9]{4,8}" minlength="4" maxlength="8" required placeholder="Repeta PIN"/>
+              <div class="pw-wrap">
+                <input class="df-input" type="password" id="confirmPinInput" inputmode="numeric" pattern="[0-9]{4,8}" minlength="4" maxlength="8" required placeholder="Repeta PIN"/>
+                <button type="button" class="pw-toggle" onclick="togglePassword('confirmPinInput', this)" aria-label="Arata PIN" tabindex="-1"><svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg></button>
+              </div>
             </div>
           </div>
           <div id="pinMsg" class="df-msg"></div>
@@ -438,6 +466,22 @@ footer .g { color:var(--gold-d); font-style:normal; }
 
 <script>
 document.getElementById('yr') && (document.getElementById('yr').textContent = new Date().getFullYear());
+
+/* ── PASSWORD TOGGLE ── */
+var EYE_ON  = '<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>';
+var EYE_OFF = '<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19m-6.72-1.07a3 3 0 1 1-4.24-4.24"/><line x1="1" y1="1" x2="23" y2="23"/></svg>';
+function togglePassword(inputId, btn) {
+  var input = document.getElementById(inputId);
+  if (input.type === 'password') {
+    input.type = 'text';
+    btn.innerHTML = EYE_OFF;
+    btn.setAttribute('aria-label', currentLang === 'ro' ? 'Ascunde PIN' : 'Hide PIN');
+  } else {
+    input.type = 'password';
+    btn.innerHTML = EYE_ON;
+    btn.setAttribute('aria-label', currentLang === 'ro' ? 'Arata PIN' : 'Show PIN');
+  }
+}
 
 var currentLang = localStorage.getItem('calnic-lang') || 'ro';
 var familyData = null;

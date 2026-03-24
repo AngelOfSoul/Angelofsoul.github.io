@@ -20,9 +20,11 @@ const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBh
   script.src = 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js';
   script.onload = function () {
     try {
-      window.supabase = window.supabase
-        ? window.supabase
-        : window.supabaseJs.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+      /* The UMD bundle sets window.supabase to the module object (which has
+         createClient). We must always call createClient() to get a real client
+         instance with .auth, .from(), etc. */
+      var lib = window.supabase || window.supabaseJs;
+      window.supabase = lib.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
     } catch (e) {
       console.warn('[Calnic] Supabase client init failed — demo mode active.', e);
     }
