@@ -396,19 +396,20 @@ var map = L.map('map', {
 
 /* Tile layers */
 var satellite = L.tileLayer(
-  'https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}',
-  {maxZoom:19, attribution:'Tiles &copy; Esri'}
+  'https://mt1.google.com/vt/lyrs=s&x={x}&y={y}&z={z}',
+  {maxZoom:20, attribution:'&copy; Google Satellite'}
+);
+var satLabels = L.tileLayer(
+  'https://mt1.google.com/vt/lyrs=h&x={x}&y={y}&z={z}',
+  {maxZoom:20, attribution:'&copy; Google', opacity:0.9}
 );
 var street = L.tileLayer(
   'https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',
-  {maxZoom:19, attribution:'&copy; OpenStreetMap contributors'}
-);
-var labels = L.tileLayer(
-  'https://tiles.stadiamaps.com/tiles/stamen_toner/{z}/{x}/{y}{r}.png',
-  {maxZoom:19, opacity:0.5, attribution:'&copy; <a href="https://stadiamaps.com/">Stadia Maps</a> &copy; <a href="https://www.stamen.com">Stamen Design</a> &copy; <a href="https://openmaptiles.org/">OpenMapTiles</a> &copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'}
+  {maxZoom:19, attribution:'&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'}
 );
 
 satellite.addTo(map);
+satLabels.addTo(map);
 var isSat = true;
 var isStreet = false;
 
@@ -690,6 +691,7 @@ map.on('mousemove', function(e) {
 function toggleSat() {
   if (!isSat) {
     map.addLayer(satellite);
+    map.addLayer(satLabels);
     if (isStreet) { map.removeLayer(street); isStreet = false; }
     document.getElementById('btnStreet').classList.remove('on');
     isSat = true;
@@ -700,7 +702,7 @@ function toggleSat() {
 function toggleStreet() {
   if (!isStreet) {
     map.addLayer(street);
-    if (isSat) { map.removeLayer(satellite); isSat = false; }
+    if (isSat) { map.removeLayer(satellite); map.removeLayer(satLabels); isSat = false; }
     document.getElementById('btnSat').classList.remove('on');
     isStreet = true;
   }
@@ -783,6 +785,17 @@ function nextTour() { tourIdx=(tourIdx+1)%tourData.length; goTour(); }
 function prevTour() { tourIdx=(tourIdx-1+tourData.length)%tourData.length; goTour(); }
 
 /* ── LANGUAGE ── */
+/* ── EXPOSE FUNCTIONS TO GLOBAL SCOPE (onclick needs these) ── */
+window.toggleSat = function() { toggleSat(); };
+window.toggleStreet = function() { toggleStreet(); };
+window.resetView = function() { resetView(); };
+window.locateMe = function() { locateMe(); };
+window.toggleLayer = function(id) { toggleLayer(id); };
+window.toggleFull = function() { toggleFull(); };
+window.toggleTour = function() { toggleTour(); };
+window.nextTour = function() { nextTour(); };
+window.prevTour = function() { prevTour(); };
+
 window._setLang = function setLang(lang) {
   currentLang = lang;
   localStorage.setItem('calnic-lang', lang);
