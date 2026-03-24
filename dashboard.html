@@ -191,7 +191,17 @@ footer .g { color:var(--gold-d); font-style:normal; }
 .tl-del-btn:hover { background:#3a1818; color:#e08080; }
 
 .empty-note { font-size:13px; color:var(--muted); font-style:italic; padding:8px 0; }
-</style>
+
+/* Photo grid in dashboard */
+.dash-photo-grid { display:grid; grid-template-columns:repeat(auto-fill,minmax(130px,1fr)); gap:10px; margin-bottom:14px; }
+.dash-photo-card { background:var(--s2); border:1px solid var(--b1); border-radius:2px; overflow:hidden; position:relative; }
+.dash-photo-thumb { width:100%; aspect-ratio:4/3; object-fit:cover; display:block; background:var(--s3); }
+.dash-photo-thumb-placeholder { width:100%; aspect-ratio:4/3; background:var(--s3); display:flex; align-items:center; justify-content:center; font-size:28px; color:var(--muted); }
+.dash-photo-info { padding:6px 8px; }
+.dash-photo-title { font-size:12px; color:var(--text); white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+.dash-photo-meta { font-size:11px; color:var(--muted); margin-top:2px; }
+.dash-photo-del { width:100%; background:none; border:none; border-top:1px solid var(--b1); color:#a05050; font-size:12px; padding:5px; cursor:pointer; font-family:'EB Garamond',serif; transition:all 0.15s; }
+.dash-photo-del:hover { background:#3a1818; color:#e08080; }</style>
 </head>
 <body>
 
@@ -398,6 +408,21 @@ footer .g { color:var(--gold-d); font-style:normal; }
           <div id="pinMsg" class="df-msg"></div>
           <button class="dash-btn" type="submit" id="pinBtn" data-ro="Schimba PIN" data-en="Change PIN">Schimba PIN</button>
         </form>
+      </div>
+    </div>
+
+    <!-- Section 5: My Photos -->
+    <div class="dash-section" id="sec-photos">
+      <div class="dash-section-hdr" onclick="toggleSection('photos')">
+        <span class="dash-section-title" data-ro="&#128247; Fotografiile Mele" data-en="&#128247; My Photos">&#128247; Fotografiile Mele</span>
+        <span class="dash-toggle" id="toggle-photos">+</span>
+      </div>
+      <div class="dash-section-body" id="body-photos" style="display:none;">
+        <div id="photosList"></div>
+        <div id="photosMsg" class="df-msg"></div>
+        <hr class="df-divider"/>
+        <p style="font-size:13px; color:var(--muted);" data-ro="Pentru a adauga fotografii noi, mergi la pagina Galerie." data-en="To add new photos, go to the Gallery page.">Pentru a adauga fotografii noi, mergi la pagina Galerie.</p>
+        <a class="dash-btn-sec" href="galerie.html" style="margin-top:10px; display:inline-block;" data-ro="&#127747; Mergi la Galerie" data-en="&#127747; Go to Gallery">&#127747; Mergi la Galerie</a>
       </div>
     </div>
 
@@ -677,7 +702,82 @@ async function deleteTimeline(entryId) {
   }
 }
 
-/* Privacy & PIN */
+/* My Photos */
+var photosCache = [];
+
+var CAT_LABELS = {
+  cetatea:'Cetatea', biserica:'Biserica', viata:'Viata satului',
+  evenimente:'Evenimente', natura:'Natura', vechi:'Fotografii vechi', familii:'Familii'
+};
+
+function renderPhotos(photos) {
+  var el = document.getElementById('photosList');
+  if (!photos || photos.length === 0) {
+    el.innerHTML = '<div class="empty-note">' + (currentLang === 'ro' ? 'Nu ai incarcat fotografii inca. Mergi la Galerie pentru a adauga prima ta fotografie.' : 'You have not uploaded any photos yet. Go to Gallery to add your first photo.') + '</div>';
+    return;
+  }
+  el.innerHTML = '<div class="dash-photo-grid">' + photos.map(function(p) {
+    var title = (currentLang === 'en' && p.title_en) ? p.title_en : (p.title_ro || (currentLang === 'ro' ? 'Fara titlu' : 'Untitled'));
+    var cat = CAT_LABELS[p.category] || p.category || '';
+    var year = p.year ? p.year : '';
+    var meta = [cat, year].filter(Boolean).join(' · ');
+    var imgHtml = p.path
+      ? '<img class="dash-photo-thumb" src="' + p.path + '" alt="' + title.replace(/"/g,'&quot;') + '" onerror="this.style.display=\'none\';this.nextElementSibling.style.display=\'flex\'">'
+        + '<div class="dash-photo-thumb-placeholder" style="display:none">&#128247;</div>'
+      : '<div class="dash-photo-thumb-placeholder">&#128247;</div>';
+    return '<div class="dash-photo-card" id="pcard-' + p.id + '">'
+      + imgHtml
+      + '<div class="dash-photo-info">'
+      + '<div class="dash-photo-title" title="' + title.replace(/"/g,'&quot;') + '">' + title + '</div>'
+      + (meta ? '<div class="dash-photo-meta">' + meta + '</div>' : '')
+      + '</div>'
+      + '<button class="dash-photo-del" onclick="deletePhoto(\'' + p.id + '\',\'' + (p.path||'').replace(/'/g,"\\'") + '\')">'
+      + (currentLang === 'ro' ? 'Sterge' : 'Delete') + '</button>'
+      + '</div>';
+  }).join('') + '</div>'
+    + '<div style="font-size:12px;color:var(--muted);margin-top:4px;">'
+    + (currentLang === 'ro'
+        ? photos.length + ' fotografie' + (photos.length !== 1 ? ' incarcate' : ' incarcata')
+        : photos.length + ' photo' + (photos.length !== 1 ? 's uploaded' : ' uploaded'))
+    + '</div>';
+}
+
+async function loadPhotos() {
+  if (!window.supabase || !currentUser) return;
+  var res = await window.supabase
+    .from('photos')
+    .select('id, title_ro, title_en, category, year, path, is_private')
+    .eq('uploader_id', currentUser.id)
+    .order('uploaded_at', { ascending: false });
+  if (!res.error && res.data) {
+    photosCache = res.data;
+    renderPhotos(res.data);
+  }
+}
+
+async function deletePhoto(photoId, photoPath) {
+  var ok = confirm(currentLang === 'ro' ? 'Stergi aceasta fotografie? Actiunea nu poate fi anulata.' : 'Delete this photo? This cannot be undone.');
+  if (!ok) return;
+  var storageErr = null;
+  if (photoPath) {
+    var pathParts = photoPath.split('/storage/v1/object/public/photos/');
+    var storagePath = pathParts.length > 1 ? pathParts[1] : null;
+    if (storagePath) {
+      var sr = await window.supabase.storage.from('photos').remove([storagePath]);
+      if (sr.error) storageErr = sr.error.message;
+    }
+  }
+  var dr = await window.supabase.from('photos').delete().eq('id', photoId);
+  if (dr.error) {
+    showMsg('photosMsg', dr.error.message, 'error');
+  } else {
+    if (storageErr) showMsg('photosMsg', (currentLang === 'ro' ? 'Inregistrarea a fost stearsa, dar fisierul din storage nu a putut fi sters: ' : 'Record deleted, but storage file could not be removed: ') + storageErr, 'error');
+    else showMsg('photosMsg', currentLang === 'ro' ? 'Fotografia a fost stearsa.' : 'Photo deleted.', 'success');
+    await loadPhotos();
+  }
+}
+
+
 async function savePrivacy(e) {
   e.preventDefault();
   var btn = document.getElementById('privacyBtn');
@@ -751,6 +851,7 @@ document.addEventListener('supabase:ready', function() {
       populateForms();
       loadMembers();
       loadTimeline();
+      loadPhotos();
       showMain();
     });
   });

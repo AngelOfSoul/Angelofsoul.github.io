@@ -142,8 +142,9 @@ In the Supabase dashboard → **Authentication → Providers**:
 
 1. Enable the **Email** provider.
 2. Go to **Authentication → URL Configuration** and set:
-   - **Site URL:** `https://angelofsoul.github.io`
-   - **Redirect URLs:** add `https://angelofsoul.github.io/login.html`
+   - **Site URL:** `https://calniconline.ro`
+   - **Redirect URLs:** add `https://calniconline.ro/login.html`
+   > ⚠️ If the domain is not yet connected, temporarily also add `https://angelofsoul.github.io` and `https://angelofsoul.github.io/login.html` until DNS is live.
 
 ---
 
