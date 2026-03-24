@@ -46,7 +46,7 @@ nav{background:var(--s1);border-bottom:2px solid var(--gold-d);display:flex;flex
 .nav-login:hover{background:#2a0a0a;color:var(--text);}
 .scroll-top{position:fixed;bottom:28px;right:24px;background:#111111;border:1px solid #b08030;color:#d4a84a;width:40px;height:40px;border-radius:2px;cursor:pointer;font-size:20px;display:flex;align-items:center;justify-content:center;opacity:0;transition:opacity 0.3s;z-index:9999;text-decoration:none;}
 .scroll-top:hover{background:#b08030;color:#0a0a0a;}
-.scroll-bottom{position:fixed;bottom:74px;right:24px;background:#111111;border:1px solid #383838;color:#a09070;width:40px;height:40px;border-radius:2px;cursor:pointer;font-size:20px;display:flex;align-items:center;justify-content:center;opacity:1;transition:opacity 0.3s;z-index:9999;text-decoration:none;}
+.scroll-bottom{position:fixed;bottom:74px;right:24px;background:#111111;border:1px solid #383838;color:#c8aa80;width:40px;height:40px;border-radius:2px;cursor:pointer;font-size:20px;display:flex;align-items:center;justify-content:center;opacity:1;transition:opacity 0.3s;z-index:9999;text-decoration:none;}
 .scroll-bottom:hover{border-color:#b08030;color:#d4a84a;}
 footer{background:#050505;border-top:2px solid var(--gold-d);padding:16px 24px;text-align:center;font-family:'EB Garamond',serif;font-size:13px;color:var(--muted);letter-spacing:1.5px;font-style:italic;}
 footer .g{color:var(--gold-d);font-style:normal;}
@@ -72,8 +72,8 @@ footer .g{color:var(--gold-d);font-style:normal;}
 .fam-hero-meta{font-size:14px;color:var(--muted);font-style:italic;margin-bottom:10px;}
 .fam-badges{display:flex;gap:8px;flex-wrap:wrap;}
 .fam-badge{font-size:10px;padding:3px 10px;border-radius:10px;letter-spacing:1px;}
-.fam-badge.pub{background:#1a2a1a;color:#6a9a5a;border:1px solid #2a4a2a;}
-.fam-badge.prv{background:#2a1a0a;color:#c8883a;border:1px solid #4a2a0a;}
+.fam-badge.pub{background:#0e1e0a;color:#82c46a;border:1px solid #2a4a2a;}
+.fam-badge.prv{background:#1e1005;color:#e09a50;border:1px solid #4a2a0a;}
 .fam-badge.vil{background:#1a1a2a;color:#6a8aaa;border:1px solid #2a2a4a;}
 .fam-hero-stats{display:flex;gap:22px;flex-shrink:0;}
 .fam-stat{text-align:center;}
@@ -92,7 +92,7 @@ footer .g{color:var(--gold-d);font-style:normal;}
 .section-head-title{font-family:'Playfair Display',serif;font-size:12px;font-weight:600;letter-spacing:3px;text-transform:uppercase;color:var(--gold);white-space:nowrap;}
 
 /* ── STORY ── */
-.fam-story{font-size:16px;line-height:1.9;color:#c8b890;border-left:3px solid var(--gold-d);padding-left:22px;font-style:italic;}
+.fam-story{font-size:16px;line-height:1.9;color:#ddd0a8;border-left:3px solid var(--gold-d);padding-left:22px;font-style:italic;}
 
 /* ── MEMBERS ── */
 .members-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(135px,1fr));gap:12px;}
@@ -468,7 +468,7 @@ footer .g{color:var(--gold-d);font-style:normal;}
       <div class="sc-row"><span data-ro="Generatii" data-en="Generations">Generatii</span><span class="sc-val">4</span></div>
       <div class="sc-row"><span data-ro="Membri" data-en="Members">Membri</span><span class="sc-val">12</span></div>
       <div class="sc-row"><span data-ro="Fotografii" data-en="Photos">Fotografii</span><span class="sc-val">47</span></div>
-      <div class="sc-row"><span data-ro="Arbore conectat" data-en="Tree connected">Arbore conectat</span><span class="sc-val" style="color:#6a9a5a;">&#10003; Da</span></div>
+      <div class="sc-row"><span data-ro="Arbore conectat" data-en="Tree connected">Arbore conectat</span><span class="sc-val" style="color:#82c46a;">&#10003; Da</span></div>
     </div>
 
     <div class="side-orn">— &#10022; —</div>
@@ -752,7 +752,7 @@ async function checkPin() {
   if (granted) {
     privateUnlocked = true;
     document.querySelector('.private-box').innerHTML = '<div class="pb-icon">&#128275;</div>'
-      + '<div class="pb-title" style="color:#6a9a5a;">' + (currentLang === 'ro' ? 'Acces acordat' : 'Access granted') + '</div>'
+      + '<div class="pb-title" style="color:#82c46a;">' + (currentLang === 'ro' ? 'Acces acordat' : 'Access granted') + '</div>'
       + '<div class="pb-sub">' + (currentLang === 'ro' ? 'Bine ai venit! Continutul privat este acum vizibil.' : 'Welcome! Private content is now visible.') + '</div>';
   } else {
     errEl.style.display = 'block';

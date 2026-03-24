@@ -54,7 +54,7 @@ footer{background:#050505;border-top:2px solid var(--gold-d);padding:16px 24px;t
 footer .g{color:var(--gold-d);font-style:normal;}
 .scroll-top{position:fixed;bottom:28px;right:24px;background:#111111;border:1px solid #b08030;color:#d4a84a;width:40px;height:40px;border-radius:2px;cursor:pointer;font-size:20px;display:flex;align-items:center;justify-content:center;opacity:0;transition:opacity 0.3s;z-index:9999;text-decoration:none;}
 .scroll-top:hover{background:#b08030;color:#0a0a0a;}
-.scroll-bottom{position:fixed;bottom:74px;right:24px;background:#111111;border:1px solid #383838;color:#a09070;width:40px;height:40px;border-radius:2px;cursor:pointer;font-size:20px;display:flex;align-items:center;justify-content:center;opacity:1;transition:opacity 0.3s;z-index:9999;text-decoration:none;}
+.scroll-bottom{position:fixed;bottom:74px;right:24px;background:#111111;border:1px solid #383838;color:#c8aa80;width:40px;height:40px;border-radius:2px;cursor:pointer;font-size:20px;display:flex;align-items:center;justify-content:center;opacity:1;transition:opacity 0.3s;z-index:9999;text-decoration:none;}
 .scroll-bottom:hover{border-color:#b08030;color:#d4a84a;}
 .main-wrap{max-width:1200px;margin:0 auto;padding:24px 20px;}
 
@@ -63,14 +63,14 @@ footer .g{color:var(--gold-d);font-style:normal;}
 .map-title-bar{font-family:'Playfair Display',serif;font-size:14px;color:var(--gold);flex:1;letter-spacing:1px;}
 .mb{font-size:11px;padding:5px 13px;background:#1a1208;border:1px solid #c8983a;color:var(--gold);font-family:'EB Garamond',serif;border-radius:3px;cursor:pointer;transition:all 0.15s;white-space:nowrap;}
 .mb:hover,.mb.on{background:var(--gold);color:#0a0a0a;}
-.mb.green{border-color:#2a4a2a;color:#6a9a5a;background:#0d1a0d;}
+.mb.green{border-color:#2a4a2a;color:#82c46a;background:#0d1a0d;}
 .mb.green:hover,.mb.green.on{background:#6a9a5a;color:#0a0a0a;}
 .mb.blue{border-color:#2a3a5a;color:#7a9aba;background:#0a0d1a;}
 .mb.blue:hover,.mb.blue.on{background:#7a9aba;color:#0a0a0a;}
 
 /* LAYER BAR */
 .layer-bar{background:#111;border:1px solid var(--b1);border-top:1px solid #2a2010;border-bottom:none;padding:7px 14px;display:flex;flex-wrap:wrap;gap:6px;align-items:center;}
-.lb-lbl{font-size:10px;color:#504030;letter-spacing:1px;text-transform:uppercase;margin-right:4px;font-family:'EB Garamond',serif;}
+.lb-lbl{font-size:10px;color:#786040;letter-spacing:1px;text-transform:uppercase;margin-right:4px;font-family:'EB Garamond',serif;}
 .lt{font-size:10px;padding:3px 10px;background:#1a1208;border:1px solid #3a2810;color:var(--muted);font-family:'EB Garamond',serif;border-radius:2px;cursor:pointer;transition:all 0.15s;display:flex;align-items:center;gap:5px;}
 .lt.on{background:#1e1810;border-color:#c8983a;color:var(--gold);}
 .lt-dot{width:8px;height:8px;border-radius:50%;flex-shrink:0;}
@@ -81,7 +81,7 @@ footer .g{color:var(--gold-d);font-style:normal;}
 /* BOTTOM BAR */
 .map-bottom{background:#0f0f0f;border:1px solid var(--b1);border-top:none;border-radius:0 0 4px 4px;padding:8px 14px;display:flex;flex-wrap:wrap;gap:16px;align-items:center;font-size:12px;color:var(--muted);font-family:'EB Garamond',serif;}
 .map-bottom strong{color:var(--gold);}
-.coord-display{font-size:11px;color:#504030;margin-left:auto;font-family:'EB Garamond',serif;}
+.coord-display{font-size:11px;color:#786040;margin-left:auto;font-family:'EB Garamond',serif;}
 
 /* TOUR BAR */
 .tour-bar{display:none;background:#1a1208;border:1px solid #c8983a;border-top:none;padding:10px 14px;align-items:center;gap:10px;flex-wrap:wrap;}
@@ -90,7 +90,7 @@ footer .g{color:var(--gold-d);font-style:normal;}
 .tour-desc{font-size:11px;color:var(--muted);font-family:'EB Garamond',serif;width:100%;margin-top:2px;}
 .tour-nav{font-size:11px;padding:4px 14px;background:#0f0f0f;border:1px solid #c8983a;color:var(--gold);border-radius:3px;cursor:pointer;font-family:'EB Garamond',serif;transition:all 0.15s;}
 .tour-nav:hover{background:var(--gold);color:#0a0a0a;}
-.tour-prog{font-size:10px;color:#504030;font-family:'EB Garamond',serif;white-space:nowrap;}
+.tour-prog{font-size:10px;color:#786040;font-family:'EB Garamond',serif;white-space:nowrap;}
 
 /* LEAFLET CUSTOM STYLES */
 .leaflet-popup-content-wrapper{background:#111!important;border:1px solid #c8983a!important;border-radius:8px!important;box-shadow:0 4px 20px #000a!important;padding:0!important;}
@@ -360,7 +360,7 @@ window.addEventListener('load', function() {
 
 /* ── LEAFLET GUARD ── */
 if (typeof L === 'undefined') {
-  document.getElementById('map').innerHTML = '<div style="display:flex;align-items:center;justify-content:center;height:100%;color:#d4a84a;font-family:EB Garamond,serif;font-size:18px;text-align:center;padding:40px;">Harta nu s-a putut incarca.<br><small style=\'color:#a09070;font-size:14px;\'>Verificati conexiunea la internet si reincarcati pagina.</small></div>';
+  document.getElementById('map').innerHTML = '<div style="display:flex;align-items:center;justify-content:center;height:100%;color:#d4a84a;font-family:EB Garamond,serif;font-size:18px;text-align:center;padding:40px;">Harta nu s-a putut incarca.<br><small style=\'color:#c8aa80;font-size:14px;\'>Verificati conexiunea la internet si reincarcati pagina.</small></div>';
   document.getElementById('introOverlay').style.display = 'none';
   return;
 }
@@ -484,7 +484,7 @@ function buildFamilyPopup(f) {
     + '<div class="pop-body">'
     + '<div style="display:flex;align-items:center;gap:10px;margin-bottom:8px;">'
     + '<div style="width:40px;height:40px;border-radius:50%;background:#1a1208;border:1.5px solid #c8983a;display:flex;align-items:center;justify-content:center;font-family:Playfair Display,serif;font-size:18px;color:#d4a84a;">'+f.init+'</div>'
-    + '<div><div class="pop-name">'+f.name+'</div><div style="font-size:10px;color:#6a9a5a;">'+f.loc+'</div></div>'
+    + '<div><div class="pop-name">'+f.name+'</div><div style="font-size:10px;color:#82c46a;">'+f.loc+'</div></div>'
     + '</div>'
     + '<div class="pop-desc">'+f.desc+'</div>'
     + '<div class="pop-acts"><a class="pop-btn" href="familiile.html">&#128106; '+( currentLang==='ro' ? 'Profil familie' : 'Family profile')+'</a>'
