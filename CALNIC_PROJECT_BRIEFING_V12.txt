@@ -1,0 +1,421 @@
+=======================================================================
+CALNIC ONLINE — PROJECT BRIEFING V12
+Last updated: 2026-03-24
+Supersedes: CALNIC_PROJECT_BRIEFING_V11.txt
+=======================================================================
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+WHAT IS THIS SITE?
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+Calnic Online is a digital memory book ("cartea vie a satului") for
+Calnic, a village in Alba County, Transylvania, Romania.
+
+Each family from the village can create their own private page,
+add family members, a family history, a timeline of important events,
+and upload photos. The site is fully bilingual: Romanian + English.
+
+  GitHub repo:  https://github.com/AngelOfSoul/Angelofsoul.github.io
+  Live site:    https://calniconline.ro  ✅ LIVE AS OF 2026-03-24
+  Old temp URL: https://angelofsoul.github.io (still works, redirects)
+  Upload link:  https://github.com/AngelOfSoul/Angelofsoul.github.io/upload/main
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+DOMAIN & DNS STATUS (updated V12)
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  Domain:       calniconline.ro ✅ PURCHASED (Host-age.ro registrar)
+  DNS:          Cloudflare ✅ ACTIVE (migrated from Host-age on 2026-03-24)
+  Nameservers:  ernest.ns.cloudflare.com + luciana.ns.cloudflare.com
+  GitHub Pages: calniconline.ro set as custom domain ✅
+  HTTPS/SSL:    Certificate issued by GitHub ✅
+  Propagation:  Complete globally ✅
+
+  DNS Records in Cloudflare (all DNS only / grey cloud):
+    A     calniconline.ro  185.199.108.153
+    A     calniconline.ro  185.199.109.153
+    A     calniconline.ro  185.199.110.153
+    A     calniconline.ro  185.199.111.153
+    CNAME www              angelofsoul.github.io
+
+  Why Cloudflare instead of Host-age DNS:
+    Host-age had zero DNS records configured — propagation never worked.
+    Cloudflare was added on 2026-03-24. Propagated in under 30 minutes.
+    Host-age is kept only as the domain registrar (annual payment).
+    Cloudflare free plan handles all DNS and provides extra security.
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+COSTS (per year)
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  Hosting (GitHub Pages):    0 lei  — free forever
+  Database (Supabase):       0 lei  — free forever
+  DNS (Cloudflare):          0 lei  — free forever
+  Contact form (Formspree):  0 lei  — 50 messages/month free
+  Keep-alive (cron-job.org): 0 lei  — free forever
+  Domain calniconline.ro:   ~50-80 lei/year (Host-age.ro)
+  TOTAL:                    ~50-80 lei/year
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+ALL PAGES ON THE SITE (14 total — admin.html added in V12)
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  1.  index.html              — Home page
+  2.  istorie.html            — Village History
+  3.  familiile.html          — Families Directory
+  4.  familiile-familie.html  — Individual Family Page
+  5.  genealogie.html         — Genealogy Overview
+  6.  genealogie-familie.html — Family Tree Viewer
+  7.  galerie.html            — Photo Gallery
+  8.  harta.html              — Village Map
+  9.  login.html              — Family Account
+  10. dashboard.html          — Private Family Dashboard
+  11. contact.html            — Contact Form
+  12. intrebari.html          — FAQ
+  13. 404.html                — Page Not Found
+  14. admin.html              — Admin Panel (NEW — TO BE BUILT)
+      magazin.html            — Shop page (PLANNED — see shop briefing)
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+WHAT IS BUILT AND WORKING (as of V12)
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ✅ All 13 pages load correctly with bilingual RO/EN support
+  ✅ Language choice saved and remembered across all pages
+  ✅ Database connected (Supabase — real credentials in supabase.js)
+  ✅ Families loaded from database on familiile.html
+  ✅ Individual family pages load by ID from database
+  ✅ Genealogy search and family tree viewer wired to database
+  ✅ Photo gallery loads real photos from Supabase Storage
+  ✅ Authenticated families can upload photos (compressed JPEG, max 1200px)
+  ✅ Login / registration / Step 2 family setup via Supabase Auth
+  ✅ Dashboard: edit family story, members, timeline, PIN, privacy
+  ✅ Dashboard: "My Photos" section — view and delete uploaded photos
+  ✅ Contact form via Formspree (endpoint: xpqygdjn)
+  ✅ Family PIN protection on individual family pages
+  ✅ Interactive map with village landmarks (Leaflet.js)
+  ✅ Demo data fallback when database is empty
+  ✅ Social sharing meta tags on all pages
+  ✅ og-image.png (1200×630px) for social media previews
+  ✅ Domain calniconline.ro live with HTTPS ← NEW V12
+  ✅ Cloudflare DNS active and propagated ← NEW V12
+  ✅ CTA block moved in index.html (after "Cum functioneaza") ← NEW V12
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+WHAT IS STILL MISSING — TO-DO LIST
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+─────────────────────────────────────────────────────────────────────
+[ADMIN] TASK A — Set up photos table in Supabase
+─────────────────────────────────────────────────────────────────────
+PRIORITY: HIGH — photo uploads will fail without this
+
+  1. Go to https://supabase.com → your project → SQL Editor
+  2. Click "New query"
+  3. Copy contents of setup-photos-storage.sql → paste → Run
+  4. Go to Storage → create bucket named: photos → set PUBLIC
+  5. Add policy: SELECT = true (anyone can view)
+  6. Add policy: INSERT = auth.uid() IS NOT NULL (logged-in only)
+
+─────────────────────────────────────────────────────────────────────
+[ADMIN] TASK B — Update Supabase Auth URLs to calniconline.ro
+─────────────────────────────────────────────────────────────────────
+PRIORITY: HIGH — login emails redirect to wrong address without this
+
+  1. Go to https://supabase.com → your project
+  2. Authentication → URL Configuration
+  3. Site URL: https://calniconline.ro
+  4. Redirect URLs: add https://calniconline.ro/login.html
+  5. Keep: https://angelofsoul.github.io and /login.html (transition)
+  6. Save
+
+─────────────────────────────────────────────────────────────────────
+[ADMIN] TASK C — Domain & DNS
+─────────────────────────────────────────────────────────────────────
+  ✅ COMPLETED 2026-03-24
+  Domain bought at Host-age.ro, DNS moved to Cloudflare, live.
+
+─────────────────────────────────────────────────────────────────────
+[ADMIN] TASK D — Set up cron-job.org keep-alive ping
+─────────────────────────────────────────────────────────────────────
+PRIORITY: MEDIUM — prevents Supabase from sleeping after 7 days idle
+
+  1. Go to https://cron-job.org → create free account
+  2. Create cronjob:
+       URL: https://qjgvhirmnxpqqcllzukp.supabase.co/rest/v1/families?limit=1
+       Header key:   apikey
+       Header value: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InFqZ3ZoaXJtbnhwcXFjbGx6dWtwIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzQyNzQ2NTgsImV4cCI6MjA4OTg1MDY1OH0.j3SgLKfwYUaY5elT6JIshvohYvr2UigvPHub7Nzm82M
+       Schedule: every 3 days
+  3. Save and enable
+
+─────────────────────────────────────────────────────────────────────
+[ADMIN] TASK E — Manual full walkthrough
+─────────────────────────────────────────────────────────────────────
+PRIORITY: LOW — do after Tasks A and B are complete
+
+  □ Visit https://calniconline.ro — check homepage loads
+  □ Switch RO/EN — check it stays on next page
+  □ Open Families page — check families load from database
+  □ Register a test family account on login.html
+  □ Complete Step 2 (name, year, description, PIN)
+  □ Go to Dashboard — check all 5 sections work
+  □ Upload a photo on galerie.html
+  □ Check photo appears in "My Photos" on dashboard
+  □ Delete the test photo
+  □ Try the Contact form — send a test message
+  □ Share a page link on WhatsApp — check og:image preview appears
+  □ Check site on mobile phone
+
+─────────────────────────────────────────────────────────────────────
+[CODE] admin.html — Admin Panel (TO BE BUILT)
+─────────────────────────────────────────────────────────────────────
+PRIORITY: MEDIUM — needed for site moderation
+
+Full spec below — see ADMIN PANEL section.
+
+─────────────────────────────────────────────────────────────────────
+[CODE] magazin.html — Shop page (TO BE BUILT)
+─────────────────────────────────────────────────────────────────────
+PRIORITY: LOW — see CALNIC_SHOP_BRIEFING_V2.txt for full spec
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+ADMIN PANEL — FULL SPECIFICATION (admin.html)
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+OVERVIEW:
+  A private page at calniconline.ro/admin.html accessible only to the
+  site owner. Completely hidden from regular visitors. Matches the dark
+  gold Calnic Online design. NOT linked from any other page.
+  NOT bilingual — Romanian only (owner only).
+
+PROTECTION:
+  - Custom username + password chosen by the site owner
+  - Stored as hardcoded hash in the HTML (not Supabase auth)
+  - Session persists via localStorage until browser is closed
+  - If wrong credentials → stays on login screen, no access
+  - No "forgot password" — owner sets it once in the code
+
+SECTIONS:
+
+  1. STATISTICI (Statistics dashboard)
+     - Total families registered
+     - Total members added
+     - Total photos uploaded
+     - Total timeline events
+     - New families this month
+     - Numbers pulled live from Supabase
+
+  2. FAMILII (All families)
+     - Table: family name, village, registered date, member count,
+       photo count, owner email, status (active/suspended)
+     - Search by name or email
+     - Actions per family:
+         → View public profile (opens familiile-familie.html?family=ID)
+         → Suspend family (hides from public directory, keeps data)
+         → Restore suspended family
+         → Delete family permanently (with confirmation dialog)
+
+  3. FOTOGRAFII RAPORTATE (Reported photos)
+     - Only shows photos that have been flagged by visitors
+     - Each entry shows: photo thumbnail, family name, report reason,
+       date reported, reporter's note
+     - Actions:
+         → View full photo
+         → Delete photo (removes from Storage + database)
+         → Dismiss report (photo is fine, remove flag)
+     - If no reports: shows "Nicio fotografie raportată" message
+     - NOTE: Admin never browses ALL photos — only reported ones
+       This protects family privacy while allowing moderation
+
+  4. ANUNȚURI (Site-wide announcements)
+     - Simple text editor to write an announcement in RO and EN
+     - Toggle ON/OFF to show/hide on homepage
+     - When active: appears as a dismissible banner on index.html
+       above the hero section, in gold/dark style
+     - Stored in Supabase (new "announcements" table needed)
+     - Examples: village events, site maintenance, new features
+
+  5. MESAJE (Contact form submissions)
+     - Note: Formspree already emails submissions to owner
+     - This section shows a log of recent submissions from Supabase
+       (if we store them there) or links to Formspree dashboard
+     - Alternatively: skip this if Formspree email is sufficient
+
+  6. ACTIVITATE RECENTĂ (Recent activity log)
+     - Last 20 actions on the site:
+         new family registered, photo uploaded, family deleted, etc.
+     - Pulled from Supabase with timestamps
+
+  7. SECURITATE (Security)
+     - List of email addresses banned from registering
+     - Add/remove banned emails
+     - Stored in Supabase (new "banned_emails" table)
+
+  8. CONT SUSPENDAT management
+     - List of currently suspended families
+     - Quick restore button for each
+
+PHOTO REPORT BUTTON (to be added to galerie.html and familiile-familie.html):
+  - Small "Raportează" (🚩) button on every public photo
+  - Clicking opens a small modal:
+      "De ce raportezi această fotografie?"
+      Options: Conținut ilegal / Conținut ofensator /
+               Încălcarea intimității / Altceva
+      Optional text field for details
+      Submit button
+  - Report stored in Supabase (new "photo_reports" table)
+  - Admin sees it immediately in Section 3 above
+  - No login required to report — anyone can flag
+
+DATABASE CHANGES NEEDED FOR ADMIN PANEL:
+  New Supabase tables:
+    announcements (id, text_ro, text_en, is_active, created_at)
+    photo_reports (id, photo_id, reason, note, reported_at, status)
+    banned_emails (id, email, banned_at, reason)
+    activity_log  (id, action_type, family_id, details, created_at)
+
+  New Supabase column on families table:
+    is_suspended boolean default false
+
+DESIGN:
+  - Same dark gold theme as all other pages
+  - Uses Playfair Display + EB Garamond fonts
+  - No nav bar (admin page is standalone, not linked from site)
+  - Has a logout button top right
+  - Sections shown as tabs or collapsible panels
+  - Tables with gold accent headers
+  - Action buttons: red for delete/ban, amber for suspend, green for restore
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+TECHNICAL DETAILS (unchanged from V11)
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+BACKEND STACK
+  Database/Auth/Storage: Supabase (https://supabase.com)
+  Supabase URL:          https://qjgvhirmnxpqqcllzukp.supabase.co
+  Supabase client:       supabase.js (shared, imported by all pages)
+  Client event:          'supabase:ready' fires when client is loaded
+  Client reference:      window.supabase
+  Config check:          window.isSupabaseConfigured() → boolean
+
+DATABASE TABLES
+  families   — one row per registered family
+    id, owner_id, name, village, since, desc_ro, desc_en,
+    members_count, generations_count, photos_count,
+    show_members, show_generations, show_photos, show_since,
+    has_public_photos, has_private_photos, pin_hash, created_at
+    is_suspended (NEW — add for admin panel)
+
+  members    — family members
+    id, family_id, name, initial, role, birth_year, death_year, is_deceased
+
+  timeline   — historical events per family
+    id, family_id, year, text_ro, text_en
+
+  photos     — uploaded photo metadata
+    id, family_id, uploader_id, path, title_ro, title_en,
+    caption_ro, caption_en, dedicatie_ro, dedicatie_en,
+    year, category, is_private, uploaded_at
+
+  announcements (NEW)
+    id, text_ro, text_en, is_active, created_at
+
+  photo_reports (NEW)
+    id, photo_id, reason, note, reported_at, status
+
+  banned_emails (NEW)
+    id, email, banned_at, reason
+
+  activity_log (NEW)
+    id, action_type, family_id, details, created_at
+
+SUPABASE STORAGE BUCKET
+  Name:    photos
+  Access:  PUBLIC
+  Policies:
+    SELECT: true
+    INSERT: auth.uid() IS NOT NULL
+
+HELPER RPC FUNCTION
+  check_family_pin(p_family_id uuid, p_pin text) → boolean
+
+AUTH SETUP
+  Provider:     Email
+  Site URL:     https://calniconline.ro
+  Redirect URL: https://calniconline.ro/login.html
+  PIN storage:  btoa(pin) — base64 encoded
+
+LANGUAGE PERSISTENCE
+  Storage key:  localStorage → 'calnic-lang'
+  Values:       'ro' (default) or 'en'
+
+CONTACT FORM
+  Provider:  Formspree
+  Endpoint:  https://formspree.io/f/xpqygdjn
+
+PHOTO UPLOAD
+  Compression: JPEG, max 1200px, quality 0.82
+  Storage path: {userId}/{timestamp}.jpg in 'photos' bucket
+
+SEO / SOCIAL SHARING
+  og-image.png:  1200×630px social card
+  og:image URL:  https://calniconline.ro/og-image.png
+  Canonical URLs: all pages use https://calniconline.ro/[page].html
+  Twitter cards: summary_large_image on all public pages
+
+CRITICAL RULES (for every future session)
+  - Always use 'calnic-lang' as localStorage key (never 'lang')
+  - Always use https://calniconline.ro as base URL
+  - Always communicate in English
+  - Fix ALL affected pages when something changes
+  - Before context limit: create updated briefing + changelog
+  - Always give upload link after delivering any file
+  - Treat site as fully live — no "coming soon" framing
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+FILE INVENTORY (V12)
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  index.html                    Homepage (CTA moved in V12)
+  familiile.html                Families directory
+  familiile-familie.html        Individual family public profile
+  genealogie.html               Genealogy overview
+  genealogie-familie.html       Individual family tree viewer
+  galerie.html                  Village photo gallery
+  istorie.html                  Village history timeline
+  harta.html                    Interactive village map
+  contact.html                  Contact form (Formspree)
+  intrebari.html                FAQ page
+  login.html                    Family login / register + Step 2
+  dashboard.html                Private family dashboard
+  404.html                      Custom 404 error page
+  admin.html                    Admin panel (TO BE BUILT)
+  magazin.html                  Shop page (PLANNED — shop briefing)
+  supabase.js                   Supabase client config (shared)
+  og-image.png                  Social sharing image (1200×630px)
+  seed-demo-data.sql            Demo family data for Supabase
+  setup-photos-storage.sql      Photos table + RLS policies
+  README-SUPABASE.md            Supabase setup guide
+  CNAME                         Custom domain: calniconline.ro
+  CALNIC_PROJECT_BRIEFING_V12.txt  This file
+  CALNIC_SHOP_BRIEFING_V2.txt      Shop briefing (separate)
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+BUILD STATUS HISTORY
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  V1-V8:  Initial pages built
+  V9:     All 13 pages completed, language persistence
+  V10:    Supabase wiring, gallery Storage, login, dashboard, genealogy
+  V11:    og-image.png, social meta tags, "My Photos" in dashboard,
+          canonical URLs, README updated
+  V12:    Domain calniconline.ro live with HTTPS
+          DNS migrated from Host-age to Cloudflare (propagated in 30min)
+          CTA block moved in index.html (after "Cum functioneaza")
+          Admin panel fully specced (admin.html — to be built)
+          Photo report system designed (privacy-first moderation)
+          Shop briefing V2 created (Printify+Textildruck Europa)
+
+=======================================================================
+END OF BRIEFING V12
+=======================================================================
