@@ -30,8 +30,10 @@ jobs:
             -H "Authorization: Bearer ${SUPABASE_ANON_KEY}" \
             "${SUPABASE_URL}/rest/v1/")
           echo "HTTP status: ${HTTP_STATUS}"
-          if [ "${HTTP_STATUS}" = "200" ] || [ "${HTTP_STATUS}" = "206" ]; then
-            echo "✅ Supabase is alive and responding."
+          # 200/206 = success; 401 = project alive but anonymous access restricted —
+          # all of these confirm the project is running and not paused.
+          if [ "${HTTP_STATUS}" = "200" ] || [ "${HTTP_STATUS}" = "206" ] || [ "${HTTP_STATUS}" = "401" ]; then
+            echo "✅ Supabase is alive and responding (HTTP ${HTTP_STATUS})."
           else
             echo "⚠️  Unexpected status ${HTTP_STATUS} — check Supabase project health."
             exit 1
