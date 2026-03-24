@@ -173,7 +173,51 @@ In the Supabase dashboard → **Authentication → Providers**:
 
 ---
 
-## 6. Seed demo data (optional)
+## 6. Keep the free-tier project alive (prevent auto-pause)
+
+Supabase pauses free-tier projects after **7 days of inactivity**. This repository
+includes a GitHub Actions workflow that pings your project automatically every week.
+
+### What was broken — and why it's fixed
+
+If you had an **external cron job** (e.g. cron-job.org) configured to hit your
+Supabase REST URL, you may have seen:
+
+> ⓘ 401 Unauthorized
+
+This happened because Supabase requires two HTTP headers on every request and the
+external job wasn't sending them:
+```
+apikey: <your-anon-key>
+Authorization: Bearer <your-anon-key>
+```
+
+### What to do now (one-time setup)
+
+1. **Disable or delete the old external cron job.**
+   You no longer need it — the GitHub Actions workflow in this repository replaces it
+   completely and already sends the correct auth headers.
+
+2. **No extra configuration needed.**
+   The workflow (`.github/workflows/supabase-keep-alive.yml`) is already committed
+   with the correct project URL and anon key. It runs automatically every Monday at
+   08:00 UTC.
+
+3. **Test it right now** (optional but recommended):
+   - Go to your repository on GitHub → **Actions** tab.
+   - Select **"Supabase Keep Alive"** in the left sidebar.
+   - Click **"Run workflow"** → **"Run workflow"** (green button).
+   - After a few seconds, the run should show a green ✅ and log
+     `HTTP status: 200` and `✅ Supabase is alive and responding.`
+
+> 💡 **Optional:** For extra security you can add `SUPABASE_URL` and
+> `SUPABASE_ANON_KEY` as repository secrets (*Settings → Secrets and variables →
+> Actions → New repository secret*). The workflow will automatically prefer secrets
+> over the hardcoded fallback values, making key rotation easier in the future.
+
+---
+
+## 7. Seed demo data (optional)
 
 To pre-populate the 5 demo families from Phase 1, run the SQL in `seed-demo-data.sql`
 in the Supabase SQL Editor.
