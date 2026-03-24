@@ -32,34 +32,45 @@ create table if not exists photos (
 
 alter table photos enable row level security;
 
--- Drop policies first so this script is safe to re-run
-drop policy if exists "public read photos"            on photos;
-drop policy if exists "uploader read own private photos" on photos;
-drop policy if exists "auth insert photos"            on photos;
-drop policy if exists "uploader delete own photos"    on photos;
-drop policy if exists "uploader update own photos"    on photos;
+-- Each policy is created inside a DO block so the script is safe to re-run:
+-- if the policy already exists the duplicate_object exception is silently ignored.
 
 -- Anyone can read public photos
-create policy "public read photos"
-  on photos for select
-  using (is_private = false);
+do $$ begin
+  create policy "public read photos"
+    on photos for select
+    using (is_private = false);
+exception when duplicate_object then null;
+end $$;
 
 -- Authenticated users can read their own private photos
-create policy "uploader read own private photos"
-  on photos for select
-  using (auth.uid() = uploader_id);
+do $$ begin
+  create policy "uploader read own private photos"
+    on photos for select
+    using (auth.uid() = uploader_id);
+exception when duplicate_object then null;
+end $$;
 
 -- Authenticated users can insert their own photos
-create policy "auth insert photos"
-  on photos for insert
-  with check (auth.uid() is not null);
+do $$ begin
+  create policy "auth insert photos"
+    on photos for insert
+    with check (auth.uid() is not null);
+exception when duplicate_object then null;
+end $$;
 
 -- Uploader can delete their own photos
-create policy "uploader delete own photos"
-  on photos for delete
-  using (auth.uid() = uploader_id);
+do $$ begin
+  create policy "uploader delete own photos"
+    on photos for delete
+    using (auth.uid() = uploader_id);
+exception when duplicate_object then null;
+end $$;
 
 -- Uploader can update their own photos
-create policy "uploader update own photos"
-  on photos for update
-  using (auth.uid() = uploader_id);
+do $$ begin
+  create policy "uploader update own photos"
+    on photos for update
+    using (auth.uid() = uploader_id);
+exception when duplicate_object then null;
+end $$;
