@@ -159,21 +159,48 @@ in the Supabase SQL Editor.
 
 This step wires the gallery upload form to Supabase Storage.
 
-### 8a. Create the Storage bucket
+### 8a. Create the Storage buckets
 
+You need **two** buckets:
+
+**Bucket 1 — `photos` (public)**
 1. In the Supabase dashboard, go to **Storage → New bucket**.
 2. Name it exactly `photos`.
 3. Toggle **Public bucket** to **ON** (so public photos load without auth headers).
 4. Click **Create bucket**.
 
+**Bucket 2 — `photos-private` (private)**
+1. Go to **Storage → New bucket**.
+2. Name it exactly `photos-private`.
+3. Leave **Public bucket** OFF (private bucket).
+4. Click **Create bucket**.
+
 ### 8b. Add Storage policies
 
-In the Supabase dashboard → **Storage → photos → Policies**, add two policies:
+> ⚠️ **Do NOT use a `visibility` column** — it does not exist in Supabase Storage objects.
+> Privacy is handled by which bucket the file is stored in.
 
-| Policy name | Operation | Expression |
-|---|---|---|
-| Public read | SELECT | `true` |
-| Authenticated upload | INSERT | `auth.uid() IS NOT NULL` |
+Go to **Storage → Policies** and add the following policies.
+
+#### For the `photos` bucket (public):
+
+| Policy name | Operation | Roles | Expression |
+|---|---|---|---|
+| `Public read photos` | SELECT | `anon`, `authenticated` | `bucket_id = 'photos'` |
+| `Auth insert photos` | INSERT | `authenticated` | `bucket_id = 'photos'` |
+| `Uploader delete own photos` | DELETE | `authenticated` | `bucket_id = 'photos' AND owner = auth.uid()` |
+| `Uploader update own photos` | UPDATE | `authenticated` | `bucket_id = 'photos' AND owner = auth.uid()` |
+
+To add each policy: click **"New policy"** → **"For full customization"** → fill in the fields → **"Review"** → **"Save policy"**.
+
+#### For the `photos-private` bucket (private):
+
+| Policy name | Operation | Roles | Expression |
+|---|---|---|---|
+| `Uploader read own private photos` | SELECT | `authenticated` | `bucket_id = 'photos-private' AND owner = auth.uid()` |
+| `Auth insert private photos` | INSERT | `authenticated` | `bucket_id = 'photos-private'` |
+| `Uploader delete own private photos` | DELETE | `authenticated` | `bucket_id = 'photos-private' AND owner = auth.uid()` |
+| `Uploader update own private photos` | UPDATE | `authenticated` | `bucket_id = 'photos-private' AND owner = auth.uid()` |
 
 ### 8c. Create the photos table and RLS
 
@@ -187,9 +214,12 @@ This creates:
 
 After completing steps 8a–8c:
 - The **"Adaugă fotografie"** button in `galerie.html` compresses the selected image
-  (max 1200 px, JPEG 82%) and uploads it to the `photos` Storage bucket.
-- The metadata row is inserted into the `photos` table.
-- The gallery automatically reloads with real photos from the database.
+  (max 1200 px, JPEG 82%) and uploads it to the correct Storage bucket:
+  - **Public photos** → `photos` bucket (publicly accessible, no auth header needed)
+  - **Private photos** → `photos-private` bucket (only accessible to the uploader)
+- The metadata row is inserted into the `photos` table (`is_private` column tracks privacy).
+- On page load, public photos are fetched from the `photos` bucket for all visitors.
+  If a user is logged in, their own private photos from `photos-private` are also loaded via a signed URL.
 - If no photos exist in the database yet, the gallery shows built-in demo data.
 
 ---

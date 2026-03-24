@@ -877,7 +877,8 @@ function savePhoto() {
     window.supabase.auth.getUser().then(function(userRes) {
       var userId = userRes && userRes.data && userRes.data.user ? userRes.data.user.id : null;
       var path = (userId || 'public') + '/' + Date.now() + '.jpg';
-      window.supabase.storage.from('photos').upload(path, blob, { contentType: 'image/jpeg', upsert: false })
+      var storageBucket = isPrivate ? 'photos-private' : 'photos';
+      window.supabase.storage.from(storageBucket).upload(path, blob, { contentType: 'image/jpeg', upsert: false })
         .then(function(storRes) {
           if (storRes.error) {
             saveBtn.disabled = false;
@@ -970,34 +971,84 @@ setLang(currentLang);
 /* ── Load real photos from Supabase on ready ── */
 function loadPhotosFromSupabase() {
   if (!window.supabase || !window.isSupabaseConfigured()) return;
-  window.supabase.from('photos')
+
+  function buildPhotoObject(r, i, total, isPrivate, imgUrl) {
+    return {
+      id: i, dbId: r.id,
+      titleRo: r.title_ro || r.caption_ro || ('Fotografie ' + (i + 1)),
+      titleEn: r.title_en || r.caption_en || ('Photo ' + (i + 1)),
+      cat: r.category || 'vechi',
+      year: r.year || 0,
+      byRo: '', byEn: '',
+      captionRo: r.caption_ro || '',
+      captionEn: r.caption_en || '',
+      dedicatieRo: r.dedicatie_ro || '',
+      dedicatieEn: r.dedicatie_en || '',
+      priv: r.is_private || false,
+      addedOrder: total - i,
+      featured: i === 0,
+      imgUrl: imgUrl
+    };
+  }
+
+  // Always fetch public photos from the photos bucket (no auth needed)
+  var publicQuery = window.supabase.from('photos')
     .select('*')
     .eq('is_private', false)
-    .order('uploaded_at', { ascending: false })
-    .then(function(res) {
-      if (res.error || !res.data || !res.data.length) return;
-      photos = res.data.map(function(r, i) {
+    .order('uploaded_at', { ascending: false });
+
+  // Also fetch the logged-in user's own private photos
+  window.supabase.auth.getUser().then(function(userRes) {
+    var userId = userRes && userRes.data && userRes.data.user ? userRes.data.user.id : null;
+    var privateQuery = userId
+      ? window.supabase.from('photos')
+          .select('*')
+          .eq('is_private', true)
+          .eq('uploader_id', userId)
+          .order('uploaded_at', { ascending: false })
+      : Promise.resolve({ data: [], error: null });
+
+    Promise.all([publicQuery, privateQuery]).then(function(results) {
+      var pubRes  = results[0];
+      var privRes = results[1];
+      var pubRows  = (!pubRes.error  && pubRes.data)  ? pubRes.data  : [];
+      var privRows = (!privRes.error && privRes.data) ? privRes.data : [];
+
+      // Build public photo objects synchronously (getPublicUrl is sync in v2)
+      var combinedTotalSync = pubRows.length + privRows.length;
+      var pubPhotos = pubRows.map(function(r, i) {
         var urlRes = window.supabase.storage.from('photos').getPublicUrl(r.path);
         var imgUrl = urlRes && urlRes.data ? urlRes.data.publicUrl : null;
-        return {
-          id: i, dbId: r.id,
-          titleRo: r.title_ro || r.caption_ro || ('Fotografie ' + (i + 1)),
-          titleEn: r.title_en || r.caption_en || ('Photo ' + (i + 1)),
-          cat: r.category || 'vechi',
-          year: r.year || 0,
-          byRo: '', byEn: '',
-          captionRo: r.caption_ro || '',
-          captionEn: r.caption_en || '',
-          dedicatieRo: r.dedicatie_ro || '',
-          dedicatieEn: r.dedicatie_en || '',
-          priv: r.is_private || false,
-          addedOrder: res.data.length - i,
-          featured: i === 0,
-          imgUrl: imgUrl
-        };
+        return buildPhotoObject(r, i, combinedTotalSync, false, imgUrl);
       });
-      setLang(currentLang);
+
+      // For private photos, generate signed URLs asynchronously then merge
+      if (!privRows.length) {
+        if (!pubPhotos.length) return;
+        photos = pubPhotos;
+        setLang(currentLang);
+        return;
+      }
+
+      var signedUrlPromises = privRows.map(function(r) {
+        return window.supabase.storage.from('photos-private').createSignedUrl(r.path, 3600);
+      });
+
+      Promise.all(signedUrlPromises).then(function(urlResults) {
+        var offset = pubPhotos.length;
+        var combinedTotal = pubRows.length + privRows.length;
+        var privPhotos = privRows.map(function(r, i) {
+          var urlRes = urlResults[i];
+          var imgUrl = urlRes && urlRes.data ? urlRes.data.signedUrl : null;
+          return buildPhotoObject(r, offset + i, combinedTotal, true, imgUrl);
+        });
+        var combined = pubPhotos.concat(privPhotos);
+        if (!combined.length) return;
+        photos = combined;
+        setLang(currentLang);
+      });
     });
+  });
 }
 document.addEventListener('supabase:ready', loadPhotosFromSupabase);
 

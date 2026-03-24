@@ -3,11 +3,54 @@
 --
 -- Run this in the Supabase SQL Editor AFTER running the main setup in README-SUPABASE.md.
 --
--- IMPORTANT — also do these two steps manually in the Supabase dashboard:
---   1. Storage → New bucket → name: "photos" → Public bucket: YES → Create
---   2. Storage → photos bucket → Policies → Add policy:
---        "Public read"   → Allowed operation: SELECT → Using expression: true
---        "Auth upload"   → Allowed operation: INSERT → Check expression: auth.uid() IS NOT NULL
+-- ─────────────────────────────────────────────────────────────────────────────
+-- IMPORTANT — also do these steps MANUALLY in the Supabase dashboard:
+--
+-- BUCKET 1: "photos"  (public bucket)
+--   Storage → New bucket → name: "photos" → Public bucket: YES → Create
+--   Then add these Storage policies (Storage → photos → Policies):
+--
+--   Policy 1 — Public read (all files in bucket are public)
+--     Name:       Public read photos
+--     Operation:  SELECT
+--     Roles:      anon, authenticated
+--     USING:      bucket_id = 'photos'
+--
+--   Policy 2 — Authenticated users can upload
+--     Name:       Auth insert photos
+--     Operation:  INSERT
+--     Roles:      authenticated
+--     WITH CHECK: bucket_id = 'photos'
+--
+--   Policy 3 — Uploader can delete own photos
+--     Name:       Uploader delete own photos
+--     Operation:  DELETE
+--     Roles:      authenticated
+--     USING:      bucket_id = 'photos' AND owner = auth.uid()
+--
+--   Policy 4 — Uploader can update own photos
+--     Name:       Uploader update own photos
+--     Operation:  UPDATE
+--     Roles:      authenticated
+--     USING:      bucket_id = 'photos' AND owner = auth.uid()
+--
+-- BUCKET 2: "photos-private"  (private bucket)
+--   Storage → New bucket → name: "photos-private" → Public bucket: NO → Create
+--   Then add this Storage policy (Storage → photos-private → Policies):
+--
+--   Policy 5 — Owner can view own private photos
+--     Name:       Uploader read own private photos
+--     Operation:  SELECT
+--     Roles:      authenticated
+--     USING:      bucket_id = 'photos-private' AND owner = auth.uid()
+--
+--   (Also add INSERT / DELETE / UPDATE policies for photos-private identical to
+--    policies 2-4 above but with bucket_id = 'photos-private'.)
+--
+-- NOTE: Do NOT use a "visibility" column — it does not exist in Supabase Storage.
+--       Privacy is controlled by which bucket the file is in (photos vs photos-private)
+--       and by the is_private column in the photos database table.
+-- ─────────────────────────────────────────────────────────────────────────────
 
 -- ── PHOTOS TABLE ─────────────────────────────────────────────────────────────
 

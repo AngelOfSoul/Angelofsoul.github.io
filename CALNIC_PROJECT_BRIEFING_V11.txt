@@ -175,10 +175,20 @@ Steps:
   2. Click "New query"
   3. Copy the contents of setup-photos-storage.sql from this repo
   4. Paste it into the SQL editor and click "Run"
-  5. Then go to Storage (left sidebar) → create a bucket named: photos
-  6. Set it to PUBLIC
-  7. Add policy: SELECT = anyone can view (true)
-  8. Add policy: INSERT = only logged-in users (auth.uid() IS NOT NULL)
+  5. Then go to Storage (left sidebar) → create two buckets:
+       a) "photos"         → PUBLIC  (public bucket: YES)
+       b) "photos-private" → PRIVATE (public bucket: NO)
+  6. For "photos" bucket, add Storage policies:
+       SELECT:  bucket_id = 'photos'                            (roles: anon, authenticated)
+       INSERT:  bucket_id = 'photos'                            (roles: authenticated)
+       DELETE:  bucket_id = 'photos' AND owner = auth.uid()     (roles: authenticated)
+       UPDATE:  bucket_id = 'photos' AND owner = auth.uid()     (roles: authenticated)
+  7. For "photos-private" bucket, add Storage policies:
+       SELECT:  bucket_id = 'photos-private' AND owner = auth.uid()  (roles: authenticated)
+       INSERT:  bucket_id = 'photos-private'                          (roles: authenticated)
+       DELETE:  bucket_id = 'photos-private' AND owner = auth.uid()   (roles: authenticated)
+       UPDATE:  bucket_id = 'photos-private' AND owner = auth.uid()   (roles: authenticated)
+  NOTE: Do NOT use a "visibility" column — it does not exist in Supabase Storage.
 
 Full guide: see README-SUPABASE.md, Step 8
 
@@ -339,13 +349,21 @@ DATABASE TABLES
     caption_ro, caption_en, dedicatie_ro, dedicatie_en,
     year, category, is_private, uploaded_at
 
-SUPABASE STORAGE BUCKET
-  Name:    photos
-  Access:  PUBLIC (read without auth)
-  Policies:
-    SELECT: true (anyone can view)
-    INSERT: auth.uid() IS NOT NULL (only logged-in users)
-  Path:    {userId|'public'}/{timestamp}.jpg
+SUPABASE STORAGE BUCKETS
+  Bucket 1: photos         (PUBLIC)
+    Policies:
+      SELECT: bucket_id = 'photos'                          (anon, authenticated)
+      INSERT: bucket_id = 'photos'                          (authenticated)
+      DELETE: bucket_id = 'photos' AND owner = auth.uid()   (authenticated)
+      UPDATE: bucket_id = 'photos' AND owner = auth.uid()   (authenticated)
+  Bucket 2: photos-private (PRIVATE)
+    Policies:
+      SELECT: bucket_id = 'photos-private' AND owner = auth.uid()  (authenticated)
+      INSERT: bucket_id = 'photos-private'                          (authenticated)
+      DELETE: bucket_id = 'photos-private' AND owner = auth.uid()   (authenticated)
+      UPDATE: bucket_id = 'photos-private' AND owner = auth.uid()   (authenticated)
+  Path:     {userId}/{timestamp}.jpg in appropriate bucket
+  NOTE:     Do NOT use a "visibility" column — it does not exist in Supabase Storage.
 
 HELPER RPC FUNCTION
   check_family_pin(p_family_id uuid, p_pin text) → boolean
@@ -368,7 +386,9 @@ CONTACT FORM
 
 PHOTO UPLOAD
   Compression: JPEG, max 1200px width/height, quality 0.82
-  Storage path: {userId}/{timestamp}.jpg in 'photos' bucket
+  Storage path: {userId}/{timestamp}.jpg
+  Public photos  → uploaded to 'photos' bucket
+  Private photos → uploaded to 'photos-private' bucket
 
 DEMO DATA (fallback when database is empty)
   familiile.html:        5 demo families (Popescu, Muresan, Ionescu, etc.)
