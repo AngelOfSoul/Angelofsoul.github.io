@@ -3,6 +3,11 @@
 --
 -- Run this in the Supabase SQL Editor AFTER running the main setup in README-SUPABASE.md.
 --
+-- ✅ SAFE TO RE-RUN: the table is created with IF NOT EXISTS, and each policy is
+--    wrapped in a DO block that silently skips creation if the policy already exists.
+--    No DROP statements are used, so Supabase will never show a "destructive operations"
+--    warning when you run this script.
+--
 -- IMPORTANT — also do these two steps manually in the Supabase dashboard:
 --   1. Storage → New bucket → name: "photos" → Public bucket: YES → Create
 --   2. Storage → photos bucket → Policies → Add policy:

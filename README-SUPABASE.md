@@ -96,7 +96,11 @@ $$;
 
 ## 4. Enable Row-Level Security
 
-Run this in the SQL Editor to lock down the tables:
+Run this in the SQL Editor to lock down the tables.
+
+> ✅ **Safe to re-run.** Each `CREATE POLICY` is wrapped in a `DO` block that
+> silently skips creation if the policy already exists, so no "destructive
+> operations" warning will appear and no existing data is touched.
 
 ```sql
 -- Enable RLS
@@ -105,33 +109,54 @@ alter table members   enable row level security;
 alter table timeline  enable row level security;
 
 -- Anyone can read families
-create policy "public read families"
-  on families for select using (true);
+do $$ begin
+  create policy "public read families"
+    on families for select using (true);
+exception when duplicate_object then null;
+end $$;
 
 -- Only the owner can update or insert their own family
-create policy "owner can update family"
-  on families for update using (auth.uid() = owner_id);
+do $$ begin
+  create policy "owner can update family"
+    on families for update using (auth.uid() = owner_id);
+exception when duplicate_object then null;
+end $$;
 
-create policy "owner can insert family"
-  on families for insert with check (auth.uid() = owner_id);
+do $$ begin
+  create policy "owner can insert family"
+    on families for insert with check (auth.uid() = owner_id);
+exception when duplicate_object then null;
+end $$;
 
 -- Anyone can read members and timeline
-create policy "public read members"
-  on members for select using (true);
+do $$ begin
+  create policy "public read members"
+    on members for select using (true);
+exception when duplicate_object then null;
+end $$;
 
-create policy "public read timeline"
-  on timeline for select using (true);
+do $$ begin
+  create policy "public read timeline"
+    on timeline for select using (true);
+exception when duplicate_object then null;
+end $$;
 
 -- Only the family owner can write members and timeline
-create policy "owner write members"
-  on members for all using (
-    auth.uid() = (select owner_id from families where id = family_id)
-  );
+do $$ begin
+  create policy "owner write members"
+    on members for all using (
+      auth.uid() = (select owner_id from families where id = family_id)
+    );
+exception when duplicate_object then null;
+end $$;
 
-create policy "owner write timeline"
-  on timeline for all using (
-    auth.uid() = (select owner_id from families where id = family_id)
-  );
+do $$ begin
+  create policy "owner write timeline"
+    on timeline for all using (
+      auth.uid() = (select owner_id from families where id = family_id)
+    );
+exception when duplicate_object then null;
+end $$;
 ```
 
 ---
@@ -178,6 +203,13 @@ In the Supabase dashboard → **Storage → photos → Policies**, add two polic
 ### 8c. Create the photos table and RLS
 
 Run the SQL in `setup-photos-storage.sql` in the **SQL Editor**.
+
+> ✅ **Safe to re-run.** The script uses `CREATE TABLE IF NOT EXISTS` and wraps
+> every `CREATE POLICY` in a `DO` block that silently skips it if the policy
+> already exists. You will never see a "destructive operations" warning from this
+> script. If you previously ran an older version of this script (without the `DO`
+> blocks), you can safely run the current version and it will do nothing — all
+> existing policies stay untouched.
 
 This creates:
 - `photos` table with all fields used by `galerie.html`
