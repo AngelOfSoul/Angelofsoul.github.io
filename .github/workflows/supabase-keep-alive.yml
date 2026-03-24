@@ -1,0 +1,38 @@
+name: Supabase Keep Alive
+
+# Ping the Supabase REST API every week to prevent the free-tier project
+# from being paused due to inactivity.
+# Also supports a manual trigger from the Actions tab.
+
+on:
+  schedule:
+    - cron: '0 8 * * 1'   # Every Monday at 08:00 UTC
+  workflow_dispatch:       # Allow manual "Test run" from the Actions tab
+
+jobs:
+  keep-alive:
+    runs-on: ubuntu-latest
+    permissions: {}   # no GitHub token access needed
+    steps:
+      - name: Ping Supabase REST API
+        env:
+          # Prefer repository secrets; fall back to the values already public in
+          # supabase.js (the anon key is a client-side credential, intentionally
+          # public, and is safe to commit alongside the rest of the source code).
+          SUPABASE_URL: ${{ secrets.SUPABASE_URL || 'https://qjgvhirmnxpqqcllzukp.supabase.co' }}
+          SUPABASE_ANON_KEY: ${{ secrets.SUPABASE_ANON_KEY || 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InFqZ3ZoaXJtbnhwcXFjbGx6dWtwIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzQyNzQ2NTgsImV4cCI6MjA4OTg1MDY1OH0.j3SgLKfwYUaY5elT6JIshvohYvr2UigvPHub7Nzm82M' }}
+        run: |
+          echo "Pinging Supabase to keep the project alive..."
+          # Use the generic REST root endpoint (/rest/v1/) so the job does not
+          # depend on any specific table name existing or being accessible.
+          HTTP_STATUS=$(curl -s -o /dev/null -w "%{http_code}" \
+            -H "apikey: ${SUPABASE_ANON_KEY}" \
+            -H "Authorization: Bearer ${SUPABASE_ANON_KEY}" \
+            "${SUPABASE_URL}/rest/v1/")
+          echo "HTTP status: ${HTTP_STATUS}"
+          if [ "${HTTP_STATUS}" = "200" ] || [ "${HTTP_STATUS}" = "206" ]; then
+            echo "✅ Supabase is alive and responding."
+          else
+            echo "⚠️  Unexpected status ${HTTP_STATUS} — check Supabase project health."
+            exit 1
+          fi
