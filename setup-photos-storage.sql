@@ -32,6 +32,13 @@ create table if not exists photos (
 
 alter table photos enable row level security;
 
+-- Drop policies first so this script is safe to re-run
+drop policy if exists "public read photos"            on photos;
+drop policy if exists "uploader read own private photos" on photos;
+drop policy if exists "auth insert photos"            on photos;
+drop policy if exists "uploader delete own photos"    on photos;
+drop policy if exists "uploader update own photos"    on photos;
+
 -- Anyone can read public photos
 create policy "public read photos"
   on photos for select
