@@ -641,7 +641,7 @@ footer .g { color:var(--gold-d); font-style:normal; }
         </label>
         <div class="pw-wrap">
           <input class="pb-input" type="password" id="s2Pin" inputmode="numeric" pattern="[0-9]{4,8}" required
-                 minlength="4" maxlength="8" placeholder="4-8 cifre numerice"/>
+                 minlength="4" maxlength="8" placeholder="4-8 cifre numerice" autocomplete="off"/>
           <button type="button" class="pw-toggle" onclick="togglePassword('s2Pin', this)" aria-label="Arata PIN" tabindex="-1"><svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg></button>
         </div>
       </div>
@@ -769,13 +769,34 @@ function setLoading(btnId, loading) {
   document.getElementById(btnId).disabled = loading;
 }
 
+/* Route an already-authenticated user: Step 2 if no family, else logged-in box */
+async function routeAuthenticatedUser(user) {
+  var famCheck = await window.supabase.from('families').select('id').eq('owner_id', user.id).maybeSingle();
+  if (famCheck.error) {
+    console.error('[Calnic] families query error:', famCheck.error.message);
+  }
+  if (!famCheck.error && famCheck.data && famCheck.data.id) {
+    showLoggedIn(user);
+  } else {
+    showStep2Panel(user.id);
+  }
+}
+
 /* Check session on page load */
 document.addEventListener('supabase:ready', function() {
   if (!window.supabase) return;
   window.supabase.auth.getSession().then(function(res) {
     var session = res.data && res.data.session;
     if (session && session.user) {
-      showLoggedIn(session.user);
+      routeAuthenticatedUser(session.user);
+    }
+  });
+  /* Handle email-confirmation redirect: Supabase sets the session after
+     processing the URL hash token, which may happen after supabase:ready */
+  var authListener = window.supabase.auth.onAuthStateChange(function(event, session) {
+    if (event === 'SIGNED_IN' && session && session.user) {
+      authListener.data.subscription.unsubscribe();
+      routeAuthenticatedUser(session.user);
     }
   });
 });
