@@ -704,6 +704,9 @@ function setLoading(btnId, loading) {
 /* Route an already-authenticated user: Step 2 if no family, else logged-in box */
 async function routeAuthenticatedUser(user) {
   var famCheck = await window.supabase.from('families').select('id').eq('owner_id', user.id).maybeSingle();
+  if (famCheck.error) {
+    console.error('[Calnic] families query error:', famCheck.error.message);
+  }
   if (!famCheck.error && famCheck.data && famCheck.data.id) {
     showLoggedIn(user);
   } else {
@@ -722,8 +725,9 @@ document.addEventListener('supabase:ready', function() {
   });
   /* Handle email-confirmation redirect: Supabase sets the session after
      processing the URL hash token, which may happen after supabase:ready */
-  window.supabase.auth.onAuthStateChange(function(event, session) {
+  var authListener = window.supabase.auth.onAuthStateChange(function(event, session) {
     if (event === 'SIGNED_IN' && session && session.user) {
+      authListener.data.subscription.unsubscribe();
       routeAuthenticatedUser(session.user);
     }
   });
