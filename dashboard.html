@@ -896,7 +896,7 @@ document.getElementById('logoutBtn').addEventListener('click', async function() 
 });
 
 /* Auth check + family load */
-document.addEventListener('supabase:ready', function() {
+function initDashboard() {
   if (!window.supabase) {
     window.location.href = 'login.html';
     return;
@@ -922,8 +922,9 @@ document.addEventListener('supabase:ready', function() {
       loadPhotos();
       showMain();
     });
-  });
-});
+  }).catch(function() { window.location.href = 'login.html'; });
+}
+if (window.supabase) { initDashboard(); } else { document.addEventListener('supabase:ready', initDashboard); }
 </script>
 </body>
 </html>

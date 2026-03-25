@@ -548,7 +548,7 @@ var supabaseLoaded = false;
    Runs after supabase.js fires the 'supabase:ready' event.
    On success, replaces the demo families array and re-renders.
    On failure, keeps the demo data and logs a console note. */
-document.addEventListener('supabase:ready', function() {
+function loadFamiliiFromSupabase() {
   var gridLoading = document.getElementById('gridLoading');
   if (!window.supabase) {
     supabaseLoaded = true;
@@ -612,8 +612,14 @@ document.addEventListener('supabase:ready', function() {
       if (statEl) statEl.textContent = families.length;
       buildAlphaBar();
       filterFamilies();
+    }).catch(function() {
+      supabaseLoaded = true;
+      if (gridLoading) gridLoading.style.display = 'none';
+      buildAlphaBar();
+      filterFamilies();
     });
-});
+}
+if (window.supabase) { loadFamiliiFromSupabase(); } else { document.addEventListener('supabase:ready', loadFamiliiFromSupabase); }
 
 var currentLang = localStorage.getItem('calnic-lang') || 'ro';
 var currentAlpha = 'all';
@@ -766,14 +772,13 @@ setTimeout(updateScrollBtns, 100);
 setLang(currentLang);
 
 /* ── NAV SESSION CHECK ── */
-document.addEventListener('supabase:ready', function() {
+function checkFamiliiNavSession() {
   if (!window.supabase) return;
   window.supabase.auth.getSession().then(function(res) {
     var session = res.data && res.data.session;
     if (!session || !session.user) return;
     var navLogin = document.querySelector('a.nav-login');
     var mobileLogin = document.querySelector('a.nav-mobile-login');
-    var label = '\ud83d\udc64 ' + (session.user.email || 'Contul meu');
     if (navLogin) {
       navLogin.href = 'login.html';
       var span = navLogin.querySelector('.nl');
@@ -785,7 +790,8 @@ document.addEventListener('supabase:ready', function() {
       mobileLogin.textContent = '\ud83d\udc64 Contul meu';
     }
   });
-});
+}
+if (window.supabase) { checkFamiliiNavSession(); } else { document.addEventListener('supabase:ready', checkFamiliiNavSession); }
 
 // Hamburger menu
 var ham = document.getElementById('hamburgerBtn');

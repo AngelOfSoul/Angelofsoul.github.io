@@ -625,7 +625,7 @@ function populateDOM() {
 }
 
 /* Load from Supabase if configured */
-document.addEventListener('supabase:ready', function() {
+function loadFamilyData() {
   if (!window.supabase) {
     showDbErrorMsg(currentLang === 'ro'
       ? 'Nu esti conectat la baza de date. Datele familiei nu pot fi incarcate.'
@@ -698,13 +698,19 @@ document.addEventListener('supabase:ready', function() {
         var editBtn = document.createElement('a');
         editBtn.href = 'dashboard.html?family=' + familyId;
         editBtn.textContent = currentLang === 'ro' ? '✎ Editeaza familia' : '✎ Edit family';
-        editBtn.style.cssText = 'display:inline-block;margin-top:12px;padding:8px 18px;background:var(--s2);border:1px solid var(--b2);color:var(--gold);font-family:'EB Garamond',serif;font-size:14px;border-radius:2px;';
+        editBtn.style.cssText = 'display:inline-block;margin-top:12px;padding:8px 18px;background:var(--s2);border:1px solid var(--b2);color:var(--gold);font-family:\'EB Garamond\',serif;font-size:14px;border-radius:2px;';
         var heroInfo = document.querySelector('.fam-hero-info');
         if (heroInfo) heroInfo.appendChild(editBtn);
       }
     });
+  }).catch(function(e) {
+    console.warn('[Calnic] Error loading family data:', e);
+    showDbErrorMsg(currentLang === 'ro'
+      ? 'Eroare la incarcarea datelor familiei. Incearca din nou mai tarziu.'
+      : 'Error loading family data. Please try again later.');
   });
-});
+}
+if (window.supabase) { loadFamilyData(); } else { document.addEventListener('supabase:ready', loadFamilyData); }
 
 function showNoFamilyMsg() {
   var msg = document.createElement('div');
@@ -827,14 +833,13 @@ window.addEventListener('load', updateScrollBtns);
 setTimeout(updateScrollBtns, 100);
 
 /* ── NAV SESSION CHECK ── */
-document.addEventListener('supabase:ready', function() {
+function checkFamilieFamilieNavSession() {
   if (!window.supabase) return;
   window.supabase.auth.getSession().then(function(res) {
     var session = res.data && res.data.session;
     if (!session || !session.user) return;
     var navLogin = document.querySelector('a.nav-login');
     var mobileLogin = document.querySelector('a.nav-mobile-login');
-    var label = '\ud83d\udc64 ' + (session.user.email || 'Contul meu');
     if (navLogin) {
       navLogin.href = 'login.html';
       var span = navLogin.querySelector('.nl');
@@ -846,7 +851,8 @@ document.addEventListener('supabase:ready', function() {
       mobileLogin.textContent = '\ud83d\udc64 Contul meu';
     }
   });
-});
+}
+if (window.supabase) { checkFamilieFamilieNavSession(); } else { document.addEventListener('supabase:ready', checkFamilieFamilieNavSession); }
 
 // Hamburger menu
 var ham = document.getElementById('hamburgerBtn');

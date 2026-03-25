@@ -869,7 +869,7 @@ if (ham && mobileMenu) {
 }
 
 /* ── ADMIN NAV LINK — visible only to admin account ── */
-document.addEventListener('supabase:ready', function() {
+function checkAdminNavLink() {
   if (!window.supabase) return;
   window.supabase.auth.getSession().then(function(res) {
     var session = res.data && res.data.session;
@@ -888,7 +888,8 @@ document.addEventListener('supabase:ready', function() {
         }
       }).catch(function(){});
   });
-});
+}
+if (window.supabase) { checkAdminNavLink(); } else { document.addEventListener('supabase:ready', checkAdminNavLink); }
 </script>
 
 <!-- ═══════════════════════════════════════════════════════════════ -->
@@ -1175,7 +1176,7 @@ document.addEventListener('supabase:ready', function() {
     });
   }
 
-  document.addEventListener('supabase:ready', boot);
+  if (window.supabase) { boot(); } else { document.addEventListener('supabase:ready', boot); }
 
 })();
 </script>
