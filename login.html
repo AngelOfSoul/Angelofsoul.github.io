@@ -543,6 +543,23 @@ footer .g { color:var(--gold-d); font-style:normal; }
       </form>
     </div>
 
+    <!-- ── STEP 1b: EMAIL CONFIRMATION NOTICE ── -->
+    <div id="panelEmailConfirm" style="display:none;">
+      <div class="login-hero">
+        <div class="login-hero-title" data-ro="✉️ Verifica email-ul" data-en="✉️ Check your email">✉️ Verifica email-ul</div>
+        <div class="login-hero-sub" data-ro="Contul tau a fost creat!" data-en="Your account has been created!">Contul tau a fost creat!</div>
+      </div>
+      <div style="background:var(--s1);border:1px solid var(--b1);border-left:3px solid var(--gold-d);border-radius:2px;padding:24px 28px;text-align:center;">
+        <p style="color:var(--text);font-size:16px;margin-bottom:14px;" data-ro="Ti-am trimis un email de confirmare. Dupa ce confirmi adresa, revino aici si autentifica-te pentru a-ti crea profilul familiei." data-en="We sent you a confirmation email. After confirming your address, come back here and sign in to create your family profile.">Ti-am trimis un email de confirmare. Dupa ce confirmi adresa, revino aici si autentifica-te pentru a-ti crea profilul familiei.</p>
+        <p style="color:var(--muted);font-size:14px;font-style:italic;" data-ro="Nu ai primit emailul? Verifica dosarul Spam." data-en="Didn't receive the email? Check your Spam folder.">Nu ai primit emailul? Verifica dosarul Spam.</p>
+        <div style="margin-top:20px;">
+          <button class="cta-btn" onclick="showTab('login')" style="margin-top:8px;">
+            <span data-ro="MERGI LA AUTENTIFICARE" data-en="GO TO SIGN IN">MERGI LA AUTENTIFICARE</span>
+          </button>
+        </div>
+      </div>
+    </div>
+
     <!-- ── STEP 2: FAMILY PROFILE ── -->
     <div id="panelStep2" style="display:none;">
     <form class="auth-form" id="step2Form" onsubmit="doFamilyProfile(event)">
@@ -638,8 +655,10 @@ function showTab(tab) {
   var isLogin = (tab === 'login');
   document.getElementById('panelLogin').style.display    = isLogin ? '' : 'none';
   document.getElementById('panelRegister').style.display = isLogin ? 'none' : '';
+  document.getElementById('panelEmailConfirm').style.display = 'none';
   document.getElementById('tabLogin').classList.toggle('active', isLogin);
   document.getElementById('tabRegister').classList.toggle('active', !isLogin);
+  document.querySelector('.tab-bar').style.display = ''; // restore tab bar
 }
 (function() {
   var params = new URLSearchParams(window.location.search);
@@ -719,6 +738,17 @@ function showStep2Panel(userId) {
   document.getElementById('panelLogin').style.display = 'none';
   document.getElementById('panelRegister').style.display = 'none';
   document.getElementById('panelStep2').style.display = '';
+}
+
+/* Show email confirmation notice panel */
+function showEmailConfirmPanel() {
+  document.querySelector('.tab-bar').style.display = 'none';
+  document.getElementById('panelLogin').style.display = 'none';
+  document.getElementById('panelRegister').style.display = 'none';
+  document.getElementById('panelStep2').style.display = 'none';
+  document.getElementById('panelEmailConfirm').style.display = '';
+  // Re-apply language translations to the new panel
+  setLang(currentLang);
 }
 
 async function doLogin(e) {
@@ -807,9 +837,9 @@ async function doRegister(e) {
     }
     pendingUserId = signUpRes.data.user && signUpRes.data.user.id;
     showMsg('registerMsg', currentLang === 'ro'
-      ? 'Cont creat! Completeaza profilul familiei.'
-      : 'Account created! Complete your family profile.', 'success');
-    showStep2Panel(pendingUserId);
+      ? 'Cont creat! Verifica email-ul pentru a confirma.'
+      : 'Account created! Check your email to confirm.', 'success');
+    showEmailConfirmPanel();
   } catch(err) {
     showMsg('registerMsg', err.message || 'Eroare necunoscuta', 'error');
   } finally {
