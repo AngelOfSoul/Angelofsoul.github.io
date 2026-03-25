@@ -577,9 +577,9 @@ var DEMO_TIMELINE = [
   { year:2002, textRo:'Ana Popescu se casatoreste cu Mihai Stan.', textEn:'Ana Popescu marries Mihai Stan.' }
 ];
 
-var FAM     = DEMO_FAM;
-var MEMBERS = DEMO_MEMBERS.slice();
-var TIMELINE = DEMO_TIMELINE.slice();
+var FAM     = null;
+var MEMBERS = [];
+var TIMELINE = [];
 
 /* Populate DOM from loaded data */
 function populateDOM() {
@@ -607,8 +607,9 @@ function populateDOM() {
 /* Load from Supabase if configured */
 document.addEventListener('supabase:ready', function() {
   if (!window.supabase) {
-    if (!familyId) showNoFamilyMsg();
-    else populateDOM();
+    showDbErrorMsg(currentLang === 'ro'
+      ? 'Nu esti conectat la baza de date. Datele familiei nu pot fi incarcate.'
+      : 'Not connected to the database. Family data cannot be loaded.');
     return;
   }
   if (!familyId) {
@@ -625,8 +626,10 @@ document.addEventListener('supabase:ready', function() {
     var timelineRes = results[2];
 
     if (famRes.error) {
-      console.info('[Calnic] Supabase not connected — showing demo data');
-      populateDOM();
+      console.warn('[Calnic] Supabase error loading family:', famRes.error.message);
+      showDbErrorMsg(currentLang === 'ro'
+        ? 'Eroare la incarcarea datelor familiei. Incearca din nou mai tarziu.'
+        : 'Error loading family data. Please try again later.');
       return;
     }
 
@@ -684,12 +687,18 @@ document.addEventListener('supabase:ready', function() {
 });
 
 function showNoFamilyMsg() {
-  var container = document.querySelector('.fam-hero-name') && document.querySelector('.fam-hero-name').closest('.fam-hero') || document.body;
   var msg = document.createElement('div');
   msg.style.cssText = 'padding:32px;text-align:center;color:var(--muted);font-style:italic;';
   msg.innerHTML = currentLang === 'ro'
     ? 'Nicio familie specificata. <a href="familiile.html">Vezi toate familiile →</a>'
     : 'No family specified. <a href="familiile.html">View all families →</a>';
+  document.querySelector('.fam-hero') && document.querySelector('.fam-hero').after(msg);
+}
+
+function showDbErrorMsg(text) {
+  var msg = document.createElement('div');
+  msg.style.cssText = 'padding:32px;text-align:center;color:var(--muted);font-style:italic;';
+  msg.textContent = text;
   document.querySelector('.fam-hero') && document.querySelector('.fam-hero').after(msg);
 }
 

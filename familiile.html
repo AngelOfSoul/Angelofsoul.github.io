@@ -550,7 +550,7 @@ document.addEventListener('supabase:ready', function() {
       supabaseLoaded = true;
       if (gridLoading) gridLoading.style.display = 'none';
       if (res.error) {
-        console.info('[Calnic] Supabase error — showing demo data');
+        console.warn('[Calnic] Supabase error — showing demo data');
         families = DEMO_FAMILIES.slice();
         buildAlphaBar();
         filterFamilies();

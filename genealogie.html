@@ -514,7 +514,7 @@ document.addEventListener('supabase:ready', function() {
     .then(function(res) {
       supabaseLoaded = true;
       if (res.error) {
-        console.info('[Calnic] Supabase error — showing demo data');
+        console.warn('[Calnic] Supabase error — showing demo data');
         FAMILIES = DEMO_FAMILIES.slice();
         filterFamilies();
         return;
@@ -541,6 +541,13 @@ document.addEventListener('supabase:ready', function() {
         };
       });
       filterFamilies();
+      /* Update sidebar stats from live data */
+      var totalFam = FAMILIES.length;
+      var totalPer = FAMILIES.reduce(function(s, f) { return s + (f.people || 0); }, 0);
+      var maxGen   = FAMILIES.reduce(function(s, f) { return Math.max(s, f.gen || 0); }, 0);
+      ['vs-fam','sc-fam'].forEach(function(id){ var el=document.getElementById(id); if(el) el.textContent=totalFam; });
+      ['vs-per','sc-per'].forEach(function(id){ var el=document.getElementById(id); if(el) el.textContent=totalPer||'—'; });
+      ['vs-gen','sc-gen'].forEach(function(id){ var el=document.getElementById(id); if(el) el.textContent=maxGen||'—'; });
     });
 });
 
