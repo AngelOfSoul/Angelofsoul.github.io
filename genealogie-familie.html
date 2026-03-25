@@ -315,7 +315,6 @@ footer .g{color:var(--gold-d);font-style:normal;}
   <a class="nav-link" href="istorie.html">&#128506; <span class="nl" data-ro="Istoria Satului" data-en="Village History">Istoria Satului</span></a>
   <a class="nav-link" href="familiile.html">&#128106; <span class="nl" data-ro="Familiile" data-en="Families">Familiile</span></a>
   <a class="nav-link active" href="genealogie.html">&#127803; <span class="nl" data-ro="Genealogie" data-en="Genealogy">Genealogie</span></a>
-  <a class="nav-link" href="harta.html">&#127757; <span class="nl" data-ro="Harta" data-en="Map">Harta</span></a>
   <a class="nav-link" href="galerie.html">&#128248; <span class="nl" data-ro="Galerie" data-en="Gallery">Galerie</span></a>
   <a class="nav-link" href="contact.html">✉ <span class="nl" data-ro="Contact" data-en="Contact">Contact</span></a>
   <a class="nav-link" href="intrebari.html">&#10067; <span class="nl" data-ro="Intrebari" data-en="FAQ">Intrebari</span></a>
@@ -329,7 +328,6 @@ footer .g{color:var(--gold-d);font-style:normal;}
   <a class="nav-mobile-link" href="istorie.html">&#128506; Istoria Satului</a>
   <a class="nav-mobile-link" href="familiile.html">&#128106; Familiile</a>
   <a class="nav-mobile-link active" href="genealogie.html">&#127803; Genealogie</a>
-  <a class="nav-mobile-link" href="harta.html">&#127757; Harta</a>
   <a class="nav-mobile-link" href="galerie.html">&#128248; Galerie</a>
   <a class="nav-mobile-link" href="contact.html">&#9993; Contact</a>
   <a class="nav-mobile-link" href="intrebari.html">&#10067; Intrebari</a>
@@ -1048,7 +1046,7 @@ function loadFamilyFromSupabase() {
     var famRes = results[0];
     var memRes = results[1];
     if (famRes.error || !famRes.data) {
-      console.info('[Calnic] Family not found in Supabase');
+      console.warn('[Calnic] Family not found in Supabase');
       if (spinner) spinner.style.display = 'none';
       return;
     }
@@ -1059,6 +1057,21 @@ function loadFamilyFromSupabase() {
     document.title = fam.name + ' \u2014 Calnic Online';
     if (memRes.error || !memRes.data || memRes.data.length === 0) {
       if (spinner) spinner.style.display = 'none';
+      var container = document.getElementById('staticTreeContainer');
+      if (container) {
+        container.style.display = 'block';
+        container.innerHTML = '<div style="padding:48px 20px;text-align:center;color:var(--muted);font-family:\'EB Garamond\',serif;font-size:15px;font-style:italic;">'
+          + '<div style="font-size:32px;margin-bottom:12px;">&#127807;</div>'
+          + '<div>' + (currentLang === 'ro'
+              ? 'Niciun membru adaugat inca.'
+              : 'No members added yet.')
+          + '</div>'
+          + '<div style="margin-top:8px;">'
+          + (currentLang === 'ro'
+              ? 'Foloseste butonul <strong>+ Adauga persoana</strong> pentru a incepe arborele familiei.'
+              : 'Use the <strong>+ Add person</strong> button to start the family tree.')
+          + '</div></div>';
+      }
       return;
     }
     var newPeople = {};

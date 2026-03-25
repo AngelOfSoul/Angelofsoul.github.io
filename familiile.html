@@ -313,7 +313,6 @@ footer .g { color:var(--gold-d); font-style:normal; }
   <a class="nav-link" href="istorie.html">&#128506; <span class="nl" data-ro="Istoria Satului" data-en="Village History">Istoria Satului</span></a>
   <a class="nav-link active" href="familiile.html">&#128106; <span class="nl" data-ro="Familiile" data-en="Families">Familiile</span></a>
   <a class="nav-link" href="genealogie.html">&#127803; <span class="nl" data-ro="Genealogie" data-en="Genealogy">Genealogie</span></a>
-  <a class="nav-link" href="harta.html">&#127757; <span class="nl" data-ro="Harta" data-en="Map">Harta</span></a>
   <a class="nav-link" href="galerie.html">&#128248; <span class="nl" data-ro="Galerie" data-en="Gallery">Galerie</span></a>
   <a class="nav-link" href="contact.html">✉ <span class="nl" data-ro="Contact" data-en="Contact">Contact</span></a>
   <a class="nav-link" href="intrebari.html">&#10067; <span class="nl" data-ro="Intrebari" data-en="FAQ">Intrebari</span></a>
@@ -327,7 +326,6 @@ footer .g { color:var(--gold-d); font-style:normal; }
   <a class="nav-mobile-link" href="istorie.html">&#128506; Istoria Satului</a>
   <a class="nav-mobile-link active" href="familiile.html">&#128106; Familiile</a>
   <a class="nav-mobile-link" href="genealogie.html">&#127803; Genealogie</a>
-  <a class="nav-mobile-link" href="harta.html">&#127757; Harta</a>
   <a class="nav-mobile-link" href="galerie.html">&#128248; Galerie</a>
   <a class="nav-mobile-link" href="contact.html">&#9993; Contact</a>
   <a class="nav-mobile-link" href="intrebari.html">&#10067; Intrebari</a>
@@ -364,8 +362,8 @@ footer .g { color:var(--gold-d); font-style:normal; }
 
   <!-- Cards grid -->
   <div class="families-grid" id="familiesGrid"></div>
-  <div class="grid-loading" id="gridLoading" style="display:none;"><div class="grid-spinner"></div><span>Se incarca date noi...</span></div>
-  <div class="no-results" id="noResults" data-ro="Nicio familie gasita." data-en="No families found.">Nicio familie gasita.</div>
+  <div class="grid-loading" id="gridLoading" style="display:flex;"><div class="grid-spinner"></div><span>Se incarca date noi...</span></div>
+  <div class="no-results" id="noResults" style="display:none;" data-ro="Nicio familie gasita." data-en="No families found.">Nicio familie gasita.</div>
 
   </div><!-- end main-col -->
 
@@ -522,24 +520,38 @@ var DEMO_FAMILIES = [
   }
 ];
 
-var families = DEMO_FAMILIES.slice();
+var families = [];
+var supabaseLoaded = false;
 
 /* ── SUPABASE LOAD ──
    Runs after supabase.js fires the 'supabase:ready' event.
    On success, replaces the demo families array and re-renders.
    On failure, keeps the demo data and logs a console note. */
 document.addEventListener('supabase:ready', function() {
-  if (!window.supabase) return;
   var gridLoading = document.getElementById('gridLoading');
-  if (gridLoading) gridLoading.style.display = 'flex';
+  if (!window.supabase) {
+    supabaseLoaded = true;
+    if (gridLoading) gridLoading.style.display = 'none';
+    families = [];
+    var grid = document.getElementById('familiesGrid');
+    if (grid) grid.innerHTML = '<div style="grid-column:1/-1;text-align:center;padding:60px 20px;color:var(--muted);font-style:italic;font-size:16px;">'
+      + (currentLang === 'en'
+        ? 'No families registered yet. Be the first to add your family!'
+        : 'Nicio familie inregistrata inca. Fii primul care isi adauga familia!')
+      + '</div>';
+    buildAlphaBar();
+    return;
+  }
   window.supabase
     .from('families')
     .select('id, name, village, since, members_count, generations_count, photos_count, show_members, show_generations, show_photos, show_since, has_public_photos, has_private_photos, desc_ro, desc_en')
     .order('name')
     .then(function(res) {
+      supabaseLoaded = true;
       if (gridLoading) gridLoading.style.display = 'none';
       if (res.error) {
-        console.info('[Calnic] Supabase error — showing demo data');
+        console.warn('[Calnic] Supabase error — showing demo data');
+        families = DEMO_FAMILIES.slice();
         buildAlphaBar();
         filterFamilies();
         return;
@@ -653,6 +665,7 @@ function buildCard(f) {
 
 // ── FILTER & RENDER ──
 function filterFamilies() {
+  if (!supabaseLoaded) return;
   var q = document.getElementById('searchInput').value.toLowerCase().trim();
   var sort = document.getElementById('sortSelect').value;
   var village = document.getElementById('villageSelect').value;

@@ -336,7 +336,6 @@ footer .g{color:var(--gold-d);font-style:normal;}
   <a class="nav-link" href="istorie.html">&#128506; <span class="nl" data-ro="Istoria Satului" data-en="Village History">Istoria Satului</span></a>
   <a class="nav-link" href="familiile.html">&#128106; <span class="nl" data-ro="Familiile" data-en="Families">Familiile</span></a>
   <a class="nav-link" href="genealogie.html">&#127803; <span class="nl" data-ro="Genealogie" data-en="Genealogy">Genealogie</span></a>
-  <a class="nav-link" href="harta.html">&#127757; <span class="nl" data-ro="Harta" data-en="Map">Harta</span></a>
   <a class="nav-link" href="galerie.html">&#128248; <span class="nl" data-ro="Galerie" data-en="Gallery">Galerie</span></a>
   <a class="nav-link" href="contact.html">✉ <span class="nl" data-ro="Contact" data-en="Contact">Contact</span></a>
   <a class="nav-link" href="intrebari.html">&#10067; <span class="nl" data-ro="Intrebari" data-en="FAQ">Intrebari</span></a>
@@ -350,7 +349,6 @@ footer .g{color:var(--gold-d);font-style:normal;}
   <a class="nav-mobile-link" href="istorie.html">&#128506; Istoria Satului</a>
   <a class="nav-mobile-link" href="familiile.html">&#128106; Familiile</a>
   <a class="nav-mobile-link" href="genealogie.html">&#127803; Genealogie</a>
-  <a class="nav-mobile-link" href="harta.html">&#127757; Harta</a>
   <a class="nav-mobile-link" href="galerie.html">&#128248; Galerie</a>
   <a class="nav-mobile-link" href="contact.html">&#9993; Contact</a>
   <a class="nav-mobile-link" href="intrebari.html">&#10067; Intrebari</a>
@@ -579,9 +577,9 @@ var DEMO_TIMELINE = [
   { year:2002, textRo:'Ana Popescu se casatoreste cu Mihai Stan.', textEn:'Ana Popescu marries Mihai Stan.' }
 ];
 
-var FAM     = DEMO_FAM;
-var MEMBERS = DEMO_MEMBERS.slice();
-var TIMELINE = DEMO_TIMELINE.slice();
+var FAM     = null;
+var MEMBERS = [];
+var TIMELINE = [];
 
 /* Populate DOM from loaded data */
 function populateDOM() {
@@ -609,8 +607,9 @@ function populateDOM() {
 /* Load from Supabase if configured */
 document.addEventListener('supabase:ready', function() {
   if (!window.supabase) {
-    if (!familyId) showNoFamilyMsg();
-    else populateDOM();
+    showDbErrorMsg(currentLang === 'ro'
+      ? 'Nu esti conectat la baza de date. Datele familiei nu pot fi incarcate.'
+      : 'Not connected to the database. Family data cannot be loaded.');
     return;
   }
   if (!familyId) {
@@ -627,8 +626,10 @@ document.addEventListener('supabase:ready', function() {
     var timelineRes = results[2];
 
     if (famRes.error) {
-      console.info('[Calnic] Supabase not connected — showing demo data');
-      populateDOM();
+      console.warn('[Calnic] Supabase error loading family:', famRes.error.message);
+      showDbErrorMsg(currentLang === 'ro'
+        ? 'Eroare la incarcarea datelor familiei. Incearca din nou mai tarziu.'
+        : 'Error loading family data. Please try again later.');
       return;
     }
 
@@ -675,7 +676,7 @@ document.addEventListener('supabase:ready', function() {
     window.supabase.auth.getUser().then(function(res) {
       if (res.data && res.data.user && res.data.user.id === FAM.ownerId) {
         var editBtn = document.createElement('a');
-        editBtn.href = 'editeaza-familia.html?family=' + familyId;
+        editBtn.href = 'dashboard.html?family=' + familyId;
         editBtn.textContent = currentLang === 'ro' ? '✎ Editeaza familia' : '✎ Edit family';
         editBtn.style.cssText = 'display:inline-block;margin-top:12px;padding:8px 18px;background:var(--s2);border:1px solid var(--b2);color:var(--gold);font-family:'EB Garamond',serif;font-size:14px;border-radius:2px;';
         var heroInfo = document.querySelector('.fam-hero-info');
@@ -686,12 +687,18 @@ document.addEventListener('supabase:ready', function() {
 });
 
 function showNoFamilyMsg() {
-  var container = document.querySelector('.fam-hero-name') && document.querySelector('.fam-hero-name').closest('.fam-hero') || document.body;
   var msg = document.createElement('div');
   msg.style.cssText = 'padding:32px;text-align:center;color:var(--muted);font-style:italic;';
   msg.innerHTML = currentLang === 'ro'
     ? 'Nicio familie specificata. <a href="familiile.html">Vezi toate familiile →</a>'
     : 'No family specified. <a href="familiile.html">View all families →</a>';
+  document.querySelector('.fam-hero') && document.querySelector('.fam-hero').after(msg);
+}
+
+function showDbErrorMsg(text) {
+  var msg = document.createElement('div');
+  msg.style.cssText = 'padding:32px;text-align:center;color:var(--muted);font-style:italic;';
+  msg.textContent = text;
   document.querySelector('.fam-hero') && document.querySelector('.fam-hero').after(msg);
 }
 
