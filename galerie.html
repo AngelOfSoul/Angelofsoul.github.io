@@ -1018,7 +1018,7 @@ function loadPhotosFromSupabase() {
       setLang(currentLang);
     });
 }
-document.addEventListener('supabase:ready', loadPhotosFromSupabase);
+if (window.supabase) { loadPhotosFromSupabase(); } else { document.addEventListener('supabase:ready', loadPhotosFromSupabase); }
 
 // Hamburger menu
 var ham = document.getElementById('hamburgerBtn');

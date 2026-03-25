@@ -1120,9 +1120,7 @@ function loadFamilyFromSupabase() {
   });
 }
 
-document.addEventListener('supabase:ready', function() {
-  loadFamilyFromSupabase();
-});
+if (window.supabase) { loadFamilyFromSupabase(); } else { document.addEventListener('supabase:ready', function() { loadFamilyFromSupabase(); }); }
 
 setLang(currentLang);
 

@@ -889,11 +889,11 @@ function loadDashboard() {
 function doBackup() {
   if (!window.supabase) { showMsg('bk-msg','Supabase nu este disponibil.','error'); return; }
   var btn = document.getElementById('bk-btn');
+  var tableNames = ['families','members','timeline','photos','announcements'];
   btn.disabled = true;
   btn.textContent = 'Se incarca datele... (0/' + tableNames.length + ')';
   btn.style.borderColor = 'var(--amber)';
 
-  var tableNames = ['families','members','timeline','photos','announcements'];
   var promises = tableNames.map(function(t, i) {
     return window.supabase.from(t).select('*').then(function(res) {
       btn.textContent = 'Se incarca datele... (' + (i+1) + '/' + tableNames.length + ')';
@@ -1113,8 +1113,11 @@ function doExportCSV() {
     var a    = document.createElement('a');
     a.href   = url;
     a.download = 'calnic-export-' + new Date().toISOString().slice(0,10) + '.csv';
+    a.style.display = 'none';
+    document.body.appendChild(a);
     a.click();
-    URL.revokeObjectURL(url);
+    document.body.removeChild(a);
+    setTimeout(function(){ URL.revokeObjectURL(url); }, 2000);
     logAction('export-csv', 'Export CSV: ' + fams.length + ' familii, ' + mems.length + ' membri');
   });
 }
