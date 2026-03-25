@@ -876,16 +876,14 @@ function savePerson() {
   }
 
   window.supabase
-    .from('family_members')
+    .from('members')
     .insert({
       family_id: familyId,
       name: name,
       birth_year: birth ? parseInt(birth) : null,
       death_year: death ? parseInt(death) : null,
       role: rel,
-      is_deceased: !!death,
-      village: loc,
-      visibility: currentVis
+      is_deceased: !!death
     })
     .then(function(result) {
       if (result.error) {
@@ -1062,7 +1060,7 @@ function loadFamilyFromSupabase() {
   if (spinner) spinner.style.display = 'block';
   Promise.all([
     window.supabase.from('families').select('id, name, village').eq('id', familyId).single(),
-    window.supabase.from('family_members').select('*').eq('family_id', familyId).order('birth_year')
+    window.supabase.from('members').select('*').eq('family_id', familyId).order('birth_year')
   ]).then(function(results) {
     var famRes = results[0];
     var memRes = results[1];
