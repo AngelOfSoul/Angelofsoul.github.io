@@ -581,6 +581,29 @@ if (ham && mobileMenu) {
     ham.textContent = mobileMenu.classList.contains('open') ? '✕' : '☰';
   });
 }
+
+/* ── NAV SESSION CHECK ── */
+function checkNavSession() {
+  if (!window.supabase) return;
+  window.supabase.auth.getSession().then(function(res) {
+    var session = res.data && res.data.session;
+    if (!session || !session.user) return;
+    var navLogin = document.querySelector('a.nav-login');
+    var mobileLogin = document.querySelector('a.nav-mobile-login');
+    if (navLogin) {
+      navLogin.href = 'dashboard.html';
+      var span = navLogin.querySelector('.nl');
+      if (span) { span.setAttribute('data-ro', 'Profilul meu'); span.setAttribute('data-en', 'My profile'); span.textContent = currentLang === 'en' ? 'My profile' : 'Profilul meu'; }
+      else { navLogin.textContent = '\ud83d\udc64 Profilul meu'; }
+    }
+    if (mobileLogin) {
+      mobileLogin.href = 'dashboard.html';
+      mobileLogin.textContent = '\ud83d\udc64 Profilul meu';
+    }
+  });
+}
+if (window.supabase) { checkNavSession(); } else { document.addEventListener('supabase:ready', checkNavSession); }
 </script>
+<script src="supabase.js"></script>
 </body>
 </html>
