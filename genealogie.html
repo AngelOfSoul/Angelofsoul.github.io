@@ -290,7 +290,6 @@ footer .g{color:var(--gold-d);font-style:normal;}
   <a class="nav-link" href="istorie.html">&#128506; <span class="nl" data-ro="Istoria Satului" data-en="Village History">Istoria Satului</span></a>
   <a class="nav-link" href="familiile.html">&#128106; <span class="nl" data-ro="Familiile" data-en="Families">Familiile</span></a>
   <a class="nav-link active" href="genealogie.html">&#127803; <span class="nl" data-ro="Genealogie" data-en="Genealogy">Genealogie</span></a>
-  <a class="nav-link" href="harta.html">&#127757; <span class="nl" data-ro="Harta" data-en="Map">Harta</span></a>
   <a class="nav-link" href="galerie.html">&#128248; <span class="nl" data-ro="Galerie" data-en="Gallery">Galerie</span></a>
   <a class="nav-link" href="contact.html">✉ <span class="nl" data-ro="Contact" data-en="Contact">Contact</span></a>
   <a class="nav-link" href="intrebari.html">&#10067; <span class="nl" data-ro="Intrebari" data-en="FAQ">Intrebari</span></a>
@@ -304,7 +303,6 @@ footer .g{color:var(--gold-d);font-style:normal;}
   <a class="nav-mobile-link" href="istorie.html">&#128506; Istoria Satului</a>
   <a class="nav-mobile-link" href="familiile.html">&#128106; Familiile</a>
   <a class="nav-mobile-link active" href="genealogie.html">&#127803; Genealogie</a>
-  <a class="nav-mobile-link" href="harta.html">&#127757; Harta</a>
   <a class="nav-mobile-link" href="galerie.html">&#128248; Galerie</a>
   <a class="nav-mobile-link" href="contact.html">&#9993; Contact</a>
   <a class="nav-mobile-link" href="intrebari.html">&#10067; Intrebari</a>
@@ -363,8 +361,8 @@ footer .g{color:var(--gold-d);font-style:normal;}
       <span class="results-count" id="resultsCount"></span>
     </div>
 
-    <div class="families-grid" id="familiesGrid"></div>
-    <div class="no-results" id="noResults" data-ro="Nicio familie gasita." data-en="No families found.">Nicio familie gasita.</div>
+    <div class="families-grid" id="familiesGrid"><div style="grid-column:1/-1;text-align:center;padding:40px 20px;color:var(--muted);font-style:italic;">&#8987; Se incarca...</div></div>
+    <div class="no-results" id="noResults" style="display:none;" data-ro="Nicio familie gasita." data-en="No families found.">Nicio familie gasita.</div>
 
   </div>
 
@@ -423,11 +421,13 @@ var DEMO_FAMILIES = [
   { id:'stan',    name:'Familia Stan',    initial:'S', village:'Calnic', since:1932, gen:2, people:6, connected:true },
   { id:'ionescu', name:'Familia Ionescu', initial:'I', village:'Calnic', since:1955, gen:2, people:5, connected:false }
 ];
-var FAMILIES = DEMO_FAMILIES.slice();
+var FAMILIES = [];
+var supabaseLoaded = false;
 
 var currentLang = localStorage.getItem('calnic-lang') || 'ro';
 
 function renderFamilies(list) {
+  if (!supabaseLoaded) return;
   var grid = document.getElementById('familiesGrid');
   var noRes = document.getElementById('noResults');
   var count = document.getElementById('resultsCount');
@@ -497,19 +497,30 @@ document.getElementById('btn-ro').addEventListener('click', function(){ setLang(
 document.getElementById('btn-en').addEventListener('click', function(){ setLang('en'); });
 
 document.addEventListener('supabase:ready', function() {
-  if (!window.supabase) return;
+  var gridEl = document.getElementById('familiesGrid');
+  if (!window.supabase) {
+    supabaseLoaded = true;
+    if (gridEl) gridEl.innerHTML = '<div style="grid-column:1/-1;text-align:center;padding:60px 20px;color:var(--muted);font-style:italic;font-size:16px;">'
+      + (currentLang === 'ro'
+        ? 'Nicio familie inregistrata inca. Fii primul care isi adauga familia!'
+        : 'No families registered yet. Be the first to add your family!')
+      + '</div>';
+    return;
+  }
   window.supabase
     .from('families')
     .select('id, name, village, since, members_count, generations_count')
     .order('name')
     .then(function(res) {
+      supabaseLoaded = true;
       if (res.error) {
         console.info('[Calnic] Supabase error — showing demo data');
+        FAMILIES = DEMO_FAMILIES.slice();
+        filterFamilies();
         return;
       }
       if (!res.data || res.data.length === 0) {
-        var grid = document.getElementById('familiesGrid');
-        if (grid) grid.innerHTML = '<div style="grid-column:1/-1;text-align:center;padding:60px 20px;color:var(--muted);font-style:italic;font-size:16px;">'
+        if (gridEl) gridEl.innerHTML = '<div style="grid-column:1/-1;text-align:center;padding:60px 20px;color:var(--muted);font-style:italic;font-size:16px;">'
           + (currentLang === 'ro'
             ? 'Nicio familie inregistrata inca. Fii primul care isi adauga familia!'
             : 'No families registered yet. Be the first to add your family!')
