@@ -673,7 +673,7 @@ document.addEventListener('supabase:ready', function() {
     window.supabase.auth.getUser().then(function(res) {
       if (res.data && res.data.user && res.data.user.id === FAM.ownerId) {
         var editBtn = document.createElement('a');
-        editBtn.href = 'editeaza-familia.html?family=' + familyId;
+        editBtn.href = 'dashboard.html?family=' + familyId;
         editBtn.textContent = currentLang === 'ro' ? '✎ Editeaza familia' : '✎ Edit family';
         editBtn.style.cssText = 'display:inline-block;margin-top:12px;padding:8px 18px;background:var(--s2);border:1px solid var(--b2);color:var(--gold);font-family:'EB Garamond',serif;font-size:14px;border-radius:2px;';
         var heroInfo = document.querySelector('.fam-hero-info');
