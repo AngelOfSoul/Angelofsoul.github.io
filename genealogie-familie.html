@@ -857,12 +857,43 @@ function savePerson() {
 }
 
 function exportTree() {
-  var toast = document.getElementById('exportToast');
-  toast.textContent = currentLang === 'ro'
-    ? 'Export ca imagine \u2014 disponibil dupa conectarea la baza de date.'
-    : 'Export as image \u2014 available after database connection.';
-  toast.style.display = 'block';
-  setTimeout(function(){ toast.style.display = 'none'; }, 2500);
+  var btn = document.querySelector('.tree-btn[onclick="exportTree()"]');
+  var origText = btn ? btn.textContent : '';
+  if (btn) btn.textContent = currentLang === 'ro' ? 'Se exporta...' : 'Exporting...';
+  var canvas = document.getElementById('treeCanvas');
+  var wrap = document.getElementById('treeWrap');
+  var origOverflow = wrap.style.overflow;
+  var origHeight = wrap.style.height;
+  wrap.style.overflow = 'visible';
+  wrap.style.height = 'auto';
+  html2canvas(canvas, {
+    backgroundColor: '#0a0a0a',
+    scale: 2,
+    useCORS: true,
+    logging: false
+  }).then(function(exportCanvas) {
+    wrap.style.overflow = origOverflow;
+    wrap.style.height = origHeight;
+    var link = document.createElement('a');
+    var familyName = (document.getElementById('tree-title') || {}).textContent || 'arbore-familie';
+    familyName = familyName.replace(/[^a-zA-Z0-9\-_]/g, '-').replace(/-+/g, '-').toLowerCase();
+    link.download = familyName + '.png';
+    link.href = exportCanvas.toDataURL('image/png');
+    link.click();
+    if (btn) btn.textContent = origText;
+  }).catch(function(err) {
+    wrap.style.overflow = origOverflow;
+    wrap.style.height = origHeight;
+    if (btn) btn.textContent = origText;
+    console.error('Export failed:', err);
+    var hint = document.querySelector('.tree-hint');
+    if (hint) {
+      var prev = hint.textContent;
+      hint.style.color = '#e08080';
+      hint.textContent = currentLang === 'ro' ? 'Export esuat. Incercati din nou.' : 'Export failed. Please try again.';
+      setTimeout(function(){ hint.textContent = prev; hint.style.color = ''; }, 3000);
+    }
+  });
 }
 
 function setLang(lang) {
@@ -1019,6 +1050,7 @@ if (ham && mobileMenu) {
   });
 }
 </script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
 <script src="supabase.js"></script>
 </body>
 </html>
