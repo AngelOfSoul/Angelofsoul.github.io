@@ -821,7 +821,15 @@ async function doRegister(e) {
 async function doFamilyProfile(e) {
   e.preventDefault();
   if (!window.supabase) { showMsg('step2Msg', 'Supabase nu este configurat.', 'error'); return; }
-  if (!pendingUserId) {
+
+  // Prefer the live session UID (works when email confirmation is disabled
+  // or when signUp auto-logs the user in). Fall back to pendingUserId.
+  var liveUserRes = await window.supabase.auth.getUser();
+  var userId = (liveUserRes.data && liveUserRes.data.user)
+    ? liveUserRes.data.user.id
+    : pendingUserId;
+
+  if (!userId) {
     showMsg('step2Msg', currentLang === 'ro' ? 'Sesiune invalida. Reincarca pagina.' : 'Invalid session. Please reload the page.', 'error');
     return;
   }
@@ -836,7 +844,7 @@ async function doFamilyProfile(e) {
   }
   setLoading('step2Btn', true);
   try {
-    var famData = { name: name, village: 'Calnic', owner_id: pendingUserId, pin_hash: btoa(pin) };
+    var famData = { name: name, village: 'Calnic', owner_id: userId, pin_hash: btoa(pin) };
     if (since) famData.since = since;
     if (descRo) famData.desc_ro = descRo;
     if (descEn) famData.desc_en = descEn;
