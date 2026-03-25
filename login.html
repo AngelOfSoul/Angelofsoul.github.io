@@ -257,6 +257,56 @@ footer .g { color:var(--gold-d); font-style:normal; }
 }
 .forgot-link:hover { color: var(--gold); }
 
+/* Forgot-password modal */
+#forgotModal {
+  display: none;
+  position: fixed;
+  inset: 0;
+  background: rgba(0,0,0,0.75);
+  z-index: 9999;
+  align-items: center;
+  justify-content: center;
+}
+#forgotModal.open { display: flex; }
+.forgot-modal-box {
+  background: var(--s1);
+  border: 1px solid var(--b1);
+  border-top: 3px solid var(--gold-d);
+  border-radius: 3px;
+  padding: 32px 36px;
+  width: 100%;
+  max-width: 420px;
+  margin: 16px;
+}
+.forgot-modal-title {
+  font-family: 'Playfair Display', serif;
+  font-size: 20px;
+  color: var(--gold);
+  margin-bottom: 20px;
+  text-align: center;
+  letter-spacing: 1px;
+}
+.forgot-modal-actions {
+  display: flex;
+  gap: 10px;
+  margin-top: 16px;
+}
+.forgot-modal-actions .pb-submit { flex: 1; margin-top: 0; }
+.forgot-modal-cancel {
+  flex: 0 0 auto;
+  background: none;
+  border: 1px solid var(--b2);
+  color: var(--muted);
+  padding: 10px 18px;
+  cursor: pointer;
+  font-family: 'EB Garamond', serif;
+  font-size: 14px;
+  letter-spacing: 1px;
+  border-radius: 1px;
+  transition: border-color 0.2s, color 0.2s;
+}
+.forgot-modal-cancel:hover { border-color: var(--gold); color: var(--gold); }
+
 /* PIN info tooltip */
 .pin-info {
   display: inline-block;
@@ -551,7 +601,7 @@ footer .g { color:var(--gold-d); font-style:normal; }
       </div>
       <div style="background:var(--s1);border:1px solid var(--b1);border-left:3px solid var(--gold-d);border-radius:2px;padding:24px 28px;text-align:center;">
         <p style="color:var(--text);font-size:16px;margin-bottom:14px;" data-ro="Ti-am trimis un email de confirmare. Dupa ce confirmi adresa, revino aici si autentifica-te pentru a-ti crea profilul familiei." data-en="We sent you a confirmation email. After confirming your address, come back here and sign in to create your family profile.">Ti-am trimis un email de confirmare. Dupa ce confirmi adresa, revino aici si autentifica-te pentru a-ti crea profilul familiei.</p>
-        <p style="color:var(--muted);font-size:14px;font-style:italic;" data-ro="Nu ai primit emailul? Verifica dosarul Spam." data-en="Didn't receive the email? Check your Spam folder.">Nu ai primit emailul? Verifica dosarul Spam.</p>
+        <p style="color:var(--muted);font-size:14px;font-style:italic;" data-ro="⚠️ Nu ai primit emailul? Verifica dosarul Spam sau fila Promotii (Gmail)." data-en="⚠️ Didn't receive the email? Check your Spam folder or Promotions tab (Gmail).">⚠️ Nu ai primit emailul? Verifica dosarul Spam sau fila Promotii (Gmail).</p>
         <div style="margin-top:20px;">
           <button class="cta-btn" onclick="showTab('login')" style="margin-top:8px;">
             <span data-ro="MERGI LA AUTENTIFICARE" data-en="GO TO SIGN IN">MERGI LA AUTENTIFICARE</span>
@@ -614,6 +664,24 @@ footer .g { color:var(--gold-d); font-style:normal; }
   &nbsp;&#183;&nbsp;
   <span data-ro="Sat cu suflet, memorie vie" data-en="A village with soul, a living memory">Sat cu suflet, memorie vie</span>
 </footer>
+
+<!-- ── FORGOT PASSWORD MODAL ── -->
+<div id="forgotModal" role="dialog" aria-modal="true" aria-labelledby="forgotModalTitle">
+  <div class="forgot-modal-box">
+    <div class="forgot-modal-title" id="forgotModalTitle" data-ro="Resetare parola" data-en="Reset password">Resetare parola</div>
+    <div class="form-group">
+      <label class="form-label" for="forgotEmail" data-ro="Adresa de email" data-en="Email address">Adresa de email</label>
+      <input class="pb-input" type="email" id="forgotEmail" autocomplete="email" placeholder="email@exemplu.ro" required/>
+    </div>
+    <div id="forgotMsg" class="form-msg"></div>
+    <div class="forgot-modal-actions">
+      <button class="pb-submit" type="button" id="forgotSendBtn" onclick="doSendForgotEmail()">
+        <span data-ro="TRIMITE" data-en="SEND">TRIMITE</span>
+      </button>
+      <button class="forgot-modal-cancel" type="button" onclick="closeForgotModal()" data-ro="Anulare" data-en="Cancel">Anulare</button>
+    </div>
+  </div>
+</div>
 
 <script>
 document.getElementById('yr').textContent = new Date().getFullYear();
@@ -788,23 +856,39 @@ async function doLogin(e) {
 }
 
 /* FORGOT PASSWORD */
-async function doForgotPassword() {
+function doForgotPassword() {
+  var modal = document.getElementById('forgotModal');
+  document.getElementById('forgotEmail').value = '';
+  var msgEl = document.getElementById('forgotMsg');
+  msgEl.className = 'form-msg';
+  msgEl.textContent = '';
+  modal.classList.add('open');
+  document.getElementById('forgotEmail').focus();
+}
+
+function closeForgotModal() {
+  document.getElementById('forgotModal').classList.remove('open');
+}
+
+async function doSendForgotEmail() {
   if (!window.supabase) {
     alert(currentLang === 'ro' ? 'Supabase nu este configurat.' : 'Supabase is not configured.');
     return;
   }
-  var email = document.getElementById('loginEmail').value.trim();
+  var email = document.getElementById('forgotEmail').value.trim();
   if (!email) {
-    showMsg('loginMsg', currentLang === 'ro' ? 'Introdu adresa de email mai intai.' : 'Please enter your email address first.', 'error');
+    showMsg('forgotMsg', currentLang === 'ro' ? 'Introdu adresa de email.' : 'Please enter your email address.', 'error');
     return;
   }
+  setLoading('forgotSendBtn', true);
   var result = await window.supabase.auth.resetPasswordForEmail(email, {
     redirectTo: window.location.origin + '/login.html'
   });
+  setLoading('forgotSendBtn', false);
   if (result.error) {
-    showMsg('loginMsg', result.error.message, 'error');
+    showMsg('forgotMsg', result.error.message, 'error');
   } else {
-    showMsg('loginMsg', currentLang === 'ro'
+    showMsg('forgotMsg', currentLang === 'ro'
       ? 'Email de resetare trimis. Verifica inbox-ul.'
       : 'Password reset email sent. Check your inbox.', 'success');
   }
@@ -899,6 +983,13 @@ document.getElementById('logoutBtn').addEventListener('click', async function() 
   await window.supabase.auth.signOut();
   document.getElementById('loggedInBox').style.display = 'none';
   document.getElementById('authBox').style.display = '';
+});
+
+document.getElementById('forgotModal').addEventListener('click', function(e) {
+  if (e.target === this) { closeForgotModal(); }
+});
+document.addEventListener('keydown', function(e) {
+  if (e.key === 'Escape') { closeForgotModal(); }
 });
 </script>
 
