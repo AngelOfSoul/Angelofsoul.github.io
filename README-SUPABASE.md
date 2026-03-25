@@ -180,6 +180,63 @@ in the Supabase SQL Editor.
 
 ---
 
+## 7. Configure Custom SMTP (SMTP2GO)
+
+Supabase's free plan limits outgoing auth emails (confirmations, password resets) to a very low
+rate (~2–4 per hour). To avoid the **"email rate limit exceeded"** error in production, configure
+a custom SMTP provider. This project uses **SMTP2GO** (free tier: 1,000 emails/month).
+
+### 7a. Create an SMTP2GO account
+
+1. Go to [https://www.smtp2go.com](https://www.smtp2go.com) and sign up for a free account.
+2. Verify your account via the confirmation email SMTP2GO sends you.
+
+### 7b. Get your SMTP credentials
+
+1. In the SMTP2GO dashboard, go to **Settings → SMTP Users**.
+2. Click **Add SMTP User**, enter a username (e.g. `calnic-online`) and set a strong password.
+3. Note down the **username** and **password** — you'll need them in the next step.
+
+### 7c. Configure custom SMTP in Supabase
+
+1. Open your **Supabase project dashboard**.
+2. Go to **Project Settings** (gear icon) → **Authentication**.
+3. Scroll down to **SMTP Settings** and toggle **"Enable Custom SMTP"** ON.
+4. Fill in the fields:
+
+| Field | Value |
+|-------|-------|
+| **Host** | `mail.smtp2go.com` |
+| **Port** | `587` (TLS) or `465` (SSL) |
+| **Username** | your SMTP2GO username |
+| **Password** | your SMTP2GO password |
+| **Sender email** | a verified sender address (e.g. `noreply@calniconline.ro`) |
+| **Sender name** | `Calnic Online` |
+
+5. Click **Save**, then click **Send test email** to verify the settings work.
+
+### 7d. Verify your sender domain
+
+Sending from an unverified domain increases the chance of emails landing in spam.
+
+1. In the SMTP2GO dashboard, go to **Sending → Verified Senders**.
+2. Click **Add Sender Domain** and enter your domain (e.g. `calniconline.ro`).
+3. SMTP2GO will show you DNS records (SPF, DKIM) to add to your domain registrar.
+4. Add those records and click **Verify** once DNS has propagated.
+
+### 7e. Test the full flow
+
+1. Make sure email confirmation is **enabled** in Supabase (**Authentication → Providers → Email → Confirm email**).
+2. Open the site's registration page and create a new test account.
+3. Confirm the email arrives (check spam if needed).
+4. Click the confirmation link, then log in — the family profile step should now appear with a live session and the `families` insert will succeed without an RLS error.
+
+> **Tip:** While developing locally or before DNS is set up, you can temporarily disable
+> email confirmation in Supabase (**Authentication → Providers → Email → turn off "Confirm email"**)
+> so you can test registration without needing real emails. Re-enable it before going to production.
+
+---
+
 ## 8. Set up photo storage
 
 This step wires the gallery upload form to Supabase Storage.
