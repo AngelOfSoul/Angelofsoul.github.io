@@ -503,8 +503,17 @@ document.addEventListener('supabase:ready', function() {
     .select('id, name, village, since, members_count, generations_count')
     .order('name')
     .then(function(res) {
-      if (res.error || !res.data || res.data.length === 0) {
-        console.info('[Calnic] Supabase not connected — showing demo data');
+      if (res.error) {
+        console.info('[Calnic] Supabase error — showing demo data');
+        return;
+      }
+      if (!res.data || res.data.length === 0) {
+        var grid = document.getElementById('familiesGrid');
+        if (grid) grid.innerHTML = '<div style="grid-column:1/-1;text-align:center;padding:60px 20px;color:var(--muted);font-style:italic;font-size:16px;">'
+          + (currentLang === 'ro'
+            ? 'Nicio familie inregistrata inca. Fii primul care isi adauga familia!'
+            : 'No families registered yet. Be the first to add your family!')
+          + '</div>';
         return;
       }
       FAMILIES = res.data.map(function(r) {
