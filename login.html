@@ -801,7 +801,7 @@ async function routeAuthenticatedUser(user) {
 }
 
 /* Check session on page load */
-document.addEventListener('supabase:ready', function() {
+function initLoginAuth() {
   if (!window.supabase) return;
   window.supabase.auth.getSession().then(function(res) {
     var session = res.data && res.data.session;
@@ -817,7 +817,8 @@ document.addEventListener('supabase:ready', function() {
       routeAuthenticatedUser(session.user);
     }
   });
-});
+}
+if (window.supabase) { initLoginAuth(); } else { document.addEventListener('supabase:ready', initLoginAuth); }
 
 /* If Supabase CDN is blocked or not configured, skip silently */
 window.addEventListener('load', function() {

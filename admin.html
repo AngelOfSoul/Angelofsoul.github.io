@@ -41,6 +41,8 @@ a{color:var(--gold);text-decoration:none;}
 .topbar-user{font-size:12px;color:var(--muted);}
 .topbar-logout{background:none;border:1px solid var(--b2);color:var(--muted);font-family:'EB Garamond',serif;font-size:12px;padding:3px 12px;border-radius:2px;cursor:pointer;transition:all 0.2s;}
 .topbar-logout:hover{border-color:var(--red);color:var(--red-l);}
+.topbar-home{background:none;border:1px solid var(--b2);color:var(--muted);font-family:'EB Garamond',serif;font-size:12px;padding:3px 12px;border-radius:2px;cursor:pointer;transition:all 0.2s;text-decoration:none;display:inline-flex;align-items:center;gap:5px;}
+.topbar-home:hover{border-color:var(--gold);color:var(--gold);}
 
 .adm-body{display:flex;flex:1;}
 
@@ -277,6 +279,7 @@ a{color:var(--gold);text-decoration:none;}
     <div class="topbar-right">
       <span class="adm-badge">ADMIN</span>
       <span class="topbar-user" id="admin-email">—</span>
+      <a href="index.html" class="topbar-home">&#8592; Site principal</a>
       <button class="topbar-logout" onclick="doLogout()">Deconectare</button>
     </div>
   </div>
@@ -309,6 +312,7 @@ a{color:var(--gold);text-decoration:none;}
         <div class="sb-item" onclick="nav(this,'photos')"><span class="sb-item-ic">&#128248;</span> Fotografii</div>
       </div>
       <div class="sb-footer">
+        <a href="index.html" class="sb-help-btn" style="display:block;text-align:center;background:var(--b1);border-color:var(--b2);color:var(--muted);">&#8592; Site principal</a>
         <button class="sb-help-btn" onclick="nav(null,'help')">? Ghid complet</button>
         <div class="sb-ver">v1.0 · Calnic Online 2026</div>
       </div>
@@ -705,7 +709,7 @@ var maintMode = false;
 var demoVisible = true;
 
 /* ── BOOT ── */
-document.addEventListener('supabase:ready', function() {
+function initAdminAuth() {
   if (!window.supabase) {
     showScreen('denied'); return;
   }
@@ -733,8 +737,18 @@ document.addEventListener('supabase:ready', function() {
           showScreen('denied');
         }
       }).catch(function() { showScreen('denied'); });
-  });
-});
+  }).catch(function() { showScreen('denied'); });
+}
+
+/* Guard against the race condition where the CDN script loads from cache
+   before this listener is registered — in that case window.supabase is
+   already set, so we call initAdminAuth() directly instead of waiting for
+   an event that has already fired and will never fire again. */
+if (window.supabase) {
+  initAdminAuth();
+} else {
+  document.addEventListener('supabase:ready', initAdminAuth);
+}
 
 function showScreen(which) {
   document.getElementById('loading-screen').style.display = 'none';
@@ -875,16 +889,20 @@ function loadDashboard() {
 function doBackup() {
   if (!window.supabase) { showMsg('bk-msg','Supabase nu este disponibil.','error'); return; }
   var btn = document.getElementById('bk-btn');
-  btn.textContent = 'Se pregateste backup-ul...';
+  btn.disabled = true;
+  btn.textContent = 'Se incarca datele... (0/' + tableNames.length + ')';
   btn.style.borderColor = 'var(--amber)';
 
-  Promise.all([
-    window.supabase.from('families').select('*'),
-    window.supabase.from('members').select('*'),
-    window.supabase.from('timeline').select('*'),
-    window.supabase.from('photos').select('*'),
-    window.supabase.from('announcements').select('*').catch(function(){ return {data:[]}; })
-  ]).then(function(results) {
+  var tableNames = ['families','members','timeline','photos','announcements'];
+  var promises = tableNames.map(function(t, i) {
+    return window.supabase.from(t).select('*').then(function(res) {
+      btn.textContent = 'Se incarca datele... (' + (i+1) + '/' + tableNames.length + ')';
+      return res;
+    }).catch(function(){ return {data:[]}; });
+  });
+
+  Promise.all(promises).then(function(results) {
+    btn.textContent = 'Se genereaza fisierul...';
     var backup = {
       version: '1.0',
       created_at: new Date().toISOString(),
@@ -904,8 +922,11 @@ function doBackup() {
     var ts   = new Date().toISOString().slice(0,10);
     a.href   = url;
     a.download = 'calnic-backup-' + ts + '.json';
+    a.style.display = 'none';
+    document.body.appendChild(a);
     a.click();
-    URL.revokeObjectURL(url);
+    document.body.removeChild(a);
+    setTimeout(function(){ URL.revokeObjectURL(url); }, 2000);
 
     var hist = JSON.parse(localStorage.getItem('calnic-bk-history') || '[]');
     var sizeMB = (blob.size / 1048576).toFixed(1) + ' MB';
@@ -918,6 +939,7 @@ function doBackup() {
     logAction('backup', 'Backup descarcat — ' + sizeMB);
     document.getElementById('dash-backup-status').textContent = 'Ultimul backup: ' + fmtDate(new Date().toISOString());
 
+    btn.disabled = false;
     btn.textContent = '\u2713 Backup salvat!';
     btn.style.borderColor = 'var(--green-l)';
     btn.style.color = 'var(--green-l)';
@@ -927,6 +949,7 @@ function doBackup() {
     }, 4000);
   }).catch(function(e) {
     showMsg('bk-msg', 'Eroare la backup: ' + e.message, 'error');
+    btn.disabled = false;
     btn.textContent = '\u2B07 Descarca backup complet';
     btn.style.borderColor = '';
   });

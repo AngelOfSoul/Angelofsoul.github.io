@@ -68,14 +68,15 @@ document.head.appendChild(stickyStyle);
 
 /* ── SMART LOGIN REDIRECT ── */
 if (window.location.pathname.indexOf('login') !== -1) {
-  document.addEventListener('supabase:ready', function() {
+  function checkLoginRedirect() {
     if (!window.supabase) return;
     window.supabase.auth.getSession().then(function(res) {
       if (res.data && res.data.session) {
         window.location.href = 'dashboard.html';
       }
     });
-  });
+  }
+  if (window.supabase) { checkLoginRedirect(); } else { document.addEventListener('supabase:ready', checkLoginRedirect); }
 }
 
 /* ── MERGE LANG SWITCHER INTO NAV ── */
@@ -243,7 +244,7 @@ function checkNotifications(familyId) {
 }
 
 /* ── MAIN BOOT ── */
-document.addEventListener('supabase:ready', function() {
+function initAdminNav() {
   mergeLangIntoNav();
 
   if (!window.supabase) {
@@ -282,7 +283,8 @@ document.addEventListener('supabase:ready', function() {
       buildProfileButton(session, null, false);
     });
   });
-});
+}
+if (window.supabase) { initAdminNav(); } else { document.addEventListener('supabase:ready', initAdminNav); }
 
 /* ── MOVE INTREBARI TO FOOTER ── */
 document.addEventListener('DOMContentLoaded', function() {
