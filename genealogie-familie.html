@@ -75,7 +75,7 @@ footer .g{color:var(--gold-d);font-style:normal;}
 .tree-canvas{position:relative;}
 
 /* ── PERSON CARD ── */
-.pc{position:absolute;width:140px;cursor:pointer;transition:transform 0.2s;}
+.pc{position:absolute;width:142px;cursor:pointer;transition:transform 0.2s;}
 .pc:hover{transform:translateY(-4px);}
 .pc.deceased .pc-box{opacity:0.72;}
 .pc-box{background:#0f0f0f;border:1px solid #c8983a;border-radius:7px;overflow:hidden;transition:border-color 0.2s,box-shadow 0.2s;}
@@ -369,12 +369,17 @@ footer .g{color:var(--gold-d);font-style:normal;}
   <div class="tree-toolbar">
     <div class="tree-title" id="tree-title">&#127807; <span data-ro="Arborele Familiei Popescu" data-en="Popescu Family Tree">Arborele Familiei Popescu</span></div>
     <button class="tree-btn" onclick="openAdd()" data-ro="+ Adauga persoana" data-en="+ Add person">+ Adauga persoana</button>
-    <button class="tree-btn vil" data-ro="&#127807; Conecteaza la Sat" data-en="&#127807; Connect to Village">&#127807; Conecteaza la Sat</button>
+    <button class="tree-btn vil" onclick="connectToVillage()" data-ro="&#127807; Conecteaza la Sat" data-en="&#127807; Connect to Village">&#127807; Conecteaza la Sat</button>
     <button class="tree-btn" onclick="exportTree()" data-ro="&#8659; Export" data-en="&#8659; Export">&#8659; Export</button>
     <span class="tree-hint" data-ro="Scroll pentru zoom · Trage pentru navigare" data-en="Scroll to zoom · Drag to navigate">Scroll pentru zoom · Trage pentru navigare</span>
   </div>
 
   <!-- TREE CANVAS -->
+  <div id="treeLoadingSpinner" style="display:none;padding:48px 20px;text-align:center;color:var(--muted);font-family:'EB Garamond',serif;font-size:15px;font-style:italic;">
+    <div style="width:28px;height:28px;border:2px solid var(--b2);border-top-color:var(--gold);border-radius:50%;animation:spin 0.8s linear infinite;margin:0 auto 14px;"></div>
+    <span data-ro="Se incarca arborele familiei..." data-en="Loading family tree...">Se incarca arborele familiei...</span>
+  </div>
+  <div id="staticTreeContainer" style="display:none;">
   <div class="tree-canvas-wrap" id="treeWrap" style="height:700px;">
     <div class="tree-canvas" id="treeCanvas" style="width:1200px;height:680px;">
 
@@ -629,6 +634,7 @@ footer .g{color:var(--gold-d);font-style:normal;}
 
     </div>
   </div>
+  </div><!-- #staticTreeContainer -->
 
 </div>
 
@@ -751,6 +757,18 @@ document.getElementById('yr').textContent = new Date().getFullYear();
 
 var currentLang = localStorage.getItem('calnic-lang') || 'ro';
 var _amIdCounter = 0;
+var currentVis = 'pub';
+
+/* ── PAGE INIT: show spinner or static tree based on URL params ── */
+(function() {
+  var params = new URLSearchParams(window.location.search);
+  var familyId = params.get('family') || params.get('id');
+  if (familyId) {
+    document.getElementById('treeLoadingSpinner').style.display = 'block';
+  } else {
+    document.getElementById('staticTreeContainer').style.display = 'block';
+  }
+})();
 
 var PEOPLE = {
   ion:{img:'https://i.pravatar.cc/86?img=70',init:'I',name:'Ion Popescu',years:'1890 — 1965',birth:'12 Martie 1890, Calnic',death:'4 Noiembrie 1965, Calnic',marriage:'1914, cu Maria Rus',prof:'Agricultor, apicultor',loc:'Calnic',village:true,bio:'Om al pamantului, Ion Popescu a trait toata viata in Calnic, cultivand pamantul si ingrijind stupina mostenita de la parintii sai. Era cunoscut in sat pentru prunele cu care facea cel mai bun rachiu din zona.',story:'"Bunicul spunea ca albinele stiu mai bine decat orice meteo cand vine ploaia. Si avea dreptate." — Petre Popescu'},
@@ -802,6 +820,7 @@ function closeAm() {
 }
 
 function setVis(v) {
+  currentVis = v;
   document.getElementById('vtPub').className = 'vt' + (v==='pub' ? ' pub' : '');
   document.getElementById('vtPriv').className = 'vt' + (v==='priv' ? ' priv' : '');
   document.getElementById('vtVil').className = 'vt' + (v==='vil' ? ' vil' : '');
@@ -820,40 +839,53 @@ function savePerson() {
     showAmMsg('error', currentLang === 'ro' ? 'Te rugam sa introduci un nume.' : 'Please enter a name.');
     return;
   }
-  var id = 'new_' + Date.now() + '_' + (++_amIdCounter);
   var birth = document.getElementById('amBirth').value.trim();
   var death = document.getElementById('amDeath').value.trim();
   var loc = document.getElementById('amLoc').value;
   var prof = document.getElementById('amProf').value.trim();
   var rel = document.getElementById('amRel').value;
   var bio = document.getElementById('amBio').value.trim();
-  var years = (birth && death) ? birth + ' \u2014 ' + death : birth || '';
-  PEOPLE[id] = {
-    img: null,
-    init: name.charAt(0).toUpperCase(),
-    name: name,
-    years: years,
-    birth: birth || '\u2014',
-    death: death || '\u2014',
-    marriage: '\u2014',
-    prof: prof || rel,
-    loc: loc,
-    village: false,
-    bio: bio,
-    story: ''
-  };
-  var currentVillage = (Object.values(PEOPLE).find(function(p){ return p.village; }) || {loc: 'Calnic'}).loc;
-  renderDynamicTree(currentVillage, PEOPLE);
-  document.getElementById('amName').value = '';
-  document.getElementById('amBirth').value = '';
-  document.getElementById('amDeath').value = '';
-  document.getElementById('amLoc').selectedIndex = 0;
-  document.getElementById('amProf').value = '';
-  document.getElementById('amRel').selectedIndex = 0;
-  document.getElementById('amBio').value = '';
-  setVis('pub');
-  showAmMsg('success', currentLang === 'ro' ? 'Persoana adaugata in arbore!' : 'Person added to tree!');
-  setTimeout(closeAm, 2000);
+
+  var params = new URLSearchParams(window.location.search);
+  var familyId = params.get('family') || params.get('id');
+
+  if (!window.supabase || !familyId) {
+    showAmMsg('error', currentLang === 'ro'
+      ? 'Nu esti conectat la baza de date. Persoana nu poate fi salvata.'
+      : 'Not connected to the database. Person cannot be saved.');
+    return;
+  }
+
+  window.supabase
+    .from('family_members')
+    .insert({
+      family_id: familyId,
+      name: name,
+      birth_year: birth ? parseInt(birth) : null,
+      death_year: death ? parseInt(death) : null,
+      role: rel,
+      is_deceased: !!death,
+      village: loc,
+      visibility: currentVis
+    })
+    .then(function(result) {
+      if (result.error) {
+        showAmMsg('error', currentLang === 'ro'
+          ? 'Eroare la salvare: ' + result.error.message
+          : 'Save error: ' + result.error.message);
+      } else {
+        document.getElementById('amName').value = '';
+        document.getElementById('amBirth').value = '';
+        document.getElementById('amDeath').value = '';
+        document.getElementById('amLoc').selectedIndex = 0;
+        document.getElementById('amProf').value = '';
+        document.getElementById('amRel').selectedIndex = 0;
+        document.getElementById('amBio').value = '';
+        setVis('pub');
+        showAmMsg('success', currentLang === 'ro' ? 'Persoana salvata!' : 'Person saved!');
+        setTimeout(function() { closeAm(); loadFamilyFromSupabase(); }, 1500);
+      }
+    });
 }
 
 function exportTree() {
@@ -907,6 +939,23 @@ function setLang(lang) {
   });
 }
 
+function connectToVillage() {
+  var params = new URLSearchParams(window.location.search);
+  var fid = params.get('family') || params.get('id');
+  if (!fid || !window.supabase) {
+    alert(currentLang === 'ro' ? 'Nu esti conectat la baza de date.' : 'Not connected to database.');
+    return;
+  }
+  window.supabase
+    .from('families')
+    .update({ connected_to_village: true })
+    .eq('id', fid)
+    .then(function(r) {
+      if (r.error) { alert('Eroare: ' + r.error.message); }
+      else { alert(currentLang === 'ro' ? 'Familie conectata la arborele satului!' : 'Family connected to village tree!'); }
+    });
+}
+
 /* ── HTML-escape helper to prevent XSS in dynamic content ── */
 function escHtml(s) {
   return String(s == null ? '' : s)
@@ -925,11 +974,20 @@ function renderDynamicTree(famVillage, people) {
   var ids = Object.keys(people);
   if (!ids.length) return;
 
-  var cardW = 140, cardH = 185, gapX = 24, gapY = 36;
+  /* Show the container and hide the loading spinner */
+  var container = document.getElementById('staticTreeContainer');
+  var spinner = document.getElementById('treeLoadingSpinner');
+  if (container) container.style.display = 'block';
+  if (spinner) spinner.style.display = 'none';
+
+  /* Clear existing content before rendering */
+  canvas.innerHTML = '';
+
+  var cardW = 142, cardH = 190, gapX = 28, gapY = 40;
   var perRow = Math.min(ids.length, 4);
   var totalItems = ids.length + 1; /* +1 for the "add" button */
   var rows = Math.ceil(totalItems / perRow);
-  var padX = 50, padY = 40;
+  var padX = 60, padY = 50;
   var totalW = Math.max(700, padX * 2 + perRow * cardW + (perRow - 1) * gapX);
   var totalH = Math.max(300, padY * 2 + rows * cardH + (rows - 1) * gapY);
 
@@ -977,18 +1035,21 @@ function renderDynamicTree(famVillage, people) {
   });
 }
 
-document.addEventListener('supabase:ready', function() {
+function loadFamilyFromSupabase() {
   var params = new URLSearchParams(window.location.search);
-  var familyId = params.get('family');
+  var familyId = params.get('family') || params.get('id');
   if (!window.supabase || !familyId) return;
+  var spinner = document.getElementById('treeLoadingSpinner');
+  if (spinner) spinner.style.display = 'block';
   Promise.all([
     window.supabase.from('families').select('id, name, village').eq('id', familyId).single(),
-    window.supabase.from('members').select('*').eq('family_id', familyId).order('birth_year')
+    window.supabase.from('family_members').select('*').eq('family_id', familyId).order('birth_year')
   ]).then(function(results) {
     var famRes = results[0];
     var memRes = results[1];
     if (famRes.error || !famRes.data) {
-      console.info('[Calnic] Family not found in Supabase — showing demo data');
+      console.info('[Calnic] Family not found in Supabase');
+      if (spinner) spinner.style.display = 'none';
       return;
     }
     var fam = famRes.data;
@@ -996,7 +1057,10 @@ document.addEventListener('supabase:ready', function() {
     var treeTitleEl = document.getElementById('tree-title');
     if (treeTitleEl) treeTitleEl.innerHTML = '&#127807; ' + escHtml(fam.name);
     document.title = fam.name + ' \u2014 Calnic Online';
-    if (memRes.error || !memRes.data || memRes.data.length === 0) return;
+    if (memRes.error || !memRes.data || memRes.data.length === 0) {
+      if (spinner) spinner.style.display = 'none';
+      return;
+    }
     var newPeople = {};
     memRes.data.forEach(function(m) {
       var birthY = m.birth_year ? String(m.birth_year) : '';
@@ -1020,6 +1084,10 @@ document.addEventListener('supabase:ready', function() {
     PEOPLE = newPeople;
     renderDynamicTree(fam.village || 'Calnic', newPeople);
   });
+}
+
+document.addEventListener('supabase:ready', function() {
+  loadFamilyFromSupabase();
 });
 
 setLang(currentLang);

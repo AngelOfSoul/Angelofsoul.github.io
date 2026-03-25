@@ -537,10 +537,22 @@ document.addEventListener('supabase:ready', function() {
     .select('id, name, village, since, members_count, generations_count, photos_count, show_members, show_generations, show_photos, show_since, has_public_photos, has_private_photos, desc_ro, desc_en')
     .order('name')
     .then(function(res) {
-      if (res.error || !res.data || res.data.length === 0) {
-        console.info('[Calnic] Supabase not connected — showing demo data');
+      if (gridLoading) gridLoading.style.display = 'none';
+      if (res.error) {
+        console.info('[Calnic] Supabase error — showing demo data');
         buildAlphaBar();
         filterFamilies();
+        return;
+      }
+      if (!res.data || res.data.length === 0) {
+        families = [];
+        var grid = document.getElementById('familiesGrid');
+        if (grid) grid.innerHTML = '<div style="grid-column:1/-1;text-align:center;padding:60px 20px;color:var(--muted);font-style:italic;font-size:16px;">'
+          + (localStorage.getItem('calnic-lang') === 'en'
+            ? 'No families registered yet. Be the first to add your family!'
+            : 'Nicio familie inregistrata inca. Fii primul care isi adauga familia!')
+          + '</div>';
+        buildAlphaBar();
         return;
       }
       families = res.data.map(function(r, idx) {
