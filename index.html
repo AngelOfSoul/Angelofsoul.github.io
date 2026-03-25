@@ -462,6 +462,7 @@ footer .g { color:var(--gold-d); font-style:normal; }
   <a class="nav-link" href="contact.html">✉ <span class="nl" data-ro="Contact" data-en="Contact">Contact</span></a>
   <a class="nav-link" href="intrebari.html">&#10067; <span class="nl" data-ro="Intrebari" data-en="FAQ">Intrebari</span></a>
   <div class="nav-right">
+    <a class="nav-login" id="guest-admin-link" href="admin.html" style="display:none;color:#c04040;border-left:1px solid #3a1010;" title="Panou Admin">&#9670; <span class="nl">Admin</span></a>
     <a class="nav-login" href="login.html">&#128274; <span class="nl" data-ro="Contul Familiei" data-en="Family Login">Contul Familiei</span></a>
   </div>
   <button class="hamburger" id="hamburgerBtn">&#9776;</button>
@@ -696,6 +697,7 @@ footer .g { color:var(--gold-d); font-style:normal; }
     <a class="nav-link" href="contact.html">✉ <span class="nl">Contact</span></a>
     <a class="nav-link" href="intrebari.html">&#10067; <span class="nl">Intrebari</span></a>
     <div class="nav-right">
+      <a class="nav-login" id="member-admin-link" href="admin.html" style="display:none;color:#c04040;border-left:1px solid #3a1010;" title="Panou Admin">&#9670; <span class="nl">Admin</span></a>
       <a class="nav-login" href="dashboard.html">&#128100; <span class="nl" id="li-nav-family">Contul meu</span></a>
     </div>
     <button class="hamburger" id="hamburgerBtn2">&#9776;</button>
@@ -843,6 +845,28 @@ if (ham && mobileMenu) {
     ham.textContent = mobileMenu.classList.contains('open') ? '✕' : '☰';
   });
 }
+
+/* ── ADMIN NAV LINK — visible only to admin account ── */
+document.addEventListener('supabase:ready', function() {
+  if (!window.supabase) return;
+  window.supabase.auth.getSession().then(function(res) {
+    var session = res.data && res.data.session;
+    if (!session) return;
+    window.supabase
+      .from('profiles')
+      .select('is_admin')
+      .eq('id', session.user.id)
+      .single()
+      .then(function(r) {
+        if (r.data && r.data.is_admin) {
+          var g = document.getElementById('guest-admin-link');
+          var m = document.getElementById('member-admin-link');
+          if (g) g.style.display = 'flex';
+          if (m) m.style.display = 'flex';
+        }
+      }).catch(function(){});
+  });
+});
 </script>
 
 <!-- ═══════════════════════════════════════════════════════════════ -->
