@@ -178,6 +178,10 @@ footer .g{color:var(--gold-d);font-style:normal;}
 .am-save:hover{background:var(--gold);color:#0a0a0a;}
 .am-cancel{flex:1;padding:9px;background:transparent;border:1px solid #3a2810;color:var(--muted);font-family:'EB Garamond',serif;font-size:13px;border-radius:4px;cursor:pointer;}
 .am-cancel:hover{border-color:var(--gold-d);color:var(--text);}
+.am-msg{padding:8px 12px;border-radius:3px;font-size:12px;font-family:'EB Garamond',serif;margin-bottom:10px;}
+.am-msg.success{background:#082a10;border:1px solid #207840;color:#80e0a0;}
+.am-msg.error{background:#2a0808;border:1px solid #782020;color:#e08080;}
+#exportToast{position:fixed;bottom:24px;right:24px;background:#082a10;border:1px solid #207840;color:#80e0a0;padding:10px 16px;border-radius:4px;font-family:'EB Garamond',serif;font-size:13px;z-index:20000;display:none;}
 
 /* village page note */
 .village-note{background:var(--s1);border:1px solid var(--b1);border-left:3px solid #2a4a2a;padding:12px 16px;border-radius:2px;margin-bottom:24px;font-size:13px;color:var(--muted);font-family:'EB Garamond',serif;}
@@ -628,6 +632,7 @@ footer .g{color:var(--gold-d);font-style:normal;}
 
 </div>
 
+<div id="exportToast"></div>
 <a class="scroll-top" id="scrollTop" onclick="window.scrollTo({top:0,behavior:'smooth'})" title="Sus">&#8679;</a>
 <a class="scroll-bottom" id="scrollBottom" onclick="window.scrollTo({top:document.body.scrollHeight,behavior:'smooth'})" title="Jos">&#8681;</a>
 
@@ -676,7 +681,7 @@ footer .g{color:var(--gold-d);font-style:normal;}
 </div>
 
 <!-- ADD PERSON MODAL -->
-<div class="am-overlay" id="amOverlay" onclick="if(event.target===this)closeAm()">
+<div class="am-overlay" id="amOverlay">
   <div class="am-box">
     <div class="am-title" data-ro="+ Adauga persoana in arbore" data-en="+ Add person to tree">+ Adauga persoana in arbore</div>
     <div class="am-f">
@@ -733,6 +738,7 @@ footer .g{color:var(--gold-d);font-style:normal;}
         <span class="vt" id="vtVil" onclick="setVis('vil')" data-ro="+ Sat" data-en="+ Village">+ Sat</span>
       </div>
     </div>
+    <div id="amMsg" class="am-msg" style="display:none;"></div>
     <div class="am-acts">
       <button class="am-save" onclick="savePerson()" data-ro="Salveaza in arbore" data-en="Save to tree">Salveaza in arbore</button>
       <button class="am-cancel" onclick="closeAm()" data-ro="Anuleaza" data-en="Cancel">Anuleaza</button>
@@ -744,6 +750,7 @@ footer .g{color:var(--gold-d);font-style:normal;}
 document.getElementById('yr').textContent = new Date().getFullYear();
 
 var currentLang = localStorage.getItem('calnic-lang') || 'ro';
+var _amIdCounter = 0;
 
 var PEOPLE = {
   ion:{img:'https://i.pravatar.cc/86?img=70',init:'I',name:'Ion Popescu',years:'1890 — 1965',birth:'12 Martie 1890, Calnic',death:'4 Noiembrie 1965, Calnic',marriage:'1914, cu Maria Rus',prof:'Agricultor, apicultor',loc:'Calnic',village:true,bio:'Om al pamantului, Ion Popescu a trait toata viata in Calnic, cultivand pamantul si ingrijind stupina mostenita de la parintii sai. Era cunoscut in sat pentru prunele cu care facea cel mai bun rachiu din zona.',story:'"Bunicul spunea ca albinele stiu mai bine decat orice meteo cand vine ploaia. Si avea dreptate." — Petre Popescu'},
@@ -790,6 +797,8 @@ function openAdd() {
 function closeAm() {
   document.getElementById('amOverlay').classList.remove('open');
   document.body.style.overflow = '';
+  var msg = document.getElementById('amMsg');
+  if (msg) { msg.style.display = 'none'; msg.className = 'am-msg'; msg.textContent = ''; }
 }
 
 function setVis(v) {
@@ -798,19 +807,62 @@ function setVis(v) {
   document.getElementById('vtVil').className = 'vt' + (v==='vil' ? ' vil' : '');
 }
 
+function showAmMsg(type, text) {
+  var el = document.getElementById('amMsg');
+  el.className = 'am-msg ' + type;
+  el.textContent = text;
+  el.style.display = 'block';
+}
+
 function savePerson() {
   var name = document.getElementById('amName').value.trim();
-  if (!name) { alert(currentLang === 'ro' ? 'Te rugam sa introduci un nume.' : 'Please enter a name.'); return; }
-  alert(currentLang === 'ro'
-    ? 'Persoana salvata! (Demo — va fi conectata la baza de date Supabase)' 
-    : 'Person saved! (Demo — will connect to Supabase database)');
-  closeAm();
+  if (!name) {
+    showAmMsg('error', currentLang === 'ro' ? 'Te rugam sa introduci un nume.' : 'Please enter a name.');
+    return;
+  }
+  var id = 'new_' + Date.now() + '_' + (++_amIdCounter);
+  var birth = document.getElementById('amBirth').value.trim();
+  var death = document.getElementById('amDeath').value.trim();
+  var loc = document.getElementById('amLoc').value;
+  var prof = document.getElementById('amProf').value.trim();
+  var rel = document.getElementById('amRel').value;
+  var bio = document.getElementById('amBio').value.trim();
+  var years = (birth && death) ? birth + ' \u2014 ' + death : birth || '';
+  PEOPLE[id] = {
+    img: null,
+    init: name.charAt(0).toUpperCase(),
+    name: name,
+    years: years,
+    birth: birth || '\u2014',
+    death: death || '\u2014',
+    marriage: '\u2014',
+    prof: prof || rel,
+    loc: loc,
+    village: false,
+    bio: bio,
+    story: ''
+  };
+  var currentVillage = (Object.values(PEOPLE).find(function(p){ return p.village; }) || {loc: 'Calnic'}).loc;
+  renderDynamicTree(currentVillage, PEOPLE);
+  document.getElementById('amName').value = '';
+  document.getElementById('amBirth').value = '';
+  document.getElementById('amDeath').value = '';
+  document.getElementById('amLoc').selectedIndex = 0;
+  document.getElementById('amProf').value = '';
+  document.getElementById('amRel').selectedIndex = 0;
+  document.getElementById('amBio').value = '';
+  setVis('pub');
+  showAmMsg('success', currentLang === 'ro' ? 'Persoana adaugata in arbore!' : 'Person added to tree!');
+  setTimeout(closeAm, 2000);
 }
 
 function exportTree() {
-  alert(currentLang === 'ro'
-    ? 'Export ca imagine — disponibil dupa conectarea la baza de date.'
-    : 'Export as image — available after database connection.');
+  var toast = document.getElementById('exportToast');
+  toast.textContent = currentLang === 'ro'
+    ? 'Export ca imagine \u2014 disponibil dupa conectarea la baza de date.'
+    : 'Export as image \u2014 available after database connection.';
+  toast.style.display = 'block';
+  setTimeout(function(){ toast.style.display = 'none'; }, 2500);
 }
 
 function setLang(lang) {
@@ -954,7 +1006,7 @@ window.addEventListener('load', updateScrollBtns);
 setTimeout(updateScrollBtns, 100);
 
 document.addEventListener('keydown', function(e) {
-  if (e.key === 'Escape') { closeDp(); closeAm(); }
+  if (e.key === 'Escape') { closeDp(); }
 });
 
 // Hamburger menu
