@@ -584,8 +584,8 @@ function populateDOM() {
   if (scc) { scc.innerHTML = FAM.connected ? '<span style="color:#82c46a;">&#10003; ' + (currentLang === 'ro' ? 'Da' : 'Yes') + '</span>' : '—'; }
   /* Tree preview */
   renderTreePreview();
-  /* Connections */
-  renderConnections(null);
+  /* Connections — pass empty array; populate with real data if/when a connections table is added */
+  renderConnections([]);
   /* Photos */
   renderPhotos();
   renderMembers();
@@ -848,7 +848,7 @@ function setLang(lang) {
       storyEl.textContent = lang === 'en' && FAM.storyEn ? FAM.storyEn : (FAM.storyRo || FAM.story || '');
     }
     renderTreePreview();
-    renderConnections(null);
+    renderConnections([]);
     renderPhotos();
   }
   renderTimeline();
