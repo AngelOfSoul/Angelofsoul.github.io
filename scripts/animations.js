@@ -1,3 +1,5 @@
+import { t } from './i18n.js';
+
 export const AnimationEngine = {
   tilePop(el) {
     el.classList.add('tile-pop');
@@ -27,7 +29,7 @@ export const AnimationEngine = {
   streakBanner(days) {
     const el = document.createElement('div');
     el.className = 'streak-banner';
-    el.textContent = `🔥 ${days} day streak!`;
+    el.textContent = t('streak_label', { n: days });
     document.body.appendChild(el);
     setTimeout(() => el.remove(), 3000);
   },
@@ -38,11 +40,12 @@ export const AnimationEngine = {
     el.innerHTML = `
       <span class="achievement-card-icon">${achievement.icon}</span>
       <div class="achievement-card-info">
-        <div class="achievement-card-name">${achievement.name}</div>
-        <div class="achievement-card-desc">${achievement.description}</div>
+        <div class="achievement-card-name">${t(achievement.nameKey) || achievement.name}</div>
+        <div class="achievement-card-desc">${t(achievement.descKey) || achievement.description}</div>
       </div>
     `;
     document.body.appendChild(el);
     setTimeout(() => el.remove(), 4000);
   }
 };
+

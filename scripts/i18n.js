@@ -75,7 +75,7 @@ export function t(k, vars) {
   let str = (d[lang] && d[lang][k]) ? d[lang][k] : (d['en'][k] || k);
   if (vars) {
     Object.keys(vars).forEach(key => {
-      str = str.replace(new RegExp(`\\{${key}\\}`, 'g'), vars[key]);
+      str = str.split(`{${key}}`).join(String(vars[key]));
     });
   }
   return str;

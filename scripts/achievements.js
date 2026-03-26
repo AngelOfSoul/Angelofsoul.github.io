@@ -3,72 +3,72 @@ const ACHIEVEMENTS = [
     id: 'first_tile',
     icon: '🌱',
     name: 'First Step',
-    nameRo: 'Primul Pas',
     description: 'Fill your first tile',
-    descriptionRo: 'Completeaza primul patrat',
+    nameKey: 'ach_first_tile_name',
+    descKey: 'ach_first_tile_desc',
     check: ({ filled }) => filled >= 1
   },
   {
     id: 'ten_tiles',
     icon: '🔟',
     name: 'Getting Started',
-    nameRo: 'Inceput Bun',
     description: 'Fill 10 tiles',
-    descriptionRo: 'Completeaza 10 patrate',
+    nameKey: 'ach_ten_tiles_name',
+    descKey: 'ach_ten_tiles_desc',
     check: ({ filled }) => filled >= 10
   },
   {
     id: 'section_one',
     icon: '🗺️',
     name: 'Section Master',
-    nameRo: 'Maestru de Sectiune',
     description: 'Complete any section',
-    descriptionRo: 'Completeaza orice sectiune',
+    nameKey: 'ach_section_one_name',
+    descKey: 'ach_section_one_desc',
     check: ({ sections }) => sections.length >= 1
   },
   {
     id: 'all_sections',
     icon: '🌍',
     name: 'Full Board',
-    nameRo: 'Tabla Completa',
     description: 'Complete all 4 sections',
-    descriptionRo: 'Completeaza toate 4 sectiunile',
+    nameKey: 'ach_all_sections_name',
+    descKey: 'ach_all_sections_desc',
     check: ({ sections }) => sections.length >= 4
   },
   {
     id: 'streak_3',
     icon: '🔥',
     name: 'On Fire',
-    nameRo: 'In Flacari',
     description: 'Reach a 3-day streak',
-    descriptionRo: 'Atinge un streak de 3 zile',
+    nameKey: 'ach_streak_3_name',
+    descKey: 'ach_streak_3_desc',
     check: ({ streak }) => streak >= 3
   },
   {
     id: 'streak_7',
     icon: '⚡',
     name: 'Week Warrior',
-    nameRo: 'Razboinicul Saptamanii',
     description: 'Reach a 7-day streak',
-    descriptionRo: 'Atinge un streak de 7 zile',
+    nameKey: 'ach_streak_7_name',
+    descKey: 'ach_streak_7_desc',
     check: ({ streak }) => streak >= 7
   },
   {
     id: 'streak_30',
     icon: '👑',
     name: 'Legendary',
-    nameRo: 'Legendar',
     description: 'Reach a 30-day streak',
-    descriptionRo: 'Atinge un streak de 30 de zile',
+    nameKey: 'ach_streak_30_name',
+    descKey: 'ach_streak_30_desc',
     check: ({ streak }) => streak >= 30
   },
   {
     id: 'complete',
     icon: '🎉',
     name: 'Mosaic Complete',
-    nameRo: 'Mozaic Complet',
     description: 'Fill all 100 tiles',
-    descriptionRo: 'Completeaza toate 100 de patrate',
+    nameKey: 'ach_complete_name',
+    descKey: 'ach_complete_desc',
     check: ({ filled }) => filled >= 100
   }
 ];

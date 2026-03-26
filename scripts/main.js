@@ -7,7 +7,7 @@ import { AnimationEngine } from './animations.js';
 import { update } from './progress.js';
 import { Storage } from './storage.js';
 
-const STREAK_MILESTONES = [3, 7, 14, 30];
+const STREAK_MILESTONES = [3, 7, 30];
 
 function updateStreakDisplay(count) {
   const el = document.getElementById('streak-count');
@@ -37,8 +37,8 @@ function renderAchievementsList() {
     item.innerHTML = `
       <span class="achievement-item-icon">${isUnlocked ? a.icon : '🔒'}</span>
       <div class="achievement-item-info">
-        <div class="achievement-item-name">${a.name}</div>
-        <div class="achievement-item-desc">${a.description}</div>
+        <div class="achievement-item-name">${t(a.nameKey) || a.name}</div>
+        <div class="achievement-item-desc">${t(a.descKey) || a.description}</div>
       </div>
     `;
     list.appendChild(item);
