@@ -1,0 +1,152 @@
+<!DOCTYPE html>
+<html lang="ro">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Mozaicul Satului — Calnic Online</title>
+  <link rel="stylesheet" href="styles/main.css">
+</head>
+<body>
+  <!-- HEADER -->
+  <header class="glass header">
+    <h1 data-ro="Mozaicul Satului" data-en="Village Mosaic">Mozaicul Satului</h1>
+    <div class="header-controls">
+      <span id="streak-display">🔥 <span id="streak-count">0</span></span>
+      <button id="help-btn">❓</button>
+      <button id="lang-ro">RO</button>
+      <button id="lang-en">EN</button>
+    </div>
+  </header>
+
+  <!-- MODE SELECTION SCREEN -->
+  <div id="mode-selection" class="screen">
+    <div class="mode-cards">
+      <div class="mode-card glass" id="mode-puzzle">
+        <div class="mode-icon">🧩</div>
+        <h2 data-ro="Puzzle Viu" data-en="Living Puzzle">Puzzle Viu</h2>
+        <p data-ro="Dezvăluie imaginea ascunsă a satului împreună cu comunitatea!" data-en="Reveal the village hidden image together with the community!">Dezvăluie imaginea ascunsă a satului împreună cu comunitatea!</p>
+        <button id="enter-puzzle" class="btn-primary" data-ro="Intră în joc" data-en="Enter game">Intră în joc</button>
+      </div>
+      <div class="mode-card glass mode-disabled" id="mode-teritorii">
+        <div class="mode-icon">🗺️</div>
+        <h2 data-ro="Teritorii" data-en="Territories">Teritorii</h2>
+        <p data-ro="Revendică teritorii pentru familia ta!" data-en="Claim territories for your family!">Revendică teritorii pentru familia ta!</p>
+        <span class="coming-soon-badge" data-ro="În curând" data-en="Coming soon">În curând</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- MAIN GAME SCREEN (hidden initially) -->
+  <div id="game-screen" class="screen hidden">
+    <div id="season-bar" class="glass season-bar">
+      <span id="season-name"></span>
+      <span id="season-countdown"></span>
+      <span id="current-painter"></span>
+    </div>
+
+    <button id="leaderboard-btn" class="btn-icon">🏆</button>
+
+    <div id="canvas-wrapper">
+      <canvas id="mosaic-canvas"></canvas>
+    </div>
+
+    <div id="color-palette"></div>
+
+    <div id="daily-limit-msg" class="glass hidden"></div>
+
+    <div id="anon-banner" class="glass hidden"></div>
+
+    <div id="feedback-root"></div>
+
+    <div id="test-panel" class="glass test-panel">
+      <div class="test-panel-header" id="test-panel-toggle">🛠️ DEV <span id="test-panel-arrow">▼</span></div>
+      <div id="test-panel-content">
+        <button class="test-btn" id="test-reset-daily">Reset daily limit</button>
+        <button class="test-btn" id="test-toggle-anon">Toggle anon/registered</button>
+        <button class="test-btn" id="test-complete-piece1">Complete piece 1</button>
+        <button class="test-btn" id="test-last-tile">Trigger last tile</button>
+        <button class="test-btn" id="test-reset-all">Reset all data</button>
+        <button class="test-btn" id="test-fast-season">Fast season end</button>
+        <button class="test-btn" id="test-mock-tiles">Add 5 mock tiles</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- LEADERBOARD MODAL -->
+  <div id="leaderboard-modal" class="modal hidden">
+    <div class="modal-content glass">
+      <button class="modal-close" data-modal="leaderboard-modal">✕</button>
+      <h2 data-ro="Clasament" data-en="Leaderboard">Clasament</h2>
+      <div class="tabs">
+        <button class="tab active" data-tab="lb-tiles" data-ro="Cele mai multe dale" data-en="Most Tiles">Cele mai multe dale</button>
+        <button class="tab" data-tab="lb-pieces" data-ro="Bucăți descoperite" data-en="Pieces Discovered">Bucăți descoperite</button>
+        <button class="tab" data-tab="lb-streak" data-ro="Cel mai lung streak" data-en="Longest Streak">Cel mai lung streak</button>
+      </div>
+      <div id="lb-tiles" class="tab-content active"></div>
+      <div id="lb-pieces" class="tab-content hidden"></div>
+      <div id="lb-streak" class="tab-content hidden"></div>
+      <div id="hall-of-fame" class="hall-of-fame"></div>
+    </div>
+  </div>
+
+  <!-- HELP MODAL -->
+  <div id="help-modal" class="modal hidden">
+    <div class="modal-content glass">
+      <button class="modal-close" data-modal="help-modal">✕</button>
+      <h2 data-ro="Ajutor" data-en="Help">Ajutor</h2>
+      <div class="tabs">
+        <button class="tab active" data-tab="help-how" data-ro="Cum joci" data-en="How to play">Cum joci</button>
+        <button class="tab" data-tab="help-rewards" data-ro="Recompense" data-en="Rewards">Recompense</button>
+        <button class="tab" data-tab="help-season" data-ro="Sezon curent" data-en="Current season">Sezon curent</button>
+      </div>
+      <div id="help-how" class="tab-content active"></div>
+      <div id="help-rewards" class="tab-content hidden"></div>
+      <div id="help-season" class="tab-content hidden"></div>
+    </div>
+  </div>
+
+  <!-- TUTORIAL OVERLAY -->
+  <div id="tutorial-overlay" class="overlay hidden">
+    <div class="tutorial-card glass">
+      <div id="tutorial-step-content"></div>
+      <div class="tutorial-dots" id="tutorial-dots"></div>
+      <div class="tutorial-buttons">
+        <button id="tutorial-skip" data-ro="Sari peste" data-en="Skip">Sari peste</button>
+        <button id="tutorial-next" class="btn-primary" data-ro="Următorul" data-en="Next">Următorul</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- REWARD SEQUENCE OVERLAY -->
+  <div id="reward-overlay" class="overlay hidden">
+    <div class="reward-content glass">
+      <div id="reward-sequence"></div>
+      <button id="reward-close" class="btn-secondary" style="margin-top:16px;">✕ Închide</button>
+    </div>
+  </div>
+
+  <!-- ACHIEVEMENT NOTIFICATION -->
+  <div id="achievement-notification" class="achievement-notification hidden"></div>
+
+  <!-- CERTIFICATE MODAL -->
+  <div id="certificate-modal" class="modal hidden">
+    <div class="modal-content glass">
+      <button class="modal-close" data-modal="certificate-modal">✕</button>
+      <h2 data-ro="Pergamentul Tău" data-en="Your Certificate">Pergamentul Tău</h2>
+      <canvas id="certificate-canvas" width="600" height="400"></canvas>
+      <button id="download-certificate" class="btn-primary" data-ro="Descarcă PNG" data-en="Download PNG">Descarcă PNG</button>
+    </div>
+  </div>
+
+  <!-- SEASON ARCHIVE MODAL -->
+  <div id="archive-modal" class="modal hidden">
+    <div class="modal-content glass">
+      <button class="modal-close" data-modal="archive-modal">✕</button>
+      <h2 data-ro="Arhiva Sezonurilor" data-en="Season Archive">Arhiva Sezonurilor</h2>
+      <div id="archive-list"></div>
+    </div>
+  </div>
+
+  <script type="module" src="scripts/main.js"></script>
+</body>
+</html>
