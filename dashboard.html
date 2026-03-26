@@ -665,8 +665,7 @@ function renderMembers(members) {
       + '<div class="mem-row-name">' + escHtml(m.name) + (visLabel ? ' <small style="color:var(--muted);font-size:10px;">' + visLabel + '</small>' : '') + (conf < 80 ? ' <small style="color:var(--amber-safe,#c8a040);font-size:10px;">' + conf + '%</small>' : '') + '</div>'
       + (meta.length ? '<div class="mem-row-meta">' + meta.map(escHtml).join(' &middot; ') + '</div>' : '')
       + (m.biography ? '<div class="mem-row-meta" style="font-style:italic;color:var(--muted);">' + escHtml(m.biography.substring(0, 80)) + (m.biography.length > 80 ? '...' : '') + '</div>' : '')
-      + '</div>'
-      + '<div class="mem-row-actions">';
+      + '</div>';
     var decBtn = document.createElement('button');
     decBtn.className = 'mem-dec-btn' + (m.is_deceased ? ' active' : '');
     decBtn.textContent = m.is_deceased ? (currentLang === 'ro' ? 'Decedat' : 'Deceased') : (currentLang === 'ro' ? 'Viu' : 'Living');
@@ -766,7 +765,7 @@ function renderTimeline(entries) {
     var text = currentLang === 'en' && t.text_en ? t.text_en : t.text_ro;
     return '<div class="tl-row">' 
       + '<div class="tl-row-year">' + t.year + '</div>' 
-      + '<div class="tl-row-text">' + text + '</div>' 
+      + '<div class="tl-row-text">' + escHtml(text || '') + '</div>' 
       + '<button class="tl-del-btn" onclick="deleteTimeline(\'' + t.id + '\')">' + (currentLang === 'ro' ? 'Sterge' : 'Delete') + '</button>' 
       + '</div>';
   }).join('');
@@ -834,14 +833,14 @@ function renderPhotos(photos) {
     var year = p.year ? p.year : '';
     var meta = [cat, year].filter(Boolean).join(' · ');
     var imgHtml = p.path
-      ? '<img class="dash-photo-thumb" src="' + p.path + '" alt="' + title.replace(/"/g,'&quot;') + '" onerror="this.style.display=\'none\';this.nextElementSibling.style.display=\'flex\'">'
+      ? '<img class="dash-photo-thumb" src="' + escHtml(p.path) + '" alt="' + escHtml(title) + '" onerror="this.style.display=\'none\';this.nextElementSibling.style.display=\'flex\'">'
         + '<div class="dash-photo-thumb-placeholder" style="display:none">&#128247;</div>'
       : '<div class="dash-photo-thumb-placeholder">&#128247;</div>';
     return '<div class="dash-photo-card" id="pcard-' + p.id + '">'
       + imgHtml
       + '<div class="dash-photo-info">'
-      + '<div class="dash-photo-title" title="' + title.replace(/"/g,'&quot;') + '">' + title + '</div>'
-      + (meta ? '<div class="dash-photo-meta">' + meta + '</div>' : '')
+      + '<div class="dash-photo-title" title="' + escHtml(title) + '">' + escHtml(title) + '</div>'
+      + (meta ? '<div class="dash-photo-meta">' + escHtml(meta) + '</div>' : '')
       + '</div>'
       + '<button class="dash-photo-del" onclick="deletePhoto(\'' + p.id + '\',\'' + (p.path||'').replace(/'/g,"\\'") + '\')">'
       + (currentLang === 'ro' ? 'Sterge' : 'Delete') + '</button>'
