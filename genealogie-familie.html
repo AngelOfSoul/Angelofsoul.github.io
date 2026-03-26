@@ -96,9 +96,6 @@ footer .g{color:var(--gold-d);font-style:normal;}
 /* GEN LABELS */
 .gen-label{position:absolute;right:10px;left:auto;z-index:6;pointer-events:none;font-size:9px;letter-spacing:2px;text-transform:uppercase;color:var(--gold-m);font-family:'Playfair Display',serif;opacity:.65;background:rgba(10,10,10,.6);padding:1px 5px;border-radius:2px;}
 /* ZOOM BAR */
-.zoom-bar{position:absolute;top:50%;right:12px;left:auto;transform:translateY(-50%);z-index:25;display:flex;flex-direction:column;gap:3px;}
-.zoom-btn{width:32px;height:32px;background:#111;border:1px solid #b08030;color:var(--gold);border-radius:3px;font-size:18px;display:flex;align-items:center;justify-content:center;cursor:pointer;transition:all .15s;line-height:1;padding:0;}
-.zoom-btn:hover{background:#b08030;color:#0a0a0a;}
 /* MINIMAP */
 .minimap{position:absolute;bottom:10px;right:10px;background:rgba(8,8,8,.92);border:1px solid var(--b2);border-radius:3px;padding:3px;z-index:20;}
 .minimap canvas{display:block;}
@@ -496,11 +493,6 @@ footer .g{color:var(--gold-d);font-style:normal;}
   <!-- TREE STAGE -->
   <div class="tree-stage-wrap">
     <div class="tree-stage" id="treeStage">
-      <div class="zoom-bar" id="zoomBar">
-        <button class="zoom-btn" id="btnZoomIn" title="Mareste">+</button>
-        <button class="zoom-btn" id="btnZoomReset" title="Resetare zoom">&#x21BA;</button>
-        <button class="zoom-btn" id="btnZoomOut" title="Micsoreaza">&minus;</button>
-      </div>
       <div class="tree-canvas" id="treeCanvas">
         <svg id="connSvg" style="position:absolute;top:0;left:0;overflow:visible;pointer-events:none;z-index:1;"></svg>
       </div>
@@ -559,6 +551,25 @@ footer .g{color:var(--gold-d);font-style:normal;}
 </footer>
 <script src="supabase.js"></script>
 <script src="admin-nav.js"></script>
+<!-- Adauga legatura modal -->
+<div id="relModal" style="display:none;position:fixed;inset:0;z-index:10000;background:rgba(0,0,0,0.78);align-items:center;justify-content:center;">
+  <div style="background:#0d0d0d;border:1px solid var(--gold-d);border-radius:3px;padding:22px 24px;width:380px;max-width:94vw;max-height:88vh;overflow-y:auto;position:relative;">
+    <button id="relModalClose" style="position:absolute;top:8px;right:12px;background:none;border:none;color:var(--muted);font-size:20px;cursor:pointer;line-height:1;" title="Inchide">&times;</button>
+    <div style="font-family:'Playfair Display',serif;font-size:13px;letter-spacing:2px;text-transform:uppercase;color:var(--gold);margin-bottom:6px;">Adauga legatura</div>
+    <div id="relModalAnchor" style="font-size:12px;color:var(--gold-d);margin-bottom:14px;"></div>
+    <div style="font-size:11px;color:var(--muted);margin-bottom:5px;letter-spacing:.05em;text-transform:uppercase;">Conecteaza cu persoana</div>
+    <select id="relPersonSelect" style="width:100%;background:#1a1208;border:1px solid var(--b2);color:var(--text);font-family:'EB Garamond',serif;font-size:14px;padding:7px 9px;border-radius:2px;margin-bottom:14px;"></select>
+    <div style="font-size:11px;color:var(--muted);margin-bottom:8px;letter-spacing:.05em;text-transform:uppercase;">Aceasta persoana este...</div>
+    <div id="relTypeContainer"></div>
+    <div id="relGenPreview" style="font-size:11px;color:#70a870;background:#0a1a0a;border:1px solid #1a3a1a;border-radius:2px;padding:6px 9px;margin-top:10px;display:none;"></div>
+    <div id="relModalError" style="font-size:12px;color:#c0392b;margin-top:8px;display:none;"></div>
+    <div style="margin-top:16px;display:flex;gap:10px;">
+      <button id="relModalCancel" style="flex:1;background:none;border:1px solid var(--b2);color:var(--muted);font-family:'EB Garamond',serif;font-size:13px;padding:7px;border-radius:2px;cursor:pointer;">Anuleaza</button>
+      <button id="relModalSave" style="flex:1;background:var(--gold-d);border:1px solid var(--gold);color:#050505;font-family:'EB Garamond',serif;font-size:13px;font-weight:700;padding:7px;border-radius:2px;cursor:pointer;">Salveaza</button>
+    </div>
+  </div>
+</div>
+
 <script>
 'use strict';
 
@@ -576,7 +587,7 @@ var CARD_W=110,GEN_Y={3:30,2:180,1:340,0:490},GEN_GAP_X=28;
 // ── INIT ─────────────────────────────────────────────────
 document.getElementById('yr').textContent=new Date().getFullYear();
 S.familyId=new URLSearchParams(window.location.search).get('family')||new URLSearchParams(window.location.search).get('id');
-applyLang(lang());initLang();initScrollBtns();initHamburger();initGuide();initKeyboard();initZoomPan();initZoomBar();initUI();
+applyLang(lang());initLang();initScrollBtns();initHamburger();initGuide();initKeyboard();initZoomPan();initUI();
 
 if(window.supabase&&window.supabase.from){boot();}else{document.addEventListener('supabase:ready',boot);}
 
@@ -609,9 +620,23 @@ function loadFamily(){
 function loadRelations(rid){
   var ids=S.members.map(function(m){return m.id;});
   if(!ids.length){afterLoad(rid);return;}
-  window.supabase.from('member_relations').select('*').in('from_member_id',ids)
-    .then(function(r){if(rid!==S.reqId)return;S.relations=r.data||[];afterLoad(rid);})
-    .catch(function(){if(rid!==S.reqId)return;S.relations=[];afterLoad(rid);});
+  // Fetch relations where this family's members appear on EITHER side
+  Promise.all([
+    window.supabase.from('member_relations').select('*').in('from_member_id',ids),
+    window.supabase.from('member_relations').select('*').in('to_member_id',ids)
+  ]).then(function(results){
+    if(rid!==S.reqId)return;
+    var fromRels = results[0].data||[];
+    var toRels   = results[1].data||[];
+    // Merge, deduplicating by id
+    var seen={};
+    var all=[];
+    fromRels.concat(toRels).forEach(function(r){
+      if(!seen[r.id]){seen[r.id]=true;all.push(r);}
+    });
+    S.relations=all;
+    afterLoad(rid);
+  }).catch(function(){if(rid!==S.reqId)return;S.relations=[];afterLoad(rid);});
 }
 
 function afterLoad(rid){
@@ -643,331 +668,264 @@ function render(){
   drawMinimap(mxX,mxY);applyXform();
 }
 
+// ── RELATION METADATA ────────────────────────────────────
+// up: how many generations OLDER the target is relative to anchor
+// positive = older (higher in tree), negative = younger (lower in tree)
+var REL_META={
+  tata:      {l:'Tata',          g:'Parinti',          up:1,  isParent:true,  bio:true},
+  mama:      {l:'Mama',          g:'Parinti',          up:1,  isParent:true,  bio:true},
+  step:      {l:'Parinte vitreg',g:'Parinti',          up:1,  isParent:true,  bio:false},
+  adopted:   {l:'Parinte adoptiv',g:'Parinti',         up:1,  isParent:true,  bio:false},
+  bunic:     {l:'Bunic',         g:'Bunici',           up:2,  isParent:true,  bio:true},
+  bunica:    {l:'Bunica',        g:'Bunici',           up:2,  isParent:true,  bio:true},
+  strabunic: {l:'Strabunic',     g:'Strabunici',       up:3,  isParent:true,  bio:true},
+  strabunica:{l:'Strabunica',    g:'Strabunici',       up:3,  isParent:true,  bio:true},
+  fiu:       {l:'Fiu',           g:'Copii',            up:-1, isChild:true,   bio:true},
+  fiica:     {l:'Fiica',         g:'Copii',            up:-1, isChild:true,   bio:true},
+  frate:     {l:'Frate',         g:'Frati',            up:0,  isSibling:true},
+  sora:      {l:'Sora',          g:'Frati',            up:0,  isSibling:true},
+  sot:       {l:'Sot',           g:'Sot / Sotie',      up:0,  isSpouse:true},
+  sotie:     {l:'Sotie',         g:'Sot / Sotie',      up:0,  isSpouse:true},
+  unchi:     {l:'Unchi',         g:'Familie extinsa',  up:1,  isExt:true},
+  matusa:    {l:'Matusa',        g:'Familie extinsa',  up:1,  isExt:true},
+  nepot:     {l:'Nepot',         g:'Familie extinsa',  up:-1, isExt:true},
+  nepoata:   {l:'Nepoata',       g:'Familie extinsa',  up:-1, isExt:true},
+  var:       {l:'Var',           g:'Familie extinsa',  up:0,  isExt:true},
+  vara:      {l:'Vara',          g:'Familie extinsa',  up:0,  isExt:true},
+  socru:     {l:'Socru',         g:'Socri',            up:1,  isExt:true},
+  soacra:    {l:'Soacra',        g:'Socri',            up:1,  isExt:true}
+};
+var REL_GROUPS=['Parinti','Bunici','Strabunici','Copii','Frati','Sot / Sotie','Familie extinsa','Socri'];
+
 function roleToGen(r){
   r=(r||'').toLowerCase();
-  if(/stramosi|strabunic|great/.test(r))return 3;
-  if(/bunic|grandp/.test(r))return 2;
-  if(/tata|mama|parinte|parent/.test(r))return 1;
-  if(/eu|myself|self|current/.test(r))return 0;
-  return 1;
+  if(/strabunic|great/.test(r))return 0;
+  if(/bunic|grandp/.test(r))return 1;
+  if(/tata|mama|parinte|parent/.test(r))return 2;
+  if(/eu|myself|self|current/.test(r))return 3;
+  return 2;
+}
+
+// Infer and set target's generation based on anchor + relation type
+function inferGen(anchorId, targetId, relType){
+  var meta=REL_META[relType];
+  if(!meta||meta.up===undefined)return;
+  var anchor=S.members.find(function(m){return m.id===anchorId;});
+  var target=S.members.find(function(m){return m.id===targetId;});
+  if(!anchor||!target)return;
+  // up>0 means target is older = smaller gen number
+  target.generation = anchor.generation - meta.up;
 }
 
 // ─────────────────────────────────────────────────────────────────
-// GENEALOGY TREE LAYOUT ENGINE
-// Handles unlimited generations, spouse pairs, multiple roots,
-// disconnected members — always produces a tidy, non-overlapping tree.
+// GENEALOGY TREE LAYOUT ENGINE — Reingold-Tilford style
 // ─────────────────────────────────────────────────────────────────
 function computeLayout(){
-  var NODE_W = CARD_W + GEN_GAP_X; // 138px per slot
-  var ROW_H  = 180;                 // vertical gap between generations
-  var PAD    = 60;                  // left/top padding
+  var NODE_W = CARD_W + GEN_GAP_X;
+  var ROW_H  = 180;
+  var PAD    = 60;
 
-  // 1. Determine generation of every member
-  var genOf = {};
+  // 1. Generation of every member
+  var genOf={};
   S.members.forEach(function(m){
-    genOf[m.id] = m.generation != null ? m.generation : roleToGen(m.role);
+    genOf[m.id]=m.generation!=null?m.generation:roleToGen(m.role);
   });
 
-  // 2. Build directed parent→child edges from relations.
-  //    A "parent" relation: from_member_id is the PARENT, to_member_id is the CHILD.
-  //    We detect direction by comparing generations (smaller gen# = older = ancestor).
-  var childrenOf = {}; // id -> [childId, ...]
-  var parentsOf  = {}; // id -> [parentId, ...]
-  S.members.forEach(function(m){ childrenOf[m.id]=[]; parentsOf[m.id]=[]; });
-
-  // Spouse pairs: used to group couples as a single layout unit
-  var spousePairs = {}; // id -> partnerId (bidirectional)
+  // 2. Build parent→child + spouse maps
+  var childrenOf={},parentsOf={},spousePairs={};
+  S.members.forEach(function(m){childrenOf[m.id]=[];parentsOf[m.id]=[];});
 
   S.relations.forEach(function(r){
-    var a = r.from_member_id, b = r.to_member_id;
-    if(r.relation_type === 'spouse' || r.relation_type === 'in_law'){
-      spousePairs[a] = b; spousePairs[b] = a;
-    } else if(r.relation_type === 'parent'){
-      var ga = genOf[a], gb = genOf[b];
-      var parentId, childId;
-      // Smaller generation number = higher up (older) in the tree
-      if(ga != null && gb != null){
-        if(ga <= gb){ parentId=a; childId=b; }
-        else         { parentId=b; childId=a; }
-      } else {
-        parentId=a; childId=b; // default: trust the relation direction
+    var meta=REL_META[r.relation_type];
+    var a=r.from_member_id, b=r.to_member_id;
+    if(!meta){
+      // Legacy relation types fallback
+      if(r.relation_type==='spouse'||r.relation_type==='in_law'){spousePairs[a]=b;spousePairs[b]=a;}
+      else if(r.relation_type==='parent'||r.relation_type==='sibling'||r.relation_type==='step'||r.relation_type==='adopted'){
+        var ga=genOf[a],gb=genOf[b];
+        var par=ga<=gb?a:b, chi=par===a?b:a;
+        if(childrenOf[par].indexOf(chi)===-1)childrenOf[par].push(chi);
+        if(parentsOf[chi].indexOf(par)===-1)parentsOf[chi].push(par);
       }
-      if(childrenOf[parentId] && childrenOf[parentId].indexOf(childId)===-1)
-        childrenOf[parentId].push(childId);
-      if(parentsOf[childId] && parentsOf[childId].indexOf(parentId)===-1)
-        parentsOf[childId].push(parentId);
-    } else if(r.relation_type === 'adopted' || r.relation_type === 'step'){
-      var ga = genOf[a], gb = genOf[b];
-      var parentId = (ga != null && gb != null && ga <= gb) ? a : b;
-      var childId  = parentId === a ? b : a;
-      if(childrenOf[parentId] && childrenOf[parentId].indexOf(childId)===-1)
-        childrenOf[parentId].push(childId);
-      if(parentsOf[childId] && parentsOf[childId].indexOf(parentId)===-1)
-        parentsOf[childId].push(parentId);
+      return;
+    }
+    if(meta.isSpouse){spousePairs[a]=b;spousePairs[b]=a;return;}
+    if(meta.isParent||meta.isChild){
+      var ga=genOf[a],gb=genOf[b];
+      var par, chi;
+      if(meta.isParent){par=ga<=gb?a:b; chi=par===a?b:a;}
+      else             {par=gb<=ga?b:a; chi=par===b?a:b;}
+      if(childrenOf[par].indexOf(chi)===-1)childrenOf[par].push(chi);
+      if(parentsOf[chi].indexOf(par)===-1)parentsOf[chi].push(par);
     }
   });
 
-  // 3. Resolve generation conflicts:
-  //    Walk the parent→child graph and ensure each child's generation
-  //    is strictly greater than its parent's. This makes newly added
-  //    ancestors automatically push everyone else down.
-  var changed = true, guard = 0;
-  while(changed && guard++ < 50){
-    changed = false;
+  // 3. Propagate gen constraints
+  var changed=true,guard=0;
+  while(changed&&guard++<100){
+    changed=false;
     S.members.forEach(function(m){
       (parentsOf[m.id]||[]).forEach(function(pid){
-        if(genOf[pid] >= genOf[m.id]){
-          genOf[m.id] = genOf[pid] + 1;
-          changed = true;
-        }
+        if(genOf[pid]>=genOf[m.id]){genOf[m.id]=genOf[pid]+1;changed=true;}
       });
       (childrenOf[m.id]||[]).forEach(function(cid){
-        if(genOf[cid] <= genOf[m.id]){
-          genOf[cid] = genOf[m.id] + 1;
-          changed = true;
-        }
+        if(genOf[cid]<=genOf[m.id]){genOf[cid]=genOf[m.id]+1;changed=true;}
       });
     });
   }
+  // Sync back to members
+  S.members.forEach(function(m){m.generation=genOf[m.id];});
 
-  // 4. Recompute Y rows from actual generation values (no fixed GEN_Y map).
-  //    Generations are sorted; row 0 = oldest (smallest gen#).
-  var allGens = [];
-  S.members.forEach(function(m){
-    if(allGens.indexOf(genOf[m.id])===-1) allGens.push(genOf[m.id]);
-  });
+  // 4. Y positions — one row per unique generation
+  var allGens=[];
+  S.members.forEach(function(m){if(allGens.indexOf(genOf[m.id])===-1)allGens.push(genOf[m.id]);});
   allGens.sort(function(a,b){return a-b;});
-  var genRow = {}; // gen# -> row index (0=top)
-  allGens.forEach(function(g,i){ genRow[g]=i; });
-  var genY = {}; // gen# -> pixel Y
-  allGens.forEach(function(g){ genY[g] = PAD + genRow[g]*ROW_H; });
+  var genY={};
+  allGens.forEach(function(g,i){genY[g]=PAD+i*ROW_H;});
 
-  // 5. Reingold-Tilford bottom-up subtree sizing.
-  //    We treat a married couple as a single "unit" whose combined width
-  //    is max(2, sum-of-children-widths). This keeps spouses side by side
-  //    and children centered under them.
-  var leafW = 1; // width in node-slots for a leaf node
-
-  // Get the "primary" representative of a couple unit (the one with smaller id string)
-  function coupleRep(id){
-    var sp = spousePairs[id];
-    if(!sp) return id;
-    return id < sp ? id : sp;
-  }
-
-  // Subtree width calculation (memoised)
-  var stW = {};
+  // 5. Subtree width
+  var stW={};
   function subtreeWidth(id){
-    if(stW[id] != null) return stW[id];
-    var ch = childrenOf[id] || [];
-    // Collect unique children (some may be shared with spouse)
-    var sp = spousePairs[id];
-    var allCh = ch.slice();
-    if(sp){ (childrenOf[sp]||[]).forEach(function(c){ if(allCh.indexOf(c)===-1) allCh.push(c); }); }
-    if(!allCh.length){
-      // Leaf: width=1 if single, width=2 if has spouse
-      stW[id] = sp ? 2 : 1;
-      return stW[id];
-    }
-    var w = 0;
-    allCh.forEach(function(cid){ w += subtreeWidth(cid); });
-    w = Math.max(w, sp ? 2 : 1); // never narrower than the couple itself
-    stW[id] = w;
-    return w;
+    if(stW[id]!=null)return stW[id];
+    var sp=spousePairs[id];
+    var allCh=childrenOf[id].slice();
+    if(sp)(childrenOf[sp]||[]).forEach(function(c){if(allCh.indexOf(c)===-1)allCh.push(c);});
+    if(!allCh.length){stW[id]=sp?2:1;return stW[id];}
+    var w=0;allCh.forEach(function(c){w+=subtreeWidth(c);});
+    stW[id]=Math.max(w,sp?2:1);return stW[id];
   }
+  S.members.forEach(function(m){subtreeWidth(m.id);});
 
-  // Pre-compute for all nodes
-  S.members.forEach(function(m){ subtreeWidth(m.id); });
-
-  // 6. Top-down X assignment
-  var xPos = {};
-  var cursor = PAD;
-  var visited = {};
-
-  function assignX(id, leftPx){
-    if(visited[id]) return;
-    visited[id] = true;
-    var sp = spousePairs[id];
-    var w  = subtreeWidth(id) * NODE_W;
-
-    // Place this node (center of its subtree allocation)
-    xPos[id] = leftPx + (w - CARD_W) / 2;
-
-    // Place spouse immediately to the right if not yet placed
-    if(sp && !visited[sp]){
-      visited[sp] = true;
-      xPos[sp] = xPos[id] + NODE_W; // one slot to the right
-    }
-
-    // Gather all children (from both this node and spouse)
-    var allCh = (childrenOf[id]||[]).slice();
-    if(sp){ (childrenOf[sp]||[]).forEach(function(c){ if(allCh.indexOf(c)===-1) allCh.push(c); }); }
-
-    // Sort children by their own generation (shouldn't differ, but be safe)
-    allCh.sort(function(a,b){ return genOf[a]-genOf[b]; });
-
-    // Center children block under the couple/single parent
-    var totalChildW = 0;
-    allCh.forEach(function(cid){ totalChildW += subtreeWidth(cid)*NODE_W; });
-    var coupleCenter = sp ? (xPos[id]+xPos[sp]+CARD_W)/2 : xPos[id]+CARD_W/2;
-    var childStart   = coupleCenter - totalChildW/2;
-
-    var cx = childStart;
-    allCh.forEach(function(cid){
-      if(!visited[cid]){
-        assignX(cid, cx);
-      }
-      cx += subtreeWidth(cid)*NODE_W;
-    });
+  // 6. X assignment top-down
+  var xPos={},visited={},cursor=PAD;
+  function assignX(id,leftPx){
+    if(visited[id])return;visited[id]=true;
+    var sp=spousePairs[id],w=subtreeWidth(id)*NODE_W;
+    xPos[id]=leftPx+(w-CARD_W)/2;
+    if(sp&&!visited[sp]){visited[sp]=true;xPos[sp]=xPos[id]+NODE_W;}
+    var allCh=childrenOf[id].slice();
+    if(sp)(childrenOf[sp]||[]).forEach(function(c){if(allCh.indexOf(c)===-1)allCh.push(c);});
+    var tc=0;allCh.forEach(function(c){tc+=subtreeWidth(c)*NODE_W;});
+    var cc=sp?(xPos[id]+xPos[sp]+CARD_W)/2:xPos[id]+CARD_W/2;
+    var cx=cc-tc/2;
+    allCh.forEach(function(c){if(!visited[c]){assignX(c,cx);}cx+=subtreeWidth(c)*NODE_W;});
   }
+  var roots=S.members.filter(function(m){return !parentsOf[m.id]||!parentsOf[m.id].length;});
+  roots.sort(function(a,b){return genOf[a.id]-genOf[b.id]||(a.id<b.id?-1:1);});
+  roots.forEach(function(r){if(!visited[r.id]){assignX(r.id,cursor);cursor+=subtreeWidth(r.id)*NODE_W+GEN_GAP_X*2;}});
+  S.members.forEach(function(m){if(xPos[m.id]==null){xPos[m.id]=cursor;cursor+=NODE_W;}});
 
-  // Find true roots: nodes with no parents
-  var roots = S.members.filter(function(m){
-    return !parentsOf[m.id] || parentsOf[m.id].length === 0;
-  });
-  // Sort roots by generation then by id for deterministic output
-  roots.sort(function(a,b){ return genOf[a.id]-genOf[b.id] || (a.id<b.id?-1:1); });
+  // 7. Normalise so min X = PAD
+  var minX=Infinity;S.members.forEach(function(m){if(xPos[m.id]<minX)minX=xPos[m.id];});
+  var shiftX=PAD-minX;S.members.forEach(function(m){xPos[m.id]+=shiftX;});
 
-  roots.forEach(function(root){
-    if(!visited[root.id]){
-      assignX(root.id, cursor);
-      cursor += subtreeWidth(root.id)*NODE_W + GEN_GAP_X*2;
-    }
-  });
-
-  // Orphaned nodes (no relations at all) — place them below the main tree
-  var orphanX = PAD;
-  S.members.forEach(function(m){
-    if(xPos[m.id] == null){
-      xPos[m.id] = orphanX;
-      orphanX += NODE_W;
-    }
-  });
-
-  // 7. Normalise: shift everything so minimum X = PAD
-  var minX = Infinity;
-  S.members.forEach(function(m){ if(xPos[m.id]<minX) minX=xPos[m.id]; });
-  var shiftX = PAD - minX;
-  S.members.forEach(function(m){ xPos[m.id] += shiftX; });
-
-  // 8. Build final layout object
-  var layout = {};
-  S.members.forEach(function(m){
-    layout[m.id] = { x: xPos[m.id], y: genY[genOf[m.id]], gen: genOf[m.id] };
-  });
+  // 8. Build layout
+  var layout={};
+  S.members.forEach(function(m){layout[m.id]={x:xPos[m.id],y:genY[genOf[m.id]],gen:genOf[m.id]};});
   return layout;
 }
 
-// ─────────────────────────────────────────────────────────────────
-// CONNECTORS
-// Draws proper genealogy lines:
-//   - Spouse: horizontal gold line between partners, with a small
-//     vertical "joint" dropping down to where children branch off.
-//   - Parent→Child: vertical line from the couple's joint point
-//     down to each child, with a shared horizontal bus bar when
-//     there are multiple children.
-// ─────────────────────────────────────────────────────────────────
-function drawConnectors(svg, layout){
-  svg.innerHTML = '';
-  if(!S.relations.length && S.members.length > 1){ drawHeuristic(svg, layout); return; }
+// ── DIRECTIONAL RELATION LABEL ────────────────────────────────
+function relLabel(relType, fromId, toId){
+  var meta=REL_META[relType];
+  var toM=S.members.find(function(m){return m.id===toId;});
+  if(!toM)return relType;
+  var n=toM.name;
+  var map={
+    tata:'Tata al lui '+n, mama:'Mama lui '+n,
+    step:'Parinte vitreg al lui '+n, adopted:'Parinte adoptiv al lui '+n,
+    bunic:'Bunicul lui '+n, bunica:'Bunica lui '+n,
+    strabunic:'Strabunicul lui '+n, strabunica:'Strabunica lui '+n,
+    fiu:'Fiul lui '+n, fiica:'Fiica lui '+n,
+    frate:'Fratele lui '+n, sora:'Sora lui '+n,
+    sot:'Sotul lui '+n, sotie:'Sotia lui '+n,
+    unchi:'Unchiul lui '+n, matusa:'Matusa lui '+n,
+    nepot:'Nepotul lui '+n, nepoata:'Nepoata lui '+n,
+    var:'Varul lui '+n, vara:'Vara lui '+n,
+    socru:'Socrul lui '+n, soacra:'Soacra lui '+n,
+    parent:t('Parinte','Parent'), sibling:t('Frate/Sora','Sibling'),
+    spouse:t('Sot/Sotie','Spouse'), in_law:t('Fin/Nasa','In-law')
+  };
+  return map[relType]||relType;
+}
 
-  var CARD_H   = 76;  // approximate card height to bottom edge
-  var CARD_MID = 38;  // vertical midpoint of card (for spouse line)
-  var JOIN_DROP = 20; // px below the couple line where the child bus starts
+// ── CONNECTORS ────────────────────────────────────────────────
+function drawConnectors(svg,layout){
+  svg.innerHTML='';
+  if(!S.relations.length&&S.members.length>1){drawHeuristic(svg,layout);return;}
 
-  // Build the same edge maps as computeLayout uses
-  var childrenOf2 = {}; var parentsOf2 = {}; var spousePairs2 = {};
-  S.members.forEach(function(m){ childrenOf2[m.id]=[]; parentsOf2[m.id]=[]; });
-  var genOf2 = {};
-  S.members.forEach(function(m){ genOf2[m.id]=layout[m.id]?layout[m.id].gen:0; });
+  var CARD_H=76, CARD_MID=38, JOIN_DROP=20;
+  var childrenOf2={},spousePairs2={};
+  S.members.forEach(function(m){childrenOf2[m.id]=[];});
 
   S.relations.forEach(function(r){
+    var meta=REL_META[r.relation_type];
     var a=r.from_member_id, b=r.to_member_id;
-    if(r.relation_type==='spouse'||r.relation_type==='in_law'){
-      spousePairs2[a]=b; spousePairs2[b]=a;
-    } else if(r.relation_type==='parent'||r.relation_type==='adopted'||r.relation_type==='step'){
-      var pa=layout[a], pb=layout[b];
-      if(!pa||!pb) return;
-      var parentId = pa.y <= pb.y ? a : b;
-      var childId  = parentId===a ? b : a;
-      var bio = r.is_biological !== false && r.relation_type !== 'adopted';
-      var col  = bio ? '#c87050' : '#5080c8';
-      var dash = bio ? null : '5 3';
-      if(childrenOf2[parentId].indexOf(childId)===-1) childrenOf2[parentId].push(childId);
-      if(parentsOf2[childId].indexOf(parentId)===-1)  parentsOf2[childId].push(parentId);
+    var isSpouse=meta?meta.isSpouse:(r.relation_type==='spouse'||r.relation_type==='in_law');
+    var isParentType=meta?(meta.isParent||meta.isChild):(r.relation_type==='parent'||r.relation_type==='step'||r.relation_type==='adopted');
+    if(isSpouse){spousePairs2[a]=b;spousePairs2[b]=a;return;}
+    if(isParentType){
+      var pa=layout[a],pb=layout[b];if(!pa||!pb)return;
+      var par=pa.y<=pb.y?a:b, chi=par===a?b:a;
+      var bio=meta?meta.bio!==false:r.is_biological!==false;
+      if(!childrenOf2[par].find(function(x){return x.id===chi;}))
+        childrenOf2[par].push({id:chi,bio:bio});
     }
   });
 
-  // Draw spouse lines first (z-order: below child lines)
-  var drawnSpouse = {};
+  // Spouse lines
+  var drawnSpouse={};
   S.relations.forEach(function(r){
-    if(r.relation_type!=='spouse'&&r.relation_type!=='in_law') return;
+    var meta=REL_META[r.relation_type];
+    var isSpouse=meta?meta.isSpouse:(r.relation_type==='spouse'||r.relation_type==='in_law');
+    if(!isSpouse)return;
     var k=[r.from_member_id,r.to_member_id].sort().join('|');
-    if(drawnSpouse[k]) return; drawnSpouse[k]=true;
-    var pa=layout[r.from_member_id], pb=layout[r.to_member_id];
-    if(!pa||!pb) return;
-    var x1=pa.x+CARD_W/2, x2=pb.x+CARD_W/2, y=pa.y+CARD_MID;
-    // Horizontal spouse line
-    addLine(svg, x1, y, x2, y, '#d4a84a', 2, null);
-    // Heart symbol at midpoint
-    var tx=mkSvg('text');
-    tx.setAttribute('x',(x1+x2)/2); tx.setAttribute('y',y-4);
-    tx.setAttribute('text-anchor','middle'); tx.setAttribute('font-size','11');
-    tx.setAttribute('fill','#d4a84a'); tx.textContent='\u2665';
-    svg.appendChild(tx);
+    if(drawnSpouse[k])return;drawnSpouse[k]=true;
+    var pa=layout[r.from_member_id],pb=layout[r.to_member_id];if(!pa||!pb)return;
+    var x1=pa.x+CARD_W/2,x2=pb.x+CARD_W/2,y=pa.y+CARD_MID;
+    addLine(svg,x1,y,x2,y,'#d4a84a',2,null);
+    var tx=mkSvg('text');tx.setAttribute('x',(x1+x2)/2);tx.setAttribute('y',y-4);
+    tx.setAttribute('text-anchor','middle');tx.setAttribute('font-size','13');
+    tx.setAttribute('fill','#d4a84a');tx.textContent='♥';svg.appendChild(tx);
   });
 
-  // Draw parent→children connectors
-  // Group children by their "parent unit" (couple or single parent)
-  var drawnParent = {};
+  // Parent-child lines
+  var drawnParent={};
   S.members.forEach(function(parentId){
-    var ch = childrenOf2[parentId];
-    if(!ch||!ch.length) return;
-    var pp = layout[parentId]; if(!pp) return;
-    var sp = spousePairs2[parentId];
-
-    // Only draw once per couple
-    var unitKey = sp ? [parentId,sp].sort().join('|') : parentId;
-    if(drawnParent[unitKey]) return; drawnParent[unitKey]=true;
-
-    // The "drop point" x: midpoint between parent and spouse (or just parent centre)
-    var px1 = pp.x + CARD_W/2;
-    var px2 = sp && layout[sp] ? layout[sp].x + CARD_W/2 : px1;
-    var dropX = (px1+px2)/2;
-    var dropY = pp.y + CARD_H + JOIN_DROP; // just below the cards
-
-    // Also include children of spouse
-    var allCh = ch.slice();
-    if(sp){ (childrenOf2[sp]||[]).forEach(function(c){ if(allCh.indexOf(c)===-1) allCh.push(c); }); }
-    if(!allCh.length) return;
-
-    // Vertical line down from parent midpoint to bus bar
-    addLine(svg, dropX, pp.y+CARD_H, dropX, dropY, '#c87050', 1.5, null);
-
-    if(allCh.length === 1){
-      // Single child: straight vertical line to child top
-      var cp = layout[allCh[0]]; if(!cp) return;
-      var cx = cp.x + CARD_W/2;
-      addLine(svg, dropX, dropY, cx, dropY, '#c87050', 1.5, null); // short horizontal jog if needed
-      addLine(svg, cx, dropY, cx, cp.y, '#c87050', 1.5, null);
+    var ch=childrenOf2[parentId];if(!ch||!ch.length)return;
+    var pp=layout[parentId];if(!pp)return;
+    var sp=spousePairs2[parentId];
+    var unitKey=sp?[parentId,sp].sort().join('|'):parentId;
+    if(drawnParent[unitKey])return;drawnParent[unitKey]=true;
+    var allCh=ch.slice();
+    if(sp)(childrenOf2[sp]||[]).forEach(function(c){if(!allCh.find(function(x){return x.id===c.id;}))allCh.push(c);});
+    if(!allCh.length)return;
+    var px1=pp.x+CARD_W/2,px2=sp&&layout[sp]?layout[sp].x+CARD_W/2:px1;
+    var dropX=(px1+px2)/2,dropY=pp.y+CARD_H+JOIN_DROP;
+    addLine(svg,dropX,pp.y+CARD_H,dropX,dropY,'#c87050',1.5,null);
+    if(allCh.length===1){
+      var cp=layout[allCh[0].id];if(!cp)return;
+      var col=allCh[0].bio?'#c87050':'#5080c8',dash=allCh[0].bio?null:'5 3';
+      var cx=cp.x+CARD_W/2;
+      addLine(svg,dropX,dropY,cx,dropY,col,1.5,dash);
+      addLine(svg,cx,dropY,cx,cp.y,col,1.5,dash);
     } else {
-      // Multiple children: horizontal bus bar, then vertical to each
-      var childXs = allCh.map(function(cid){ var cp=layout[cid]; return cp?cp.x+CARD_W/2:dropX; });
-      var busLeft  = Math.min.apply(null, childXs);
-      var busRight = Math.max.apply(null, childXs);
-      // Horizontal bus
-      addLine(svg, busLeft, dropY, busRight, dropY, '#c87050', 1.5, null);
-      // Vertical from dropX to bus
-      if(dropX < busLeft || dropX > busRight){
-        addLine(svg, dropX, dropY, dropX < busLeft ? busLeft : busRight, dropY, '#c87050', 1.5, null);
-      }
-      // Verticals from bus to each child
-      allCh.forEach(function(cid){
-        var cp = layout[cid]; if(!cp) return;
-        var cx = cp.x + CARD_W/2;
-        addLine(svg, cx, dropY, cx, cp.y, '#c87050', 1.5, null);
+      var xs=allCh.map(function(c){var cp=layout[c.id];return cp?cp.x+CARD_W/2:dropX;});
+      var bL=Math.min.apply(null,xs),bR=Math.max.apply(null,xs);
+      addLine(svg,bL,dropY,bR,dropY,'#c87050',1.5,null);
+      allCh.forEach(function(c){
+        var cp=layout[c.id];if(!cp)return;
+        var col=c.bio?'#c87050':'#5080c8',dash=c.bio?null:'5 3';
+        addLine(svg,cp.x+CARD_W/2,dropY,cp.x+CARD_W/2,cp.y,col,1.5,dash);
       });
     }
+  });
+
+  // Extended family dashed green lines
+  S.relations.forEach(function(r){
+    var meta=REL_META[r.relation_type];if(!meta||!meta.isExt)return;
+    var pa=layout[r.from_member_id],pb=layout[r.to_member_id];if(!pa||!pb)return;
+    addLine(svg,pa.x+CARD_W/2,pa.y+CARD_MID,pb.x+CARD_W/2,pb.y+CARD_MID,'#70a870',1.5,'4 3');
   });
 }
 
@@ -1104,7 +1062,7 @@ function openDetail(id){
     var o=S.members.find(function(x){return x.id===oid;});if(!o)return;
     var chip=document.createElement('div');chip.className='rc '+(r.is_biological!==false?'rc-blood':'rc-alliance');
     var rav=document.createElement('div');rav.className='rc-av';rav.textContent=(o.initial||o.name.charAt(0)).toUpperCase();
-    var info=document.createElement('div');info.innerHTML='<span class="rc-nm">'+escH(o.name)+'</span><span class="rc-tp">'+escH(relLabel(r.relation_type,r.is_biological))+'</span>';
+    var info=document.createElement('div');info.innerHTML='<span class="rc-nm">'+escH(o.name)+'</span><span class="rc-tp">'+escH(relLabel(r.relation_type,r.from_member_id,r.to_member_id))+'</span>';
     chip.appendChild(rav);chip.appendChild(info);
     chip.addEventListener('click',function(){closeDetail();setTimeout(function(){openDetail(oid);},60);});
     rcs.appendChild(chip);
@@ -1291,7 +1249,7 @@ function renderRelList(id){
     var o=S.members.find(function(x){return x.id===oid;});if(!o)return;
     var item=document.createElement('div');item.className='rel-item';
     var rav=document.createElement('div');rav.className='rel-av';rav.textContent=(o.initial||o.name.charAt(0)).toUpperCase();
-    var info=document.createElement('div');info.style.flex='1';info.innerHTML='<div class="rel-name">'+escH(o.name)+'</div><span class="rel-type-lbl">'+escH(relLabel(r.relation_type,r.is_biological))+'</span>';
+    var info=document.createElement('div');info.style.flex='1';info.innerHTML='<div class="rel-name">'+escH(o.name)+'</div><span class="rel-type-lbl">'+escH(relLabel(r.relation_type,r.from_member_id,r.to_member_id))+'</span>';
     var rm=document.createElement('button');rm.className='rel-btn rel-btn-rm';rm.textContent=t('Sterge legatura','Remove link');
     rm.addEventListener('click',function(){removeRel(r.id,item);});
     item.appendChild(rav);item.appendChild(info);item.appendChild(rm);list.appendChild(item);
@@ -1307,92 +1265,104 @@ function removeRel(relId,item){
   }).catch(function(err){alert(err.message);});
 }
 
-// ── RELATION MODAL (replaces ugly browser prompt) ──
+// ── RELATION MODAL ──────────────────────────────────────────
 (function(){
-  var relModal = document.getElementById('relModal');
-  var step1 = document.getElementById('relStep1');
-  var step2 = document.getElementById('relStep2');
-  var relNameInput = document.getElementById('relNameInput');
-  var relNameError = document.getElementById('relNameError');
-  var relFoundName = document.getElementById('relFoundName');
-  var relTypeGrid = document.getElementById('relTypeGrid');
-  var selectedType = null;
-  var foundMember = null;
+  var selRelType=null;
 
-  var REL_TYPES = [
-    {val:'parent',   ro:'Parinte',   en:'Parent'},
-    {val:'sibling',  ro:'Frate/Sora',en:'Sibling'},
-    {val:'spouse',   ro:'Sot/Sotie', en:'Spouse'},
-    {val:'in_law',   ro:'Fin/Nasa',  en:'In-law'},
-    {val:'step',     ro:'Vitreg/a',  en:'Step'},
-    {val:'adopted',  ro:'Adoptat/a', en:'Adopted'}
-  ];
-
-  function openModal(){
-    step1.style.display='block';
-    step2.style.display='none';
-    relNameInput.value='';
-    relNameError.style.display='none';
-    foundMember=null; selectedType=null;
-    relModal.style.display='flex';
-    setTimeout(function(){relNameInput.focus();},80);
-    // Update labels for language
-    var isRo=lang()==='ro';
-    document.getElementById('relModalTitle').textContent=isRo?'Adauga legatura':'Add connection';
-    document.getElementById('relNameLabel').textContent=isRo?'Numele persoanei cu care vrei sa creezi o legatura:':'Name of the person to connect with:';
-    document.getElementById('relTypeLabel').textContent=isRo?'Tipul legaturii:':'Relation type:';
-    document.getElementById('relStep1Cancel').textContent=isRo?'Anuleaza':'Cancel';
-    document.getElementById('relStep1Next').textContent=isRo?'Continua':'Continue';
-    document.getElementById('relStep2Back').textContent=isRo?'Inapoi':'Back';
-    document.getElementById('relStep2Save').textContent=isRo?'Salveaza':'Save';
+  function buildTypeGrid(anchorId){
+    var grouped={};
+    Object.keys(REL_META).forEach(function(k){
+      var g=REL_META[k].g;
+      if(!grouped[g])grouped[g]=[];
+      grouped[g].push({v:k,l:REL_META[k].l});
+    });
+    var html='';
+    REL_GROUPS.forEach(function(grp){
+      if(!grouped[grp])return;
+      html+='<div style="margin-bottom:8px;">';
+      html+='<div style="font-size:9px;color:var(--muted);letter-spacing:.1em;text-transform:uppercase;margin-bottom:4px;">'+escH(grp)+'</div>';
+      html+='<div style="display:flex;flex-wrap:wrap;gap:5px;">';
+      grouped[grp].forEach(function(tp){
+        html+='<button data-val="'+escH(tp.v)+'" style="padding:5px 11px;background:#1a1208;border:1px solid var(--b2);color:var(--text);font-family:'EB Garamond',serif;font-size:12px;border-radius:2px;cursor:pointer;transition:all .12s;">'+escH(tp.l)+'</button>';
+      });
+      html+='</div></div>';
+    });
+    return html;
   }
 
-  function closeModal(){relModal.style.display='none';}
+  function openModal(){
+    if(!S.editingId)return;
+    var anchor=S.members.find(function(m){return m.id===S.editingId;});
+    if(!anchor)return;
+    selRelType=null;
+
+    // Populate person select
+    var sel=document.getElementById('relPersonSelect');
+    sel.innerHTML='';
+    S.members.forEach(function(m){
+      if(m.id===S.editingId)return;
+      var opt=document.createElement('option');opt.value=m.id;opt.textContent=m.name;sel.appendChild(opt);
+    });
+
+    // Anchor label
+    document.getElementById('relModalAnchor').textContent=t('Din perspectiva lui: ','From the perspective of: ')+anchor.name;
+
+    // Type grid
+    var container=document.getElementById('relTypeContainer');
+    container.innerHTML=buildTypeGrid(S.editingId);
+    container.querySelectorAll('button[data-val]').forEach(function(btn){
+      btn.addEventListener('click',function(){
+        container.querySelectorAll('button[data-val]').forEach(function(b){
+          b.style.background='#1a1208';b.style.borderColor='var(--b2)';b.style.color='var(--text)';
+        });
+        btn.style.background='var(--gold-d)';btn.style.borderColor='var(--gold)';btn.style.color='#050505';
+        selRelType=btn.dataset.val;
+        // Show generation preview
+        var meta=REL_META[selRelType];
+        var preview=document.getElementById('relGenPreview');
+        if(meta&&meta.up!==undefined){
+          var rows=Math.abs(meta.up);
+          var dir=meta.up>0?t('deasupra','above'):meta.up<0?t('dedesubt','below'):'';
+          var msg=rows===0
+            ?t('Va fi pe aceeasi linie in arbore.','Will be on the same row in the tree.')
+            :t('Va fi mutat cu '+rows+' rand(uri) '+dir+' in arbore.','Will be placed '+rows+' row(s) '+dir+' in the tree.');
+          preview.textContent=msg;preview.style.display='block';
+        } else {
+          preview.style.display='none';
+        }
+      });
+    });
+
+    document.getElementById('relModalError').style.display='none';
+    document.getElementById('relGenPreview').style.display='none';
+    document.getElementById('relModal').style.display='flex';
+  }
+
+  function closeModal(){
+    document.getElementById('relModal').style.display='none';
+    selRelType=null;
+  }
 
   document.getElementById('relModalClose').addEventListener('click',closeModal);
-  document.getElementById('relStep1Cancel').addEventListener('click',closeModal);
-  document.getElementById('relStep2Back').addEventListener('click',function(){
-    step1.style.display='block';step2.style.display='none';
-  });
-  relModal.addEventListener('click',function(e){if(e.target===relModal)closeModal();});
+  document.getElementById('relModalCancel').addEventListener('click',closeModal);
+  document.getElementById('relModal').addEventListener('click',function(e){if(e.target===this)closeModal();});
 
-  document.getElementById('relStep1Next').addEventListener('click',function(){
-    var name=relNameInput.value.trim();
-    if(!name){relNameError.textContent=t('Introdu un nume.','Enter a name.');relNameError.style.display='block';return;}
-    var found=S.members.find(function(m){return m.name.toLowerCase().includes(name.toLowerCase())&&m.id!==S.editingId;});
-    if(!found){relNameError.textContent=t('Persoana nu a fost gasita in arbore. Adaug-o mai intai.','Person not found in tree. Add them first.');relNameError.style.display='block';return;}
-    foundMember=found;
-    relFoundName.textContent=t('Persoana gasita: ','Person found: ')+found.name;
-    // Build type buttons
-    relTypeGrid.innerHTML='';
-    selectedType=null;
-    var isRo=lang()==='ro';
-    REL_TYPES.forEach(function(rt){
-      var btn=document.createElement('button');
-      btn.textContent=isRo?rt.ro:rt.en;
-      btn.dataset.val=rt.val;
-      btn.style.cssText='background:#1a1208;border:1px solid var(--b2);color:var(--text);font-family:\'EB Garamond\',serif;font-size:13px;padding:8px 6px;border-radius:2px;cursor:pointer;transition:all 0.15s;';
-      btn.addEventListener('click',function(){
-        relTypeGrid.querySelectorAll('button').forEach(function(b){b.style.background='#1a1208';b.style.borderColor='var(--b2)';b.style.color='var(--text)';});
-        btn.style.background='var(--gold-d)';btn.style.borderColor='var(--gold)';btn.style.color='#050505';
-        selectedType=rt.val;
-      });
-      relTypeGrid.appendChild(btn);
-    });
-    step1.style.display='none';step2.style.display='block';
-  });
-
-  relNameInput.addEventListener('keydown',function(e){if(e.key==='Enter')document.getElementById('relStep1Next').click();});
-
-  document.getElementById('relStep2Save').addEventListener('click',function(){
-    if(!selectedType){return;}
-    var btn=document.getElementById('relStep2Save');
-    btn.disabled=true;btn.textContent=t('Se salveaza...','Saving...');
-    window.supabase.from('member_relations').insert({from_member_id:S.editingId,to_member_id:foundMember.id,relation_type:selectedType,is_biological:selectedType!=='spouse'&&selectedType!=='in_law',confidence:100})
+  document.getElementById('relModalSave').addEventListener('click',function(){
+    var err=document.getElementById('relModalError');
+    if(!selRelType){err.textContent=t('Selecteaza tipul legaturii.','Select a relation type.');err.style.display='block';return;}
+    var targetId=document.getElementById('relPersonSelect').value;
+    if(!targetId){err.textContent=t('Selecteaza o persoana.','Select a person.');err.style.display='block';return;}
+    var btn=this;btn.disabled=true;btn.textContent=t('Se salveaza...','Saving...');
+    // Infer generation before saving
+    inferGen(S.editingId, targetId, selRelType);
+    var bio=REL_META[selRelType]?REL_META[selRelType].bio!==false:true;
+    window.supabase.from('member_relations')
+      .insert({from_member_id:S.editingId,to_member_id:targetId,relation_type:selRelType,is_biological:bio,confidence:100})
       .then(function(r){
-        if(r.error){btn.disabled=false;btn.textContent=t('Salveaza','Save');alert(r.error.message);return;}
+        btn.disabled=false;btn.textContent=t('Salveaza','Save');
+        if(r.error){err.textContent=r.error.message;err.style.display='block';return;}
         closeModal();reload();setTimeout(function(){openEditor(S.editingId);switchTab(1);},800);
-      }).catch(function(err){btn.disabled=false;btn.textContent=t('Salveaza','Save');alert(err.message);});
+      }).catch(function(e){btn.disabled=false;btn.textContent=t('Salveaza','Save');err.textContent=e.message;err.style.display='block';});
   });
 
   document.getElementById('addRelBtn').addEventListener('click',openModal);
@@ -1541,25 +1511,15 @@ function updateGenLabels(){
 function center(){var stage=document.getElementById('treeStage'),cv=document.getElementById('treeCanvas');var sw=stage.clientWidth||800,sh=stage.clientHeight||660;var cw=parseFloat(cv.style.width)||800,ch=parseFloat(cv.style.height)||680;S.panX=Math.max(20,(sw-cw*S.zoom)/2);S.panY=Math.max(10,(sh-ch*S.zoom)/3);applyXform();}
 function debounce(fn,ms){var t;return function(){clearTimeout(t);t=setTimeout(fn,ms);};}
 
-function initZoomBar(){
-  document.getElementById('btnZoomIn').addEventListener('click',function(e){e.stopPropagation();S.zoom=Math.min(1.5,S.zoom+0.15);applyXform();});
-  document.getElementById('btnZoomOut').addEventListener('click',function(e){e.stopPropagation();S.zoom=Math.max(0.4,S.zoom-0.15);applyXform();});
-  document.getElementById('btnZoomReset').addEventListener('click',function(e){e.stopPropagation();S.zoom=0.88;center();});
-}
-
 function initZoomPan(){
   var stage=document.getElementById('treeStage');
   var mmH=function(e){if(!S.panning)return;S.panX+=e.clientX-S.lastMouse.x;S.panY+=e.clientY-S.lastMouse.y;S.lastMouse={x:e.clientX,y:e.clientY};applyXform();};
   var muH=function(){S.panning=false;stage.style.cursor='grab';};
   stage.addEventListener('mousedown',function(e){if(e.target.closest('.pn,.ag,.dp,.htip'))return;S.panning=true;S.lastMouse={x:e.clientX,y:e.clientY};stage.style.cursor='grabbing';});
   document.addEventListener('mousemove',mmH);document.addEventListener('mouseup',muH);
-  stage.addEventListener('wheel',function(e){e.preventDefault();var raw=e.deltaMode===1?e.deltaY*40:e.deltaY;var d=raw>0?-.08:.08;var r=stage.getBoundingClientRect();var mx=e.clientX-r.left,my=e.clientY-r.top;var nz=Math.min(1.5,Math.max(.4,S.zoom+d));var ratio=nz/S.zoom;S.panX=mx-ratio*(mx-S.panX);S.panY=my-ratio*(my-S.panY);S.zoom=nz;applyXform();},{passive:false});
   var lt=null;
   stage.addEventListener('touchstart',function(e){if(e.touches.length===1)lt={x:e.touches[0].clientX,y:e.touches[0].clientY};},{passive:true});
   stage.addEventListener('touchmove',function(e){if(e.touches.length===1&&lt){S.panX+=e.touches[0].clientX-lt.x;S.panY+=e.touches[0].clientY-lt.y;lt={x:e.touches[0].clientX,y:e.touches[0].clientY};applyXform();}},{passive:true});
-  var id0=null;
-  stage.addEventListener('touchstart',function(e){if(e.touches.length===2)id0=Math.hypot(e.touches[0].clientX-e.touches[1].clientX,e.touches[0].clientY-e.touches[1].clientY);},{passive:true});
-  stage.addEventListener('touchmove',function(e){if(e.touches.length===2&&id0){var d=Math.hypot(e.touches[0].clientX-e.touches[1].clientX,e.touches[0].clientY-e.touches[1].clientY);S.zoom=Math.min(1.5,Math.max(.4,S.zoom*d/id0));id0=d;applyXform();}},{passive:true});
   stage.addEventListener('click',function(e){if(!e.target.closest('.pn,.ag,.dp'))closeDetail();});
   if(window.ResizeObserver){S.resizeObs=new ResizeObserver(debounce(function(){if(S.members.length)render();center();},150));S.resizeObs.observe(stage);}
 }
@@ -1582,9 +1542,6 @@ function initKeyboard(){
     if(e.target.matches('input,textarea,select'))return;
     switch(e.key){
       case 'Escape':if(document.getElementById('editorOverlay').classList.contains('open'))closeEditor();else if(document.getElementById('addOverlay').classList.contains('open'))closeAddModal();else if(document.getElementById('guideOverlay').classList.contains('open'))closeGuide();else closeDetail();break;
-      case '=':case '+':S.zoom=Math.min(1.5,S.zoom+.1);applyXform();break;
-      case '-':S.zoom=Math.max(.4,S.zoom-.1);applyXform();break;
-      case '0':S.zoom=1;center();break;
       case ' ':e.preventDefault();center();break;
       case 'n':case 'N':openAddModal();break;
       case '?':showGuide();break;
@@ -1641,35 +1598,6 @@ function initScrollBtns(){
 function initHamburger(){var h=document.getElementById('hamburgerBtn'),m=document.getElementById('navMobileMenu');if(!h||!m)return;h.addEventListener('click',function(){var o=m.classList.toggle('open');h.textContent=o?'\u2715':'\u2630';});}
 </script>
 
-<!-- Adauga legatura modal -->
-<div id="relModal" style="display:none;position:fixed;inset:0;z-index:10000;background:rgba(0,0,0,0.75);align-items:center;justify-content:center;">
-  <div style="background:#0d0d0d;border:1px solid var(--gold-d);border-radius:3px;padding:28px 30px;width:360px;max-width:90vw;position:relative;box-shadow:0 8px 32px #000a;">
-    <button id="relModalClose" style="position:absolute;top:10px;right:14px;background:none;border:none;color:var(--muted);font-size:20px;cursor:pointer;line-height:1;" title="Inchide">&times;</button>
-    <div style="font-family:'Playfair Display',serif;font-size:14px;letter-spacing:2px;text-transform:uppercase;color:var(--gold);margin-bottom:18px;" id="relModalTitle">Adauga legatura</div>
-
-    <!-- Step 1: name -->
-    <div id="relStep1">
-      <label style="font-size:13px;color:var(--muted);display:block;margin-bottom:6px;" id="relNameLabel">Numele persoanei cu care vrei sa creezi o legatura:</label>
-      <input id="relNameInput" type="text" autocomplete="off" style="width:100%;box-sizing:border-box;background:#1a1208;border:1px solid var(--b2);color:var(--text);font-family:'EB Garamond',serif;font-size:15px;padding:8px 10px;border-radius:2px;outline:none;" />
-      <div id="relNameError" style="color:#c0392b;font-size:12px;margin-top:5px;display:none;"></div>
-      <div style="margin-top:18px;display:flex;gap:10px;justify-content:flex-end;">
-        <button id="relStep1Cancel" style="background:none;border:1px solid var(--b2);color:var(--muted);font-family:'EB Garamond',serif;font-size:13px;padding:6px 16px;border-radius:2px;cursor:pointer;">Anuleaza</button>
-        <button id="relStep1Next" style="background:var(--gold-d);border:1px solid var(--gold);color:#050505;font-family:'EB Garamond',serif;font-size:13px;font-weight:700;padding:6px 18px;border-radius:2px;cursor:pointer;">Continua</button>
-      </div>
-    </div>
-
-    <!-- Step 2: relation type -->
-    <div id="relStep2" style="display:none;">
-      <div id="relFoundName" style="font-size:13px;color:var(--gold);margin-bottom:12px;"></div>
-      <label style="font-size:13px;color:var(--muted);display:block;margin-bottom:8px;" id="relTypeLabel">Tipul legaturii:</label>
-      <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;" id="relTypeGrid"></div>
-      <div style="margin-top:18px;display:flex;gap:10px;justify-content:flex-end;">
-        <button id="relStep2Back" style="background:none;border:1px solid var(--b2);color:var(--muted);font-family:'EB Garamond',serif;font-size:13px;padding:6px 16px;border-radius:2px;cursor:pointer;">Inapoi</button>
-        <button id="relStep2Save" style="background:var(--gold-d);border:1px solid var(--gold);color:#050505;font-family:'EB Garamond',serif;font-size:13px;font-weight:700;padding:6px 18px;border-radius:2px;cursor:pointer;">Salveaza</button>
-      </div>
-    </div>
-  </div>
-</div>
 
 </body>
 </html>

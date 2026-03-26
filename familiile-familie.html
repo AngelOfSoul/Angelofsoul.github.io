@@ -663,6 +663,8 @@ function loadFamilyData() {
     /* Show edit button if current user is the family owner */
     window.supabase.auth.getUser().then(function(res) {
       if (res.data && res.data.user && res.data.user.id === FAM.ownerId) {
+        isOwner = true;
+        renderMembers(); // re-render with edit buttons
         var editBtn = document.createElement('a');
         editBtn.href = 'dashboard.html?family=' + familyId;
         editBtn.textContent = currentLang === 'ro' ? '✎ Editeaza familia' : '✎ Edit family';
@@ -699,6 +701,8 @@ function showDbErrorMsg(text) {
 var currentLang = localStorage.getItem('calnic-lang') || 'ro';
 var privateUnlocked = false;
 
+var isOwner = false; // set after auth check
+
 function renderMembers() {
   var grid = document.getElementById('membersGrid');
   if (!grid) return;
@@ -707,11 +711,18 @@ function renderMembers() {
     return;
   }
   grid.innerHTML = MEMBERS.map(function(m) {
+    var editBtn = isOwner
+      ? '<a href="genealogie-familie.html?family=' + (FAM ? FAM.id : familyId) + '&edit_member=' + m.id + '" '
+        + 'style="display:inline-block;margin-top:8px;padding:3px 12px;background:var(--s2);border:1px solid var(--b2);color:var(--gold);font-family:\'EB Garamond\',serif;font-size:12px;border-radius:2px;text-decoration:none;transition:border-color 0.15s;" '
+        + 'onmouseover="this.style.borderColor=\'var(--gold)\'" onmouseout="this.style.borderColor=\'var(--b2)\'">'
+        + (currentLang === 'ro' ? '✎ Editeaza' : '✎ Edit') + '</a>'
+      : '';
     return '<div class="member-card' + (m.deceased ? ' deceased' : '') + '">'
       + '<div class="mem-avatar">' + m.initial + '</div>'
       + '<div class="mem-name">' + m.name + '</div>'
       + '<div class="mem-role">' + m.role + '</div>'
       + '<div class="mem-years">' + m.years + '</div>'
+      + editBtn
       + '</div>';
   }).join('');
 }
