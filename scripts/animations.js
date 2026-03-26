@@ -48,4 +48,3 @@ export const AnimationEngine = {
     setTimeout(() => el.remove(), 4000);
   }
 };
-

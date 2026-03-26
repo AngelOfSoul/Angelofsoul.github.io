@@ -70,7 +70,7 @@ function doReset() {
 
 // Wire events
 document.addEventListener('mosaic:tileFilled', e => {
-  const { filled, total } = e.detail;
+  const { index, filled, total } = e.detail;
   update(filled, total);
   Streak.update();
   const { count } = Streak.get();
@@ -82,6 +82,12 @@ document.addEventListener('mosaic:tileFilled', e => {
 
   const sections = Sections.loadCompleted();
   Achievements.check({ filled, sections, streak: count });
+
+  // Trigger tile pop on the freshly-rendered filled tile
+  requestAnimationFrame(() => {
+    const tileEl = document.querySelector(`.tile[data-index="${index}"]`);
+    if (tileEl) AnimationEngine.tilePop(tileEl);
+  });
 });
 
 document.addEventListener('mosaic:sectionComplete', e => {
