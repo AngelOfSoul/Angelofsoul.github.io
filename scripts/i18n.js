@@ -1,1 +1,0 @@
-let lang='en';const d={en:{tile:'+1 Tile'},ro:{tile:'+1 Piesa'}};export function setLang(l){lang=l}export function t(k){return d[lang][k]||k}

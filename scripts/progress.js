@@ -1,1 +1,0 @@
-export function update(f,t){let p=Math.floor((f/t)*100);document.getElementById('progress-fill').style.width=p+'%';document.getElementById('progress-text').innerText=p+'%'}

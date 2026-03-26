@@ -1,1 +1,0 @@
-export function show(m){const r=document.getElementById('feedback-root');const e=document.createElement('div');e.className='feedback';e.innerText=m;r.appendChild(e);setTimeout(()=>e.remove(),2000)}

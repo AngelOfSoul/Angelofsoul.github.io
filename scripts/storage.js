@@ -1,1 +1,0 @@
-export const Storage={key:'tiles',get(){return JSON.parse(localStorage.getItem(this.key)||'[]')},set(d){localStorage.setItem(this.key,JSON.stringify(d))}}
