@@ -313,10 +313,10 @@ footer .g { color:var(--gold-d); font-style:normal; }
         <span class="dash-toggle" id="toggle-story">+</span>
       </div>
       <div class="dash-section-body" id="body-story" style="display:none;">
-        <form onsubmit="saveStory(event)">
+        <div id="storyForm">
           <div class="df-group">
             <label class="df-label" data-ro="Numele familiei" data-en="Family name">Numele familiei</label>
-            <input class="df-input" type="text" id="storyName" required/>
+            <input class="df-input" type="text" id="storyName"/>
           </div>
           <div class="df-group">
             <label class="df-label" data-ro="In Calnic din anul" data-en="In Calnic since year">In Calnic din anul</label>
@@ -331,8 +331,8 @@ footer .g { color:var(--gold-d); font-style:normal; }
             <textarea class="df-textarea" id="storyDescEn" maxlength="600" rows="4" placeholder="Family story..."></textarea>
           </div>
           <div id="storyMsg" class="df-msg"></div>
-          <button class="dash-btn" type="submit" id="storyBtn" data-ro="Salveaza" data-en="Save">Salveaza</button>
-        </form>
+          <button class="dash-btn" id="storyBtn" data-ro="Salveaza" data-en="Save">Salveaza</button>
+        </div>
       </div>
     </div>
 
@@ -346,15 +346,15 @@ footer .g { color:var(--gold-d); font-style:normal; }
         <div id="membersList"></div>
         <hr class="df-divider"/>
         <div class="df-subsection-title" data-ro="Adauga un membru" data-en="Add a member">Adauga un membru</div>
-        <form onsubmit="addMember(event)">
+        <div>
           <div class="df-row">
             <div class="df-group">
               <label class="df-label" data-ro="Nume (obligatoriu)" data-en="Name (required)">Nume (obligatoriu)</label>
-              <input class="df-input" type="text" id="newMemberName" required placeholder="Ion Popescu"/>
+              <input class="df-input" type="text" id="newMemberName" placeholder="Ion Popescu"/>
             </div>
             <div class="df-group">
-              <label class="df-label" data-ro="Rol" data-en="Role">Rol</label>
-              <input class="df-input" type="text" id="newMemberRole" placeholder="Cap de familie"/>
+              <label class="df-label" data-ro="Rol / Profesie" data-en="Role / Profession">Rol / Profesie</label>
+              <input class="df-input" type="text" id="newMemberRole" placeholder="ex. Agricultor"/>
             </div>
           </div>
           <div class="df-row">
@@ -363,8 +363,22 @@ footer .g { color:var(--gold-d); font-style:normal; }
               <input class="df-input" type="number" id="newMemberBirth" min="1800" max="2099" placeholder="1950"/>
             </div>
             <div class="df-group">
-              <label class="df-label" data-ro="An deces" data-en="Death year">An deces</label>
+              <label class="df-label" data-ro="An deces (gol = in viata)" data-en="Death year (empty = living)">An deces</label>
               <input class="df-input" type="number" id="newMemberDeath" min="1800" max="2099" placeholder=""/>
+            </div>
+          </div>
+          <div class="df-row">
+            <div class="df-group">
+              <label class="df-label" data-ro="Localitate" data-en="Location">Localitate</label>
+              <input class="df-input" type="text" id="newMemberLocation" placeholder="ex. Calnic"/>
+            </div>
+            <div class="df-group">
+              <label class="df-label" data-ro="Vizibilitate" data-en="Visibility">Vizibilitate</label>
+              <select class="df-input" id="newMemberVisibility">
+                <option value="public" data-ro="Public" data-en="Public">Public</option>
+                <option value="family" data-ro="Familia" data-en="Family">Familia</option>
+                <option value="private" data-ro="Privat" data-en="Private">Privat</option>
+              </select>
             </div>
           </div>
           <div class="df-group df-check-group">
@@ -374,8 +388,8 @@ footer .g { color:var(--gold-d); font-style:normal; }
             </label>
           </div>
           <div id="membersMsg" class="df-msg"></div>
-          <button class="dash-btn" type="submit" id="addMemberBtn" data-ro="Adauga" data-en="Add">Adauga</button>
-        </form>
+          <button class="dash-btn" id="addMemberBtn" data-ro="Adauga" data-en="Add">Adauga</button>
+        </div>
       </div>
     </div>
 
@@ -389,24 +403,24 @@ footer .g { color:var(--gold-d); font-style:normal; }
         <div id="timelineList"></div>
         <hr class="df-divider"/>
         <div class="df-subsection-title" data-ro="Adauga un eveniment" data-en="Add an event">Adauga un eveniment</div>
-        <form onsubmit="addTimeline(event)">
+        <div id="timelineForm">
           <div class="df-row">
             <div class="df-group">
               <label class="df-label" data-ro="Anul (obligatoriu)" data-en="Year (required)">Anul (obligatoriu)</label>
-              <input class="df-input" type="number" id="newTlYear" required min="1000" max="2099" placeholder="1874"/>
+              <input class="df-input" type="number" id="newTlYear" min="1000" max="2099" placeholder="1874"/>
             </div>
           </div>
           <div class="df-group">
             <label class="df-label" data-ro="Text (RO, obligatoriu)" data-en="Text (RO, required)">Text (RO, obligatoriu)</label>
-            <textarea class="df-textarea" id="newTlTextRo" required rows="2" placeholder="Eveniment..."></textarea>
+            <textarea class="df-textarea" id="newTlTextRo" rows="2" placeholder="Eveniment..."></textarea>
           </div>
           <div class="df-group">
             <label class="df-label" data-ro="Text (EN, optional)" data-en="Text (EN, optional)">Text (EN, optional)</label>
             <textarea class="df-textarea" id="newTlTextEn" rows="2" placeholder="Event..."></textarea>
           </div>
           <div id="timelineMsg" class="df-msg"></div>
-          <button class="dash-btn" type="submit" id="addTlBtn" data-ro="Adauga" data-en="Add">Adauga</button>
-        </form>
+          <button class="dash-btn" id="addTlBtn" data-ro="Adauga" data-en="Add">Adauga</button>
+        </div>
       </div>
     </div>
 
@@ -417,7 +431,7 @@ footer .g { color:var(--gold-d); font-style:normal; }
         <span class="dash-toggle" id="toggle-privacy">+</span>
       </div>
       <div class="dash-section-body" id="body-privacy" style="display:none;">
-        <form onsubmit="savePrivacy(event)">
+        <div id="privacyForm">
           <div class="df-subsection-title" data-ro="Vizibilitate informatii" data-en="Information visibility">Vizibilitate informatii</div>
           <div class="df-check-group">
             <label class="df-check-label"><input type="checkbox" id="privShowMembers"/> <span data-ro="Afiseaza membrii" data-en="Show members">Afiseaza membrii</span></label>
@@ -426,11 +440,11 @@ footer .g { color:var(--gold-d); font-style:normal; }
             <label class="df-check-label"><input type="checkbox" id="privShowSince"/> <span data-ro="Afiseaza anul stabilirii" data-en="Show settled year">Afiseaza anul stabilirii</span></label>
           </div>
           <div id="privacyMsg" class="df-msg"></div>
-          <button class="dash-btn" type="submit" id="privacyBtn" data-ro="Salveaza setarile" data-en="Save settings">Salveaza setarile</button>
-        </form>
+          <button class="dash-btn" id="privacyBtn" data-ro="Salveaza setarile" data-en="Save settings">Salveaza setarile</button>
+        </div>
         <hr class="df-divider"/>
         <div class="df-subsection-title" data-ro="Schimba PIN-ul familiei" data-en="Change family PIN">Schimba PIN-ul familiei</div>
-        <form onsubmit="changePIN(event)">
+        <div id="pinForm">
           <div class="df-row">
             <div class="df-group">
               <label class="df-label" data-ro="PIN nou (4-8 cifre)" data-en="New PIN (4-8 digits)">PIN nou (4-8 cifre)</label>
@@ -448,8 +462,8 @@ footer .g { color:var(--gold-d); font-style:normal; }
             </div>
           </div>
           <div id="pinMsg" class="df-msg"></div>
-          <button class="dash-btn" type="submit" id="pinBtn" data-ro="Schimba PIN" data-en="Change PIN">Schimba PIN</button>
-        </form>
+          <button class="dash-btn" id="pinBtn" data-ro="Schimba PIN" data-en="Change PIN">Schimba PIN</button>
+        </div>
       </div>
     </div>
 
@@ -604,9 +618,10 @@ function populateForms() {
 }
 
 /* Save story */
-async function saveStory(e) {
-  e.preventDefault();
+async function saveStory() {
   var btn = document.getElementById('storyBtn');
+  var nameV = document.getElementById('storyName').value.trim();
+  if (!nameV) { showMsg('storyMsg', currentLang==='ro'?'Numele familiei este obligatoriu.':'Family name is required.', 'error'); return; }
   btn.disabled = true;
   var updates = {
     name:    document.getElementById('storyName').value.trim(),
@@ -632,26 +647,38 @@ function renderMembers(members) {
     el.innerHTML = '<div class="empty-note">' + (currentLang === 'ro' ? 'Niciun membru adaugat inca.' : 'No members added yet.') + '</div>';
     return;
   }
-  el.innerHTML = members.map(function(m) {
+  el.innerHTML = '';
+  members.forEach(function(m) {
     var initial = m.initial || (m.name ? m.name[0] : '?');
     var meta = [];
-    if (m.role) meta.push(m.role);
-    if (m.birth_year) meta.push(m.birth_year + (m.death_year ? ' - ' + m.death_year : ' -'));
-    var decLabel = m.is_deceased
-      ? (currentLang === 'ro' ? 'Decedat' : 'Deceased')
-      : (currentLang === 'ro' ? 'Viu' : 'Living');
-    return '<div class="member-row' + (m.is_deceased ? ' deceased' : '') + '" id="mrow-' + m.id + '">' 
-      + '<div class="mem-row-av">' + initial + '</div>' 
-      + '<div class="mem-row-info">' 
-      + '<div class="mem-row-name">' + m.name + '</div>' 
-      + (meta.length ? '<div class="mem-row-meta">' + meta.join(' &middot; ') + '</div>' : '') 
-      + '</div>' 
-      + '<div class="mem-row-actions">' 
-      + '<button class="mem-dec-btn' + (m.is_deceased ? ' active' : '') + '" onclick="toggleDeceased(\'' + m.id + '\',' + (!m.is_deceased) + ')">' + decLabel + '</button>' 
-      + '<button class="mem-del-btn" onclick="deleteMember(\'' + m.id + '\')">' + (currentLang === 'ro' ? 'Sterge' : 'Delete') + '</button>' 
-      + '</div>' 
-      + '</div>';
-  }).join('');
+    if (m.profession || m.role) meta.push(m.profession || m.role);
+    if (m.location) meta.push(m.location);
+    if (m.birth_year) meta.push(m.birth_year + (m.death_year ? ' \u2014 ' + m.death_year : (m.is_deceased ? '' : (currentLang === 'ro' ? ' \u2014 viu' : ' \u2014 living'))));
+    var vis = m.visibility || 'public';
+    var visLabel = vis === 'private' ? (currentLang === 'ro' ? '&#128274; Privat' : '&#128274; Private') : vis === 'family' ? (currentLang === 'ro' ? '&#128100; Familia' : '&#128100; Family') : '';
+    var conf = (m.confidence != null) ? m.confidence : 100;
+    var row = document.createElement('div');
+    row.className = 'member-row' + (m.is_deceased ? ' deceased' : '');
+    row.id = 'mrow-' + m.id;
+    row.innerHTML = '<div class="mem-row-av">' + escHtml(initial) + '</div>'
+      + '<div class="mem-row-info">'
+      + '<div class="mem-row-name">' + escHtml(m.name) + (visLabel ? ' <small style="color:var(--muted);font-size:10px;">' + visLabel + '</small>' : '') + (conf < 80 ? ' <small style="color:var(--amber-safe,#c8a040);font-size:10px;">' + conf + '%</small>' : '') + '</div>'
+      + (meta.length ? '<div class="mem-row-meta">' + meta.map(escHtml).join(' &middot; ') + '</div>' : '')
+      + (m.biography ? '<div class="mem-row-meta" style="font-style:italic;color:var(--muted);">' + escHtml(m.biography.substring(0, 80)) + (m.biography.length > 80 ? '...' : '') + '</div>' : '')
+      + '</div>'
+      + '<div class="mem-row-actions">';
+    var decBtn = document.createElement('button');
+    decBtn.className = 'mem-dec-btn' + (m.is_deceased ? ' active' : '');
+    decBtn.textContent = m.is_deceased ? (currentLang === 'ro' ? 'Decedat' : 'Deceased') : (currentLang === 'ro' ? 'Viu' : 'Living');
+    decBtn.addEventListener('click', (function(mid, isDec) { return function() { toggleDeceased(mid, !isDec); }; })(m.id, m.is_deceased));
+    var delBtn = document.createElement('button');
+    delBtn.className = 'mem-del-btn';
+    delBtn.textContent = currentLang === 'ro' ? 'Sterge' : 'Delete';
+    delBtn.addEventListener('click', (function(mid) { return function() { deleteMember(mid); }; })(m.id));
+    var row2 = document.createElement('div');row2.className='mem-row-actions';row2.appendChild(decBtn);row2.appendChild(delBtn);
+    row.appendChild(row2);
+    el.appendChild(row);
+  });
 }
 
 var membersCache = [];
@@ -664,19 +691,35 @@ async function loadMembers() {
   }
 }
 
-async function addMember(e) {
-  e.preventDefault();
+async function addMember() {
   var btn = document.getElementById('addMemberBtn');
   btn.disabled = true;
+  var nameVal = document.getElementById('newMemberName').value.trim();
+  if (!nameVal || nameVal.length < 2) {
+    showMsg('membersMsg', currentLang === 'ro' ? 'Numele este obligatoriu (min 2 caractere).' : 'Name is required (min 2 characters).', 'error');
+    btn.disabled = false; return;
+  }
   var birthVal = document.getElementById('newMemberBirth').value;
   var deathVal = document.getElementById('newMemberDeath').value;
+  var by = birthVal ? parseInt(birthVal, 10) : null;
+  var dy = deathVal ? parseInt(deathVal, 10) : null;
+  if (by && dy && dy <= by) {
+    showMsg('membersMsg', currentLang === 'ro' ? 'Decesul nu poate fi inainte de nastere.' : 'Death cannot be before birth.', 'error');
+    btn.disabled = false; return;
+  }
   var newMember = {
     family_id:  familyId,
-    name:       document.getElementById('newMemberName').value.trim(),
+    name:       nameVal,
+    initial:    nameVal.charAt(0).toUpperCase(),
     role:       document.getElementById('newMemberRole').value.trim() || null,
-    birth_year: birthVal ? parseInt(birthVal,10) : null,
-    death_year: deathVal ? parseInt(deathVal,10) : null,
-    is_deceased: document.getElementById('newMemberDeceased').checked
+    profession: document.getElementById('newMemberRole').value.trim() || null,
+    birth_year: by || null,
+    death_year: dy || null,
+    is_deceased: !!(dy || document.getElementById('newMemberDeceased').checked),
+    is_living:  !(dy || document.getElementById('newMemberDeceased').checked),
+    location:   document.getElementById('newMemberLocation') ? document.getElementById('newMemberLocation').value.trim() || null : null,
+    visibility: document.getElementById('newMemberVisibility') ? document.getElementById('newMemberVisibility').value : 'public',
+    confidence: 100
   };
   var res = await window.supabase.from('members').insert([newMember]);
   if (res.error) {
@@ -687,6 +730,7 @@ async function addMember(e) {
     document.getElementById('newMemberRole').value = '';
     document.getElementById('newMemberBirth').value = '';
     document.getElementById('newMemberDeath').value = '';
+    if (document.getElementById('newMemberLocation')) document.getElementById('newMemberLocation').value = '';
     document.getElementById('newMemberDeceased').checked = false;
     await loadMembers();
   }
@@ -736,14 +780,16 @@ async function loadTimeline() {
   }
 }
 
-async function addTimeline(e) {
-  e.preventDefault();
+async function addTimeline() {
   var btn = document.getElementById('addTlBtn');
+  var yr = document.getElementById('newTlYear').value;
+  var tx = document.getElementById('newTlTextRo').value.trim();
+  if (!yr || !tx) { showMsg('timelineMsg', currentLang==='ro'?'Anul si textul sunt obligatorii.':'Year and text are required.', 'error'); return; }
   btn.disabled = true;
   var newEntry = {
     family_id: familyId,
-    year:      parseInt(document.getElementById('newTlYear').value, 10),
-    text_ro:   document.getElementById('newTlTextRo').value.trim(),
+    year:      parseInt(yr, 10),
+    text_ro:   tx,
     text_en:   document.getElementById('newTlTextEn').value.trim() || null
   };
   var res = await window.supabase.from('timeline').insert([newEntry]);
@@ -844,8 +890,7 @@ async function deletePhoto(photoId, photoPath) {
 }
 
 
-async function savePrivacy(e) {
-  e.preventDefault();
+async function savePrivacy() {
   var btn = document.getElementById('privacyBtn');
   btn.disabled = true;
   var updates = {
@@ -864,8 +909,7 @@ async function savePrivacy(e) {
   btn.disabled = false;
 }
 
-async function changePIN(e) {
-  e.preventDefault();
+async function changePIN() {
   var newPin     = document.getElementById('newPinInput').value;
   var confirmPin = document.getElementById('confirmPinInput').value;
   if (newPin !== confirmPin) {
@@ -925,6 +969,39 @@ function initDashboard() {
   }).catch(function() { window.location.href = 'login.html'; });
 }
 if (window.supabase) { initDashboard(); } else { document.addEventListener('supabase:ready', initDashboard); }
+
+// ── WIRE-UP: all event listeners ──────────────────────────
+document.addEventListener('DOMContentLoaded', function() {
+  // Add member button (replaces inline onclick)
+  var amb = document.getElementById('addMemberBtn');
+  if (amb) amb.addEventListener('click', addMember);
+
+  // Form save buttons (replaces form onsubmit)
+  var sb_story = document.getElementById('storyBtn');
+  if (sb_story) sb_story.addEventListener('click', function() { saveStory(); });
+
+  var sb_tl = document.getElementById('addTlBtn');
+  if (sb_tl) sb_tl.addEventListener('click', function() { addTimeline(); });
+
+  var sb_priv = document.getElementById('privacyBtn');
+  if (sb_priv) sb_priv.addEventListener('click', function() { savePrivacy(); });
+
+  var sb_pin = document.getElementById('pinBtn');
+  if (sb_pin) sb_pin.addEventListener('click', function() { changePIN(); });
+
+  // Scroll buttons
+  var stb = document.getElementById('scrollTop');
+  var sbb = document.getElementById('scrollBottom');
+  if (stb) { stb.removeAttribute('onclick'); stb.addEventListener('click', function() { window.scrollTo({top:0, behavior:'smooth'}); }); }
+  if (sbb) { sbb.removeAttribute('onclick'); sbb.addEventListener('click', function() { window.scrollTo({top:document.body.scrollHeight, behavior:'smooth'}); }); }
+});
+
+// escHtml helper for renderMembers
+function escHtml(s) {
+  return String(s == null ? '' : s)
+    .replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;').replace(/'/g, '&#39;');
+}
 </script>
 </body>
 </html>
