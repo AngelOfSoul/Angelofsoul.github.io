@@ -730,6 +730,7 @@ function initAdminAuth() {
           loadDashboard();
           loadAnnouncements();
           loadFamilies();
+          loadUsers();
           loadContactMessages();
           loadLogs();
           loadPhotos();
@@ -883,6 +884,73 @@ function loadDashboard() {
       bkEl.innerHTML = '<span style="color:var(--amber);">&#9888; Nu ai efectuat niciun backup inca</span>';
     }
   });
+}
+
+/* ── USERS ── */
+function loadUsers() {
+  if (!window.supabase) return;
+  var el = document.getElementById('users-list');
+  if (!el) return;
+  // Join profiles + families to get email-equivalent (owner) info
+  Promise.all([
+    window.supabase.from('profiles').select('id, is_admin, created_at').order('created_at', {ascending: false}),
+    window.supabase.from('families').select('owner_id, name, village, created_at')
+  ]).then(function(results) {
+    var profiles = results[0].data || [];
+    var families = results[1].data || [];
+
+    if (profiles.length === 0) {
+      el.innerHTML = '<div style="color:var(--gold-m);font-style:italic;font-size:13px;">Nu exista utilizatori inregistrati.</div>';
+      return;
+    }
+
+    // Map owner_id -> family info
+    var famByOwner = {};
+    families.forEach(function(f) { famByOwner[f.owner_id] = f; });
+
+    el.innerHTML = '<div class="tbl-wrap"><table class="adm-tbl">' +
+      '<tr>' +
+        '<th style="width:180px;">Familie / Cont</th>' +
+        '<th style="width:100px;">Sat</th>' +
+        '<th style="width:110px;">Inregistrat</th>' +
+        '<th style="width:60px;">Admin</th>' +
+        '<th></th>' +
+      '</tr>' +
+      profiles.map(function(p) {
+        var fam = famByOwner[p.id];
+        var famName = fam ? fam.name : '<span style="color:var(--muted);font-style:italic;">Fara familie</span>';
+        var village = fam ? (fam.village || '—') : '—';
+        var since   = p.created_at ? fmtDate(p.created_at).slice(0, 11) : '—';
+        var adminBadge = p.is_admin
+          ? '<span class="badge info">Admin</span>'
+          : '<span class="badge low">Utilizator</span>';
+        var resetBtn = '<button class="tbtn" onclick="resetUserPassword('' + p.id + '')" title="Trimite email resetare parola">&#128274; Reset</button>';
+        return '<tr>' +
+          '<td>' + famName + '</td>' +
+          '<td>' + village + '</td>' +
+          '<td>' + since + '</td>' +
+          '<td>' + adminBadge + '</td>' +
+          '<td style="white-space:nowrap;">' + resetBtn + '</td>' +
+          '</tr>';
+      }).join('') +
+      '</table></div>' +
+      '<div style="font-size:11px;color:var(--muted);margin-top:8px;">Total: ' + profiles.length + ' cont(uri) inregistrate.</div>';
+  }).catch(function(err) {
+    el.innerHTML = '<div style="color:var(--red);font-size:13px;">Eroare la incarcarea utilizatorilor: ' + err.message + '</div>';
+  });
+}
+
+function resetUserPassword(userId) {
+  if (!window.supabase) return;
+  var fam = document.querySelector('#users-list table');
+  // We can't get email from profiles directly — use families owner_id match
+  // Instead show a confirmation and use admin API if available, else inform
+  if (!confirm('Trimiti un email de resetare parola acestui utilizator?')) return;
+  // Supabase admin.generateLink requires service key — not available client-side.
+  // Best we can do from client: inform admin to use Supabase dashboard.
+  alert('Pentru resetarea parolei, mergi in Supabase Dashboard → Authentication → Users, gaseste utilizatorul si apasa "Send password reset".
+
+Aceasta actiune necesita cheia de serviciu (service key) care nu trebuie expusa in frontend.');
 }
 
 /* ── BACKUP ── */
@@ -1191,19 +1259,32 @@ function doPublishAnn(testOnly) {
   if (!title) { showMsg('ann-msg','Te rog completeaza titlul anuntului.','error'); return; }
   if (!body)  { showMsg('ann-msg','Te rog completeaza mesajul anuntului.','error'); return; }
   if (!expAt) { showMsg('ann-msg','Te rog seteaza data de expirare.','error'); return; }
+
+  // "Trimite test" = dry run — validates and previews without inserting to DB
+  if (testOnly) {
+    var pubDate  = pubAt ? new Date(pubAt).toLocaleString('ro-RO') : 'Acum (' + new Date().toLocaleString('ro-RO') + ')';
+    var expDate  = new Date(expAt).toLocaleString('ro-RO');
+    showMsg('ann-msg',
+      '&#10003; Validare reusita. Anuntul arata astfel — Titlu: "' + title +
+      '" | Tip: ' + type + ' | Publicare: ' + pubDate + ' | Expirare: ' + expDate +
+      ' — Apasa PUBLICA pentru a-l trimite.',
+      'success'
+    );
+    return;
+  }
+
   if (!window.supabase) { showMsg('ann-msg','Supabase nu este disponibil.','error'); return; }
   var row = {
     title:        title,
     body:         body,
     type:         type,
     published_at: pubAt ? new Date(pubAt).toISOString() : new Date().toISOString(),
-    expires_at:   new Date(expAt).toISOString(),
-    test_only:    testOnly
+    expires_at:   new Date(expAt).toISOString()
   };
   window.supabase.from('announcements').insert(row).then(function(r){
     if (r.error) { showMsg('ann-msg', 'Eroare: ' + r.error.message, 'error'); return; }
-    showMsg('ann-msg', testOnly ? '&#10003; Anunt de test publicat — vizibil doar tie.' : '&#10003; Anunt publicat cu succes!', 'success');
-    logAction('ann-publish', (testOnly?'Test ':'') + 'Anunt publicat: "' + title + '"');
+    showMsg('ann-msg', '&#10003; Anunt publicat cu succes!', 'success');
+    logAction('ann-publish', 'Anunt publicat: "' + title + '"');
     document.getElementById('ann-title').value = '';
     document.getElementById('ann-body').value  = '';
     loadAnnouncements();
