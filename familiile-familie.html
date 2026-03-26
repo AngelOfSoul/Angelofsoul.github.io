@@ -19,7 +19,7 @@
 <meta name="twitter:description" content="Profilul public al familiei din Calnic, Alba — genealogie, membrii, cronologie si fotografii.">
 <meta name="twitter:image" content="https://calniconline.ro/og-image.png">
 <link rel="canonical" href="https://calniconline.ro/familiile-familie.html">
-<title>Familia Popescu — Calnic Online</title>
+<title>Familie — Calnic Online</title>
 <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,600;0,700;1,400&family=EB+Garamond:ital,wght@0,400;0,500;1,400&display=swap" rel="stylesheet">
 <style>
 :root{--bg:#0a0a0a;--s1:#111111;--s2:#161616;--s3:#1c1c1c;--b1:#2a2a2a;--b2:#383838;--gold:#d4a84a;--gold-l:#e0b84a;--gold-d:#b08030;--gold-m:#7a5828;--text:#f0e8d0;--muted:#a09070;}
@@ -375,15 +375,15 @@ footer .g{color:var(--gold-d);font-style:normal;}
   <span>›</span>
   <a href="familiile.html" data-ro="Familiile" data-en="Families">Familiile</a>
   <span>›</span>
-  <span id="breadcrumb-name">Familia Popescu</span>
+  <span id="breadcrumb-name" data-ro="Familie" data-en="Family">Familie</span>
 </div>
 
 <!-- Family Hero -->
 <div class="fam-hero">
-  <div class="fam-avatar" id="fam-avatar">P</div>
+  <div class="fam-avatar" id="fam-avatar">?</div>
   <div class="fam-hero-info">
-    <div class="fam-hero-name" id="fam-name">Familia Popescu</div>
-    <div class="fam-hero-meta" id="fam-meta">Calnic, Alba &nbsp;&middot;&nbsp; prezenti din 1874 &nbsp;&middot;&nbsp; 4 generatii</div>
+    <div class="fam-hero-name" id="fam-name"></div>
+    <div class="fam-hero-meta" id="fam-meta"></div>
     <div class="fam-badges">
       <span class="fam-badge pub" data-ro="public" data-en="public">public</span>
       <span class="fam-badge prv" data-ro="continut privat" data-en="private content">continut privat</span>
@@ -391,9 +391,9 @@ footer .g{color:var(--gold-d);font-style:normal;}
     </div>
   </div>
   <div class="fam-hero-stats">
-    <div class="fam-stat"><span class="fam-stat-num">12</span><span class="fam-stat-lbl" data-ro="membri" data-en="members">membri</span></div>
-    <div class="fam-stat"><span class="fam-stat-num">47</span><span class="fam-stat-lbl" data-ro="poze" data-en="photos">poze</span></div>
-    <div class="fam-stat"><span class="fam-stat-num">4</span><span class="fam-stat-lbl" data-ro="generatii" data-en="generations">generatii</span></div>
+    <div class="fam-stat"><span class="fam-stat-num" id="stat-members">—</span><span class="fam-stat-lbl" data-ro="membri" data-en="members">membri</span></div>
+    <div class="fam-stat"><span class="fam-stat-num" id="stat-photos">—</span><span class="fam-stat-lbl" data-ro="poze" data-en="photos">poze</span></div>
+    <div class="fam-stat"><span class="fam-stat-num" id="stat-gen">—</span><span class="fam-stat-lbl" data-ro="generatii" data-en="generations">generatii</span></div>
   </div>
 </div>
 
@@ -404,7 +404,7 @@ footer .g{color:var(--gold-d);font-style:normal;}
     <div class="section-head">
       <span class="section-head-title" data-ro="Povestea familiei" data-en="Family story">Povestea familiei</span>
     </div>
-    <p class="fam-story" id="fam-story">Familia Popescu s-a asezat in Calnic la sfarsitul secolului al XIX-lea, venind din zonele de deal ale Albei. Au fost agricultori si apicultori generatii la rand, pastrand traditia stupilor pe dealurile din spatele satului. Astazi, membrii familiei sunt raspanditi in toata tara, dar radacinile raman in Calnic.</p>
+    <p class="fam-story" id="fam-story"></p>
 
     <!-- Members -->
     <div class="section-head">
@@ -416,50 +416,24 @@ footer .g{color:var(--gold-d);font-style:normal;}
     <div class="section-head">
       <span class="section-head-title" data-ro="Fotografii publice" data-en="Public photos">Fotografii publice</span>
     </div>
-    <div class="photos-grid">
-      <div class="photo-cell">&#127968;</div>
-      <div class="photo-cell">&#128106;</div>
-      <div class="photo-cell">&#127807;</div>
-      <a class="photo-more" href="galerie.html">
-        <div class="photo-more-num">+44</div>
-        <div class="photo-more-lbl" data-ro="mai multe" data-en="more">mai multe</div>
-      </a>
+    <div class="photos-grid" id="photosGrid">
+      <div style="padding:20px 0;color:var(--muted);font-style:italic;font-size:14px;grid-column:1/-1;text-align:center;" data-ro="Se incarca fotografii..." data-en="Loading photos...">Se incarca fotografii...</div>
     </div>
 
     <!-- Tree preview -->
     <div class="section-head">
       <span class="section-head-title" data-ro="Arborele genealogic" data-en="Family tree">Arborele genealogic</span>
     </div>
-    <a class="tree-preview" href="genealogie-familie.html?family=popescu">
-      <div class="tp-left">
-        <div class="tp-icon">&#127807;</div>
-        <div>
-          <div class="tp-title" data-ro="Arborele Familiei Popescu" data-en="Popescu Family Tree">Arborele Familiei Popescu</div>
-          <div class="tp-sub" data-ro="4 generatii · 12 persoane · conectat la arborele satului" data-en="4 generations · 12 people · connected to village tree">4 generatii &middot; 12 persoane &middot; conectat la arborele satului</div>
-        </div>
-      </div>
-      <div class="tp-btn" data-ro="Vezi arborele" data-en="View tree">Vezi arborele</div>
-    </a>
+    <div id="treePreview">
+      <div style="padding:20px;color:var(--muted);font-style:italic;font-size:14px;" data-ro="Se incarca arborele..." data-en="Loading tree...">Se incarca arborele...</div>
+    </div>
 
     <!-- Connections -->
     <div class="section-head">
       <span class="section-head-title" data-ro="Legaturi cu alte familii" data-en="Connected families">Legaturi cu alte familii</span>
     </div>
-    <div class="connections">
-      <a class="conn-card" href="familiile-familie.html?family=muresan">
-        <div class="conn-avatar">M</div>
-        <div>
-          <div class="conn-name">Familia Muresan</div>
-          <div class="conn-type" data-ro="casatorie · 1976" data-en="marriage · 1976">casatorie &middot; 1976</div>
-        </div>
-      </a>
-      <a class="conn-card" href="familiile-familie.html?family=stan">
-        <div class="conn-avatar">S</div>
-        <div>
-          <div class="conn-name">Familia Stan</div>
-          <div class="conn-type" data-ro="casatorie · 2002" data-en="marriage · 2002">casatorie &middot; 2002</div>
-        </div>
-      </a>
+    <div class="connections" id="connections">
+      <div style="padding:20px 0;color:var(--muted);font-style:italic;font-size:14px;" data-ro="Se incarca legaturi..." data-en="Loading connections...">Se incarca legaturi...</div>
     </div>
 
     <!-- Timeline -->
@@ -475,12 +449,12 @@ footer .g{color:var(--gold-d);font-style:normal;}
 
     <div class="side-card">
       <div class="sc-title" data-ro="Despre familie" data-en="About the family">Despre familie</div>
-      <div class="sc-row"><span data-ro="Localitate" data-en="Village">Localitate</span><span class="sc-val">Calnic</span></div>
-      <div class="sc-row"><span data-ro="In Calnic din" data-en="In Calnic since">In Calnic din</span><span class="sc-val">1874</span></div>
-      <div class="sc-row"><span data-ro="Generatii" data-en="Generations">Generatii</span><span class="sc-val">4</span></div>
-      <div class="sc-row"><span data-ro="Membri" data-en="Members">Membri</span><span class="sc-val">12</span></div>
-      <div class="sc-row"><span data-ro="Fotografii" data-en="Photos">Fotografii</span><span class="sc-val">47</span></div>
-      <div class="sc-row"><span data-ro="Arbore conectat" data-en="Tree connected">Arbore conectat</span><span class="sc-val" style="color:#82c46a;">&#10003; Da</span></div>
+      <div class="sc-row"><span data-ro="Localitate" data-en="Village">Localitate</span><span class="sc-val" id="sc-village">—</span></div>
+      <div class="sc-row"><span data-ro="In Calnic din" data-en="In Calnic since">In Calnic din</span><span class="sc-val" id="sc-since">—</span></div>
+      <div class="sc-row"><span data-ro="Generatii" data-en="Generations">Generatii</span><span class="sc-val" id="sc-gen">—</span></div>
+      <div class="sc-row"><span data-ro="Membri" data-en="Members">Membri</span><span class="sc-val" id="sc-members">—</span></div>
+      <div class="sc-row"><span data-ro="Fotografii" data-en="Photos">Fotografii</span><span class="sc-val" id="sc-photos">—</span></div>
+      <div class="sc-row"><span data-ro="Arbore conectat" data-en="Tree connected">Arbore conectat</span><span class="sc-val" id="sc-connected">—</span></div>
     </div>
 
     <div class="side-orn">— &#10022; —</div>
@@ -568,34 +542,7 @@ var params   = new URLSearchParams(window.location.search);
 var familyId = params.get('id') || params.get('family');
 if (!familyId) { window.location.href = 'familiile.html'; }
 
-/* Demo fallback data (Familia Popescu) */
-var DEMO_FAM = {
-  id: 'demo-popescu',
-  name: 'Familia Popescu',
-  initial: 'P',
-  village: 'Calnic',
-  since: 1874,
-  gen: 4,
-  members: 12,
-  photos: 47,
-  connected: true,
-  pin: '1874'
-};
-
-var DEMO_MEMBERS = [
-  { name:'Ion Popescu',     initial:'I', role:'Cap de familie', years:'1948 —',      deceased:false },
-  { name:'Maria Popescu',   initial:'M', role:'Sotie',          years:'1952 —',      deceased:false },
-  { name:'Gheorghe Popescu',initial:'G', role:'Tata',           years:'1920 — 1998', deceased:true  },
-  { name:'Ana Popescu',     initial:'A', role:'Fiica',          years:'1978 —',      deceased:false },
-  { name:'Dan Popescu',     initial:'D', role:'Fiu',            years:'1981 —',      deceased:false }
-];
-
-var DEMO_TIMELINE = [
-  { year:1874, textRo:'Familia se stabileste in Calnic, venind din zona Sebesului.', textEn:'The family settles in Calnic, coming from the Sebes area.' },
-  { year:1920, textRo:'Se construieste casa familiei pe dealul din vestul satului.', textEn:'The family home is built on the hill west of the village.' },
-  { year:1976, textRo:'Ion Popescu se casatoreste cu Maria Muresan.', textEn:'Ion Popescu marries Maria Muresan.' },
-  { year:2002, textRo:'Ana Popescu se casatoreste cu Mihai Stan.', textEn:'Ana Popescu marries Mihai Stan.' }
-];
+/* Demo fallback data removed — page requires a valid ?family= parameter */
 
 var FAM     = null;
 var MEMBERS = [];
@@ -603,6 +550,7 @@ var TIMELINE = [];
 
 /* Populate DOM from loaded data */
 function populateDOM() {
+  if (!FAM) return;
   document.getElementById('fam-avatar').textContent = FAM.initial || (FAM.name ? FAM.name[0] : '?');
   document.getElementById('fam-name').textContent   = FAM.name || '';
   var metaParts = [FAM.village || 'Calnic'];
@@ -610,16 +558,36 @@ function populateDOM() {
   if (FAM.gen)   metaParts.push(FAM.gen + ' ' + (currentLang === 'ro' ? 'generatii' : 'generations'));
   document.getElementById('fam-meta').innerHTML = metaParts.join('  ·  ');
   if (FAM.story) document.getElementById('fam-story').textContent = currentLang === 'ro' ? (FAM.storyRo || FAM.story) : (FAM.storyEn || FAM.story);
-  var statsEl = document.querySelector('.fam-hero-stats');
-  if (statsEl) {
-    var membLbl = currentLang === 'ro' ? 'membri' : 'members';
-    var photLbl = currentLang === 'ro' ? 'poze' : 'photos';
-    var genLbl  = currentLang === 'ro' ? 'generatii' : 'generations';
-    statsEl.innerHTML =
-      '<div class="fam-stat"><span class="fam-stat-num">' + (FAM.members || '—') + '</span><span class="fam-stat-lbl" data-ro="membri" data-en="members">' + membLbl + '</span></div>' +
-      '<div class="fam-stat"><span class="fam-stat-num">' + (FAM.photos || '—') + '</span><span class="fam-stat-lbl" data-ro="poze" data-en="photos">' + photLbl + '</span></div>' +
-      '<div class="fam-stat"><span class="fam-stat-num">' + (FAM.gen || '—') + '</span><span class="fam-stat-lbl" data-ro="generatii" data-en="generations">' + genLbl + '</span></div>';
-  }
+  /* Update hero stats */
+  var smEl = document.getElementById('stat-members');
+  var spEl = document.getElementById('stat-photos');
+  var sgEl = document.getElementById('stat-gen');
+  if (smEl) smEl.textContent = FAM.members || '—';
+  if (spEl) spEl.textContent = FAM.photos  || '—';
+  if (sgEl) sgEl.textContent = FAM.gen     || '—';
+  /* Update breadcrumb and document title */
+  var bcEl = document.getElementById('breadcrumb-name');
+  if (bcEl) bcEl.textContent = FAM.name || (currentLang === 'ro' ? 'Familie' : 'Family');
+  document.title = (FAM.name || (currentLang === 'ro' ? 'Familie' : 'Family')) + ' — Calnic Online';
+  /* Update sidebar stats */
+  var scv = document.getElementById('sc-village');
+  var scs = document.getElementById('sc-since');
+  var scg = document.getElementById('sc-gen');
+  var scm = document.getElementById('sc-members');
+  var scp = document.getElementById('sc-photos');
+  var scc = document.getElementById('sc-connected');
+  if (scv) scv.textContent = FAM.village  || '—';
+  if (scs) scs.textContent = FAM.since    || '—';
+  if (scg) scg.textContent = FAM.gen      || '—';
+  if (scm) scm.textContent = FAM.members  || '—';
+  if (scp) scp.textContent = FAM.photos   || '—';
+  if (scc) { scc.innerHTML = FAM.connected ? '<span style="color:#82c46a;">&#10003; ' + (currentLang === 'ro' ? 'Da' : 'Yes') + '</span>' : '—'; }
+  /* Tree preview */
+  renderTreePreview();
+  /* Connections */
+  renderConnections(null);
+  /* Photos */
+  renderPhotos();
   renderMembers();
   renderTimeline();
 }
@@ -733,6 +701,11 @@ var privateUnlocked = false;
 
 function renderMembers() {
   var grid = document.getElementById('membersGrid');
+  if (!grid) return;
+  if (!MEMBERS || !MEMBERS.length) {
+    grid.innerHTML = '<div style="padding:20px 0;color:var(--muted);font-style:italic;font-size:14px;" data-ro="Niciun membru inregistrat." data-en="No members registered.">' + (currentLang === 'ro' ? 'Niciun membru inregistrat.' : 'No members registered.') + '</div>';
+    return;
+  }
   grid.innerHTML = MEMBERS.map(function(m) {
     return '<div class="member-card' + (m.deceased ? ' deceased' : '') + '">'
       + '<div class="mem-avatar">' + m.initial + '</div>'
@@ -745,6 +718,11 @@ function renderMembers() {
 
 function renderTimeline() {
   var tl = document.getElementById('timeline');
+  if (!tl) return;
+  if (!TIMELINE || !TIMELINE.length) {
+    tl.innerHTML = '<div style="padding:20px 0;color:var(--muted);font-style:italic;font-size:14px;" data-ro="Niciun moment inregistrat." data-en="No events recorded.">' + (currentLang === 'ro' ? 'Niciun moment inregistrat.' : 'No events recorded.') + '</div>';
+    return;
+  }
   tl.innerHTML = TIMELINE.map(function(t) {
     var text = currentLang === 'ro' ? t.textRo : t.textEn;
     return '<div class="tl-item">'
@@ -752,6 +730,64 @@ function renderTimeline() {
       + '<div class="tl-text">' + text + '</div>'
       + '</div>';
   }).join('');
+}
+
+function renderTreePreview() {
+  var el = document.getElementById('treePreview');
+  if (!el || !FAM) return;
+  var famId = FAM.id || familyId || '';
+  var href = 'genealogie-familie.html' + (famId ? '?family=' + encodeURIComponent(famId) : '');
+  var titleRo = 'Arborele ' + FAM.name;
+  var titleEn = FAM.name + ' Family Tree';
+  var subParts = [];
+  if (FAM.gen)     subParts.push(FAM.gen + (currentLang === 'ro' ? ' generatii' : ' generations'));
+  if (FAM.members) subParts.push(FAM.members + (currentLang === 'ro' ? ' persoane' : ' people'));
+  if (FAM.connected) subParts.push(currentLang === 'ro' ? 'conectat la arborele satului' : 'connected to village tree');
+  var sub = subParts.join(' · ');
+  el.innerHTML = '<a class="tree-preview" href="' + href + '">'
+    + '<div class="tp-left">'
+    + '<div class="tp-icon">&#127807;</div>'
+    + '<div>'
+    + '<div class="tp-title">' + (currentLang === 'ro' ? titleRo : titleEn) + '</div>'
+    + '<div class="tp-sub">' + sub + '</div>'
+    + '</div>'
+    + '</div>'
+    + '<div class="tp-btn" data-ro="Vezi arborele" data-en="View tree">' + (currentLang === 'ro' ? 'Vezi arborele' : 'View tree') + '</div>'
+    + '</a>';
+}
+
+function renderConnections(connections) {
+  var el = document.getElementById('connections');
+  if (!el) return;
+  if (!connections || !connections.length) {
+    el.innerHTML = '<div style="padding:20px 0;color:var(--muted);font-style:italic;font-size:14px;" data-ro="Nicio legatura cu alte familii inregistrata." data-en="No connections with other families recorded.">' + (currentLang === 'ro' ? 'Nicio legatura cu alte familii inregistrata.' : 'No connections with other families recorded.') + '</div>';
+    return;
+  }
+  el.innerHTML = connections.map(function(c) {
+    return '<a class="conn-card" href="familiile-familie.html?family=' + encodeURIComponent(c.id) + '">'
+      + '<div class="conn-avatar">' + (c.initial || c.name[0]) + '</div>'
+      + '<div>'
+      + '<div class="conn-name">' + c.name + '</div>'
+      + '<div class="conn-type">' + (currentLang === 'ro' ? c.typeRo || c.type : c.typeEn || c.type) + '</div>'
+      + '</div>'
+      + '</a>';
+  }).join('');
+}
+
+function renderPhotos() {
+  var el = document.getElementById('photosGrid');
+  if (!el || !FAM) return;
+  var count = FAM.photos || 0;
+  if (!count) {
+    el.innerHTML = '<div style="padding:20px 0;color:var(--muted);font-style:italic;font-size:14px;grid-column:1/-1;text-align:center;" data-ro="Nicio fotografie publica disponibila." data-en="No public photos available.">' + (currentLang === 'ro' ? 'Nicio fotografie publica disponibila.' : 'No public photos available.') + '</div>';
+    return;
+  }
+  var galHref = 'galerie.html' + (familyId ? '?family=' + encodeURIComponent(familyId) : '');
+  var moreLbl = currentLang === 'ro' ? 'mai multe' : 'more';
+  el.innerHTML = '<a class="photo-more" href="' + galHref + '">'
+    + '<div class="photo-more-num">' + count + '</div>'
+    + '<div class="photo-more-lbl" data-ro="mai multe" data-en="more">' + moreLbl + '</div>'
+    + '</a>';
 }
 
 async function checkPin() {
@@ -806,9 +842,14 @@ function setLang(lang) {
     if (val !== null) el.textContent = val;
   });
   /* Re-render language-dependent dynamic content */
-  var storyEl = document.getElementById('fam-story');
-  if (storyEl && (FAM.storyRo || FAM.storyEn)) {
-    storyEl.textContent = lang === 'en' && FAM.storyEn ? FAM.storyEn : (FAM.storyRo || FAM.story || '');
+  if (FAM) {
+    var storyEl = document.getElementById('fam-story');
+    if (storyEl && (FAM.storyRo || FAM.storyEn)) {
+      storyEl.textContent = lang === 'en' && FAM.storyEn ? FAM.storyEn : (FAM.storyRo || FAM.story || '');
+    }
+    renderTreePreview();
+    renderConnections(null);
+    renderPhotos();
   }
   renderTimeline();
 }
@@ -816,8 +857,7 @@ function setLang(lang) {
 document.getElementById('btn-ro').addEventListener('click', function() { setLang('ro'); });
 document.getElementById('btn-en').addEventListener('click', function() { setLang('en'); });
 
-/* Initial render using demo data (replaced when Supabase loads) */
-populateDOM();
+/* Show initial loading state until Supabase data arrives */
 setLang(currentLang);
 
 function updateScrollBtns() {
