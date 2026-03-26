@@ -1,24 +1,57 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
 <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Mosaic V5</title>
 <link rel="stylesheet" href="styles/main.css">
 </head>
 <body>
 <div class="app">
-<header class="glass">
-<h1>Mosaic</h1>
-<button id="lang-en">EN</button>
-<button id="lang-ro">RO</button>
-</header>
-<div class="glass">
-<div class="progress-bar"><div id="progress-fill"></div></div>
-<div id="progress-text">0%</div>
+  <header class="glass">
+    <h1 data-i18n="game_title">Mosaic</h1>
+    <div id="streak-display">🔥 <span id="streak-count">0</span> <span data-i18n="day_streak">day streak</span></div>
+    <div class="header-actions">
+      <button id="achievements-btn">🏆</button>
+      <button id="lang-en" class="lang-btn">EN</button>
+      <button id="lang-ro" class="lang-btn">RO</button>
+    </div>
+  </header>
+  <div class="glass progress-card">
+    <div class="progress-bar"><div id="progress-fill"></div></div>
+    <div id="progress-text">0%</div>
+  </div>
+  <div class="grid-wrapper">
+    <div id="grid" class="grid"></div>
+    <div class="section-badge" id="section-badge-0"></div>
+    <div class="section-badge" id="section-badge-1"></div>
+    <div class="section-badge" id="section-badge-2"></div>
+    <div class="section-badge" id="section-badge-3"></div>
+  </div>
+  <div id="feedback-root" class="feedback-root"></div>
 </div>
-<div id="grid" class="grid"></div>
-<div id="feedback-root" class="feedback-root"></div>
+
+<!-- Achievements Panel -->
+<div id="achievements-panel" class="achievements-panel hidden">
+  <div class="achievements-inner glass">
+    <div class="achievements-header">
+      <h2>🏆 <span data-i18n="achievements">Achievements</span></h2>
+      <button id="achievements-close">✕</button>
+    </div>
+    <div id="achievements-list"></div>
+  </div>
 </div>
+
+<!-- Win Overlay -->
+<div id="win-overlay" class="win-overlay hidden">
+  <div class="win-content">
+    <div class="win-particles"></div>
+    <h1 id="win-title">🎉 Mosaic Complete!</h1>
+    <p id="win-subtitle">You filled all 100 tiles!</p>
+    <button id="reset-btn" class="reset-btn">Reset</button>
+  </div>
+</div>
+
 <script type="module" src="scripts/main.js"></script>
 </body>
 </html>
