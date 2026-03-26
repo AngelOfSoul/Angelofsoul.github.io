@@ -124,7 +124,7 @@ footer .g{color:var(--gold-d);font-style:normal;}
 .g1 .av{border-color:#c8983a;}
 .g0 .av{border-color:var(--gold);border-width:3px;}
 .dec-ring{position:absolute;inset:-5px;border-radius:50%;border:1.5px dashed #5a4020;pointer-events:none;}
-.v-badge{position:absolute;bottom:0;right:0;background:var(--green-bg);border:1.5px solid var(--green-br);border-radius:8px;padding:1px 5px;font-size:8px;color:var(--green);white-space:nowrap;pointer-events:none;}
+.v-badge{position:absolute;bottom:2px;right:2px;width:11px;height:11px;border-radius:50%;background:var(--green);border:2px solid var(--bg);pointer-events:none;box-shadow:0 0 5px rgba(130,196,106,.55);}
 .own-badge{position:absolute;top:-2px;right:-2px;width:16px;height:16px;border-radius:50%;background:#1a2808;border:1.5px solid var(--gold);display:flex;align-items:center;justify-content:center;font-size:7px;color:var(--gold);pointer-events:none;}
 .nl{margin-top:5px;text-align:center;width:110px;}
 .nn{font-family:'Playfair Display',serif;font-size:10px;color:var(--text);line-height:1.3;display:block;word-break:break-word;}
@@ -485,17 +485,17 @@ footer .g{color:var(--gold-d);font-style:normal;}
     <div class="leg"><svg width="22" height="3"><line x1="0" y1="1.5" x2="22" y2="1.5" stroke="#c87050" stroke-width="1.5"/></svg><span data-ro="Legatura de sange" data-en="Blood relation">Legatura de sange</span></div>
     <div class="leg"><svg width="22" height="3"><line x1="0" y1="1.5" x2="22" y2="1.5" stroke="#5080c8" stroke-width="1.5" stroke-dasharray="4 2"/></svg><span data-ro="Alianta prin casatorie" data-en="Alliance by marriage">Alianta prin casatorie</span></div>
     <div class="leg"><span style="display:inline-block;width:12px;height:12px;border-radius:50%;border:1.5px dashed #5a4020;flex-shrink:0;"></span><span data-ro="Persoana decedata" data-en="Deceased person">Persoana decedata</span></div>
-    <div class="leg"><span style="background:var(--green-bg);border:1px solid var(--green-br);border-radius:8px;padding:1px 5px;font-size:8px;color:var(--green);" data-ro="in sat" data-en="in village">in sat</span><span data-ro="Conectat la arborele satului" data-en="Connected to village tree">Conectat la arborele satului</span></div>
+    <div class="leg"><span style="display:inline-block;width:11px;height:11px;border-radius:50%;background:var(--green);border:2px solid var(--bg);flex-shrink:0;box-shadow:0 0 4px rgba(130,196,106,.5);"></span><span data-ro="In sat" data-en="In village">In sat</span></div>
     <div class="leg"><span style="width:14px;height:14px;border-radius:50%;background:#1a2808;border:1.5px solid var(--gold);display:inline-flex;align-items:center;justify-content:center;font-size:7px;color:var(--gold);">&#10003;</span><span data-ro="Adaugat de tine — poti edita" data-en="Added by you — you can edit">Adaugat de tine</span></div>
   </div>
 
   <!-- TREE STAGE -->
   <div class="tree-stage-wrap">
-    <div class="gen-label" id="gl3" style="top:60px;" data-ro="Stramosi" data-en="Ancestors">Stramosi</div>
-    <div class="gen-label" id="gl2" style="top:200px;" data-ro="Bunici" data-en="Grandparents">Bunici</div>
-    <div class="gen-label" id="gl1" style="top:360px;" data-ro="Parinti" data-en="Parents">Parinti</div>
-    <div class="gen-label" id="gl0" style="top:510px;" data-ro="Eu" data-en="Me">Eu</div>
     <div class="tree-stage" id="treeStage">
+      <div class="gen-label" id="gl3" data-ro="Stramosi" data-en="Ancestors">Stramosi</div>
+      <div class="gen-label" id="gl2" data-ro="Bunici" data-en="Grandparents">Bunici</div>
+      <div class="gen-label" id="gl1" data-ro="Parinti" data-en="Parents">Parinti</div>
+      <div class="gen-label" id="gl0" data-ro="Eu" data-en="Me">Eu</div>
       <div class="tree-canvas" id="treeCanvas">
         <svg id="connSvg" style="position:absolute;top:0;left:0;overflow:visible;pointer-events:none;z-index:1;"></svg>
       </div>
@@ -707,7 +707,7 @@ function buildNode(m,pos){
   if(m.is_deceased){var dr=document.createElement('div');dr.className='dec-ring';av.appendChild(dr);}
   if(m.photo_url){var img=document.createElement('img');img.src=m.photo_url;img.alt=escH(m.name);img.loading='lazy';img.onerror=function(){img.style.display='none';putInit(av,m,avSz);};av.appendChild(img);}
   else{putInit(av,m,avSz);}
-  if(m.visibility==='public'||m.village){var vb=document.createElement('div');vb.className='v-badge';vb.setAttribute('data-ro','in sat');vb.setAttribute('data-en','in village');vb.textContent=t('in sat','in village');av.appendChild(vb);}
+  if(m.visibility==='public'||m.village){var vb=document.createElement('div');vb.className='v-badge';vb.setAttribute('data-ro','in sat');vb.setAttribute('data-en','in village');av.appendChild(vb);}
   if(isOwner){var ob=document.createElement('div');ob.className='own-badge';ob.textContent='\u2713';ob.title=t('Tu ai adaugat aceasta persoana','You added this person');av.appendChild(ob);}
   wrap.appendChild(av);
   var nl=document.createElement('div');nl.className='nl';
@@ -1146,7 +1146,7 @@ function subscribeRT(){
 
 // ── ZOOM / PAN ────────────────────────────────────────────
 function applyXform(){document.getElementById('treeCanvas').style.transform='translate('+S.panX+'px,'+S.panY+'px) scale('+S.zoom+')';updateGenLabels();drawMinimap();}
-function updateGenLabels(){var gy={3:30,2:180,1:340,0:490};['3','2','1','0'].forEach(function(g){var el=document.getElementById('gl'+g);if(el)el.style.top=Math.round(S.panY+gy[g]*S.zoom+8)+'px';});}
+function updateGenLabels(){var gy={3:30,2:180,1:340,0:490};var stage=document.getElementById('treeStage');var sh=stage?stage.clientHeight:660;['3','2','1','0'].forEach(function(g){var el=document.getElementById('gl'+g);if(el){var t=Math.round(S.panY+gy[g]*S.zoom+8);el.style.top=Math.max(0,Math.min(sh-14,t))+'px';}});}
 function center(){var stage=document.getElementById('treeStage'),cv=document.getElementById('treeCanvas');var sw=stage.clientWidth||800,sh=stage.clientHeight||660;var cw=parseFloat(cv.style.width)||800,ch=parseFloat(cv.style.height)||680;S.panX=Math.max(20,(sw-cw*S.zoom)/2);S.panY=Math.max(10,(sh-ch*S.zoom)/3);applyXform();}
 function debounce(fn,ms){var t;return function(){clearTimeout(t);t=setTimeout(fn,ms);};}
 
@@ -1156,7 +1156,7 @@ function initZoomPan(){
   var muH=function(){S.panning=false;stage.style.cursor='grab';};
   stage.addEventListener('mousedown',function(e){if(e.target.closest('.pn,.ag,.dp,.htip'))return;S.panning=true;S.lastMouse={x:e.clientX,y:e.clientY};stage.style.cursor='grabbing';});
   document.addEventListener('mousemove',mmH);document.addEventListener('mouseup',muH);
-  stage.addEventListener('wheel',function(e){e.preventDefault();var d=e.deltaY>0?-.08:.08;var r=stage.getBoundingClientRect();var mx=e.clientX-r.left,my=e.clientY-r.top;var nz=Math.min(2,Math.max(.25,S.zoom+d));var ratio=nz/S.zoom;S.panX=mx-ratio*(mx-S.panX);S.panY=my-ratio*(my-S.panY);S.zoom=nz;applyXform();},{passive:false});
+  stage.addEventListener('wheel',function(e){e.preventDefault();var raw=e.deltaMode===1?e.deltaY*40:e.deltaY;var d=raw>0?-.08:.08;var r=stage.getBoundingClientRect();var mx=e.clientX-r.left,my=e.clientY-r.top;var nz=Math.min(2,Math.max(.25,S.zoom+d));var ratio=nz/S.zoom;S.panX=mx-ratio*(mx-S.panX);S.panY=my-ratio*(my-S.panY);S.zoom=nz;applyXform();},{passive:false});
   var lt=null;
   stage.addEventListener('touchstart',function(e){if(e.touches.length===1)lt={x:e.touches[0].clientX,y:e.touches[0].clientY};},{passive:true});
   stage.addEventListener('touchmove',function(e){if(e.touches.length===1&&lt){S.panX+=e.touches[0].clientX-lt.x;S.panY+=e.touches[0].clientY-lt.y;lt={x:e.touches[0].clientX,y:e.touches[0].clientY};applyXform();}},{passive:true});
