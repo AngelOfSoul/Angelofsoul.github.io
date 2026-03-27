@@ -1,20 +1,230 @@
-<!-- Add this script before </body> in admin.html -->
+<!DOCTYPE html>
+<html lang="ro">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Admin — Calnic Online</title>
+<link rel="icon" type="image/svg+xml" href="favicon.svg">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=EB+Garamond:wght@400;500;600;700&family=Playfair+Display:wght@400;500;600;700&display=swap" rel="stylesheet">
+<script src="supabase.js"></script>
+<script src="admin-nav.js"></script>
+</head>
+<body>
+
+<div id="access-check">Se verifica accesul...</div>
+
+<div id="admin-content" class="hidden">
+  <nav><div class="nav-right" id="nav-right-main"></div></nav>
+  
+  <div class="lang-bar">LIMBĂ / LANGUAGEROEN</div>
+  <div class="site-header">Satul nostru — Amintirile noastre</div>
+
+  <div class="nav-container">
+    <div class="nav-links">
+      <a href="index.html" class="nav-link">⌂ Acasa</a>
+      <a href="istorie.html" class="nav-link">🗺 Istoria Satului</a>
+      <a href="familiile.html" class="nav-link">👪 Familiile</a>
+      <a href="genealogie.html" class="nav-link">🌻 Genealogie</a>
+      <a href="galerie.html" class="nav-link">📸 Galerie</a>
+      <a href="contact.html" class="nav-link">✉ Contact</a>
+      <a href="intrebari.html" class="nav-link">❓ Intrebari</a>
+      <a href="login.html" class="nav-login">🔒 Contul Familiei</a>
+    </div>
+    <button class="mobile-menu-toggle">☰</button>
+  </div>
+
+  <div class="nav-mobile-menu">
+    <a href="index.html" class="nav-mobile-link">⌂ Acasa</a>
+    <a href="istorie.html" class="nav-mobile-link">🗺 Istoria Satului</a>
+    <a href="familiile.html" class="nav-mobile-link">👪 Familiile</a>
+    <a href="genealogie.html" class="nav-mobile-link">🌻 Genealogie</a>
+    <a href="galerie.html" class="nav-mobile-link">📸 Galerie</a>
+    <a href="contact.html" class="nav-mobile-link">✉ Contact</a>
+    <a href="intrebari.html" class="nav-mobile-link">❓ Intrebari</a>
+    <a href="login.html" class="nav-mobile-link">🔒 Contul Familiei</a>
+  </div>
+
+  <main class="container">
+    <h1>Calnic Online Admin</h1>
+    <div class="admin-grid">
+      <div class="admin-card">
+        <h3>🔒 Acces restrictionat</h3>
+        <p>Nu ai permisiuni de administrator pentru acest panou.</p>
+        <a href="index.html">Inapoi la site</a>
+      </div>
+      <div class="admin-card">
+        <h3>◆ Calnic Admin Panel</h3>
+        <p>ADMIN—</p>
+        <a href="index.html">← Site principal</a>
+        <button onclick="window.supabase.auth.signOut()">Deconectare</button>
+      </div>
+    </div>
+
+    <div class="admin-sidebar">
+      <h3>PANOU ADMIN Calnic Online</h3>
+      <ul>
+        <li>Principal ■  Panou</li>
+        <li>Siguranta datelor 📦  Backup</li>
+        <li>⚙  Unelte tehnice</li>
+        <li>Securitate 👤  Utilizatori</li>
+        <li>Continut 📌  Anunturi</li>
+        <li>👪  Familii</li>
+        <li>Comunicare ✉  Mesaje</li>
+        <li>💬  Contact</li>
+        <li>Istoric 📄  Jurnale</li>
+        <li>Media 📸  Fotografii</li>
+      </ul>
+      <a href="index.html">← Site principal</a>
+      <p>? Ghid complet v1.0 · Calnic Online 2026</p>
+    </div>
+
+    <div class="admin-content-area">
+      <h3>Panou de control</h3>
+      <p>Panou de control Prima pagina din admin. Arata starea intregului sat dintr-o privire — familii, membri, fotografii, completitudine si ultimul backup.</p>
+      <p>Bun venit in panoul de administrare Calnic Online.</p>
+      <div class="stats">
+        <p>— Familii se incarca...</p>
+        <p>— Membri in arbori genealogici</p>
+        <p>— Fotografii in arhiva satului</p>
+        <p>— Completitudine medie village</p>
+        <p>Familii inactive (90+ zile) Se incarca...</p>
+        <p>Profiluri incomplete ( <50%) Se incarca...</p>
+      </div>
+      <div class="backup-section">
+        <p>Se verifica ultimul backup... Apasa "Backup" in sidebar pentru a salva datele</p>
+        <a href="#">Mergi la Backup  →</a>
+        <h3>Backup si recuperare</h3>
+        <p>? De ce e critic? Planul gratuit Supabase NU face backup automat. Daca se sterge ceva din greseala, datele dispar pentru totdeauna. Apasa butonul mare o data pe saptamana. Protejeaza datele tuturor familiilor din sat.</p>
+        <button>📦 Salveaza toate datele acum</button>
+        <p>Descarca un fisier complet cu toate familiile, membrii, fotografiile, cronologiile si anunturile. Salveaza-l in Google Drive sau pe calculator.</p>
+        <button>⬇ Descarca backup complet</button>
+        <p>Recomandat: o data pe saptamana · Fisierul se descarca automat pe calculatorul tau</p>
+        <p>Istoricul backupurilor Se incarca istoricul...</p>
+        <h3>Restaurare date</h3>
+        <p>? Restaurare sigura Incarci fisierul de backup si sistemul iti arata exact ce s-ar schimba INAINTE de a face ceva. Niciodata nu se modifica nimic fara confirmarea ta.</p>
+        <input type="file" accept=".json">
+        <button>Previzualizeaza</button>
+      </div>
+      
+      <h3>Unelte tehnice</h3>
+      <p>? Regula de baza Verde = OK, Portocaliu = atentie necesara, Rosu = problema gasita. Nicio unealta nu sterge date fara confirmare explicita din partea ta. Verificari si reparatii automate cu un singur click.</p>
+      <div class="tools">
+        <div class="tool"><h3>Verificator RLS</h3><p>? Politici RLS Verifica ca datele private ale familiilor sunt protejate. O setare gresita in Supabase poate expune datele tuturor pe internet fara niciun avertisment. Protectia datelor private ale familiilor Se verifica... <button>Verifica</button></p></div>
+        <div class="tool"><h3>Curatare stocare</h3><p>? Fisiere fantoma Fotografii sterse din baza de date dar ramase in Storage. Consuma spatiul gratuit (1GB) in mod invizibil. Fisiere fantoma in Supabase Storage Apasa Verifica <button>Verifica</button></p></div>
+        <div class="tool"><h3>Membri orfani</h3><p>? Membri orfani Membri a caror familie a fost stearsa. Inregistrari invizibile care ocupa spatiu si pot cauza erori. Membri fara familie valida Apasa Verifica <button>Verifica</button></p></div>
+        <div class="tool"><h3>Date invalide</h3><p>? Date imposibile Deces inainte de nastere, ani incorecti. Strica widgetul "Astazi in familia ta" de pe homepage. Erori date nastere / deces Apasa Verifica <button>Verifica</button></p></div>
+        <div class="tool"><h3>Familii fara cont</h3><p>? Inregistrare incompleta Familii create dar fara cont de utilizator legat. Nimeni nu se poate autentifica pentru ele. Inregistrari esuate la jumatate Apasa Verifica <button>Verifica</button></p></div>
+        <div class="tool"><h3>Sincronizare contoare</h3><p>? Contoare incorecte members_count si photos_count pot deriva dupa editari. Repara toate familiile dintr-o singura operatiune. Repara members_count si photos_count Recomandat lunar <button>Sincronizeaza</button></p></div>
+        <div class="tool"><h3>Date demo</h3><p>? Toggle date demo Ascunde sau afiseaza instantaneu familiile demo (Popescu, Ionescu etc.) in lista publica a satului. Familii test vizibile / ascunse Vizibile <button>Toggle</button></p></div>
+        <div class="tool"><h3>Emailuri duplicate</h3><p>? Conturi duble Cauta conturi inregistrate de doua ori cu emailuri aproape identice. Mentine lista de utilizatori curata. Conturi duble in sistem Apasa Verifica <button>Verifica</button></p></div>
+      </div>
+
+      <h3>Alte unelte</h3>
+      <div class="tools">
+        <div class="tool"><h3>⬇ Export CSV toate datele</h3><p>? Export CSV Descarca toate familiile si membrii ca fisier Excel. Util pentru rapoarte, partajare sau backup lizibil de om.</p></div>
+        <div class="tool"><h3>Mod mentenanta</h3><p>? Mod mentenanta Afiseaza un banner pe tot site-ul in timp ce faci lucrari tehnice. Datele raman intacte. Dezactiveaza la fel de usor. Dezactivat — site-ul functioneaza normal</p></div>
+        <div class="tool"><h3>SQL Runner (SELECT only)</h3><p>? SQL Runner Verifica date din baza de date fara sa deschizi Supabase. Accepta DOAR interogari SELECT — nu poate modifica nimic. 100% sigur prin constructie. <input type="text" placeholder="Ruleaza interogare"> <button>Doar SELECT · Fara modificari</button></p></div>
+      </div>
+
+      <h3>Utilizatori</h3>
+      <p>? Utilizatori Conturi inregistrate pe site. Poti reseta parola cuiva care a uitat-o sau dezactiva conturi suspecte. Parolele sunt criptate si nu sunt vizibile nimanui. Conturi inregistrate, securitate si acces. Se incarca utilizatorii...</p>
+
+      <h3>Anunturi</h3>
+      <p>? Anunturi Apar pe homepage doar utilizatorilor autentificati. Cand expira, dispar singure fara sa faci nimic manual. Publica, programeaza si gestioneaza anunturi pentru membri. Anunturi active Se incarca anunturile...</p>
+      <div class="form-group">
+        <label>Anunt nou</label>
+        <input type="text" placeholder="Titlu">
+        <textarea placeholder="Mesaj"></textarea>
+        <select><option>Tip Anunt</option><option>Anunt</option><option>Actualizare site</option></select>
+        <label>Publica la</label>
+        <input type="datetime-local">
+        <label>Expira la</label>
+        <input type="datetime-local">
+        <button>Publica</button>
+        <button>Trimite test</button>
+      </div>
+
+      <h3>Familii inregistrate</h3>
+      <p>? Familii Editeaza detaliile oricarei familii sau sterge una complet. Stergerea este permanenta si cere confirmare explicita prin tastarea numelui familiei. Toate familiile din Calnic Online. Se incarca familiile...</p>
+
+      <h3>Mesaj catre toate familiile</h3>
+      <p>? Diferenta fata de anunturi Anunturile apar pe homepage. Mesajele se trimit pe email direct in inbox-ul fiecarei familii. Foloseste rar — doar pentru comunicari cu adevarat importante. Trimite un email tuturor familiilor inregistrate.</p>
+      <div class="form-group">
+        <input type="text" placeholder="Subiect email">
+        <textarea placeholder="Mesaj"></textarea>
+        <p>Acest mesaj va fi trimis pe email catre toate familiile inregistrate. Verifica textul cu atentie inainte de trimitere.</p>
+        <button>Trimite tuturor</button>
+        <button>Previzualizeaza</button>
+      </div>
+
+      <h3>Mesaje Contact</h3>
+      <p>? Mesaje primite Toate mesajele trimise prin formularul de contact al site-ului apar aici. Le poti citi si marca ca rezolvate direct din admin. Mesaje primite prin formularul de contact. Se incarca mesajele...</p>
+
+      <h3>Jurnale</h3>
+      <p>? Doua tipuri de jurnal Actiuni = ce AI FACUT tu in admin. Acces = cine A DESCHIS pagina admin si cand. Impreuna dau un istoric complet al activitatii administrative. Istoric complet al actiunilor si accesului in panoul admin.</p>
+      <div class="logs">
+        <div class="log"><h3>Jurnal actiuni</h3><p>? Jurnal actiuni Inregistreaza TOT ce faci in admin. Daca ceva merge gresit pe site, te uiti aici si stii exact ce s-a intamplat si cand. Se incarca...</p></div>
+        <div class="log"><h3>Jurnal acces</h3><p>? Jurnal acces Fiecare deschidere a paginii admin: cine, de unde, la ce ora. Crucial cand adaugi colegi admin — stii imediat daca cineva acceseaza din locatii suspecte. Se incarca...</p></div>
+      </div>
+
+      <h3>Manager fotografii</h3>
+      <p>? Fotografii Vizualizeaza, filtreaza si sterge fotografii nepotrivite. Stergerea este permanenta si cere confirmare — fotografiile dispar si din Supabase Storage. Toate fotografiile din arhiva satului — modereaza si gestioneaza. Toate familiile Toate fotografiile Raportate Fara descriere Se incarca fotografiile...</p>
+      <a href="#">← Inapoi la panou</a>
+
+      <h3>Ghid complet — Panou Admin</h3>
+      <p>Tot ce trebuie sa stii despre fiecare sectiune si unealta din admin.</p>
+      <div class="guide">
+        <div class="guide-item"><h3>■ Panou de control ⌄</h3><p>Ce este panoul de control? Prima pagina pe care o vezi cand deschizi admin. Arata starea intregului sat dintr-o privire: cate familii, membri, fotografii si cat de complete sunt profilurile in medie. Afiseaz a si familiile inactive de 90+ zile si cele cu profiluri incomplete, plus statusul ultimului backup efectuat.</p></div>
+        <div class="guide-item"><h3>📦 Backup si recuperare ⌄</h3><p>Backup complet — butonul mare verde Descarca TOATE datele site-ului (familii, membri, fotografii, cronologii, anunturi) intr-un singur fisier JSON cu timestamp in nume. Salveaza-l in Google Drive sau pe calculator. A pasa o data pe saptamana pentru siguranta maxima. ⚠ Pe planul gratuit Supabase nu exista backup automat. Acesta este singurul tau salvgard in caz de accident sau stergere accidentala a datelor. Istoricul backupurilor Lista tuturor backupurilor pe care le-ai efectuat cu data exacta, ora si marimea fisierului. Poti descarca orice backup vechi daca ai nevoie sa recuperezi date dintr-un moment ante rior. Restaurare cu previzualizare Incarci un fisier de backup si sistemul iti arata exact ce s-ar schimba INAINTE de a executa restaurarea — cate randuri se adauga, modifica sau sterg. Confirmi explicit, si abia at unci se executa. Niciodata nu se modifica nimic fara confirmarea ta.</p></div>
+        <div class="guide-item"><h3>⚙ Unelte tehnice ⌄</h3><p>Verificator politici RLS Verifica ca datele private ale familiilor (fotografii private, date personale, documente) sunt protejate in baza de date. O singura setare gresita in Supabase poate expune datele t uturor familiilor pe internet fara niciun avertisment. Ruleaza saptamanal. Daca apare rosu — opreste orice modificare si contacteaza suportul Supabase imediat. Curatare stocare Cauta si sterge fisiere fantoma — fotografii sterse din baza de date dar al caror fisier a ramas in Supabase Storage. Aceste fisiere consuma spatiul tau gratuit (1GB) in mod invizi bil, pana cand incarcarea de fotografii incepe sa esueze. Detector membri orfani Cauta membri ai caror familie a fost stearsa din baza de date. Sunt inregistrari invizibile care ocupa spatiu si pot cauza erori in interogari complexe. Corector date invalide Gaseste membri cu date imposibile — data decesului inainte de data nasterii, an nastere care nu se potriveste cu data completa, sau date in format gresit. Aceste erori strica widge tul "Astazi in familia ta" de pe homepage si calculul aniversarilor. Familii fara cont Gaseste familii create in baza de date dar la care nu s-a legat niciun cont de utilizator — inregistrare esuata la jumatate. Nimeni nu se poate autentifica pentru aceste familii si  ele apar in lista satului fara proprietar. Sincronizare contoare Recalculeaza numarul de membri, fotografii si generatii pentru toate familiile. Aceste numere pot deveni incorecte dupa editari manuale. Le repara pe toate dintr-o singura operatiu ne. Recomandat lunar. Toggle date demo Ascunde sau afiseaza instantaneu cele 5 familii demo (Popescu, Ionescu, Moldovan, Popa, Muresan) in lista publica a satului. Util cand testezi functionalitati noi si nu vrei ca viz itatorii sa vada date false. SQL Runner (SELECT only) Iti permite sa verifici date din baza de date direct din admin, fara sa deschizi Supabase. Accepta DOAR interogari de citire (SELECT) — nu poate modifica, sterge sau adauga nimic.  Este 100% sigur prin constructie. Export CSV Descarca toate familiile si membrii intr-un fisier care se deschide in Excel sau Google Sheets. Util pentru rapoarte, partajare cu autoritatile locale, sau ca backup lizibil de om. Mod mentenanta Afiseaza un banner pe tot site-ul care anunta vizitatorilor ca se fac lucrari tehnice. Datele raman intacte. Dezactiveaza la fel de usor cand termini lucrarile.</p></div>
+        <div class="guide-item"><h3>👤 Utilizatori ⌄</h3><p>Ce poti face in aceasta sectiune? Vezi toate conturile inregistrate pe site. Poti reseta parola unui utilizator care a uitat-o — li se trimite automat un email de resetare. Poti dezactiva un cont suspect fara sa il  stergi. Parolele sunt criptate si nu pot fi vazute de nimeni, nici de tine, nici de Supabase.</p></div>
+        <div class="guide-item"><h3>📌 Anunturi ⌄</h3><p>Cum functioneaza anunturile? Scrii un anunt, alegi tipul (Anunt general sau Actualizare site), setezi cand apare si cand expira automat. Apare pe homepage doar pentru utilizatorii autentificati. Cand ajunge la  data de expirare, dispare singur fara sa faci nimic manual. Publicare programata Daca lasi campul "Publica la" gol, anuntul apare imediat. Daca setezi o data si ora viitoare, anuntul va aparea automat la acel moment, fara sa fie nevoie sa faci ceva. Test anunt Publica anuntul doar pentru contul tau de admin. Poti vedea exact cum arata pe homepage — culoarea, formatul, textul — inainte sa il trimiti tuturor celor 47 de familii.</p></div>
+        <div class="guide-item"><h3>👪 Familii ⌄</h3><p>Ce poti face? Editeaza detaliile oricarei familii — nume, poveste, an inregistrare, setari de vizibilitate. Poti sterge o familie complet. Stergerea este permanenta si cere confirmarea numelui f amiliei tastat manual, ca masura de siguranta impotriva stergerilor accidentale.</p></div>
+        <div class="guide-item"><h3>✉ Mesaje si Contact ⌄</h3><p>Mesaj catre toate familiile Trimite un email direct la adresele tuturor familiilor inregistrate. Diferit de anunturi care apar pe homepage — mesajele ajung in inbox-ul fiecaruia. Foloseste rar, doar pentru co municari cu adevarat importante, ca sa nu devii enervant. Contact — mesaje primite Toate mesajele trimise prin formularul de contact al site-ului (pagina contact.html) apar aici. Le poti citi, raspunde sau marca ca rezolvate direct din panoul admin, fara sa verif ici email-ul.</p></div>
+        <div class="guide-item"><h3>📄 Jurnale ⌄</h3><p>Jurnal actiuni — ce AI FACUT tu Inregistreaza fiecare actiune executata in admin: ai publicat un anunt, ai sters o fotografie, ai editat o familie, ai rulat o reparatie, ai descarcat un backup. Daca ceva merge gr esit pe site, te uiti in acest jurnal si stii exact ce s-a intamplat si cand. Jurnal acces — cine A DESCHIS admin-ul Inregistreaza fiecare deschidere a paginii admin: emailul contului, tara de provenienta si ora exacta. In prezent esti singurul admin. Devine crucial cand adaugi colegi — stii imed iat daca cineva acceseaza la ore suspecte sau din locatii necunoscute.</p></div>
+        <div class="guide-item"><h3>📸 Fotografii ⌄</h3><p>Ce poti face? Vizualizeaza toate fotografiile incarcate de toate familiile, filtreaza pe familie sau status (raportate, fara descriere). Sterge fotografii nepotrivite sau accidentale. Stergerea  este permanenta si cere confirmare — fotografiile sterse dispar si din Supabase Storage.</p></div>
+      </div>
+    </div>
+  </main>
+
+  <footer>
+    <p>Calnic ·  Alba  ·  Romania  ·  ·Sat cu suflet, memorie vie·</p>
+    <div class="footer-links">
+      <a href="intrebari.html">Intrebari frecvente</a>
+      ·
+      <a href="contact.html">Contact</a>
+    </div>
+  </footer>
+</div>
+
 <script>
 document.addEventListener('supabase:ready', async function() {
+  const checkDiv = document.getElementById('access-check');
+  const contentDiv = document.getElementById('admin-content');
+  
   if (!window.supabase) {
-    document.body.innerHTML = '<h1 style="color:#c04040;text-align:center;margin-top:50px;">Eroare Sistem</h1>';
+    checkDiv.innerHTML = '<h1 style="color:#c04040;text-align:center;margin-top:50px;">Eroare Sistem</h1>';
     return;
   }
-  const { data: { session } } = await window.supabase.auth.getSession();
+  
+  const {  { session } } = await window.supabase.auth.getSession();
   if (!session) {
     window.location.href = 'login.html';
     return;
   }
-  const { data: profile } = await window.supabase.from('profiles').select('is_admin').eq('id', session.user.id).single();
+  
+  const {  profile } = await window.supabase.from('profiles').select('is_admin').eq('id', session.user.id).single();
   if (!profile || !profile.is_admin) {
-    document.body.innerHTML = '<h1 style="color:#c04040;text-align:center;margin-top:50px;">Acces Restrictionat</h1><p style="text-align:center;"><a href="index.html" style="color:#d4a84a;">Inapoi acasa</a></p>';
+    checkDiv.innerHTML = '<h1 style="color:#c04040;text-align:center;margin-top:50px;">Acces Restrictionat</h1><p style="text-align:center;"><a href="index.html" style="color:#d4a84a;">Inapoi acasa</a></p>';
     return;
   }
-  console.log('Admin access granted');
+  
+  checkDiv.style.display = 'none';
+  contentDiv.classList.remove('hidden');
 });
 </script>
+
+</body>
+</html>
