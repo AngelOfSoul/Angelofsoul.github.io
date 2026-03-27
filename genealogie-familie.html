@@ -586,7 +586,7 @@ var CARD_W=110,GEN_Y={3:30,2:180,1:340,0:490},GEN_GAP_X=28;
 
 // ── INIT ─────────────────────────────────────────────────
 document.getElementById('yr').textContent=new Date().getFullYear();
-S.familyId=new URLSearchParams(window.location.search).get('family')||new URLSearchParams(window.location.search).get('id');
+(function(){var params=new URLSearchParams(window.location.search);S.familyId=params.get('family')||params.get('id')||localStorage.getItem('calnic-familyId');if(S.familyId)localStorage.setItem('calnic-familyId',S.familyId);})();
 applyLang(lang());initLang();initScrollBtns();initHamburger();initGuide();initKeyboard();initZoomPan();initUI();
 
 if(window.supabase&&window.supabase.from){boot();}else{document.addEventListener('supabase:ready',boot);}
