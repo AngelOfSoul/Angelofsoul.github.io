@@ -2,10 +2,8 @@
 admin-nav.js — Calnic Online v2 (FIXED)
 */
 (function () {
-/* ── PAGE LOAD FLASH FIX ── */
 document.documentElement.style.background = '#0a0a0a';
 
-/* ── STICKY NAV ── */
 var stickyStyle = document.createElement('style');
 stickyStyle.textContent = [
   'nav { position:sticky; top:0; z-index:900; }',
@@ -49,7 +47,6 @@ stickyStyle.textContent = [
 ].join('\n');
 document.head.appendChild(stickyStyle);
 
-/* ── SMART LOGIN REDIRECT ── */
 if (window.location.pathname.indexOf('login') !== -1) {
   function checkLoginRedirect() {
     if (!window.supabase) return;
@@ -59,10 +56,13 @@ if (window.location.pathname.indexOf('login') !== -1) {
       }
     });
   }
-  if (window.supabase) { checkLoginRedirect(); } else { document.addEventListener('supabase:ready', checkLoginRedirect); }
+  if (window.supabase) { 
+    checkLoginRedirect(); 
+  } else { 
+    document.addEventListener('supabase:ready', checkLoginRedirect); 
+  }
 }
 
-/* ── MERGE LANG SWITCHER INTO NAV ── */
 function mergeLangIntoNav() {
   var langBar = document.querySelector('.lang-bar');
   var navRight = document.querySelector('.nav-right');
@@ -86,7 +86,6 @@ function mergeLangIntoNav() {
   langBar.style.display = 'none';
 }
 
-/* ── BUILD PROFILE BUTTON ── */
 function buildProfileButton(session, familyName, hasNotif) {
   var navRight = document.querySelector('#nav-right-main, .nav-right');
   if (!navRight) return;
@@ -160,7 +159,6 @@ function buildMobileFloat(initial, hasNotif) {
   document.body.appendChild(fb);
 }
 
-/* ── INJECT ADMIN LINK ── */
 function injectAdminLink() {
   var navRight = document.querySelector('.nav-right');
   if (!navRight) return;
@@ -187,20 +185,18 @@ function showAdminLink() {
   document.querySelectorAll('.calnic-admin-mobile-link').forEach(function(el){ el.classList.add('show'); });
 }
 
-/* ── CHECK NOTIFICATIONS ── */
 function checkNotifications(familyId) {
   if (!window.supabase || !familyId) return Promise.resolve(false);
   var now = new Date().toISOString();
   return window.supabase
-  .from('announcements')
-  .select('id', {count:'exact', head:true})
-  .lte('published_at', now)
-  .gte('expires_at', now)
-  .then(function(r) { return (r.count || 0) > 0; })
-  .catch(function() { return false; });
+    .from('announcements')
+    .select('id', {count:'exact', head:true})
+    .lte('published_at', now)
+    .gte('expires_at', now)
+    .then(function(r) { return (r.count || 0) > 0; })
+    .catch(function() { return false; });
 }
 
-/* ── MAIN BOOT ── */
 function initAdminNav() {
   mergeLangIntoNav();
   if (!window.supabase) {
@@ -234,9 +230,13 @@ function initAdminNav() {
     });
   });
 }
-if (window.supabase) { initAdminNav(); } else { document.addEventListener('supabase:ready', initAdminNav); }
 
-/* ── MOVE INTREBARI TO FOOTER ── */
+if (window.supabase) { 
+  initAdminNav(); 
+} else { 
+  document.addEventListener('supabase:ready', initAdminNav); 
+}
+
 document.addEventListener('DOMContentLoaded', function() {
   var intrebariLink = document.querySelector('a.nav-link[href="intrebari.html"]');
   if (intrebariLink) {
