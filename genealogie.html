@@ -19,6 +19,8 @@
 <link rel="canonical" href="https://calniconline.ro/genealogie.html">
 <title>Genealogie — Calnic Online</title>
 <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,600;0,700;1,400&family=EB+Garamond:ital,wght@0,400;0,500;1,400&display=swap" rel="stylesheet">
+<link rel="icon" type="image/svg+xml" href="favicon.svg">
+<link rel="icon" type="image/x-icon" href="favicon.ico">
 <style>
 :root{--bg:#0a0a0a;--s1:#111;--s2:#161616;--s3:#1c1c1c;--b1:#2a2a2a;--b2:#383838;--gold:#d4a84a;--gold-l:#e0b84a;--gold-d:#b08030;--gold-m:#7a5828;--text:#f0e8d0;--muted:#a09070;--green:#82c46a;--green-bg:#0d1a0d;--green-br:#2a4a2a;--red:#c86a6a;--red-bg:#1a0d0d;--amber:#c8a040;}
 *,*::before,*::after{margin:0;padding:0;box-sizing:border-box;}
@@ -161,10 +163,6 @@ footer .g{color:var(--gold-d);font-style:normal;}
 }
 @media(min-width:741px){.hamburger{display:none!important;}.nav-mobile-menu{display:none!important;}}
 </style>
-<link rel="icon" type="image/x-icon" href="favicon.ico">
-<link rel="icon" type="image/png" sizes="32x32" href="favicon.png">
-<link rel="apple-touch-icon" sizes="180x180" href="apple-touch-icon.png">
-<link rel="shortcut icon" href="favicon.ico">
 </head>
 <body>
 
@@ -311,7 +309,7 @@ footer .g{color:var(--gold-d);font-style:normal;}
 <script src="admin-nav.js"></script>
 <script>
 'use strict';
-function escH(s){return String(s==null?'':s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;').replace(/\''/g,'&#39;');}
+function escH(s){return String(s==null?'':s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;').replace(/'/g,'&#39;');}
 function lang(){return localStorage.getItem('calnic-lang')||'ro';}
 function t(ro,en){return lang()==='en'?en:ro;}
 
@@ -399,8 +397,8 @@ document.getElementById('pfBtn').addEventListener('click',function(){
       var fA=families.find(function(f){return f.id===from;});var fB=families.find(function(f){return f.id===to;});
       if(found){
         var types={blood:t('sange','blood'),marriage:t('casatorie','marriage'),alliance:t('alianta','alliance'),distant:t('indepartata','distant')};
-        result.textContent=t('Exista o legatura directa de tip &laquo;'+(types[found.link_type]||found.link_type)+'&raquo; intre familiile '+(fA?fA.name:'A')+' si '+(fB?fB.name:'B')+'.',
-          'There is a direct '+(types[found.link_type]||found.link_type)+' connection between '+(fA?fA.name:'A')+' and '+(fB?fB.name:'B')+'.');
+        result.innerHTML=t('Exista o legatura directa de tip &laquo;'+escH(types[found.link_type]||found.link_type)+'&raquo; intre familiile '+escH(fA?fA.name:'A')+' si '+escH(fB?fB.name:'B')+'.',
+          'There is a direct &laquo;'+escH(types[found.link_type]||found.link_type)+'&raquo; connection between '+escH(fA?fA.name:'A')+' and '+escH(fB?fB.name:'B')+'.');
       } else {
         result.textContent=t('Nu exista o legatura directa inregistrata intre aceste familii. Aceasta nu inseamna ca nu exista o legatura — doar ca nu a fost documentata inca.',
           'No direct connection is recorded between these families. This does not mean there is none — it may not have been documented yet.');
@@ -437,7 +435,7 @@ function doSearch(q){
 }
 
 function renderSearchResults(results,q,res){
-  if(!results.length){res.innerHTML='<div class="sr-item" style="pointer-events:none;">'+escH(t('Niciun rezultat pentru &laquo;'+q+'&raquo;.','No results for &laquo;'+q+'&raquo;.'))+'</div>';res.classList.add('open');return;}
+  if(!results.length){res.innerHTML='<div class="sr-item" style="pointer-events:none;">'+(lang()==='en'?'No results for &laquo;':'Niciun rezultat pentru &laquo;')+escH(q)+'&raquo;.</div>';res.classList.add('open');return;}
   res.innerHTML='';
   results.forEach(function(r){
     var item=document.createElement('div');item.className='sr-item';

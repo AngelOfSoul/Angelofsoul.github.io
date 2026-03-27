@@ -586,11 +586,10 @@ var CARD_W=110,GEN_Y={3:30,2:180,1:340,0:490},GEN_GAP_X=28;
 
 // ── INIT ─────────────────────────────────────────────────
 document.getElementById('yr').textContent=new Date().getFullYear();
-S.familyId=new URLSearchParams(window.location.search).get('family')||new URLSearchParams(window.location.search).get('id');
+(function(){var params=new URLSearchParams(window.location.search);S.familyId=params.get('family')||params.get('id')||localStorage.getItem('calnic-familyId');if(S.familyId)localStorage.setItem('calnic-familyId',S.familyId);})();
 applyLang(lang());initLang();initScrollBtns();initHamburger();initGuide();initKeyboard();initZoomPan();initUI();
 
 if(window.supabase&&window.supabase.from){boot();}else{document.addEventListener('supabase:ready',boot);}
-window.addEventListener('load',function(){if(S.members.length)center();});
 
 function boot(){
   window.supabase.auth.getSession().then(function(r){
@@ -642,18 +641,43 @@ function loadRelations(rid){
 
 function afterLoad(rid){
   if(rid!==S.reqId)return;
-  updateTitle();render();center();
-  // Safety re-center after fonts/images settle
+  updateTitle();render();if(S.members.length)center();
+  if(S.members.length===0){
+    var cv=document.getElementById('treeCanvas');
+    if(cv){
+      var d=document.createElement('div');
+      d.className='tree-error';
+      d.innerHTML='<div class="tree-error-icon">&#127807;</div>'
+        +'<div class="tree-error-title" data-ro="Arbore gol" data-en="Empty tree">Arbore gol</div>'
+        +'<div class="tree-error-sub" data-ro="Niciun membru adaugat inca. Apasa + Adauga persoana pentru a incepe." data-en="No members added yet. Press + Add person to get started.">Niciun membru adaugat inca. Apasa + Adauga persoana pentru a incepe.</div>';
+      cv.innerHTML='';
+      cv.appendChild(d);
+    }
+  }
+  // Safety re-center after layout settles — 300 ms is enough for the
+  // browser to finish a paint cycle after the Supabase response, so
+  // stage.clientWidth returns the real value instead of 0.
   setTimeout(function(){if(S.members.length)center();},300);
   // Auto-open editor if ?edit_member= param is present (e.g. coming from familiile-familie.html)
   var autoEdit=new URLSearchParams(window.location.search).get('edit_member');
   if(autoEdit){
     var found=S.members.find(function(m){return m.id===autoEdit;});
-    if(found){setTimeout(function(){openEditor(autoEdit);},500);}
+    if(found){setTimeout(function(){openEditor(autoEdit);},400);}
   }
 }
 
 function reload(){S.relations=[];loadFamily();}
+
+// ── SYNC MEMBERS COUNT ───────────────────────────────────
+function syncMembersCount(){
+  if(!S.familyId||!window.supabase)return;
+  window.supabase.from('members').select('id',{count:'exact',head:true}).eq('family_id',S.familyId).then(function(r){
+    if(r.error){console.warn('[Calnic] syncMembersCount count query failed:',r.error.message);return;}
+    window.supabase.from('families').update({members_count:r.count}).eq('id',S.familyId).then(function(ur){
+      if(ur.error)console.warn('[Calnic] syncMembersCount update failed:',ur.error.message);
+    });
+  });
+}
 
 // ── RENDER ───────────────────────────────────────────────
 function render(){
@@ -700,12 +724,13 @@ var REL_META={
 };
 var REL_GROUPS=['Parinti','Bunici','Strabunici','Copii','Frati','Sot / Sotie','Familie extinsa','Socri'];
 
-function roleToGen(r){
-  r=(r||'').toLowerCase();
-  if(/strabunic|great/.test(r))return 0;
-  if(/bunic|grandp/.test(r))return 1;
-  if(/tata|mama|parinte|parent/.test(r))return 2;
-  if(/eu|myself|self|current/.test(r))return 3;
+function roleToGen(role){
+  if(!role)return 2;
+  var r=(role||'').toLowerCase();
+  if(r==='bunic'||r==='bunica'||r==='grandparent'||r==='grandfather'||r==='grandmother')return 0;
+  if(r==='parinte'||r==='tata'||r==='mama'||r==='father'||r==='mother'||r==='parent'||r==='step')return 1;
+  if(r==='copil'||r==='fiu'||r==='fiica'||r==='child'||r==='son'||r==='daughter')return 3;
+  // spouse, sibling, other, member, and any unknown role → default generation 2
   return 2;
 }
 
@@ -732,6 +757,8 @@ function computeLayout(){
   var genOf={};
   S.members.forEach(function(m){
     genOf[m.id]=m.generation!=null?m.generation:roleToGen(m.role);
+    if(genOf[m.id]==null||isNaN(genOf[m.id]))genOf[m.id]=2;
+    genOf[m.id]=Math.max(0,Math.min(3,genOf[m.id]));
   });
 
   // 2. Build parent→child + spouse maps
@@ -994,6 +1021,7 @@ function buildGhost(layout,mxX){
 }
 
 function renderEmpty(cv){
+  S.panX=0;S.panY=0;S.zoom=1;
   cv.style.width='100%';cv.style.height='400px';
   var d=document.createElement('div');d.className='tree-error';d.style.height='100%';
   d.innerHTML='<div class="tree-error-icon">&#127807;</div><div class="tree-error-title">'+escH(t('Arborele tau incepe de aici','Your tree starts here'))+'</div><div class="tree-error-sub">'+escH(t('Adauga prima persoana — poate fi tu, un parinte sau cel mai vechi strabun pe care il cunosti.','Add the first person — it can be you, a parent or the oldest ancestor you know.'))+'</div>';
@@ -1004,6 +1032,7 @@ function showLoading(){var cv=document.getElementById('treeCanvas'),svg=document
 
 function showErr(title,sub){
   var cv=document.getElementById('treeCanvas'),svg=document.getElementById('connSvg');
+  S.panX=0;S.panY=0;S.zoom=1;
   Array.from(cv.children).forEach(function(el){if(el!==svg)cv.removeChild(el);});
   var d=document.createElement('div');d.className='tree-error';
   d.innerHTML='<div class="tree-error-icon">&#9888;&#65039;</div><div class="tree-error-title">'+escH(title)+'</div><div class="tree-error-sub">'+escH(sub)+'</div>';
@@ -1420,7 +1449,7 @@ document.getElementById('delExecuteBtn').addEventListener('click',function(){
   window.supabase.from('members').delete().eq('id',id).then(function(r){
     if(r.error){btn.disabled=false;btn.textContent=t('Sterge definitiv','Delete permanently');alert(r.error.message);return;}
     S.members=S.members.filter(function(x){return x.id!==id;});S.relations=S.relations.filter(function(r){return r.from_member_id!==id&&r.to_member_id!==id;});
-    closeEditor();closeDetail();showUndo(t(m.name+' a fost sters.',''+m.name+' was deleted.'),null);render();
+    closeEditor();closeDetail();syncMembersCount();showUndo(t(m.name+' a fost sters.',''+m.name+' was deleted.'),null);render();
   }).catch(function(err){btn.disabled=false;btn.textContent=t('Sterge definitiv','Delete permanently');alert(err.message);});
 });
 
@@ -1449,6 +1478,7 @@ document.getElementById('af-save-btn').addEventListener('click',function(){
     btn.disabled=false;btn.setAttribute('data-ro','Adauga in arbore');btn.textContent=t('Adauga in arbore','Add to tree');
     if(r.error){showMsg('af-msg','error',r.error.message);return;}
     if(r.data&&r.data[0])S.members.push(r.data[0]);
+    syncMembersCount();
     showMsg('af-msg','success',t('Persoana adaugata in arbore!','Person added to tree!'));
     setTimeout(function(){closeAddModal();render();},1200);
   }).catch(function(err){btn.disabled=false;btn.textContent=t('Adauga in arbore','Add to tree');showMsg('af-msg','error',err.message);});
@@ -1599,6 +1629,9 @@ function initScrollBtns(){
 
 // ── HAMBURGER ────────────────────────────────────────────
 function initHamburger(){var h=document.getElementById('hamburgerBtn'),m=document.getElementById('navMobileMenu');if(!h||!m)return;h.addEventListener('click',function(){var o=m.classList.toggle('open');h.textContent=o?'\u2715':'\u2630';});}
+
+// Re-center once the full page layout is complete (fallback for blank tree)
+window.addEventListener('load',function(){if(S.members.length)center();});
 </script>
 
 
