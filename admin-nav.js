@@ -1,17 +1,7 @@
 /*
- * admin-nav.js — Calnic Online v2
- * Handles:
- *   1. Smart profile button — two states (logged in/out), avatar, notification dot
- *   2. Admin link — visible only to is_admin accounts
- *   3. Language switcher merged into nav
- *   4. Sticky nav on scroll
- *   5. Mobile floating profile button
- *   6. Smart login redirect — if already logged in, skip login.html
- *   7. Page load flash fix
- *   8. Active nav indicator improvements
- */
+admin-nav.js — Calnic Online v2 (FIXED)
+*/
 (function () {
-
 /* ── PAGE LOAD FLASH FIX ── */
 document.documentElement.style.background = '#0a0a0a';
 
@@ -20,7 +10,6 @@ var stickyStyle = document.createElement('style');
 stickyStyle.textContent = [
   'nav { position:sticky; top:0; z-index:900; }',
   '.site-header { position:sticky; top:0; z-index:901; }',
-  /* Profile button styles */
   '.prf-btn-out { display:flex;align-items:center;gap:8px;margin:6px 10px;padding:7px 18px;background:#b08030;border:1px solid #d4a84a;border-radius:2px;font-family:"Playfair Display",serif;font-size:13px;font-weight:700;color:#050505;letter-spacing:1px;cursor:pointer;transition:all 0.2s;white-space:nowrap;text-decoration:none; }',
   '.prf-btn-out:hover { background:#d4a84a;color:#050505;text-decoration:none; }',
   '.prf-btn-in { display:flex;align-items:center;gap:8px;margin:5px 10px;padding:4px 12px 4px 4px;background:#161616;border:1px solid #b08030;border-radius:2px;cursor:pointer;transition:all 0.2s;position:relative;white-space:nowrap;text-decoration:none; }',
@@ -31,7 +20,6 @@ stickyStyle.textContent = [
   '.prf-text { display:flex;flex-direction:column;gap:1px; }',
   '.prf-name { font-family:"Playfair Display",serif;font-size:13px;color:#d4a84a;line-height:1; }',
   '.prf-sub { font-size:10px;color:#7a5828;letter-spacing:1px;line-height:1; }',
-  /* Dropdown */
   '.prf-dropdown { position:absolute;top:calc(100% + 4px);right:0;background:#111111;border:1px solid #b08030;border-radius:2px;min-width:180px;z-index:1000;display:none;box-shadow:0 8px 24px rgba(0,0,0,0.6); }',
   '.prf-dropdown.show { display:block; }',
   '.prf-dd-item { display:flex;align-items:center;gap:10px;padding:10px 16px;font-family:"EB Garamond",serif;font-size:14px;color:#f5eed8;cursor:pointer;transition:all 0.15s;text-decoration:none;border-bottom:1px solid #1c1c1c; }',
@@ -40,17 +28,14 @@ stickyStyle.textContent = [
   '.prf-dd-item.logout { color:#a05050; }',
   '.prf-dd-item.logout:hover { color:#e08080;background:#1a0808; }',
   '.prf-dd-sep { height:1px;background:#1c1c1c;margin:0; }',
-  /* Admin link */
   '.calnic-admin-link { display:none!important; }',
   '.calnic-admin-link.show { display:flex!important;color:#c04040!important;border-left:1px solid #3a1010!important; }',
   '.calnic-admin-mobile-link { display:none!important; }',
   '.calnic-admin-mobile-link.show { display:flex!important;color:#c04040!important;border-left:3px solid #c04040!important; }',
-  /* Lang in nav */
   '.nav-lang { display:flex;align-items:center;gap:4px;padding:0 10px;border-left:1px solid #2a2a2a; }',
   '.nav-lang-btn { background:none;border:1px solid #585040;color:#f5eed8;padding:2px 8px;cursor:pointer;font-family:"EB Garamond",serif;font-size:11px;letter-spacing:1px;transition:all 0.2s;border-radius:1px; }',
   '.nav-lang-btn.active { background:#b08030;border-color:#d4a84a;color:#050505;font-weight:700; }',
   '.nav-lang-btn:hover:not(.active) { border-color:#d4a84a; }',
-  /* Mobile floating button */
   '.mobile-prf-float { display:none;position:fixed;bottom:20px;right:16px;z-index:9999;width:50px;height:50px;border-radius:50%;background:#b08030;border:2px solid #d4a84a;align-items:center;justify-content:center;cursor:pointer;transition:all 0.2s;box-shadow:0 4px 16px rgba(0,0,0,0.5);text-decoration:none; }',
   '.mobile-prf-float:hover { background:#d4a84a;transform:scale(1.08); }',
   '.mobile-prf-float-av { font-family:"Playfair Display",serif;font-size:18px;color:#050505;font-weight:700; }',
@@ -58,10 +43,8 @@ stickyStyle.textContent = [
   '.mobile-prf-float-notif.show { display:block; }',
   '@media(max-width:740px) { .mobile-prf-float { display:flex; } }',
   '@media(min-width:741px) { .mobile-prf-float { display:none!important; } }',
-  /* Active nav indicator */
   '.nav-link.active { background:#161616!important;color:#d4a84a!important;border-bottom:2px solid #d4a84a!important;position:relative; }',
-  '.nav-link.active::after { content:"";position:absolute;bottom:-2px;left:50%;transform:translateX(-50%);width:6px;height:6px;background:#d4a84a;border-radius:50%; }',
-  /* Nav divider before profile */
+  '.nav-link.active::after { content:" ";position:absolute;bottom:-2px;left:50%;transform:translateX(-50%);width:6px;height:6px;background:#d4a84a;border-radius:50%; }',
   '.nav-prf-divider { width:1px;background:linear-gradient(to bottom,transparent,#b08030,transparent);margin:8px 4px;flex-shrink:0; }',
 ].join('\n');
 document.head.appendChild(stickyStyle);
@@ -84,11 +67,9 @@ function mergeLangIntoNav() {
   var langBar = document.querySelector('.lang-bar');
   var navRight = document.querySelector('.nav-right');
   if (!langBar || !navRight) return;
-
   var btnRo = document.getElementById('btn-ro') || document.getElementById('btn-ro-li');
   var btnEn = document.getElementById('btn-en') || document.getElementById('btn-en-li');
   if (!btnRo || !btnEn) return;
-
   var langWrap = document.createElement('div');
   langWrap.className = 'nav-lang';
   var nbRo = document.createElement('button');
@@ -102,8 +83,6 @@ function mergeLangIntoNav() {
   langWrap.appendChild(nbRo);
   langWrap.appendChild(nbEn);
   navRight.appendChild(langWrap);
-
-  // Hide original lang bar
   langBar.style.display = 'none';
 }
 
@@ -111,77 +90,58 @@ function mergeLangIntoNav() {
 function buildProfileButton(session, familyName, hasNotif) {
   var navRight = document.querySelector('#nav-right-main, .nav-right');
   if (!navRight) return;
-
-  // Remove existing profile buttons
   var existing = navRight.querySelector('.prf-btn-out, .prf-btn-in, .prf-btn-wrap');
   if (existing) existing.remove();
-
-  // Remove old nav-login (Contul Familiei)
   var oldLogin = navRight.querySelector('.nav-login:not(.calnic-admin-link)');
   if (oldLogin) oldLogin.remove();
-
-  // Add divider
   var divExist = navRight.querySelector('.nav-prf-divider');
   if (!divExist) {
     var div = document.createElement('div');
     div.className = 'nav-prf-divider';
     navRight.insertBefore(div, navRight.firstChild);
   }
-
   if (!session) {
-    // LOGGED OUT — gold button
     var btn = document.createElement('a');
     btn.className = 'prf-btn-out';
     btn.href = 'login.html';
-    btn.innerHTML = '&#128274; <span>Profilul Meu</span>';
+    btn.innerHTML = '🔒 Profilul Meu';
     navRight.appendChild(btn);
-
-    // Mobile floating
     buildMobileFloat(null, false);
   } else {
-    // LOGGED IN — avatar button with dropdown
     var initial = familyName ? familyName.charAt(0).toUpperCase() : '?';
     var wrap = document.createElement('div');
     wrap.className = 'prf-btn-wrap';
     wrap.style.cssText = 'position:relative;display:flex;align-items:center;';
-
     var btn = document.createElement('a');
     btn.className = 'prf-btn-in';
     btn.href = 'dashboard.html';
     btn.innerHTML =
-      '<div class="prf-avatar">' + initial +
-        '<div class="prf-notif-dot' + (hasNotif ? ' show' : '') + '" id="prf-notif-dot"></div>' +
-      '</div>' +
-      '<div class="prf-text">' +
-        '<div class="prf-name">' + (familyName || 'Profilul Meu') + '</div>' +
-        '<div class="prf-sub">PROFILUL MEU</div>' +
-      '</div>';
-
-    // Dropdown
+      ' <div class="prf-avatar">' + initial +
+        ' <div class="prf-notif-dot' + (hasNotif ? ' show' : '') + '" id="prf-notif-dot"> </div>' +
+      ' </div>' +
+      ' <div class="prf-text">' +
+        ' <div class="prf-name">' + (familyName || 'Profilul Meu') + ' </div>' +
+        ' <div class="prf-sub">PROFILUL MEU </div>' +
+      ' </div>';
     var dd = document.createElement('div');
     dd.className = 'prf-dropdown';
     dd.id = 'prf-dropdown';
     dd.innerHTML =
-      '<a class="prf-dd-item" href="dashboard.html">&#128100; Profilul familiei mele</a>' +
-      '<a class="prf-dd-item" href="dashboard.html#photos">&#128248; Fotografiile mele</a>' +
-      '<a class="prf-dd-item" href="dashboard.html#members">&#127803; Membrii familiei</a>' +
-      '<div class="prf-dd-sep"></div>' +
-      '<a class="prf-dd-item logout" href="#" onclick="window.supabase&&window.supabase.auth.signOut().then(function(){window.location.href=\'index.html\'});return false;">&#128275; Deconectare</a>';
-
+      ' <a class="prf-dd-item" href="dashboard.html"> &#128100; Profilul familiei mele </a>' +
+      ' <a class="prf-dd-item" href="dashboard.html#photos"> &#128248; Fotografiile mele </a>' +
+      ' <a class="prf-dd-item" href="dashboard.html#members"> &#127803; Membrii familiei </a>' +
+      ' <div class="prf-dd-sep"> </div>' +
+      ' <a class="prf-dd-item logout" href="#" onclick="window.supabase && window.supabase.auth.signOut().then(function(){window.location.href=\'index.html\'});return false;"> &#128275; Deconectare </a>';
     btn.addEventListener('click', function(e) {
       e.preventDefault();
       dd.classList.toggle('show');
     });
-
     document.addEventListener('click', function(e) {
       if (!wrap.contains(e.target)) dd.classList.remove('show');
     });
-
     wrap.appendChild(btn);
     wrap.appendChild(dd);
     navRight.appendChild(wrap);
-
-    // Mobile floating
     buildMobileFloat(initial, hasNotif);
   }
 }
@@ -189,14 +149,13 @@ function buildProfileButton(session, familyName, hasNotif) {
 function buildMobileFloat(initial, hasNotif) {
   var existing = document.querySelector('.mobile-prf-float');
   if (existing) existing.remove();
-
   var fb = document.createElement('a');
   fb.className = 'mobile-prf-float';
   fb.href = initial ? 'dashboard.html' : 'login.html';
   if (initial) {
-    fb.innerHTML = '<span class="mobile-prf-float-av">' + initial + '</span><div class="mobile-prf-float-notif' + (hasNotif ? ' show' : '') + '"></div>';
+    fb.innerHTML = '' + initial + '';
   } else {
-    fb.innerHTML = '<span style="font-size:18px;">&#128274;</span>';
+    fb.innerHTML = '🔒';
   }
   document.body.appendChild(fb);
 }
@@ -210,17 +169,15 @@ function injectAdminLink() {
   link.className = 'nav-login calnic-admin-link';
   link.href = 'admin.html';
   link.title = 'Panou Admin';
-  link.innerHTML = '&#9670; <span class="nl">Admin</span>';
+  link.innerHTML = '◆ Admin';
   navRight.insertBefore(link, navRight.firstChild);
-
-  // Mobile
   var menus = document.querySelectorAll('.nav-mobile-menu, #navMobileMenu, #navMobileMenu2');
   menus.forEach(function(menu) {
     if (menu.querySelector('.calnic-admin-mobile-link')) return;
     var ml = document.createElement('a');
     ml.className = 'nav-mobile-link calnic-admin-mobile-link';
     ml.href = 'admin.html';
-    ml.innerHTML = '&#9670; Admin';
+    ml.innerHTML = '◆ Admin';
     menu.insertBefore(ml, menu.firstChild);
   });
 }
@@ -235,32 +192,27 @@ function checkNotifications(familyId) {
   if (!window.supabase || !familyId) return Promise.resolve(false);
   var now = new Date().toISOString();
   return window.supabase
-    .from('announcements')
-    .select('id', {count:'exact', head:true})
-    .lte('published_at', now)
-    .gte('expires_at', now)
-    .then(function(r) { return (r.count || 0) > 0; })
-    .catch(function() { return false; });
+  .from('announcements')
+  .select('id', {count:'exact', head:true})
+  .lte('published_at', now)
+  .gte('expires_at', now)
+  .then(function(r) { return (r.count || 0) > 0; })
+  .catch(function() { return false; });
 }
 
 /* ── MAIN BOOT ── */
 function initAdminNav() {
   mergeLangIntoNav();
-
   if (!window.supabase) {
     buildProfileButton(null, null, false);
     return;
   }
-
   window.supabase.auth.getSession().then(function(res) {
     var session = res.data && res.data.session;
-
     if (!session) {
       buildProfileButton(null, null, false);
       return;
     }
-
-    // Logged in — get family name + admin status + notifications in parallel
     Promise.all([
       window.supabase.from('families').select('name,id').eq('owner_id', session.user.id).single(),
       window.supabase.from('profiles').select('is_admin').eq('id', session.user.id).single()
@@ -270,10 +222,8 @@ function initAdminNav() {
       var familyName = familyData ? familyData.name : 'Profilul Meu';
       var familyId = familyData ? familyData.id : null;
       var isAdmin = profileData && profileData.is_admin;
-
       checkNotifications(familyId).then(function(hasNotif) {
         buildProfileButton(session, familyName, hasNotif);
-
         if (isAdmin) {
           injectAdminLink();
           showAdminLink();
@@ -291,7 +241,6 @@ document.addEventListener('DOMContentLoaded', function() {
   var intrebariLink = document.querySelector('a.nav-link[href="intrebari.html"]');
   if (intrebariLink) {
     intrebariLink.style.display = 'none';
-    // Add to footer
     var footer = document.querySelector('footer');
     if (footer) {
       var fl = document.createElement('a');
@@ -302,10 +251,7 @@ document.addEventListener('DOMContentLoaded', function() {
       footer.appendChild(fl);
     }
   }
-
-  // Also hide from mobile menu
   var mobileIntrebari = document.querySelector('a.nav-mobile-link[href="intrebari.html"]');
   if (mobileIntrebari) mobileIntrebari.style.display = 'none';
 });
-
 })();
