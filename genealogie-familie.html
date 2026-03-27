@@ -641,7 +641,7 @@ function loadRelations(rid){
 
 function afterLoad(rid){
   if(rid!==S.reqId)return;
-  updateTitle();render();center();
+  updateTitle();render();if(S.members.length)center();
   // Safety re-center after layout settles — 300 ms is enough for the
   // browser to finish a paint cycle after the Supabase response, so
   // stage.clientWidth returns the real value instead of 0.
@@ -1006,6 +1006,7 @@ function buildGhost(layout,mxX){
 }
 
 function renderEmpty(cv){
+  S.panX=0;S.panY=0;S.zoom=1;
   cv.style.width='100%';cv.style.height='400px';
   var d=document.createElement('div');d.className='tree-error';d.style.height='100%';
   d.innerHTML='<div class="tree-error-icon">&#127807;</div><div class="tree-error-title">'+escH(t('Arborele tau incepe de aici','Your tree starts here'))+'</div><div class="tree-error-sub">'+escH(t('Adauga prima persoana — poate fi tu, un parinte sau cel mai vechi strabun pe care il cunosti.','Add the first person — it can be you, a parent or the oldest ancestor you know.'))+'</div>';
@@ -1016,6 +1017,7 @@ function showLoading(){var cv=document.getElementById('treeCanvas'),svg=document
 
 function showErr(title,sub){
   var cv=document.getElementById('treeCanvas'),svg=document.getElementById('connSvg');
+  S.panX=0;S.panY=0;S.zoom=1;
   Array.from(cv.children).forEach(function(el){if(el!==svg)cv.removeChild(el);});
   var d=document.createElement('div');d.className='tree-error';
   d.innerHTML='<div class="tree-error-icon">&#9888;&#65039;</div><div class="tree-error-title">'+escH(title)+'</div><div class="tree-error-sub">'+escH(sub)+'</div>';
