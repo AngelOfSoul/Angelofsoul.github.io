@@ -16,7 +16,7 @@
 
     <style>
         /* ────────────────────────────────────────
-           THEME VARIABLES (Dark & Gold)
+           THEME VARIABLES (Dark & Gold - Matches All Pages)
            ──────────────────────────────────────── */
         :root {
             --color-bg: #121212;
@@ -55,7 +55,7 @@
         button { cursor: pointer; font-family: inherit; }
 
         /* ────────────────────────────────────────
-           NAVIGATION (Matches index.html)
+           NAVIGATION (Matches index.html Exactly)
            ──────────────────────────────────────── */
         .navbar {
             background: var(--color-surface);
@@ -284,7 +284,7 @@
         }
 
         /* ────────────────────────────────────────
-           MODALS (Session 3: Before Script)
+           MODALS (Session 3: Before Script - Dark/Gold Theme)
            ──────────────────────────────────────── */
         dialog {
             background: var(--color-surface);
@@ -386,7 +386,7 @@
         }
 
         /* ────────────────────────────────────────
-           FOOTER (Matches index.html)
+           FOOTER (Matches All Pages Exactly)
            ──────────────────────────────────────── */
         footer {
             background: var(--color-surface);
@@ -431,7 +431,7 @@
 </head>
 <body>
 
-    <!-- NAVIGATION -->
+    <!-- NAVIGATION (Matches index.html) -->
     <nav class="navbar">
         <div class="nav-logo">Calnic Online</div>
         
@@ -497,7 +497,7 @@
 
     </main>
 
-    <!-- FOOTER -->
+    <!-- FOOTER (Matches All Pages Exactly) -->
     <footer>
         <p>Calnic · Alba · Romania</p>
         <p>Sat cu suflet, memorie vie</p>
@@ -509,6 +509,7 @@
 
     <!-- ────────────────────────────────────────
          MODALS (Session 3: Placed BEFORE Scripts)
+         Session 1: Dark/Gold Theme
          ──────────────────────────────────────── -->
 
     <!-- 1. Welcome/Help Modal -->
@@ -586,7 +587,7 @@
             <div class="form-group">
                 <label>2. Selectează tipul legăturii</label>
                 <div class="relation-grid">
-                    <!-- Session 4: New Relation Types -->
+                    <!-- Session 4: New Romanian Relation Types -->
                     <button class="relation-btn" data-type="tata">Tată</button>
                     <button class="relation-btn" data-type="mama">Mamă</button>
                     <button class="relation-btn" data-type="frate">Frate</button>
@@ -679,7 +680,7 @@
          JAVASCRIPT
          ──────────────────────────────────────── -->
     <script type="module">
-        // ─── SUPABASE INITIALIZATION (Using your real credentials) ───
+        // ─── SUPABASE INITIALIZATION (Your Real Credentials from supabase.js) ───
         const SUPABASE_URL = 'https://qjgvhirmnxpqqcllzukp.supabase.co';
         const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InFqZ3ZoaXJtbnhwcXFjbGx6dWtwIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzQyNzQ2NTgsImV4cCI6MjA4OTg1MDY1OH0.j3SgLKfwYUaY5elT6JIshvohYvr2UigvPHub7Nzm82M';
         const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
@@ -745,7 +746,7 @@
             if (!memberIds || memberIds.length === 0) return [];
             
             // Session 3 Fix: Query both from AND to
-            const { data: fromRelations, error: error1 } = await supabase
+            const {  fromRelations, error: error1 } = await supabase
                 .from('member_relations')
                 .select('*')
                 .in('from_member_id', memberIds);
@@ -767,7 +768,7 @@
             return uniqueRelations;
         }
 
-        // ─── TREE RENDERING (Auto-Center, No Zoom/Pan) ───
+        // ─── TREE RENDERING (Auto-Center, No Zoom/Pan - Session 2 & 4) ───
         function renderTree() {
             const nodesLayer = document.getElementById('nodes-layer');
             const svgLayer = document.getElementById('tree-svg');
@@ -785,7 +786,7 @@
             
             loadingMsg.style.display = 'none';
             
-            // Simple grid layout (Session 2: Auto-center, No Zoom)
+            // Simple grid layout (Session 2: Auto-center, No Zoom/Pan)
             const nodeWidth = 80;
             const nodeHeight = 100;
             const startX = 100;
