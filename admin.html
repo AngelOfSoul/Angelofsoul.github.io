@@ -695,26 +695,6 @@ a{color:var(--gold);text-decoration:none;}
     </div><!-- end content -->
   </div><!-- end adm-body -->
 </div><!-- end adm-wrap -->
-
-<!-- ══ EDIT FAMILY MODAL ══ -->
-<div id="edit-family-overlay" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,0.75);z-index:900;align-items:center;justify-content:center;" onclick="if(event.target===this)closeEditFamily()">
-  <div style="background:var(--s2);border:1px solid var(--b1);border-radius:2px;padding:28px;max-width:480px;width:94%;max-height:90vh;overflow-y:auto;">
-    <div style="font-family:'Playfair Display',serif;font-size:17px;color:var(--gold-l);margin-bottom:18px;">✎ Editeaza familia</div>
-    <div style="margin-bottom:14px;"><label class="fl">Numele familiei (obligatoriu)</label><input class="fi" id="ef-name" placeholder="ex: Popescu"/></div>
-    <div class="form-row" style="margin-bottom:14px;">
-      <div><label class="fl">In Calnic din anul</label><input class="fi" type="number" id="ef-since" min="1200" max="2099" placeholder="ex: 1874"/></div>
-      <div><label class="fl">Sat / Localitate</label><input class="fi" id="ef-village" placeholder="ex: Calnic"/></div>
-    </div>
-    <div style="margin-bottom:14px;"><label class="fl">Descriere (RO)</label><textarea class="ft" id="ef-desc-ro" placeholder="Scurta descriere a familiei in romana..."></textarea></div>
-    <div style="margin-bottom:18px;"><label class="fl">Descriere (EN)</label><textarea class="ft" id="ef-desc-en" placeholder="Short family description in English..."></textarea></div>
-    <div id="ef-msg" class="df-msg" style="margin-bottom:12px;"></div>
-    <div style="display:flex;gap:10px;">
-      <button class="adm-btn" onclick="saveEditFamily()">Salveaza</button>
-      <button class="adm-btn-sec" onclick="closeEditFamily()">Anuleaza</button>
-    </div>
-  </div>
-</div>
-
 </div><!-- end admin-panel -->
 
 <script>
@@ -1349,58 +1329,8 @@ function loadFamilies() {
   });
 }
 
-var _editFamilyId = null;
-
 function editFamily(id, name) {
-  _editFamilyId = id;
-  // Fetch full family data to populate form
-  window.supabase.from('families').select('*').eq('id', id).single().then(function(r) {
-    if (r.error || !r.data) {
-      showMsg('ef-msg', 'Nu s-a putut incarca familia: ' + (r.error ? r.error.message : 'Date lipsa'), 'error');
-      document.getElementById('edit-family-overlay').style.display = 'flex';
-      return;
-    }
-    var f = r.data;
-    document.getElementById('ef-name').value = f.name || '';
-    document.getElementById('ef-since').value = f.since || '';
-    document.getElementById('ef-village').value = f.village || '';
-    document.getElementById('ef-desc-ro').value = f.desc_ro || '';
-    document.getElementById('ef-desc-en').value = f.desc_en || '';
-    showMsg('ef-msg', '', '');
-    var ov = document.getElementById('edit-family-overlay');
-    ov.style.display = 'flex';
-    document.getElementById('ef-name').focus();
-  });
-}
-
-function closeEditFamily() {
-  document.getElementById('edit-family-overlay').style.display = 'none';
-  _editFamilyId = null;
-}
-
-function saveEditFamily() {
-  var nameV = document.getElementById('ef-name').value.trim();
-  if (!nameV) {
-    showMsg('ef-msg', 'Numele familiei este obligatoriu.', 'error');
-    return;
-  }
-  var sinceRaw = document.getElementById('ef-since').value;
-  var updates = {
-    name:     nameV,
-    since:    sinceRaw ? parseInt(sinceRaw, 10) : null,
-    village:  document.getElementById('ef-village').value.trim() || null,
-    desc_ro:  document.getElementById('ef-desc-ro').value.trim() || null,
-    desc_en:  document.getElementById('ef-desc-en').value.trim() || null
-  };
-  window.supabase.from('families').update(updates).eq('id', _editFamilyId).then(function(r) {
-    if (r.error) {
-      showMsg('ef-msg', 'Eroare: ' + r.error.message, 'error');
-      return;
-    }
-    logAction('family-edit', 'Familie editata: ' + nameV);
-    showMsg('ef-msg', '✓ Salvat cu succes!', 'success');
-    setTimeout(function() { closeEditFamily(); loadFamilies(); loadDashboard(); }, 1200);
-  });
+  alert('Editarea completa a familiei "' + name + '" va fi disponibila in versiunea finala.\nPentru modificari urgente, foloseste Supabase Table Editor.');
 }
 
 function deleteFamily(id, name) {
