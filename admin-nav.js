@@ -1,5 +1,14 @@
 /*
-admin-nav.js — Calnic Online v2 (Corrected)
+admin-nav.js — Calnic Online v2
+Handles:
+Smart profile button — two states (logged in/out), avatar, notification dot
+Admin link — visible only to is_admin accounts
+Language switcher merged into nav
+Sticky nav on scroll
+Mobile floating profile button
+Smart login redirect — if already logged in, skip login.html
+Page load flash fix
+Active nav indicator improvements
 */
 (function () {
 /* ── PAGE LOAD FLASH FIX ── */
@@ -116,22 +125,22 @@ function buildProfileButton(session, familyName, hasNotif) {
     btn.className = 'prf-btn-in';
     btn.href = 'dashboard.html';
     btn.innerHTML =
-      ' <div class="prf-avatar" >' + initial +
-        ' <div class="prf-notif-dot' + (hasNotif ? ' show' : '') + '" id="prf-notif-dot" > </div >' +
-      ' </div >' +
-      ' <div class="prf-text" >' +
-        ' <div class="prf-name" >' + (familyName || 'Profilul Meu') + ' </div >' +
-        ' <div class="prf-sub" >PROFILUL MEU </div >' +
-      ' </div >';
+      ' <div class="prf-avatar">' + initial +
+        ' <div class="prf-notif-dot' + (hasNotif ? ' show' : '') + '" id="prf-notif-dot"> </div>' +
+      ' </div>' +
+      ' <div class="prf-text">' +
+        ' <div class="prf-name">' + (familyName || 'Profilul Meu') + ' </div>' +
+        ' <div class="prf-sub">PROFILUL MEU </div>' +
+      ' </div>';
     var dd = document.createElement('div');
     dd.className = 'prf-dropdown';
     dd.id = 'prf-dropdown';
     dd.innerHTML =
-      ' <a class="prf-dd-item" href="dashboard.html" > &#128100; Profilul familiei mele </a >' +
-      ' <a class="prf-dd-item" href="dashboard.html#photos" > &#128248; Fotografiile mele </a >' +
-      ' <a class="prf-dd-item" href="dashboard.html#members" > &#127803; Membrii familiei </a >' +
-      ' <div class="prf-dd-sep" > </div >' +
-      ' <a class="prf-dd-item logout" href="#" onclick="window.supabase & &window.supabase.auth.signOut().then(function(){window.location.href=\'index.html\'});return false;" > &#128275; Deconectare </a >';
+      ' <a class="prf-dd-item" href="dashboard.html"> &#128100; Profilul familiei mele </a>' +
+      ' <a class="prf-dd-item" href="dashboard.html#photos"> &#128248; Fotografiile mele </a>' +
+      ' <a class="prf-dd-item" href="dashboard.html#members"> &#127803; Membrii familiei </a>' +
+      ' <div class="prf-dd-sep"> </div>' +
+      ' <a class="prf-dd-item logout" href="#" onclick="window.supabase && window.supabase.auth.signOut().then(function(){window.location.href=\'index.html\'});return false;"> &#128275; Deconectare </a>';
     btn.addEventListener('click', function(e) {
       e.preventDefault();
       dd.classList.toggle('show');
