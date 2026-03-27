@@ -645,6 +645,7 @@ function loadFamilyData() {
       var deathStr = m.death_year ? String(m.death_year) : '';
       var years = birthStr + (deathStr ? ' — ' + deathStr : (birthStr ? ' —' : ''));
       return {
+        id: m.id,
         name: m.name,
         initial: m.initial || (m.name ? m.name[0] : '?'),
         role: m.role || '',

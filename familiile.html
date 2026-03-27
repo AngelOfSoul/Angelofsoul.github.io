@@ -641,7 +641,7 @@ function buildAlphaBar() {
 // ── BUILD CARD HTML ──
 function buildCard(f) {
   var lang = currentLang;
-  var locText = f.showSince
+  var locText = (f.showSince && f.since)
     ? (lang === 'ro' ? f.village + ' · din ' + f.since : f.village + ' · since ' + f.since)
     : f.village;
 
@@ -660,9 +660,9 @@ function buildCard(f) {
     var lGen = lang === 'ro' ? 'generatii' : 'generations';
     var lPhotos = lang === 'ro' ? 'fotografii' : 'photos';
     statsHtml = '<div class="stats">';
-    statsHtml += '<div class="stat"><span class="stat-val">' + (f.showMembers && f.members ? f.members : '&mdash;') + '</span><span class="stat-lbl">' + lMembers + '</span></div>';
-    statsHtml += '<div class="stat"><span class="stat-val">' + (f.showGenerations && f.generations ? f.generations : '&mdash;') + '</span><span class="stat-lbl">' + lGen + '</span></div>';
-    statsHtml += '<div class="stat"><span class="stat-val">' + (f.showPhotos && f.photos ? f.photos : '&mdash;') + '</span><span class="stat-lbl">' + lPhotos + '</span></div>';
+    statsHtml += '<div class="stat"><span class="stat-val">' + (f.showMembers && f.members != null ? f.members : '&mdash;') + '</span><span class="stat-lbl">' + lMembers + '</span></div>';
+    statsHtml += '<div class="stat"><span class="stat-val">' + (f.showGenerations && f.generations != null ? f.generations : '&mdash;') + '</span><span class="stat-lbl">' + lGen + '</span></div>';
+    statsHtml += '<div class="stat"><span class="stat-val">' + (f.showPhotos && f.photos != null ? f.photos : '&mdash;') + '</span><span class="stat-lbl">' + lPhotos + '</span></div>';
     statsHtml += '</div>';
   }
 

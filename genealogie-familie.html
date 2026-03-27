@@ -642,6 +642,10 @@ function loadRelations(rid){
 function afterLoad(rid){
   if(rid!==S.reqId)return;
   updateTitle();render();center();
+  // Safety re-center after layout settles — 300 ms is enough for the
+  // browser to finish a paint cycle after the Supabase response, so
+  // stage.clientWidth returns the real value instead of 0.
+  setTimeout(function(){if(S.members.length)center();},300);
   // Auto-open editor if ?edit_member= param is present (e.g. coming from familiile-familie.html)
   var autoEdit=new URLSearchParams(window.location.search).get('edit_member');
   if(autoEdit){
@@ -651,6 +655,17 @@ function afterLoad(rid){
 }
 
 function reload(){S.relations=[];loadFamily();}
+
+// ── SYNC MEMBERS COUNT ───────────────────────────────────
+function syncMembersCount(){
+  if(!S.familyId||!window.supabase)return;
+  window.supabase.from('members').select('id',{count:'exact',head:true}).eq('family_id',S.familyId).then(function(r){
+    if(r.error){console.warn('[Calnic] syncMembersCount count query failed:',r.error.message);return;}
+    window.supabase.from('families').update({members_count:r.count}).eq('id',S.familyId).then(function(ur){
+      if(ur.error)console.warn('[Calnic] syncMembersCount update failed:',ur.error.message);
+    });
+  });
+}
 
 // ── RENDER ───────────────────────────────────────────────
 function render(){
@@ -1417,7 +1432,7 @@ document.getElementById('delExecuteBtn').addEventListener('click',function(){
   window.supabase.from('members').delete().eq('id',id).then(function(r){
     if(r.error){btn.disabled=false;btn.textContent=t('Sterge definitiv','Delete permanently');alert(r.error.message);return;}
     S.members=S.members.filter(function(x){return x.id!==id;});S.relations=S.relations.filter(function(r){return r.from_member_id!==id&&r.to_member_id!==id;});
-    closeEditor();closeDetail();showUndo(t(m.name+' a fost sters.',''+m.name+' was deleted.'),null);render();
+    closeEditor();closeDetail();syncMembersCount();showUndo(t(m.name+' a fost sters.',''+m.name+' was deleted.'),null);render();
   }).catch(function(err){btn.disabled=false;btn.textContent=t('Sterge definitiv','Delete permanently');alert(err.message);});
 });
 
@@ -1446,6 +1461,7 @@ document.getElementById('af-save-btn').addEventListener('click',function(){
     btn.disabled=false;btn.setAttribute('data-ro','Adauga in arbore');btn.textContent=t('Adauga in arbore','Add to tree');
     if(r.error){showMsg('af-msg','error',r.error.message);return;}
     if(r.data&&r.data[0])S.members.push(r.data[0]);
+    syncMembersCount();
     showMsg('af-msg','success',t('Persoana adaugata in arbore!','Person added to tree!'));
     setTimeout(function(){closeAddModal();render();},1200);
   }).catch(function(err){btn.disabled=false;btn.textContent=t('Adauga in arbore','Add to tree');showMsg('af-msg','error',err.message);});
@@ -1596,6 +1612,9 @@ function initScrollBtns(){
 
 // ── HAMBURGER ────────────────────────────────────────────
 function initHamburger(){var h=document.getElementById('hamburgerBtn'),m=document.getElementById('navMobileMenu');if(!h||!m)return;h.addEventListener('click',function(){var o=m.classList.toggle('open');h.textContent=o?'\u2715':'\u2630';});}
+
+// Re-center once the full page layout is complete (fallback for blank tree)
+window.addEventListener('load',function(){if(S.members.length)center();});
 </script>
 
 
