@@ -4,447 +4,146 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Calnic Online — Satul nostru, Amintirile noastre</title>
-<meta name="description" content="Calnic Online — Cartea vie a satului Calnic, Alba. Pastrati amintirile, genealogia si fotografiile familiei pentru generatiile viitoare.">
-
-<!-- Open Graph / Social Media -->
-<meta property="og:title" content="Calnic Online — Satul nostru, Amintirile noastre">
-<meta property="og:description" content="Cartea vie a satului — pentru cei de acasa si pentru generatiile care vor veni">
-<meta property="og:type" content="website">
-<meta property="og:url" content="https://calniconline.ro/">
-<meta property="og:image" content="https://calniconline.ro/og-image.png">
-<meta property="og:locale" content="ro_RO">
-<meta property="og:locale:alternate" content="en_US">
-
-<!-- Canonical URL -->
-<link rel="canonical" href="https://calniconline.ro/">
-
-<!-- Favicon -->
+<meta name="description" content="Calnic Online — Cartea vie a satului Calnic, Alba.">
 <link rel="icon" type="image/svg+xml" href="favicon.svg">
-
-<!-- Fonts -->
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=EB+Garamond:wght@400;500;600;700&family=Playfair+Display:wght@400;500;600;700&display=swap" rel="stylesheet">
-
-<!-- Styles -->
-<style>
-* { margin: 0; padding: 0; box-sizing: border-box; }
-body { 
-  background: #0a0a0a; 
-  color: #f5eed8; 
-  font-family: 'EB Garamond', serif;
-  line-height: 1.6;
-}
-h1, h2, h3, h4, h5, h6 { 
-  font-family: 'Playfair Display', serif; 
-  color: #d4a84a;
-}
-a { 
-  color: #d4a84a; 
-  text-decoration: none; 
-  transition: all 0.2s;
-}
-a:hover { 
-  color: #b08030; 
-}
-
-/* Navigation */
-nav { 
-  position: sticky; 
-  top: 0; 
-  z-index: 900; 
-  background: #111;
-  border-bottom: 1px solid #b08030;
-}
-.nav-container {
-  max-width: 1200px;
-  margin: 0 auto;
-  padding: 1rem 2rem;
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-}
-.nav-brand {
-  font-family: 'Playfair Display', serif;
-  font-size: 1.5rem;
-  font-weight: 700;
-  color: #d4a84a;
-}
-.nav-links {
-  display: flex;
-  gap: 1.5rem;
-  align-items: center;
-  flex-wrap: wrap;
-}
-.nav-link {
-  font-size: 0.95rem;
-  padding: 0.5rem 1rem;
-  border-radius: 2px;
-}
-.nav-link:hover {
-  background: #161616;
-}
-.nav-login {
-  background: #b08030;
-  color: #050505 !important;
-  padding: 0.5rem 1.2rem;
-  border-radius: 2px;
-  font-weight: 600;
-}
-.nav-login:hover {
-  background: #d4a84a;
-}
-
-/* Hero Section */
-.hero {
-  text-align: center;
-  padding: 6rem 2rem 4rem;
-  background: linear-gradient(135deg, #0a0a0a 0%, #161616 100%);
-  border-bottom: 2px solid #b08030;
-}
-.hero h1 {
-  font-size: 3rem;
-  margin-bottom: 1rem;
-  color: #d4a84a;
-}
-.hero-subtitle {
-  font-size: 1.3rem;
-  color: #7a5828;
-  margin-bottom: 2rem;
-}
-.hero-ornament {
-  color: #b08030;
-  font-size: 1.5rem;
-  margin: 1rem 0;
-}
-
-/* Sections */
-.container {
-  max-width: 1200px;
-  margin: 0 auto;
-  padding: 3rem 2rem;
-}
-.section {
-  margin-bottom: 4rem;
-}
-.section-title {
-  font-size: 2rem;
-  margin-bottom: 2rem;
-  text-align: center;
-  color: #d4a84a;
-}
-
-/* Cards */
-.cards-grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
-  gap: 2rem;
-  margin-top: 2rem;
-}
-.card {
-  background: #111;
-  border: 1px solid #2a2a2a;
-  border-radius: 4px;
-  padding: 2rem;
-  transition: all 0.3s;
-}
-.card:hover {
-  border-color: #b08030;
-  transform: translateY(-4px);
-}
-.card h3 {
-  margin-bottom: 1rem;
-  color: #d4a84a;
-}
-
-/* CTA Button */
-.cta-button {
-  display: inline-block;
-  background: #b08030;
-  color: #050505 !important;
-  padding: 1rem 2.5rem;
-  font-family: 'Playfair Display', serif;
-  font-weight: 700;
-  font-size: 1.1rem;
-  border-radius: 2px;
-  margin: 2rem 0;
-  border: 2px solid #d4a84a;
-  transition: all 0.3s;
-}
-.cta-button:hover {
-  background: #d4a84a;
-  transform: scale(1.05);
-}
-
-/* Stats */
-.stats-grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-  gap: 2rem;
-  text-align: center;
-  margin: 3rem 0;
-}
-.stat-item h4 {
-  font-size: 2.5rem;
-  color: #d4a84a;
-  margin-bottom: 0.5rem;
-}
-.stat-item p {
-  color: #7a5828;
-  font-size: 0.95rem;
-}
-
-/* Footer */
-footer {
-  background: #111;
-  border-top: 1px solid #2a2a2a;
-  padding: 3rem 2rem 2rem;
-  text-align: center;
-  color: #7a5828;
-}
-.footer-links {
-  margin: 1rem 0;
-}
-.footer-links a {
-  margin: 0 0.5rem;
-  color: #7a5828;
-}
-.footer-links a:hover {
-  color: #d4a84a;
-}
-
-/* Mobile Menu */
-.mobile-menu-toggle {
-  display: none;
-  background: none;
-  border: none;
-  color: #d4a84a;
-  font-size: 1.5rem;
-  cursor: pointer;
-}
-
-@media (max-width: 768px) {
-  .mobile-menu-toggle {
-    display: block;
-  }
-  .nav-links {
-    display: none;
-    position: absolute;
-    top: 100%;
-    left: 0;
-    right: 0;
-    background: #111;
-    flex-direction: column;
-    padding: 1rem;
-    border-bottom: 1px solid #b08030;
-  }
-  .nav-links.active {
-    display: flex;
-  }
-  .hero h1 {
-    font-size: 2rem;
-  }
-}
-
-/* Announcement Banner */
-.announcement-banner {
-  background: #161616;
-  color: #d4a84a;
-  text-align: center;
-  padding: 10px;
-  font-family: 'EB Garamond', serif;
-  border-bottom: 1px solid #b08030;
-}
-</style>
-
 <script src="supabase.js"></script>
 <script src="admin-nav.js"></script>
 </head>
 <body>
 
-<!-- Navigation -->
-<nav>
-  <div class="nav-container">
-    <div class="nav-brand">Calnic Online</div>
-    <button class="mobile-menu-toggle" onclick="document.querySelector('.nav-links').classList.toggle('active')">☰</button>
-    <div class="nav-links" id="nav-right-main">
-      <a href="index.html" class="nav-link active">Acasa</a>
-      <a href="istorie.html" class="nav-link">Istoria Satului</a>
-      <a href="familiile.html" class="nav-link">Familiile</a>
-      <a href="genealogie.html" class="nav-link">Genealogie</a>
-      <a href="galerie.html" class="nav-link">Galerie</a>
-      <a href="contact.html" class="nav-link">Contact</a>
-      <a href="login.html" class="nav-login">🔒 Contul Familiei</a>
-    </div>
+<!-- NAV (Injected by admin-nav.js) -->
+<nav><div class="nav-right" id="nav-right-main"></div></nav>
+
+<!-- CONTENT (Original Content Preserved) -->
+<div class="lang-bar">LIMBĂ / LANGUAGEROEN</div>
+<div class="site-header">Satul nostru — Amintirile noastre</div>
+
+<div class="nav-container">
+  <div class="nav-links">
+    <a href="index.html" class="nav-link active">⌂ Acasa</a>
+    <a href="istorie.html" class="nav-link">🗺 Istoria Satului</a>
+    <a href="familiile.html" class="nav-link">👪 Familiile</a>
+    <a href="genealogie.html" class="nav-link">🌻 Genealogie</a>
+    <a href="galerie.html" class="nav-link">📸 Galerie</a>
+    <a href="contact.html" class="nav-link">✉ Contact</a>
+    <a href="intrebari.html" class="nav-link">❓ Intrebari</a>
+    <a href="admin.html" class="nav-link">◆ Admin</a>
+    <a href="login.html" class="nav-login">🔒 Contul Familiei</a>
   </div>
-</nav>
+  <button class="mobile-menu-toggle">☰</button>
+</div>
 
-<!-- Hero Section -->
-<section class="hero">
-  <h1>Calnic Online</h1>
-  <p class="hero-subtitle">Cartea vie a satului — pentru cei de acasa si pentru generatiile care vor veni</p>
-  <div class="hero-ornament">✦  ✦</div>
-</section>
+<div class="nav-mobile-menu">
+  <a href="index.html" class="nav-mobile-link">⌂ Acasa</a>
+  <a href="istorie.html" class="nav-mobile-link">🗺 Istoria Satului</a>
+  <a href="familiile.html" class="nav-mobile-link">👪 Familiile</a>
+  <a href="genealogie.html" class="nav-mobile-link">🌻 Genealogie</a>
+  <a href="galerie.html" class="nav-mobile-link">📸 Galerie</a>
+  <a href="contact.html" class="nav-mobile-link">✉ Contact</a>
+  <a href="intrebari.html" class="nav-mobile-link">❓ Intrebari</a>
+  <a href="login.html" class="nav-mobile-link">🔒 Contul Familiei</a>
+</div>
 
-<!-- Mission Section -->
-<section class="container section">
-  <h2 class="section-title">Misiunea noastra</h2>
-  <p style="text-align: center; font-size: 1.2rem; max-width: 800px; margin: 0 auto 2rem;">
-    Calnic Online este cartea vie a satului — un loc unde fiecare familie isi pastreaza amintirile, genealogia si fotografiile, atat pentru cei ramasi acasa, cat si pentru generatiile care nu s-au nascut inca.
-  </p>
-  
-  <h3 style="text-align: center; margin: 2rem 0 1rem; color: #d4a84a;">Pentru cine este</h3>
-  <div class="cards-grid">
-    <div class="card">
-      <h3>🏠 Localnici</h3>
-      <p>Familii care traiesc astazi in Calnic</p>
-    </div>
-    <div class="card">
-      <h3>🚗 Plecati</h3>
-      <p>Familii mutate in alte orase din Romania</p>
-    </div>
-    <div class="card">
-      <h3>✈ Diaspora</h3>
-      <p>Romani si sasi plecati in strainatate</p>
-    </div>
-    <div class="card">
-      <h3>📚 Cercetatori</h3>
-      <p>Istorici, genealogisti, curiosi</p>
-    </div>
-  </div>
-</section>
+<main>
+  <section class="hero">
+    <h1>Calnic Online</h1>
+    <p>Cartea vie a satului — pentru cei de acasa si pentru generatiile care vor veni</p>
+    <div class="ornament">✦ ✦ ✦</div>
+  </section>
 
-<!-- How It Works -->
-<section class="container section" style="background: #111; border-top: 1px solid #2a2a2a; border-bottom: 1px solid #2a2a2a;">
-  <h2 class="section-title">Cum functioneaza</h2>
-  <div class="cards-grid">
-    <div class="card" style="text-align: center;">
-      <h3>1. Inregistreaza-te</h3>
-      <p>Creezi contul familiei tale in cateva minute</p>
+  <section class="container">
+    <h2>Misiunea noastra</h2>
+    <p>Calnic Online este cartea vie a satului — un loc unde fiecare familie isi pastreaza amintirile, genealogia si fotografiile, atat pentru cei ramasi acasa, cat si pentru generatiile care nu s-au nascut inca.</p>
+    
+    <h3>Pentru cine este</h3>
+    <div class="cards-grid">
+      <div class="card"><h3>🏠 Localnici</h3><p>Familii care traiesc astazi in Calnic</p></div>
+      <div class="card"><h3>🚗 Plecati</h3><p>Familii mutate in alte orase din Romania</p></div>
+      <div class="card"><h3>✈ Diaspora</h3><p>Romani si sasi plecati in strainatate</p></div>
+      <div class="card"><h3>📚 Cercetatori</h3><p>Istorici, genealogisti, curiosi</p></div>
     </div>
-    <div class="card" style="text-align: center;">
-      <h3>2. Completeaza profilul</h3>
-      <p>Povestea, locatia, perioada familiei</p>
-    </div>
-    <div class="card" style="text-align: center;">
-      <h3>3. Adauga poze</h3>
-      <p>Galeria familiei, publica sau privata</p>
-    </div>
-    <div class="card" style="text-align: center;">
-      <h3>4. Construieste arborele</h3>
-      <p>Genealogia familiei, generatie cu generatie</p>
-    </div>
-    <div class="card" style="text-align: center;">
-      <h3>5. Impartaseste</h3>
-      <p>Trimite link-ul familiei tale oricui</p>
-    </div>
-  </div>
-  
-  <div style="text-align: center; margin-top: 3rem;">
-    <h3 style="color: #d4a84a; margin-bottom: 1rem;">Familia ta apartine aici</h3>
-    <p style="margin-bottom: 2rem;">Adauga-va povestea — pentru voi si pentru cei care vor veni</p>
-    <a href="login.html?tab=register" class="cta-button">INREGISTREAZA FAMILIA TA</a>
-  </div>
-</section>
 
-<!-- Public vs Private -->
-<section class="container section">
-  <h2 class="section-title">Public vs Privat</h2>
-  <div class="cards-grid">
-    <div class="card">
-      <h3 style="color: #40c060;">✓ Vizibil tuturor</h3>
-      <ul style="list-style: none; line-height: 2;">
-        <li>• Numele familiei</li>
-        <li>• Satul si perioada</li>
-        <li>• Fotografii marcate public</li>
-        <li>• Povestea familiala publica</li>
-        <li>• Legaturi cu alte familii</li>
-      </ul>
+    <h3>Cum functioneaza</h3>
+    <div class="steps">
+      <div class="step"><h3>1</h3><p>Inregistreaza-te</p></div>
+      <div class="step"><h3>2</h3><p>Completeaza profilul</p></div>
+      <div class="step"><h3>3</h3><p>Adauga poze</p></div>
+      <div class="step"><h3>4</h3><p>Construieste arborele</p></div>
+      <div class="step"><h3>5</h3><p>Impartaseste</p></div>
     </div>
-    <div class="card">
-      <h3 style="color: #c04040;">🔒 Doar familia ta</h3>
-      <ul style="list-style: none; line-height: 2;">
-        <li>• Date personale (nasteri, decese)</li>
-        <li>• Fotografii private</li>
-        <li>• Detalii genealogice sensibile</li>
-        <li>• Documente de familie</li>
-        <li>• Acces cu PIN de familie</li>
-      </ul>
-    </div>
-  </div>
-</section>
 
-<!-- What You Find -->
-<section class="container section" style="background: #111;">
-  <h2 class="section-title">Ce gasesti pe site</h2>
-  <div class="cards-grid">
-    <div class="card">
-      <h3>📖 Istoria Satului</h3>
-      <p>Timeline complet din preistorie pana azi, Cetatea UNESCO, comunitatile saseasca si romaneasca</p>
+    <div class="cta-block">
+      <h3>Familia ta apartine aici</h3>
+      <p>Adauga-va povestea — pentru voi si pentru cei care vor veni</p>
+      <a href="login.html?tab=register" class="btn">INREGISTREAZA FAMILIA TA</a>
     </div>
-    <div class="card">
-      <h3>👪 Familiile</h3>
-      <p>Registrul familiilor din Calnic, cu profiluri publice si spatii private pentru fiecare</p>
-    </div>
-    <div class="card">
-      <h3>📸 Galeria Foto</h3>
-      <p>Arhiva fotografica a satului — vechi si noi, publice si private, donate de familii</p>
-    </div>
-    <div class="card">
-      <h3>🌻 Genealogie</h3>
-      <p>Arborele genealogic al fiecarei familii, conectat la arborele intregului sat</p>
-    </div>
-    <div class="card">
-      <h3>✉ Contact</h3>
-      <p>Intrebari, sugestii sau erori — suntem aici sa raspundem</p>
-    </div>
-    <div class="card">
-      <h3>❓ Intrebari frecvente</h3>
-      <p>Raspunsuri la cele mai comune intrebari despre utilizarea site-ului</p>
-    </div>
-  </div>
-</section>
 
-<!-- Stats -->
-<section class="container section">
-  <h2 class="section-title">Gratuit pentru totdeauna</h2>
-  <div class="stats-grid">
-    <div class="stat-item">
-      <h4>0 lei</h4>
-      <p>cost anual pentru familii</p>
+    <h3>Public vs Privat</h3>
+    <div class="cards-grid">
+      <div class="card"><h3>✓ Vizibil tuturor</h3><ul><li>Numele familiei</li><li>Satul si perioada</li><li>Fotografii marcate public</li><li>Povestea familiala publica</li><li>Legaturi cu alte familii</li></ul></div>
+      <div class="card"><h3>🔒 Doar familia ta</h3><ul><li>Date personale (nasteri, decese)</li><li>Fotografii private</li><li>Detalii genealogice sensibile</li><li>Documente de familie</li><li>Acces cu PIN de familie</li></ul></div>
     </div>
-    <div class="stat-item">
-      <h4>0 reclame</h4>
-      <p>niciodata, pe niciun dispozitiv</p>
-    </div>
-    <div class="stat-item">
-      <h4>∞</h4>
-      <p>disponibil pentru generatiile viitoare</p>
-    </div>
-  </div>
-</section>
 
-<!-- Creator -->
-<section class="container section" style="text-align: center; max-width: 800px; margin: 0 auto;">
-  <h2 class="section-title">Cine a construit acest site</h2>
-  <p style="font-size: 1.1rem; line-height: 1.8;">
-    Calnic Online a fost creat de cineva care crede ca amintirile nu trebuie sa se piarda odata cu trecerea timpului. Fiecare dintre noi isi poate gasi aici un loc in care sa isi aminteasca de cei dragi — si sa lase in urma un memento al oamenilor si al locului unde s-a nascut.
-  </p>
-</section>
+    <h3>Ce gasesti pe site</h3>
+    <div class="cards-grid">
+      <div class="card"><h3>📖 Istoria Satului</h3><p>Timeline complet din preistorie pana azi, Cetatea UNESCO, comunitatile saseasca si romaneasca</p></div>
+      <div class="card"><h3>👪 Familiile</h3><p>Registrul familiilor din Calnic, cu profiluri publice si spatii private pentru fiecare</p></div>
+      <div class="card"><h3>📸 Galeria Foto</h3><p>Arhiva fotografica a satului — vechi si noi, publice si private, donate de familii</p></div>
+      <div class="card"><h3>🌻 Genealogie</h3><p>Arborele genealogic al fiecarei familii, conectat la arborele intregului sat</p></div>
+      <div class="card"><h3>✉ Contact</h3><p>Intrebari, sugestii sau erori — suntem aici sa raspundem</p></div>
+      <div class="card"><h3>❓ Intrebari frecvente</h3><p>Raspunsuri la cele mai comune intrebari despre utilizarea site-ului</p></div>
+    </div>
 
-<!-- Footer -->
+    <h3>Gratuit pentru totdeauna</h3>
+    <div class="stats-grid">
+      <div class="stat"><h4>0 lei</h4><p>cost anual pentru familii</p></div>
+      <div class="stat"><h4>0 reclame</h4><p>niciodata, pe niciun dispozitiv</p></div>
+      <div class="stat"><h4>∞</h4><p>disponibil pentru generatiile viitoare</p></div>
+    </div>
+
+    <h3>Cine a construit acest site</h3>
+    <p>Calnic Online a fost creat de cineva care crede ca amintirile nu trebuie sa se piarda odata cu trecerea timpului. Fiecare dintre noi isi poate gasi aici un loc in care sa isi aminteasca de cei dragi — si sa lase in urma un memento al oamenilor si al locului unde s-a nascut.</p>
+  </section>
+</main>
+
 <footer>
-  <div style="max-width: 1200px; margin: 0 auto;">
-    <p style="font-family: 'Playfair Display', serif; font-size: 1.2rem; color: #d4a84a; margin-bottom: 1rem;">
-      Calnic · Alba · Romania
-    </p>
-    <p style="font-style: italic; margin-bottom: 1rem;">Sat cu suflet, memorie vie</p>
+  <div class="lang-bar">LIMBA / LANGUAGEROEN</div>
+  <div class="site-header">Satul nostru — Amintirile noastre</div>
+  <div class="nav-container">
+    <div class="nav-links">
+      <a href="index.html" class="nav-link">⌂ Acasa</a>
+      <a href="istorie.html" class="nav-link">🗺 Istoria Satului</a>
+      <a href="familiile.html" class="nav-link">👪 Familiile</a>
+      <a href="genealogie.html" class="nav-link">🌻 Genealogie</a>
+      <a href="galerie.html" class="nav-link">📸 Galerie</a>
+      <a href="contact.html" class="nav-link">✉ Contact</a>
+      <a href="intrebari.html" class="nav-link">❓ Intrebari</a>
+      <a href="admin.html" class="nav-link">◆ Admin</a>
+      <a href="dashboard.html" class="nav-link">👤 Contul meu</a>
+    </div>
+  </div>
+  <div class="nav-mobile-menu">
+    <a href="index.html" class="nav-mobile-link">⌂ Acasa</a>
+    <a href="istorie.html" class="nav-mobile-link">🗺 Istoria Satului</a>
+    <a href="familiile.html" class="nav-mobile-link">👪 Familiile</a>
+    <a href="genealogie.html" class="nav-mobile-link">🌻 Genealogie</a>
+    <a href="galerie.html" class="nav-mobile-link">📸 Galerie</a>
+    <a href="contact.html" class="nav-mobile-link">✉ Contact</a>
+    <a href="intrebari.html" class="nav-mobile-link">❓ Intrebari</a>
+    <a href="dashboard.html" class="nav-mobile-link">👤 Contul meu</a>
+  </div>
+  <div class="ornament">✦     ✦     ✦</div>
+  <div class="footer-content">
+    <p>Bun venit înapoi — — Familii înregistrate în sat — Membri în arbori genealogici — Fotografii păstrate în arhivă 🕑 Astăzi în familia ta Anunțuri Activitate recentă în sat Se încarcă... Completitudinea profilului</p>
+    <p>Calnic   ·   Alba    ·   Romania    ·    · Sat cu suflet, memorie vie ·</p>
     <div class="footer-links">
       <a href="intrebari.html">Intrebari frecvente</a>
       ·
       <a href="contact.html">Contact</a>
     </div>
-    <p style="margin-top: 2rem; font-size: 0.85rem;">© 2026 Calnic Online</p>
   </div>
 </footer>
 
@@ -457,7 +156,7 @@ document.addEventListener('supabase:ready', function() {
       const lang = localStorage.getItem('calnic-lang') || 'ro';
       const msg = res.data[0]['text_' + lang] || res.data[0].text_ro;
       const banner = document.createElement('div');
-      banner.className = 'announcement-banner';
+      banner.style.cssText = 'background:#161616;color:#d4a84a;text-align:center;padding:10px;font-family:"EB Garamond";border-bottom:1px solid #b08030;';
       banner.textContent = msg;
       document.body.insertBefore(banner, document.body.firstChild);
     }
