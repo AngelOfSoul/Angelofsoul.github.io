@@ -3,19 +3,18 @@ Allow: /
 Allow: /index.html
 Allow: /familie.html
 Allow: /familiile.html
-Allow: /galerie.html
+Allow: /familiile-familie.html
 Allow: /genealogie.html
+Allow: /genealogie-familie.html
+Allow: /galerie.html
 Allow: /istorie.html
 Allow: /contact.html
 Allow: /intrebari.html
-
 Disallow: /admin.html
 Disallow: /dashboard.html
 Disallow: /login.html
 Disallow: /404.html
-Disallow: /familiile-familie.html
-Disallow: /genealogie-familie.html
 Disallow: /supabase.js
 Disallow: /admin-nav.js
-
+Disallow: /*?*pin=
 Sitemap: https://calniconline.ro/sitemap.xml
