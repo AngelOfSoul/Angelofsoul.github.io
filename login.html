@@ -4,124 +4,219 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Contul Familiei — Calnic Online</title>
-<link rel="stylesheet" href="style.css">
+<link rel="icon" type="image/svg+xml" href="favicon.svg">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=EB+Garamond:wght@400;500;600;700&family=Playfair+Display:wght@400;500;600;700&display=swap" rel="stylesheet">
 <script src="supabase.js"></script>
 <script src="admin-nav.js"></script>
+<style>
+/* Minimal styles to ensure forms work if CSS missing */
+form { display: flex; flex-direction: column; gap: 1rem; max-width: 400px; margin: 2rem auto; }
+input, textarea, select, button { padding: 0.8rem; font-family: inherit; }
+button { cursor: pointer; background: #b08030; color: #050505; border: none; font-weight: bold; }
+.hidden { display: none; }
+</style>
 </head>
 <body>
-<!-- NAV (Included via admin-nav.js usually, but ensure structure exists) -->
+
 <nav><div class="nav-right" id="nav-right-main"></div></nav>
 
-<div class="container">
-  <h1>🔒 Contul familiei tale</h1>
-  
-  <!-- Login Form -->
-  <form id="login-form">
-    <h3>Intra in cont</h3>
-    <input type="email" id="login-email" placeholder="Adresa de email" required>
-    <input type="password" id="login-password" placeholder="Parola" required>
-    <button type="submit">INTRĂ</button>
-  </form>
+<div class="lang-bar">LIMBĂ / LANGUAGEROEN</div>
+<div class="site-header">Satul nostru — Amintirile noastre</div>
 
-  <!-- Register Form -->
-  <form id="register-form" style="display:none;">
-    <h3>Inregistreaza familia</h3>
-    <input type="email" id="reg-email" placeholder="Adresa de email" required>
-    <input type="password" id="reg-pass" placeholder="Parola (min. 6 caractere)" required>
-    <input type="password" id="reg-pass-confirm" placeholder="Confirma parola" required>
-    <button type="submit">INREGISTREAZA</button>
-  </form>
-
-  <!-- Create Family Profile (Step 2) -->
-  <form id="create-family-form" style="display:none;">
-    <h3>Completeaza profilul familiei</h3>
-    <input type="text" id="fam-name" placeholder="Numele familiei" required>
-    <input type="number" id="fam-since" placeholder="In Calnic din anul">
-    <textarea id="fam-desc" placeholder="Descriere scurta"></textarea>
-    <input type="text" id="fam-pin" placeholder="PIN familie (4-8 cifre)" maxlength="8" required>
-    <button type="submit">CREAZA PROFILUL</button>
-  </form>
-
-  <div id="auth-message" style="margin-top:10px;color:#c04040;"></div>
+<div class="nav-container">
+  <div class="nav-links">
+    <a href="index.html" class="nav-link">⌂ Acasa</a>
+    <a href="istorie.html" class="nav-link">🗺 Istoria Satului</a>
+    <a href="familiile.html" class="nav-link">👪 Familiile</a>
+    <a href="genealogie.html" class="nav-link">🌻 Genealogie</a>
+    <a href="galerie.html" class="nav-link">📸 Galerie</a>
+    <a href="contact.html" class="nav-link">✉ Contact</a>
+    <a href="intrebari.html" class="nav-link">❓ Intrebari</a>
+    <a href="login.html" class="nav-link active">🔒 Contul Familiei</a>
+  </div>
+  <button class="mobile-menu-toggle">☰</button>
 </div>
 
+<div class="nav-mobile-menu">
+  <a href="index.html" class="nav-mobile-link">⌂ Acasa</a>
+  <a href="istorie.html" class="nav-mobile-link">🗺 Istoria Satului</a>
+  <a href="familiile.html" class="nav-mobile-link">👪 Familiile</a>
+  <a href="genealogie.html" class="nav-mobile-link">🌻 Genealogie</a>
+  <a href="galerie.html" class="nav-mobile-link">📸 Galerie</a>
+  <a href="contact.html" class="nav-mobile-link">✉ Contact</a>
+  <a href="intrebari.html" class="nav-mobile-link">❓ Intrebari</a>
+  <a href="login.html" class="nav-mobile-link">🔒 Contul Familiei</a>
+</div>
+
+<main class="container">
+  <div id="logged-in-view" class="hidden">
+    <h3>👤 Esti autentificat</h3>
+    <a href="dashboard.html" class="btn">Profilul familiei mele</a>
+    <button onclick="window.supabase.auth.signOut()">Deconectare</button>
+  </div>
+
+  <div id="auth-view">
+    <h2>🔒 Contul familiei tale</h2>
+    <p>Acces privat pentru membrii familiei</p>
+    
+    <div class="tabs">
+      <button onclick="showTab('login')">🔒 Intra in cont</button>
+      <button onclick="showTab('register')">➕ Inregistreaza familia</button>
+    </div>
+
+    <div id="message-box"></div>
+
+    <form id="login-form">
+      <h3>🔒 Intra in cont</h3>
+      <input type="email" id="login-email" placeholder="Adresa de email" required>
+      <input type="password" id="login-password" placeholder="Parola" required>
+      <button type="submit">INTRA</button>
+      <a href="#" onclick="showReset()">Ai uitat parola?</a>
+    </form>
+
+    <form id="register-form" class="hidden">
+      <h3>➕ Inregistreaza familia</h3>
+      <input type="email" id="reg-email" placeholder="Adresa de email" required>
+      <input type="password" id="reg-pass" placeholder="Parola (min. 6 caractere)" required>
+      <input type="password" id="reg-pass-confirm" placeholder="Confirma parola" required>
+      <button type="submit">INREGISTREAZA</button>
+    </form>
+
+    <div id="verification-msg" class="hidden">
+      <h3>✉️ Verifica email-ul</h3>
+      <p>Contul tau a fost creat! Ti-am trimis un email de confirmare. Dupa ce confirmi adresa, revino aici si autentifica-te pentru a-ti crea profilul familiei.</p>
+      <p>⚠️ Nu ai primit emailul? Verifica dosarul Spam sau fila Promotii (Gmail).</p>
+      <button onclick="showTab('login')">MERGI LA AUTENTIFICARE</button>
+    </div>
+
+    <div id="create-family-view" class="hidden">
+      <h3>Profilul familiei tale</h3>
+      <p>Completeaza datele familiei</p>
+      <form id="create-family-form">
+        <input type="text" id="fam-name" placeholder="Numele familiei" required>
+        <input type="number" id="fam-since" placeholder="In Calnic din anul (optional)">
+        <textarea id="fam-desc-ro" placeholder="Descriere scurta (RO, optional)"></textarea>
+        <textarea id="fam-desc-en" placeholder="Descriere scurta (EN, optional)"></textarea>
+        <input type="password" id="fam-pin" placeholder="PIN familie (4–8 cifre)" maxlength="8" required>
+        <button type="submit">🔒 CREAZA PROFILUL FAMILIEI</button>
+      </form>
+    </div>
+
+    <form id="reset-form" class="hidden">
+      <h3>Resetare parola</h3>
+      <input type="email" id="reset-email" placeholder="Adresa de email" required>
+      <button type="submit">TRIMITE</button>
+      <button type="button" onclick="showTab('login')">Anulare</button>
+    </form>
+  </div>
+</main>
+
+<footer>
+  <p>Calnic ·  Alba  ·  Romania  ·  ·Sat cu suflet, memorie vie·</p>
+  <div class="footer-links">
+    <a href="intrebari.html">Intrebari frecvente</a>
+    ·
+    <a href="contact.html">Contact</a>
+  </div>
+</footer>
+
 <script>
+function showTab(tab) {
+  document.getElementById('login-form').classList.add('hidden');
+  document.getElementById('register-form').classList.add('hidden');
+  document.getElementById('reset-form').classList.add('hidden');
+  document.getElementById('verification-msg').classList.add('hidden');
+  document.getElementById('message-box').style.display = 'none';
+  
+  if (tab === 'login') document.getElementById('login-form').classList.remove('hidden');
+  if (tab === 'register') document.getElementById('register-form').classList.remove('hidden');
+}
+
+function showReset() {
+  document.getElementById('login-form').classList.add('hidden');
+  document.getElementById('reset-form').classList.remove('hidden');
+}
+
+function showMessage(msg, type) {
+  const box = document.getElementById('message-box');
+  box.textContent = msg;
+  box.style.color = type === 'error' ? '#c04040' : '#40c060';
+  box.style.display = 'block';
+}
+
 document.addEventListener('supabase:ready', function() {
   if (!window.supabase) return;
 
   // Check Session
   window.supabase.auth.getSession().then(function(res) {
     if (res.data.session) {
-      // Check if family exists
       window.supabase.from('families').select('id').eq('owner_id', res.data.session.user.id).single().then(function(famRes) {
         if (famRes.data) {
-          window.location.href = 'dashboard.html';
+          document.getElementById('auth-view').classList.add('hidden');
+          document.getElementById('logged-in-view').classList.remove('hidden');
         } else {
-          document.getElementById('login-form').style.display = 'none';
-          document.getElementById('register-form').style.display = 'none';
-          document.getElementById('create-family-form').style.display = 'block';
+          document.getElementById('login-form').classList.add('hidden');
+          document.getElementById('register-form').classList.add('hidden');
+          document.getElementById('create-family-view').classList.remove('hidden');
         }
       });
     }
   });
 
-  // Toggle Forms
-  document.querySelector('a[href="#register"]')?.addEventListener('click', function(e){
-    e.preventDefault();
-    document.getElementById('login-form').style.display = 'none';
-    document.getElementById('register-form').style.display = 'block';
-  });
-
   // Login
   document.getElementById('login-form').addEventListener('submit', async function(e) {
     e.preventDefault();
-    var email = document.getElementById('login-email').value;
-    var pass = document.getElementById('login-password').value;
-    var msg = document.getElementById('auth-message');
-    var res = await window.supabase.auth.signInWithPassword({ email: email, password: pass });
-    if (res.error) msg.textContent = 'Eroare: ' + res.error.message;
+    const email = document.getElementById('login-email').value;
+    const pass = document.getElementById('login-password').value;
+    const res = await window.supabase.auth.signInWithPassword({ email: email, password: pass });
+    if (res.error) showMessage('Eroare: ' + res.error.message, 'error');
     else window.location.href = 'dashboard.html';
   });
 
   // Register
   document.getElementById('register-form').addEventListener('submit', async function(e) {
     e.preventDefault();
-    var email = document.getElementById('reg-email').value;
-    var pass = document.getElementById('reg-pass').value;
-    var confirm = document.getElementById('reg-pass-confirm').value;
-    var msg = document.getElementById('auth-message');
-    if (pass !== confirm) { msg.textContent = 'Parolele nu se potrivesc.'; return; }
-    var res = await window.supabase.auth.signUp({ email: email, password: pass });
-    if (res.error) msg.textContent = 'Eroare: ' + res.error.message;
+    const email = document.getElementById('reg-email').value;
+    const pass = document.getElementById('reg-pass').value;
+    const confirm = document.getElementById('reg-pass-confirm').value;
+    if (pass !== confirm) { showMessage('Parolele nu se potrivesc.', 'error'); return; }
+    const res = await window.supabase.auth.signUp({ email: email, password: pass });
+    if (res.error) showMessage('Eroare: ' + res.error.message, 'error');
     else {
-      msg.style.color = '#40c060';
-      msg.textContent = 'Cont creat! Verifica email-ul.';
-      setTimeout(function(){ window.location.reload(); }, 2000);
+      document.getElementById('register-form').classList.add('hidden');
+      document.getElementById('verification-msg').classList.remove('hidden');
     }
   });
 
   // Create Family
   document.getElementById('create-family-form').addEventListener('submit', async function(e) {
     e.preventDefault();
-    var user = window.supabase.auth.getUser();
-    if (!user) return;
-    var name = document.getElementById('fam-name').value;
-    var since = document.getElementById('fam-since').value;
-    var desc = document.getElementById('fam-desc').value;
-    var pin = document.getElementById('fam-pin').value;
-    var msg = document.getElementById('auth-message');
-    
-    var res = await window.supabase.from('families').insert([{
-      owner_id: user.id,
-      name: name,
-      since: since,
-      desc_ro: desc,
-      pin_hash: btoa(pin)
+    const user = await window.supabase.auth.getUser();
+    if (!user.data.user) return;
+    const res = await window.supabase.from('families').insert([{
+      owner_id: user.data.user.id,
+      name: document.getElementById('fam-name').value,
+      since: document.getElementById('fam-since').value,
+      desc_ro: document.getElementById('fam-desc-ro').value,
+      desc_en: document.getElementById('fam-desc-en').value,
+      pin_hash: btoa(document.getElementById('fam-pin').value)
     }]);
-    if (res.error) msg.textContent = 'Eroare: ' + res.error.message;
+    if (res.error) showMessage('Eroare: ' + res.error.message, 'error');
     else window.location.href = 'dashboard.html';
+  });
+
+  // Reset
+  document.getElementById('reset-form').addEventListener('submit', async function(e) {
+    e.preventDefault();
+    const email = document.getElementById('reset-email').value;
+    const res = await window.supabase.auth.resetPasswordForEmail(email);
+    if (res.error) showMessage('Eroare: ' + res.error.message, 'error');
+    else showMessage('Email de resetare trimis!', 'success');
   });
 });
 </script>
+
 </body>
 </html>
