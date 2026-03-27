@@ -1,14 +1,5 @@
 /*
 admin-nav.js — Calnic Online v2
-Handles:
-Smart profile button — two states (logged in/out), avatar, notification dot
-Admin link — visible only to is_admin accounts
-Language switcher merged into nav
-Sticky nav on scroll
-Mobile floating profile button
-Smart login redirect — if already logged in, skip login.html
-Page load flash fix
-Active nav indicator improvements
 */
 (function () {
 /* ── PAGE LOAD FLASH FIX ── */
