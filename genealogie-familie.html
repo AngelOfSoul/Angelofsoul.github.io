@@ -642,6 +642,18 @@ function loadRelations(rid){
 function afterLoad(rid){
   if(rid!==S.reqId)return;
   updateTitle();render();if(S.members.length)center();
+  if(S.members.length===0){
+    var cv=document.getElementById('treeCanvas');
+    if(cv){
+      var d=document.createElement('div');
+      d.className='tree-error';
+      d.innerHTML='<div class="tree-error-icon">&#127807;</div>'
+        +'<div class="tree-error-title" data-ro="Arbore gol" data-en="Empty tree">Arbore gol</div>'
+        +'<div class="tree-error-sub" data-ro="Niciun membru adaugat inca. Apasa + Adauga persoana pentru a incepe." data-en="No members added yet. Press + Add person to get started.">Niciun membru adaugat inca. Apasa + Adauga persoana pentru a incepe.</div>';
+      cv.innerHTML='';
+      cv.appendChild(d);
+    }
+  }
   // Safety re-center after layout settles — 300 ms is enough for the
   // browser to finish a paint cycle after the Supabase response, so
   // stage.clientWidth returns the real value instead of 0.
@@ -712,12 +724,13 @@ var REL_META={
 };
 var REL_GROUPS=['Parinti','Bunici','Strabunici','Copii','Frati','Sot / Sotie','Familie extinsa','Socri'];
 
-function roleToGen(r){
-  r=(r||'').toLowerCase();
-  if(/strabunic|great/.test(r))return 0;
-  if(/bunic|grandp/.test(r))return 1;
-  if(/tata|mama|parinte|parent/.test(r))return 2;
-  if(/eu|myself|self|current/.test(r))return 3;
+function roleToGen(role){
+  if(!role)return 2;
+  var r=(role||'').toLowerCase();
+  if(r==='bunic'||r==='bunica'||r==='grandparent'||r==='grandfather'||r==='grandmother')return 0;
+  if(r==='parinte'||r==='tata'||r==='mama'||r==='father'||r==='mother'||r==='parent'||r==='step')return 1;
+  if(r==='copil'||r==='fiu'||r==='fiica'||r==='child'||r==='son'||r==='daughter')return 3;
+  // spouse, sibling, other, member, and any unknown role → default generation 2
   return 2;
 }
 
@@ -744,6 +757,8 @@ function computeLayout(){
   var genOf={};
   S.members.forEach(function(m){
     genOf[m.id]=m.generation!=null?m.generation:roleToGen(m.role);
+    if(genOf[m.id]==null||isNaN(genOf[m.id]))genOf[m.id]=2;
+    genOf[m.id]=Math.max(0,Math.min(3,genOf[m.id]));
   });
 
   // 2. Build parent→child + spouse maps
