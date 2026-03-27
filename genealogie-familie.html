@@ -4,15 +4,14 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Arborele Familiei — Calnic Online</title>
+    <meta name="description" content="Genealogie și arbore genealogic pentru familia Calnic">
     
     <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@400;600;700&family=Montserrat:wght@300;400;500&display=swap" rel="stylesheet">
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 
     <style>
-        /* ═══════════════════════════════════════════════════
-           THEME VARIABLES (Exact match with your screenshots)
-           ═══════════════════════════════════════════════════ */
         :root {
             --bg-dark: #0a0a0a;
             --bg-surface: #111111;
@@ -39,13 +38,14 @@
             line-height: 1.6;
         }
 
-        h1, h2, h3, h4 { font-family: 'Cormorant Garamond', serif; color: var(--gold); }
+        h1, h2, h3, h4 { 
+            font-family: 'Cormorant Garamond', serif; 
+            color: var(--gold); 
+        }
+
         a { text-decoration: none; color: inherit; transition: 0.3s; }
         button { cursor: pointer; font-family: inherit; }
 
-        /* ═══════════════════════════════════════════════════
-           HEADER (Exact match with index.html)
-           ═══════════════════════════════════════════════════ */
         .site-header {
             text-align: center;
             padding: 20px 0;
@@ -74,9 +74,6 @@
             letter-spacing: 2px;
         }
 
-        /* ═══════════════════════════════════════════════════
-           NAVIGATION (Exact match with all pages)
-           ═══════════════════════════════════════════════════ */
         .navbar {
             background: var(--bg-surface);
             border-bottom: 1px solid var(--gold);
@@ -94,6 +91,7 @@
         .nav-links {
             display: flex;
             list-style: none;
+            flex-wrap: wrap;
         }
 
         .nav-links a {
@@ -132,9 +130,15 @@
             color: var(--bg-dark);
         }
 
-        /* ═══════════════════════════════════════════════════
-           MAIN CONTENT
-           ═══════════════════════════════════════════════════ */
+        .mobile-menu-btn {
+            display: none;
+            background: none;
+            border: none;
+            color: var(--gold);
+            font-size: 1.5rem;
+            padding: 15px;
+        }
+
         .container {
             max-width: 1200px;
             margin: 0 auto;
@@ -169,15 +173,31 @@
             gap: 8px;
         }
 
-        .btn:hover { background: var(--gold); color: var(--bg-dark); }
-        .btn-primary { background: var(--gold); color: var(--bg-dark); }
-        .btn-primary:hover { background: var(--gold-hover); }
-        .btn-secondary { background: var(--bg-surface); color: var(--text-muted); border-color: var(--border); }
-        .btn-secondary:hover { background: var(--border); color: var(--text-main); }
+        .btn:hover { 
+            background: var(--gold); 
+            color: var(--bg-dark); 
+        }
 
-        /* ═══════════════════════════════════════════════════
-           TREE CONTROLS & LEGEND
-           ═══════════════════════════════════════════════════ */
+        .btn-primary { 
+            background: var(--gold); 
+            color: var(--bg-dark); 
+        }
+
+        .btn-primary:hover { 
+            background: var(--gold-hover); 
+        }
+
+        .btn-secondary { 
+            background: var(--bg-surface); 
+            color: var(--text-muted); 
+            border-color: var(--border); 
+        }
+
+        .btn-secondary:hover { 
+            background: var(--border); 
+            color: var(--text-main); 
+        }
+
         .tree-controls {
             display: flex;
             gap: 10px;
@@ -197,16 +217,23 @@
             gap: 20px;
         }
 
-        .legend-item { display: flex; align-items: center; gap: 8px; }
-        .legend-line { width: 30px; height: 2px; display: inline-block; }
+        .legend-item { 
+            display: flex; 
+            align-items: center; 
+            gap: 8px; 
+        }
+
+        .legend-line { 
+            width: 30px; 
+            height: 2px; 
+            display: inline-block; 
+        }
+
         .line-blood { background: var(--line-blood); }
         .line-adopted { border-top: 2px dotted var(--line-adopted); }
         .line-extended { border-top: 2px dotted var(--line-extended); }
         .line-marriage { background: var(--gold); }
 
-        /* ═══════════════════════════════════════════════════
-           TREE AREA (No Zoom/Pan - Auto Center)
-           ═══════════════════════════════════════════════════ */
         #tree-container {
             width: 100%;
             height: 70vh;
@@ -260,9 +287,126 @@
             z-index: 1;
         }
 
-        /* ═══════════════════════════════════════════════════
-           MODALS (Session 1 & 3: Dark/Gold, Before Script)
-           ═══════════════════════════════════════════════════ */
+        .member-sidebar {
+            position: fixed;
+            top: 0;
+            right: -400px;
+            width: 350px;
+            height: 100vh;
+            background: var(--bg-surface);
+            border-left: 2px solid var(--gold);
+            box-shadow: -5px 0 30px rgba(0,0,0,0.8);
+            z-index: 1000;
+            transition: right 0.3s ease;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .member-sidebar.active {
+            right: 0;
+        }
+
+        .sidebar-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100vw;
+            height: 100vh;
+            background: rgba(0,0,0,0.7);
+            z-index: 999;
+            display: none;
+        }
+
+        .sidebar-overlay.active {
+            display: block;
+        }
+
+        .sidebar-header {
+            padding: 20px;
+            border-bottom: 1px solid var(--border);
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+        }
+
+        .sidebar-header h3 {
+            color: var(--gold);
+            font-size: 1.5rem;
+            margin-bottom: 5px;
+        }
+
+        .sidebar-meta {
+            color: var(--text-muted);
+            font-size: 0.85rem;
+        }
+
+        .sidebar-close {
+            background: none;
+            border: none;
+            color: var(--text-muted);
+            font-size: 1.5rem;
+            cursor: pointer;
+            padding: 0;
+            line-height: 1;
+        }
+
+        .sidebar-close:hover {
+            color: var(--gold);
+        }
+
+        .sidebar-body {
+            padding: 20px;
+            flex: 1;
+            overflow-y: auto;
+        }
+
+        .relation-item {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding: 12px 0;
+            border-bottom: 1px solid var(--border);
+            cursor: pointer;
+        }
+
+        .relation-item:hover {
+            background: var(--bg-input);
+        }
+
+        .relation-item:last-child {
+            border-bottom: none;
+        }
+
+        .relation-icon {
+            width: 40px;
+            height: 40px;
+            border: 1px solid var(--gold);
+            border-radius: 50%;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            color: var(--gold);
+            font-weight: bold;
+            flex-shrink: 0;
+        }
+
+        .relation-info h4 {
+            color: var(--text-main);
+            font-size: 1rem;
+            margin-bottom: 3px;
+            font-family: 'Cormorant Garamond', serif;
+        }
+
+        .relation-info p {
+            color: var(--text-muted);
+            font-size: 0.8rem;
+        }
+
+        .sidebar-footer {
+            padding: 20px;
+            border-top: 1px solid var(--border);
+        }
+
         dialog {
             background: var(--bg-surface);
             color: var(--text-main);
@@ -274,7 +418,9 @@
             box-shadow: 0 0 30px rgba(0,0,0,0.9);
         }
 
-        dialog::backdrop { background: rgba(0, 0, 0, 0.9); }
+        dialog::backdrop { 
+            background: rgba(0, 0, 0, 0.9); 
+        }
 
         .modal-header {
             background: var(--gold);
@@ -301,9 +447,13 @@
             line-height: 1;
         }
 
-        .modal-body { padding: 25px; }
+        .modal-body { 
+            padding: 25px; 
+        }
 
-        .form-group { margin-bottom: 20px; }
+        .form-group { 
+            margin-bottom: 20px; 
+        }
 
         .form-group label {
             display: block;
@@ -339,7 +489,6 @@
             gap: 15px;
         }
 
-        /* Visibility Toggle (Exact match with screenshot) */
         .visibility-toggle {
             display: flex;
             gap: 5px;
@@ -374,7 +523,6 @@
             color: white;
         }
 
-        /* Relation Grid */
         .relation-grid {
             display: grid;
             grid-template-columns: repeat(3, 1fr);
@@ -406,9 +554,6 @@
             border-top: 1px solid var(--border);
         }
 
-        /* ═══════════════════════════════════════════════════
-           FOOTER (Exact match with all pages)
-           ═══════════════════════════════════════════════════ */
         footer {
             text-align: center;
             padding: 30px 20px;
@@ -418,8 +563,13 @@
             font-size: 0.85rem;
         }
 
-        footer a { color: var(--gold); }
-        footer a:hover { text-decoration: underline; }
+        footer a { 
+            color: var(--gold); 
+        }
+
+        footer a:hover { 
+            text-decoration: underline; 
+        }
 
         .loading {
             display: flex;
@@ -430,7 +580,6 @@
             font-size: 1.2rem;
         }
 
-        /* Mobile */
         @media (max-width: 768px) {
             .nav-links { display: none; }
             .logo-container { flex-direction: column; gap: 10px; }
@@ -438,14 +587,13 @@
             .btn { width: 100%; justify-content: center; }
             .form-row { grid-template-columns: 1fr; }
             .relation-grid { grid-template-columns: repeat(2, 1fr); }
+            .mobile-menu-btn { display: block; }
+            .member-sidebar { width: 100%; right: -100%; }
         }
     </style>
 </head>
 <body>
 
-    <!-- ═══════════════════════════════════════════════════
-         HEADER (Exact match with index.html)
-         ═══════════════════════════════════════════════════ -->
     <header class="site-header">
         <div class="logo-container">
             <span class="logo-text">Calnic Online</span>
@@ -453,10 +601,8 @@
         </div>
     </header>
 
-    <!-- ═══════════════════════════════════════════════════
-         NAVIGATION (Exact match with all pages)
-         ═══════════════════════════════════════════════════ -->
     <nav class="navbar">
+        <button class="mobile-menu-btn" aria-label="Meniu">☰</button>
         <div class="nav-container">
             <ul class="nav-links">
                 <li><a href="index.html">Acasă</a></li>
@@ -475,9 +621,6 @@
         </div>
     </nav>
 
-    <!-- ═══════════════════════════════════════════════════
-         MAIN CONTENT
-         ═══════════════════════════════════════════════════ -->
     <main class="container">
         <div class="page-header">
             <h1 class="page-title">ARBORELE FAMILIEI</h1>
@@ -498,7 +641,7 @@
         <div class="legend">
             <div class="legend-item"><span class="legend-line line-marriage"></span> Casătorie</div>
             <div class="legend-item"><span class="legend-line line-blood"></span> Legătură de sânge</div>
-            <div class="legend-item"><span class="legend-line line-adopted"></span> Adopție</div>
+            <div class="legend-item"><span class="legend-line line-adopted"></span> Adopție/Vitreg</div>
             <div class="legend-item"><span class="legend-line line-extended"></span> Familie extinsă</div>
         </div>
 
@@ -509,9 +652,6 @@
         </div>
     </main>
 
-    <!-- ═══════════════════════════════════════════════════
-         FOOTER (Exact match with all pages)
-         ═══════════════════════════════════════════════════ -->
     <footer>
         <p>Calnic · Alba · Romania</p>
         <p>Sat cu suflet, memorie vie</p>
@@ -521,12 +661,25 @@
         </p>
     </footer>
 
-    <!-- ═══════════════════════════════════════════════════
-         MODALS (Session 3: BEFORE Script Tag)
-         Session 1: Dark/Gold Theme (Exact match with screenshot)
-         ═══════════════════════════════════════════════════ -->
+    <!-- SIDEBAR (click pe membru) -->
+    <div class="sidebar-overlay" id="sidebar-overlay"></div>
+    <aside class="member-sidebar" id="member-sidebar">
+        <div class="sidebar-header">
+            <div>
+                <h3 id="sidebar-name">Nume Membru</h3>
+                <p class="sidebar-meta" id="sidebar-meta">Gen 1 · 4 legături</p>
+            </div>
+            <button class="sidebar-close" id="sidebar-close">×</button>
+        </div>
+        <div class="sidebar-body" id="sidebar-relations">
+            <!-- Relațiile vor fi încărcate aici -->
+        </div>
+        <div class="sidebar-footer">
+            <button class="btn btn-primary" id="btn-add-relation-sidebar" style="width:100%;">+ Adaugă legătură nouă</button>
+        </div>
+    </aside>
 
-    <!-- 1. Help Modal -->
+    <!-- MODAL: Ajutor -->
     <dialog id="modal-help">
         <div class="modal-header">
             <h3>Ghid Rapid</h3>
@@ -546,7 +699,7 @@
         </div>
     </dialog>
 
-    <!-- 2. Add Person Modal (EXACT match with your screenshot) -->
+    <!-- MODAL: Adaugă Persoană -->
     <dialog id="modal-add-person">
         <div class="modal-header">
             <h3>+ Adaugă persoană în arbore</h3>
@@ -558,7 +711,6 @@
                     <label>Nume complet *</label>
                     <input type="text" id="add-name" required placeholder="ex. Ion Popescu">
                 </div>
-
                 <div class="form-row">
                     <div class="form-group">
                         <label>An naștere</label>
@@ -569,7 +721,6 @@
                         <input type="number" id="add-death" placeholder="gol=in viață">
                     </div>
                 </div>
-
                 <div class="form-row">
                     <div class="form-group">
                         <label>Localitate</label>
@@ -584,21 +735,6 @@
                         <input type="text" id="add-profession" placeholder="ex. Agricultor">
                     </div>
                 </div>
-
-                <div class="form-group">
-                    <label>Relație cu familia</label>
-                    <select id="add-relation">
-                        <option value="tata">Tată</option>
-                        <option value="mama">Mamă</option>
-                        <option value="frate">Frate / Soră</option>
-                        <option value="sot">Soț / Soție</option>
-                        <option value="copil">Copil</option>
-                        <option value="bunic">Bunic / Bunică</option>
-                        <option value="vitreg">Părinte vitreg / Adoptat</option>
-                        <option value="altul">Alt membru</option>
-                    </select>
-                </div>
-
                 <div class="form-group">
                     <label>Vizibilitate</label>
                     <div class="visibility-toggle">
@@ -608,12 +744,10 @@
                     </div>
                     <input type="hidden" id="add-visibility" value="public">
                 </div>
-
                 <div class="form-group">
                     <label>Biografie scurtă</label>
                     <textarea id="add-biography" rows="3" placeholder="Câteva cuvinte despre această persoană..."></textarea>
                 </div>
-
                 <div class="modal-actions">
                     <button type="button" class="btn btn-secondary" onclick="this.closest('dialog').close()">Anulează</button>
                     <button type="submit" class="btn btn-primary">Adaugă în arbore</button>
@@ -622,7 +756,7 @@
         </div>
     </dialog>
 
-    <!-- 3. Profile Modal -->
+    <!-- MODAL: Profil Persoană -->
     <dialog id="modal-profile">
         <div class="modal-header">
             <h3 id="profile-name">Nume Persoană</h3>
@@ -640,7 +774,7 @@
         </div>
     </dialog>
 
-    <!-- 4. Add Relation Modal (Session 1 & 4) -->
+    <!-- MODAL: Adaugă Legătură -->
     <dialog id="modal-add-relation">
         <div class="modal-header">
             <h3>Adaugă Legătură</h3>
@@ -657,6 +791,10 @@
                 <div class="relation-grid">
                     <button class="relation-btn" data-type="tata">Tată</button>
                     <button class="relation-btn" data-type="mama">Mamă</button>
+                    <button class="relation-btn" data-type="bunic">Bunic</button>
+                    <button class="relation-btn" data-type="bunica">Bunică</button>
+                    <button class="relation-btn" data-type="strabunic">Străbunic</button>
+                    <button class="relation-btn" data-type="strabunica">Străbunică</button>
                     <button class="relation-btn" data-type="frate">Frate</button>
                     <button class="relation-btn" data-type="sora">Soră</button>
                     <button class="relation-btn" data-type="sot">Soț</button>
@@ -681,7 +819,7 @@
         </div>
     </dialog>
 
-    <!-- 5. Edit Person Modal -->
+    <!-- MODAL: Editează Persoană -->
     <dialog id="modal-edit-person">
         <div class="modal-header">
             <h3>Editează Persoană</h3>
@@ -699,16 +837,11 @@
         </div>
     </dialog>
 
-    <!-- ═══════════════════════════════════════════════════
-         JAVASCRIPT (All functionality from Sessions 1-4)
-         ═══════════════════════════════════════════════════ -->
     <script type="module">
-        // ─── SUPABASE CONFIG (Your real credentials) ───
         const SUPABASE_URL = 'https://qjgvhirmnxpqqcllzukp.supabase.co';
         const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InFqZ3ZoaXJtbnhwcXFjbGx6dWtwIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzQyNzQ2NTgsImV4cCI6MjA4OTg1MDY1OH0.j3SgLKfwYUaY5elT6JIshvohYvr2UigvPHub7Nzm82M';
         const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 
-        // ─── STATE ───
         let members = [];
         let relations = [];
         let selectedMember = null;
@@ -716,16 +849,21 @@
         let selectedRelationTarget = null;
         let visibilityValue = 'public';
 
-        // ─── UI LISTENERS ───
+        // Mobile menu
+        document.querySelector('.mobile-menu-btn')?.addEventListener('click', () => {
+            document.querySelector('.nav-links').classList.toggle('active');
+        });
+
+        // Button listeners
         document.getElementById('btn-add-person').onclick = () => document.getElementById('modal-add-person').showModal();
         document.getElementById('btn-help').onclick = () => document.getElementById('modal-help').showModal();
 
-        // Close modals on backdrop click
+        // Close modals on backdrop
         document.querySelectorAll('dialog').forEach(d => {
             d.addEventListener('click', e => { if(e.target === d) d.close(); });
         });
 
-        // Visibility toggle (exact match with screenshot)
+        // Visibility toggle
         document.querySelectorAll('.visibility-toggle button').forEach(btn => {
             btn.onclick = () => {
                 document.querySelectorAll('.visibility-toggle button').forEach(b => b.classList.remove('active'));
@@ -782,7 +920,7 @@
                 to_member_id: selectedRelationTarget.id,
                 relation_type: selectedRelationType,
                 confidence: 100,
-                is_biological: selectedRelationType !== 'adoptat' && selectedRelationType !== 'vitreg'
+                is_biological: !['adoptat', 'vitreg'].includes(selectedRelationType)
             }]);
 
             if(error) { alert('Eroare: ' + error.message); return; }
@@ -791,7 +929,7 @@
             loadTree();
         };
 
-        // Add person form submit
+        // Add person form
         document.getElementById('form-add-person').onsubmit = async (e) => {
             e.preventDefault();
             const newMember = {
@@ -838,11 +976,31 @@
             loadTree();
         };
 
-        // ─── TREE LOADING & RENDERING ───
+        // Sidebar functions
+        const sidebar = document.getElementById('member-sidebar');
+        const sidebarOverlay = document.getElementById('sidebar-overlay');
+        const sidebarClose = document.getElementById('sidebar-close');
+
+        sidebarClose.onclick = () => {
+            sidebar.classList.remove('active');
+            sidebarOverlay.classList.remove('active');
+        };
+
+        sidebarOverlay.onclick = () => {
+            sidebar.classList.remove('active');
+            sidebarOverlay.classList.remove('active');
+        };
+
+        document.getElementById('btn-add-relation-sidebar').onclick = () => {
+            sidebar.classList.remove('active');
+            sidebarOverlay.classList.remove('active');
+            document.getElementById('modal-add-relation').showModal();
+        };
+
+        // Load and render tree
         async function loadTree() {
             document.getElementById('loading-msg').style.display = 'flex';
             
-            // Load members
             const { data: membersData } = await supabase
                 .from('members')
                 .select('*')
@@ -855,7 +1013,6 @@
             }
             members = membersData;
 
-            // Load relations (Session 3 Fix: from AND to)
             const memberIds = members.map(m => m.id);
             const { data: relFrom } = await supabase
                 .from('member_relations')
@@ -880,19 +1037,17 @@
             svgLayer.innerHTML = '';
             loading.style.display = 'none';
 
-            // Simple level-based layout (mimics Reingold-Tilford visually)
             const levelHeight = 150;
             const nodeWidth = 100;
             const startX = 100;
             const startY = 50;
 
-            // Group by generation (by birth year)
             const now = new Date().getFullYear();
             const levels = {};
             
             members.forEach(m => {
                 const age = m.birth_year ? (now - m.birth_year) : 50;
-                let level = Math.floor(age / 25); // Approximate generation
+                let level = Math.floor(age / 25);
                 if(!levels[level]) levels[level] = [];
                 levels[level].push(m);
             });
@@ -918,14 +1073,13 @@
                         <span class="name-label">${m.name}</span>
                     `;
                     
-                    node.onclick = () => showProfile(m);
+                    node.onclick = () => showMemberSidebar(m);
                     nodesLayer.appendChild(node);
                 });
 
                 yOffset += levelHeight;
             });
 
-            // Draw connection lines
             relations.forEach(rel => {
                 const from = positions[rel.from_member_id];
                 const to = positions[rel.to_member_id];
@@ -937,7 +1091,6 @@
                     line.setAttribute('x2', to.x);
                     line.setAttribute('y2', to.y);
                     
-                    // Line color based on relation type (Session 4)
                     if(rel.relation_type === 'adoptat' || rel.relation_type === 'vitreg') {
                         line.setAttribute('stroke', '#3b82f6');
                         line.setAttribute('stroke-dasharray', '5,5');
@@ -954,17 +1107,60 @@
             });
         }
 
-        function showProfile(m) {
-            selectedMember = m;
-            document.getElementById('profile-name').textContent = m.name;
-            document.getElementById('profile-birth').textContent = m.birth_year ? `Născut: ${m.birth_year}` : '';
-            document.getElementById('profile-death').textContent = m.death_year ? `Deces: ${m.death_year}` : '';
-            document.getElementById('profile-location').textContent = m.location || '';
-            document.getElementById('profile-biography').textContent = m.biography || '';
-            document.getElementById('modal-profile').showModal();
+        async function showMemberSidebar(member) {
+            selectedMember = member;
+            document.getElementById('sidebar-name').textContent = member.name;
+            document.getElementById('sidebar-meta').textContent = `Gen ${Math.floor((new Date().getFullYear() - (member.birth_year || 1970)) / 25)} · Calculare legături...`;
+            
+            // Load relations for this member
+            const { data: memberRels } = await supabase
+                .from('member_relations')
+                .select('*')
+                .or(`from_member_id.eq.${member.id},to_member_id.eq.${member.id}`);
+            
+            const relationLabels = {
+                'tata': 'Tata al lui', 'mama': 'Mama lui', 'vitreg': 'Părinte vitreg al lui', 'adoptat': 'Părinte adoptiv al lui',
+                'bunic': 'Bunicul lui', 'bunica': 'Bunica lui', 'strabunic': 'Străbunicul lui', 'strabunica': 'Străbunica lui',
+                'frate': 'Fratele lui', 'sora': 'Sora lui', 'sot': 'Soțul lui', 'sotie': 'Soția lui',
+                'copil': 'Copilul lui', 'unchi': 'Unchiul lui', 'matusa': 'Mătușa lui',
+                'nepot': 'Nepotul lui', 'nepoata': 'Nepoata lui', 'var': 'Varul lui', 'vara': 'Vara lui',
+                'socru': 'Socrul lui', 'soacra': 'Soacra lui', 'cuscru': 'Cuscrul lui'
+            };
+
+            let relationsHtml = '';
+            if(memberRels && memberRels.length > 0) {
+                for(const rel of memberRels) {
+                    const otherId = rel.from_member_id === member.id ? rel.to_member_id : rel.from_member_id;
+                    const { data: otherMember } = await supabase.from('members').select('name').eq('id', otherId).single();
+                    if(otherMember) {
+                        const label = relationLabels[rel.relation_type] || rel.relation_type;
+                        relationsHtml += `
+                            <div class="relation-item" onclick="showMemberSidebarById('${otherId}')">
+                                <div class="relation-icon">${otherMember.name.charAt(0).toUpperCase()}</div>
+                                <div class="relation-info">
+                                    <h4>${otherMember.name}</h4>
+                                    <p>${label} ${member.name}</p>
+                                </div>
+                            </div>
+                        `;
+                    }
+                }
+            } else {
+                relationsHtml = '<p style="color:var(--text-muted);">Nu există legături în arbore.</p>';
+            }
+            
+            document.getElementById('sidebar-relations').innerHTML = relationsHtml;
+            document.getElementById('sidebar-meta').textContent = `Gen ${Math.floor((new Date().getFullYear() - (member.birth_year || 1970)) / 25)} · ${memberRels?.length || 0} legături`;
+            
+            sidebar.classList.add('active');
+            sidebarOverlay.classList.add('active');
         }
 
-        // Initialize
+        window.showMemberSidebarById = async (id) => {
+            const { data: member } = await supabase.from('members').select('*').eq('id', id).single();
+            if(member) showMemberSidebar(member);
+        };
+
         loadTree();
     </script>
 </body>
