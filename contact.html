@@ -1,9 +1,109 @@
-<!-- Add this script before </body> in contact.html -->
+<!DOCTYPE html>
+<html lang="ro">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Contact — Calnic Online</title>
+<link rel="icon" type="image/svg+xml" href="favicon.svg">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=EB+Garamond:wght@400;500;600;700&family=Playfair+Display:wght@400;500;600;700&display=swap" rel="stylesheet">
+<script src="supabase.js"></script>
+<script src="admin-nav.js"></script>
+</head>
+<body>
+
+<nav><div class="nav-right" id="nav-right-main"></div></nav>
+
+<div class="lang-bar">LIMBĂ / LANGUAGEROEN</div>
+<div class="site-header">Satul nostru — Amintirile noastre</div>
+
+<div class="nav-container">
+  <div class="nav-links">
+    <a href="index.html" class="nav-link">⌂ Acasa</a>
+    <a href="istorie.html" class="nav-link">🗺 Istoria Satului</a>
+    <a href="familiile.html" class="nav-link">👪 Familiile</a>
+    <a href="genealogie.html" class="nav-link">🌻 Genealogie</a>
+    <a href="galerie.html" class="nav-link">📸 Galerie</a>
+    <a href="contact.html" class="nav-link active">✉ Contact</a>
+    <a href="intrebari.html" class="nav-link">❓ Intrebari</a>
+    <a href="login.html" class="nav-login">🔒 Contul Familiei</a>
+  </div>
+  <button class="mobile-menu-toggle">☰</button>
+</div>
+
+<div class="nav-mobile-menu">
+  <a href="index.html" class="nav-mobile-link">⌂ Acasa</a>
+  <a href="istorie.html" class="nav-mobile-link">🗺 Istoria Satului</a>
+  <a href="familiile.html" class="nav-mobile-link">👪 Familiile</a>
+  <a href="genealogie.html" class="nav-mobile-link">🌻 Genealogie</a>
+  <a href="galerie.html" class="nav-mobile-link">📸 Galerie</a>
+  <a href="contact.html" class="nav-mobile-link">✉ Contact</a>
+  <a href="intrebari.html" class="nav-mobile-link">❓ Intrebari</a>
+  <a href="login.html" class="nav-mobile-link">🔒 Contul Familiei</a>
+</div>
+
+<main class="container">
+  <h1>Contact</h1>
+  <p>Suntem bucurosi sa va auzim ✦  ✦  ✦</p>
+  
+  <form action="https://formspree.io/f/xpqygdjn" method="POST" id="contact-form">
+    <h3>Trimite un mesaj</h3>
+    <select name="subject" required>
+      <option value="" disabled selected>Subiect mesaj</option>
+      <option value="Contul meu">Contul meu</option>
+      <option value="Foto / Galerie">Foto / Galerie</option>
+      <option value="Genealogie">Genealogie</option>
+      <option value="Eroare pe site">Eroare pe site</option>
+      <option value="Colaborare">Colaborare</option>
+      <option value="Altceva">Altceva</option>
+    </select>
+    <input type="text" name="name" required placeholder="Nume">
+    <input type="text" name="location" placeholder="Sat / Localitate  optional">
+    <input type="email" name="email" required placeholder="Adresa de email">
+    <input type="text" name="family" placeholder="Familia din Calnic  optional">
+    <textarea name="message" maxlength="1200" required placeholder="Mesajul tau 0 /1200"></textarea>
+    <button type="submit">TRIMITE MESAJUL</button>
+  </form>
+  <div id="form-status"></div>
+
+  <div class="faq-link">
+    <p>Intrebari frecvente:  Ai intrebari despre cum functioneaza site-ul? Consulta pagina <a href="intrebari.html">Intrebari frecvente</a>.</p>
+    <p class="note">Nota: Informatiile trimise sunt folosite exclusiv pentru a raspunde mesajului tau. Nu stocam date fara consimtamant.</p>
+  </div>
+
+  <div class="success-msg hidden">
+    <p>✓Mesaj trimis! Multumim! Vom reveni in cel mai scurt timp.</p>
+  </div>
+</main>
+
+<footer>
+  <p>Calnicul nu e doar un sat — e o memorie vie, pastrata de fiecare familie care a trait pe aceste dealuri.</p>
+  <div class="footer-info">
+    <h3>Proiectul Calnic Online</h3>
+    <p>Informatii utile 📍 Sat Calnic, jud. Alba 🌎 Regiune Transilvania, Romania 🏛 Cetatea Patrimoniu UNESCO 📱 Platforme GitHub Pages</p>
+    <p>Timp de raspuns obisnuit De obicei raspundem in 2-3 zile.</p>
+    <h3>Pagini utile</h3>
+    <ul>
+      <li><a href="familiile.html">👪 Registrul Familiilor</a> Adauga sau cauta familia ta</li>
+      <li><a href="galerie.html">📸 Galeria foto</a> Incarca fotografii vechi din sat</li>
+      <li><a href="genealogie.html">🌻 Arborele genealogic</a> Construieste genealogia familiei</li>
+    </ul>
+  </div>
+  <div class="scroll-links">⇧ ⇩</div>
+  <p>Calnic ·  Alba  ·  Romania  ·  ·Sat cu suflet, memorie vie·</p>
+  <div class="footer-links">
+    <a href="intrebari.html">Intrebari frecvente</a>
+    ·
+    <a href="contact.html">Contact</a>
+  </div>
+</footer>
+
 <script>
 var form = document.getElementById("contact-form");
+var status = document.getElementById("form-status");
 async function handleSubmit(event) {
   event.preventDefault();
-  var status = document.getElementById("form-status");
   var data = new FormData(event.target);
   fetch(event.target.action, {
     method: form.method,
@@ -11,14 +111,20 @@ async function handleSubmit(event) {
     headers: { 'Accept': 'application/json' }
   }).then(response => {
     if (response.ok) {
-      alert("Mesaj trimis!");
+      status.textContent = "✓Mesaj trimis! Multumim!";
+      status.style.color = "#40c060";
       form.reset();
     } else {
-      alert("Oops! There was a problem submitting your form");
+      status.textContent = "Oops! There was a problem submitting your form";
+      status.style.color = "#c04040";
     }
   }).catch(error => {
-    alert("Oops! There was a problem submitting your form");
+    status.textContent = "Oops! There was a problem submitting your form";
+    status.style.color = "#c04040";
   });
 }
 form.addEventListener("submit", handleSubmit);
 </script>
+
+</body>
+</html>
