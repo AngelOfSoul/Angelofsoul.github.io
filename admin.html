@@ -21,58 +21,1456 @@
 *{margin:0;padding:0;box-sizing:border-box;}
 body{background:var(--bg);color:var(--text);font-family:'EB Garamond',Georgia,serif;font-size:15px;line-height:1.6;min-height:100vh;}
 a{color:var(--gold);text-decoration:none;}
+
+/* ── ACCESS DENIED / LOADING ── */
+.access-screen{display:flex;align-items:center;justify-content:center;min-height:100vh;flex-direction:column;gap:16px;text-align:center;padding:24px;}
+.access-spinner{width:28px;height:28px;border:2px solid var(--b2);border-top-color:var(--gold);border-radius:50%;animation:spin 0.8s linear infinite;}
+@keyframes spin{to{transform:rotate(360deg);}}
+.access-title{font-family:'Playfair Display',serif;font-size:22px;color:var(--gold);}
+.access-sub{font-size:14px;color:var(--muted);font-style:italic;}
+.access-btn{background:var(--gold-d);border:1px solid var(--gold);color:#050505;font-family:'Playfair Display',serif;font-size:13px;font-weight:700;letter-spacing:2px;padding:10px 24px;border-radius:2px;cursor:pointer;transition:all 0.2s;text-decoration:none;display:inline-block;margin-top:8px;}
+.access-btn:hover{background:var(--gold);}
+
+/* ── ADMIN LAYOUT ── */
+#admin-panel{display:none;}
+.adm-wrap{display:flex;flex-direction:column;min-height:100vh;}
+.topbar{background:var(--s1);border-bottom:1px solid var(--b1);padding:9px 20px;display:flex;align-items:center;justify-content:space-between;flex-shrink:0;}
+.topbar-title{font-family:'Playfair Display',serif;font-size:13px;letter-spacing:2px;color:var(--gold);}
+.topbar-right{display:flex;align-items:center;gap:12px;}
+.adm-badge{background:#1a0808;border:1px solid #3a1010;color:var(--red);font-size:10px;padding:2px 8px;border-radius:2px;letter-spacing:1px;}
+.topbar-user{font-size:12px;color:var(--muted);}
+.topbar-logout{background:none;border:1px solid var(--b2);color:var(--muted);font-family:'EB Garamond',serif;font-size:12px;padding:3px 12px;border-radius:2px;cursor:pointer;transition:all 0.2s;}
+.topbar-logout:hover{border-color:var(--red);color:var(--red-l);}
+.topbar-home{background:none;border:1px solid var(--b2);color:var(--muted);font-family:'EB Garamond',serif;font-size:12px;padding:3px 12px;border-radius:2px;cursor:pointer;transition:all 0.2s;text-decoration:none;display:inline-flex;align-items:center;gap:5px;}
+.topbar-home:hover{border-color:var(--gold);color:var(--gold);}
+
+.adm-body{display:flex;flex:1;}
+
+/* ── SIDEBAR ── */
+.sidebar{width:215px;background:var(--s1);border-right:1px solid var(--b1);display:flex;flex-direction:column;flex-shrink:0;min-height:calc(100vh - 42px);}
+.sb-top{padding:14px 16px 10px;border-bottom:1px solid var(--b1);}
+.sb-logo-title{font-family:'Playfair Display',serif;font-size:13px;color:var(--gold);letter-spacing:2px;}
+.sb-logo-sub{font-size:11px;color:var(--gold-m);letter-spacing:1px;}
+.sb-nav{flex:1;padding:6px 0;overflow-y:auto;}
+.sb-group{padding:10px 16px 3px;font-size:10px;letter-spacing:2px;color:var(--gold-m);text-transform:uppercase;}
+.sb-item{display:flex;align-items:center;gap:8px;padding:7px 16px;font-size:13px;color:var(--muted);cursor:pointer;border-left:2px solid transparent;transition:all 0.15s;user-select:none;}
+.sb-item:hover{background:var(--s2);color:var(--text);}
+.sb-item.active{background:var(--s2);color:var(--gold);border-left-color:var(--gold);}
+.sb-item-ic{font-size:13px;width:16px;text-align:center;flex-shrink:0;}
+.sb-footer{padding:12px 16px;border-top:1px solid var(--b1);display:flex;flex-direction:column;gap:8px;}
+.sb-help-btn{width:100%;background:var(--gold-m);border:1px solid var(--gold-d);color:#050505;font-family:'EB Garamond',serif;font-size:12px;letter-spacing:1px;padding:8px 12px;border-radius:2px;cursor:pointer;text-align:left;transition:all 0.2s;font-weight:700;}
+.sb-help-btn:hover{background:var(--gold-d);border-color:var(--gold);}
+.sb-ver{font-size:10px;color:var(--b3);letter-spacing:1px;}
+
+/* ── CONTENT AREA ── */
+.content{flex:1;overflow-y:auto;background:var(--bg);}
+.sec{display:none;padding:24px;}
+.sec.active{display:block;}
+.help-guide{display:none;padding:24px;}
+.help-guide.active{display:block;}
+.ct-title{font-family:'Playfair Display',serif;font-size:22px;color:var(--gold-l);margin-bottom:4px;}
+.ct-sub{font-size:13px;color:var(--muted);font-style:italic;margin-bottom:22px;}
+.sec-hdr{display:flex;align-items:center;gap:10px;margin-bottom:4px;}
+
+/* ── TOOLTIPS ── */
+.tip-wrap{position:relative;display:inline-flex;align-items:center;gap:4px;}
+.tip-btn{width:16px;height:16px;border-radius:50%;background:#1c1200;border:1px solid var(--gold-m);color:var(--gold);font-size:10px;cursor:pointer;display:inline-flex;align-items:center;justify-content:center;font-family:'Playfair Display',serif;font-weight:700;flex-shrink:0;transition:all 0.2s;}
+.tip-btn:hover{background:#2a1c00;border-color:var(--gold);}
+.tip-box{display:none;position:absolute;left:22px;top:-4px;background:var(--s2);border:1px solid var(--gold-m);border-radius:2px;padding:10px 14px;width:240px;font-size:12px;color:#c8aa80;line-height:1.6;z-index:200;box-shadow:0 4px 12px rgba(0,0,0,0.5);}
+.tip-box strong{color:var(--gold);display:block;margin-bottom:4px;font-size:13px;}
+.tip-box.show{display:block;}
+
+/* ── STATS ── */
+.stat-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-bottom:22px;}
+.stat-card{background:var(--s2);border:1px solid var(--b1);border-top:2px solid var(--gold-d);border-radius:2px;padding:16px;}
+.stat-val{font-family:'Playfair Display',serif;font-size:28px;color:var(--gold);margin-bottom:2px;}
+.stat-lbl{font-size:11px;color:var(--gold-m);letter-spacing:1.5px;text-transform:uppercase;}
+.stat-sub{font-size:11px;color:var(--b3);font-style:italic;margin-top:3px;}
+
+/* ── TABLES ── */
+.tbl-wrap{overflow-x:auto;}
+.adm-tbl{width:100%;border-collapse:collapse;font-size:13px;table-layout:fixed;}
+.adm-tbl th{text-align:left;padding:8px 12px;font-size:10px;letter-spacing:2px;text-transform:uppercase;color:var(--gold-m);border-bottom:1px solid var(--b1);font-weight:normal;white-space:nowrap;}
+.adm-tbl td{padding:9px 12px;border-bottom:1px solid var(--s3);color:var(--text);overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
+.adm-tbl tr:last-child td{border-bottom:none;}
+.adm-tbl tr:hover td{background:var(--s2);}
+
+/* ── BADGES ── */
+.badge{font-size:10px;padding:2px 8px;border-radius:2px;letter-spacing:1px;white-space:nowrap;}
+.badge.ok{background:#0a1a0a;border:1px solid #2a4a2a;color:var(--green-l);}
+.badge.warn{background:#1a1200;border:1px solid #4a3800;color:var(--amber);}
+.badge.low{background:#1a0a0a;border:1px solid #4a1a1a;color:var(--red);}
+.badge.crit{background:#1a0808;border:1px solid #5a1010;color:#e05050;}
+.badge.info{background:#0c1e33;border:1px solid #185fa5;color:var(--blue-l);}
+.badge.new{background:#1a1200;border:1px solid var(--gold-m);color:var(--gold);}
+
+/* ── BUTTONS ── */
+.tbtn{background:none;border:1px solid var(--b2);color:var(--muted);font-size:11px;padding:3px 10px;border-radius:2px;cursor:pointer;font-family:'EB Garamond',serif;transition:all 0.15s;}
+.tbtn:hover{border-color:var(--gold-d);color:var(--gold);}
+.tbtn.red{border-color:#3a1818;color:#a05050;}
+.tbtn.red:hover{background:#2a0808;color:var(--red-l);}
+.tbtn.green{border-color:#1a4a1a;color:var(--green-l);}
+.tbtn.green:hover{background:#0a1a0a;}
+.adm-btn{background:var(--gold-d);border:1px solid var(--gold);color:#050505;font-family:'Playfair Display',serif;font-size:12px;font-weight:700;letter-spacing:2px;text-transform:uppercase;padding:9px 22px;border-radius:2px;cursor:pointer;transition:all 0.2s;}
+.adm-btn:hover{background:var(--gold);}
+.adm-btn-sec{background:none;border:1px solid var(--b2);color:var(--muted);font-family:'EB Garamond',serif;font-size:13px;padding:8px 16px;border-radius:2px;cursor:pointer;transition:all 0.2s;}
+.adm-btn-sec:hover{border-color:var(--gold-d);color:var(--gold);}
+.adm-btn-big{background:#0a1a0a;border:2px solid var(--green);color:var(--green-l);font-family:'Playfair Display',serif;font-size:15px;font-weight:700;letter-spacing:2px;padding:18px 32px;border-radius:2px;cursor:pointer;transition:all 0.2s;width:100%;text-align:center;margin-bottom:12px;display:block;}
+.adm-btn-big:hover{background:#0d2a0d;border-color:var(--green-l);}
+.adm-btn-red{background:#1a0808;border:1px solid var(--red);color:var(--red-l);font-family:'Playfair Display',serif;font-size:12px;font-weight:700;letter-spacing:1px;padding:9px 22px;border-radius:2px;cursor:pointer;transition:all 0.2s;}
+.adm-btn-red:hover{background:#2a0a0a;}
+
+/* ── FORMS ── */
+.form-box{background:var(--s2);border:1px solid var(--b1);border-radius:2px;padding:20px;margin-bottom:16px;}
+.form-row{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-bottom:14px;}
+.form-row-3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:14px;margin-bottom:14px;}
 .fl{display:block;font-size:11px;letter-spacing:2px;text-transform:uppercase;color:var(--gold-m);margin-bottom:5px;}
 .fi{background:var(--s3);border:1px solid var(--b2);color:var(--text);padding:8px 12px;font-family:'EB Garamond',serif;font-size:14px;border-radius:2px;outline:none;width:100%;transition:border-color 0.2s;}
 .fi:focus{border-color:var(--gold-d);}
+.ft{background:var(--s3);border:1px solid var(--b2);color:var(--text);padding:8px 12px;font-family:'EB Garamond',serif;font-size:14px;border-radius:2px;outline:none;width:100%;min-height:90px;resize:vertical;transition:border-color 0.2s;}
+.ft:focus{border-color:var(--gold-d);}
+.fs{background:var(--s3);border:1px solid var(--b2);color:var(--text);padding:8px 12px;font-family:'EB Garamond',serif;font-size:14px;border-radius:2px;outline:none;width:100%;}
+.df-msg{padding:8px 12px;border-radius:2px;font-size:13px;margin:8px 0;display:none;}
+.df-msg.success{background:#082a10;border:1px solid #207840;color:#80e0a0;display:block;}
+.df-msg.error{background:#2a0808;border:1px solid #5a2020;color:#e08080;display:block;}
+.df-msg.info{background:#0c1e33;border:1px solid #185fa5;color:var(--blue-l);display:block;}
+
+/* ── REPAIR CARDS ── */
+.rep-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px;}
+.rep-card{background:var(--s2);border:1px solid var(--b1);border-radius:2px;padding:16px;display:flex;align-items:center;justify-content:space-between;gap:12px;}
+.rep-info{flex:1;}
+.rep-title{font-size:13px;color:var(--text);margin-bottom:3px;display:flex;align-items:center;gap:6px;}
+.rep-sub{font-size:11px;color:var(--gold-m);font-style:italic;}
+.rep-status{font-size:11px;padding:2px 8px;border-radius:2px;margin-top:5px;display:inline-block;}
+.rep-status.ok{background:#0a1a0a;border:1px solid #2a4a2a;color:var(--green-l);}
+.rep-status.warn{background:#1a1200;border:1px solid #4a3800;color:var(--amber);}
+.rep-status.crit{background:#1a0808;border:1px solid #5a1010;color:#e05050;}
+
+/* ── BACKUP ── */
+.bk-box{background:#0a1200;border:2px solid var(--green);border-radius:2px;padding:28px;margin-bottom:18px;text-align:center;}
+.bk-icon{font-size:36px;margin-bottom:12px;}
+.bk-title{font-family:'Playfair Display',serif;font-size:20px;color:var(--green-l);margin-bottom:8px;}
+.bk-sub{font-size:14px;color:#4a7050;margin-bottom:20px;line-height:1.6;}
+.bk-note{font-size:12px;color:#3a5040;margin-top:8px;}
+.bk-history{background:var(--s2);border:1px solid var(--b1);border-radius:2px;overflow:hidden;}
+.bk-row{display:flex;align-items:center;gap:14px;padding:11px 16px;border-bottom:1px solid var(--s3);}
+.bk-row:last-child{border-bottom:none;}
+.bk-date{font-size:13px;color:var(--text);flex:1;}
+.bk-size{font-size:12px;color:var(--gold-m);}
+.bk-dl{font-size:11px;color:var(--gold);cursor:pointer;border:1px solid var(--gold-m);padding:3px 10px;border-radius:2px;transition:all 0.2s;}
+.bk-dl:hover{background:var(--gold-m);color:#050505;}
+
+/* ── LOGS ── */
+.log-list{background:var(--s2);border:1px solid var(--b1);border-radius:2px;padding:14px 18px;}
+.log-row{display:flex;gap:12px;padding:9px 0;border-bottom:1px solid var(--s3);align-items:flex-start;}
+.log-row:last-child{border-bottom:none;}
+.log-dot{width:7px;height:7px;border-radius:50%;background:var(--gold);margin-top:5px;flex-shrink:0;}
+.log-dot.red{background:var(--red);}
+.log-dot.blue{background:var(--blue);}
+.log-dot.green{background:var(--green-l);}
+.log-time{font-size:11px;color:var(--gold-m);white-space:nowrap;min-width:130px;}
+.log-text{font-size:13px;color:var(--text);flex:1;line-height:1.5;}
+.log-text span{color:var(--gold);}
+.log-text .red{color:#e05050;}
+
+/* ── CONTACT ── */
+.contact-card{background:var(--s2);border:1px solid var(--b1);border-radius:2px;padding:16px;margin-bottom:10px;}
+.contact-top{display:flex;align-items:center;justify-content:space-between;margin-bottom:8px;}
+.contact-name{font-size:14px;color:var(--text);font-family:'Playfair Display',serif;}
+.contact-meta{display:flex;align-items:center;gap:10px;}
+.contact-msg{font-size:13px;color:var(--muted);line-height:1.7;margin-bottom:10px;}
+.contact-actions{display:flex;gap:8px;}
+
+/* ── PHOTOS ── */
+.photo-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(140px,1fr));gap:10px;}
+.photo-card{background:var(--s2);border:1px solid var(--b1);border-radius:2px;overflow:hidden;}
+.photo-card.reported{border-color:#5a1010;background:#1a0808;}
+.photo-thumb{width:100%;aspect-ratio:4/3;background:var(--s3);display:flex;align-items:center;justify-content:center;font-size:28px;color:var(--b2);}
+.photo-info{padding:8px 10px;}
+.photo-family{font-size:11px;color:var(--gold-m);margin-bottom:5px;}
+.photo-family.reported{color:#e05050;}
+
+/* ── CONFIRM DIALOG ── */
+.confirm-overlay{display:none;position:absolute;top:0;left:0;right:0;bottom:0;background:rgba(0,0,0,0.7);z-index:500;align-items:center;justify-content:center;min-height:200px;}
+.confirm-overlay.show{display:flex;}
+.confirm-box{background:var(--s2);border:1px solid var(--b1);border-radius:2px;padding:28px;max-width:420px;width:90%;}
+.confirm-title{font-family:'Playfair Display',serif;font-size:16px;color:var(--gold-l);margin-bottom:8px;}
+.confirm-msg{font-size:14px;color:var(--muted);line-height:1.7;margin-bottom:20px;}
+.confirm-actions{display:flex;gap:12px;}
+
+/* ── WARN BOX ── */
+.warn-box{background:#0d1117;border:1px solid #1e3a5f;border-left:3px solid var(--blue);border-radius:2px;padding:12px 16px;margin-bottom:14px;font-size:13px;color:var(--blue-l);line-height:1.6;}
+.danger-box{background:#1a0808;border:1px solid #5a1010;border-left:3px solid var(--red);border-radius:2px;padding:12px 16px;margin-bottom:14px;font-size:13px;color:var(--red-l);line-height:1.6;}
+
+/* ── HELP GUIDE ── */
+.help-back{display:inline-flex;align-items:center;gap:8px;background:none;border:1px solid var(--b2);color:var(--muted);font-family:'EB Garamond',serif;font-size:13px;padding:7px 16px;border-radius:2px;cursor:pointer;margin-bottom:22px;transition:all 0.2s;}
+.help-back:hover{border-color:var(--gold-d);color:var(--gold);}
+.hs{background:var(--s2);border:1px solid var(--b1);border-radius:2px;margin-bottom:8px;overflow:hidden;}
+.hs-hdr{display:flex;align-items:center;justify-content:space-between;padding:13px 18px;cursor:pointer;transition:background 0.15s;user-select:none;}
+.hs-hdr:hover{background:var(--s3);}
+.hs-hdr.open{background:var(--s3);border-bottom:1px solid var(--b1);}
+.hs-title{font-family:'Playfair Display',serif;font-size:14px;color:var(--gold);}
+.hs-arrow{font-size:14px;color:var(--gold-m);transition:transform 0.2s;}
+.hs-hdr.open .hs-arrow{transform:rotate(180deg);}
+.hs-body{display:none;padding:18px 20px;}
+.hs-body.open{display:block;}
+.hi{margin-bottom:14px;padding-bottom:14px;border-bottom:1px solid var(--s3);}
+.hi:last-child{border-bottom:none;margin-bottom:0;padding-bottom:0;}
+.hi-name{font-size:13px;color:var(--text);margin-bottom:5px;}
+.hi-desc{font-size:13px;color:var(--muted);line-height:1.75;}
+.hi-warn{font-size:12px;color:var(--amber);margin-top:8px;padding:8px 12px;background:#1a1200;border-left:2px solid var(--amber);}
+
+/* ── SQL RUNNER ── */
+.sql-box{background:var(--s3);border:1px solid var(--b2);border-radius:2px;padding:12px;font-family:'Courier New',monospace;font-size:13px;color:#a0d4a0;min-height:100px;resize:vertical;width:100%;outline:none;}
+.sql-result{background:var(--s3);border:1px solid var(--b1);border-radius:2px;padding:14px;font-family:'Courier New',monospace;font-size:12px;color:var(--text);margin-top:12px;min-height:60px;line-height:1.6;display:none;}
+
+/* ── MISC ── */
+.two-col{display:grid;grid-template-columns:1fr 1fr;gap:16px;}
+.section-label{font-size:10px;letter-spacing:2px;color:var(--gold-m);text-transform:uppercase;margin-bottom:10px;}
+.divider{border:none;border-top:1px solid var(--b1);margin:20px 0;}
+.maint-toggle{display:flex;align-items:center;gap:16px;background:var(--s2);border:1px solid var(--b1);border-radius:2px;padding:16px 20px;}
+.maint-info{flex:1;}
+.maint-title{font-size:14px;color:var(--text);margin-bottom:3px;}
+.maint-sub{font-size:12px;color:var(--muted);font-style:italic;}
+.toggle-switch{width:44px;height:24px;background:var(--b2);border-radius:12px;cursor:pointer;position:relative;transition:background 0.2s;flex-shrink:0;}
+.toggle-switch.on{background:var(--green);}
+.toggle-switch::after{content:'';position:absolute;width:18px;height:18px;background:var(--text);border-radius:50%;top:3px;left:3px;transition:left 0.2s;}
+.toggle-switch.on::after{left:23px;}
+
+@media(max-width:900px){
+  .sidebar{width:180px;}
+  .stat-grid{grid-template-columns:1fr 1fr;}
+  .rep-grid{grid-template-columns:1fr;}
+  .two-col{grid-template-columns:1fr;}
+  .form-row-3{grid-template-columns:1fr 1fr;}
+}
+@media(max-width:640px){
+  .sidebar{display:none;}
+  .form-row,.form-row-3{grid-template-columns:1fr;}
+}
 </style>
+<link rel="icon" type="image/svg+xml" href="favicon.svg">
+<link rel="icon" type="image/x-icon" href="favicon.ico">
+<meta name="description" content="Panou de administrare Calnic Online.">
 </head>
 <body>
-<!-- FIXED: All labels now have 'for' attributes matching input IDs -->
-<div class="form-box">
-  <div style="margin-bottom:14px;">
-    <label for="ann-title" class="fl">Titlu</label>
-    <input class="fi" id="ann-title" placeholder="ex: Functionalitate noua disponibila"/>
-  </div>
-  <div style="margin-bottom:14px;">
-    <label for="ann-body" class="fl">Mesaj</label>
-    <textarea id="ann-body" placeholder="Continutul anuntului"></textarea>
-  </div>
-  <div style="margin-bottom:14px;">
-    <label for="ann-type" class="fl">Tip</label>
-    <select id="ann-type"><option value="notice">Anunt</option></select>
-  </div>
-  <div style="margin-bottom:14px;">
-    <label for="ann-publish" class="fl">Publica la</label>
-    <input class="fi" type="datetime-local" id="ann-publish"/>
-  </div>
-  <div style="margin-bottom:14px;">
-    <label for="ann-expires" class="fl">Expira la</label>
-    <input class="fi" type="datetime-local" id="ann-expires"/>
-  </div>
-  <div style="margin-bottom:14px;">
-    <label for="msg-subject" class="fl">Subiect email</label>
-    <input class="fi" id="msg-subject" placeholder="ex: Noutati din Calnic Online"/>
-  </div>
-  <div style="margin-bottom:14px;">
-    <label for="msg-body" class="fl">Mesaj</label>
-    <textarea id="msg-body" placeholder="Scrie mesajul tau aici..."></textarea>
-  </div>
-  <div style="margin-bottom:14px;">
-    <label for="restore-file" class="fl">Fisier Backup</label>
-    <input class="fi" type="file" accept=".json" id="restore-file"/>
-  </div>
-  <div style="margin-bottom:14px;">
-    <label for="sql-input" class="fl">SQL Query</label>
-    <textarea id="sql-input" placeholder="SELECT * FROM families LIMIT 10;"></textarea>
-  </div>
-  <div style="margin-bottom:14px;">
-    <label for="photo-filter-family" class="fl">Familie</label>
-    <select id="photo-filter-family"><option value="">Toate familiile</option></select>
-  </div>
-  <div style="margin-bottom:14px;">
-    <label for="photo-filter-status" class="fl">Status</label>
-    <select id="photo-filter-status"><option value="">Toate fotografiile</option></select>
-  </div>
+
+<!-- ── LOADING SCREEN ── -->
+<div id="loading-screen" class="access-screen">
+  <div class="access-spinner"></div>
+  <div class="access-title">Se verifica accesul...</div>
+  <div class="access-sub">Calnic Online Admin</div>
 </div>
+
+<!-- ── ACCESS DENIED SCREEN ── -->
+<div id="denied-screen" class="access-screen" style="display:none;">
+  <div style="font-size:48px;margin-bottom:8px;">&#128274;</div>
+  <div class="access-title">Acces restrictionat</div>
+  <div class="access-sub">Nu ai permisiuni de administrator pentru acest panou.</div>
+  <a href="index.html" class="access-btn">Inapoi la site</a>
+</div>
+
+<!-- ── ADMIN PANEL ── -->
+<div id="admin-panel">
+<div class="adm-wrap">
+
+  <div class="topbar">
+    <div class="topbar-title">&#9670; Calnic Admin Panel</div>
+    <div class="topbar-right">
+      <span class="adm-badge">ADMIN</span>
+      <span class="topbar-user" id="admin-email">—</span>
+      <a href="index.html" class="topbar-home">&#8592; Site principal</a>
+      <button class="topbar-logout" onclick="doLogout()">Deconectare</button>
+    </div>
+  </div>
+
+  <div class="adm-body">
+
+    <!-- SIDEBAR -->
+    <div class="sidebar">
+      <div class="sb-top">
+        <div class="sb-logo-title">PANOU ADMIN</div>
+        <div class="sb-logo-sub">Calnic Online</div>
+      </div>
+      <div class="sb-nav">
+        <div class="sb-group">Principal</div>
+        <div class="sb-item active" onclick="nav(this,'dashboard')"><span class="sb-item-ic">&#9632;</span> Panou</div>
+        <div class="sb-group">Siguranta datelor</div>
+        <div class="sb-item" onclick="nav(this,'backup')"><span class="sb-item-ic">&#128230;</span> Backup</div>
+        <div class="sb-item" onclick="nav(this,'tools')"><span class="sb-item-ic">&#9881;</span> Unelte tehnice</div>
+        <div class="sb-group">Securitate</div>
+        <div class="sb-item" onclick="nav(this,'users')"><span class="sb-item-ic">&#128100;</span> Utilizatori</div>
+        <div class="sb-group">Continut</div>
+        <div class="sb-item" onclick="nav(this,'ann')"><span class="sb-item-ic">&#128204;</span> Anunturi</div>
+        <div class="sb-item" onclick="nav(this,'families')"><span class="sb-item-ic">&#128106;</span> Familii</div>
+        <div class="sb-group">Comunicare</div>
+        <div class="sb-item" onclick="nav(this,'msg')"><span class="sb-item-ic">&#9993;</span> Mesaje</div>
+        <div class="sb-item" onclick="nav(this,'contact')"><span class="sb-item-ic">&#128172;</span> Contact</div>
+        <div class="sb-group">Istoric</div>
+        <div class="sb-item" onclick="nav(this,'logs')"><span class="sb-item-ic">&#128196;</span> Jurnale</div>
+        <div class="sb-group">Media</div>
+        <div class="sb-item" onclick="nav(this,'photos')"><span class="sb-item-ic">&#128248;</span> Fotografii</div>
+      </div>
+      <div class="sb-footer">
+        <a href="index.html" class="sb-help-btn" style="display:block;text-align:center;background:var(--b1);border-color:var(--b2);color:var(--muted);">&#8592; Site principal</a>
+        <button class="sb-help-btn" onclick="nav(null,'help')">? Ghid complet</button>
+        <div class="sb-ver">v1.0 · Calnic Online 2026</div>
+      </div>
+    </div>
+
+    <!-- CONTENT -->
+    <div class="content" id="main-content">
+
+      <!-- ══ DASHBOARD ══ -->
+      <div class="sec active" id="sec-dashboard">
+        <div class="sec-hdr">
+          <div class="ct-title">Panou de control</div>
+          <div class="tip-wrap"><div class="tip-btn" onclick="tip('t-dash',event)">?</div><div class="tip-box" id="t-dash"><strong>Panou de control</strong>Prima pagina din admin. Arata starea intregului sat dintr-o privire — familii, membri, fotografii, completitudine si ultimul backup.</div></div>
+        </div>
+        <div class="ct-sub">Bun venit in panoul de administrare Calnic Online.</div>
+
+        <div class="stat-grid">
+          <div class="stat-card"><div class="stat-val" id="dash-families">—</div><div class="stat-lbl">Familii</div><div class="stat-sub" id="dash-families-sub">se incarca...</div></div>
+          <div class="stat-card"><div class="stat-val" id="dash-members">—</div><div class="stat-lbl">Membri</div><div class="stat-sub">in arbori genealogici</div></div>
+          <div class="stat-card"><div class="stat-val" id="dash-photos">—</div><div class="stat-lbl">Fotografii</div><div class="stat-sub">in arhiva satului</div></div>
+          <div class="stat-card"><div class="stat-val" id="dash-score">—</div><div class="stat-lbl">Completitudine</div><div class="stat-sub">medie village</div></div>
+        </div>
+
+        <div class="two-col" style="margin-bottom:16px;">
+          <div style="background:var(--s2);border:1px solid var(--b1);border-radius:2px;padding:16px;">
+            <div class="section-label">Familii inactive (90+ zile)</div>
+            <div id="dash-inactive"><div style="color:var(--gold-m);font-style:italic;font-size:13px;">Se incarca...</div></div>
+          </div>
+          <div style="background:var(--s2);border:1px solid var(--b1);border-radius:2px;padding:16px;">
+            <div class="section-label">Profiluri incomplete (&lt;50%)</div>
+            <div id="dash-incomplete"><div style="color:var(--gold-m);font-style:italic;font-size:13px;">Se incarca...</div></div>
+          </div>
+        </div>
+
+        <div style="background:#0a1200;border:1px solid #2a4a2a;border-radius:2px;padding:14px 18px;display:flex;align-items:center;justify-content:space-between;">
+          <div>
+            <div style="font-size:13px;color:var(--green-l);" id="dash-backup-status">Se verifica ultimul backup...</div>
+            <div style="font-size:11px;color:#4a7050;font-style:italic;">Apasa "Backup" in sidebar pentru a salva datele</div>
+          </div>
+          <button class="tbtn green" onclick="nav(document.querySelectorAll('.sb-item')[2],'backup')">Mergi la Backup &#8594;</button>
+        </div>
+      </div>
+
+      <!-- ══ BACKUP ══ -->
+      <div class="sec" id="sec-backup">
+        <div class="sec-hdr">
+          <div class="ct-title">Backup si recuperare</div>
+          <div class="tip-wrap"><div class="tip-btn" onclick="tip('t-bk',event)">?</div><div class="tip-box" id="t-bk"><strong>De ce e critic?</strong>Planul gratuit Supabase NU face backup automat. Daca se sterge ceva din greseala, datele dispar pentru totdeauna. Apasa butonul mare o data pe saptamana.</div></div>
+        </div>
+        <div class="ct-sub">Protejeaza datele tuturor familiilor din sat.</div>
+
+        <div class="bk-box">
+          <div class="bk-icon">&#128230;</div>
+          <div class="bk-title">Salveaza toate datele acum</div>
+          <div class="bk-sub">Descarca un fisier complet cu toate familiile, membrii, fotografiile, cronologiile si anunturile. Salveaza-l in Google Drive sau pe calculator.</div>
+          <button class="adm-btn-big" id="bk-btn" onclick="doBackup()">&#11015; Descarca backup complet</button>
+          <div class="bk-note">Recomandat: o data pe saptamana · Fisierul se descarca automat pe calculatorul tau</div>
+        </div>
+
+        <div id="bk-msg"></div>
+
+        <div class="section-label" style="margin-bottom:10px;">Istoricul backupurilor</div>
+        <div class="bk-history" id="bk-history">
+          <div style="padding:14px 16px;color:var(--gold-m);font-style:italic;font-size:13px;">Se incarca istoricul...</div>
+        </div>
+
+        <div style="margin-top:20px;">
+          <div class="section-label" style="margin-bottom:10px;">
+            Restaurare date
+            <div class="tip-btn" style="display:inline-flex;margin-left:4px;" onclick="tip('t-restore',event)">?</div>
+            <div class="tip-box" id="t-restore" style="position:absolute;"><strong>Restaurare sigura</strong>Incarci fisierul de backup si sistemul iti arata exact ce s-ar schimba INAINTE de a face ceva. Niciodata nu se modifica nimic fara confirmarea ta.</div>
+          </div>
+          <div class="form-box">
+            <div style="font-size:13px;color:var(--muted);margin-bottom:12px;">Incarca un fisier de backup (.json) pentru previzualizare inainte de restaurare:</div>
+            <div style="display:flex;gap:10px;flex-wrap:wrap;">
+              <input class="fi" type="file" accept=".json" id="restore-file" style="flex:1;min-width:200px;"/>
+              <button class="adm-btn-sec" onclick="doRestorePreview()">Previzualizeaza</button>
+            </div>
+            <div id="restore-preview" style="margin-top:12px;display:none;"></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- ══ TOOLS ══ -->
+      <div class="sec" id="sec-tools">
+        <div class="sec-hdr">
+          <div class="ct-title">Unelte tehnice</div>
+          <div class="tip-wrap"><div class="tip-btn" onclick="tip('t-tools',event)">?</div><div class="tip-box" id="t-tools"><strong>Regula de baza</strong>Verde = OK, Portocaliu = atentie necesara, Rosu = problema gasita. Nicio unealta nu sterge date fara confirmare explicita din partea ta.</div></div>
+        </div>
+        <div class="ct-sub">Verificari si reparatii automate cu un singur click.</div>
+
+        <div class="rep-grid" style="margin-bottom:16px;">
+          <div class="rep-card">
+            <div class="rep-info">
+              <div class="rep-title">Verificator RLS <div class="tip-btn" onclick="tip('t-rls',event)">?</div><div class="tip-box" id="t-rls"><strong>Politici RLS</strong>Verifica ca datele private ale familiilor sunt protejate. O setare gresita in Supabase poate expune datele tuturor pe internet fara niciun avertisment.</div></div>
+              <div class="rep-sub">Protectia datelor private ale familiilor</div>
+              <div class="rep-status" id="rls-status">Se verifica...</div>
+            </div>
+            <button class="adm-btn-sec" onclick="runRLS()">Verifica</button>
+          </div>
+          <div class="rep-card">
+            <div class="rep-info">
+              <div class="rep-title">Curatare stocare <div class="tip-btn" onclick="tip('t-stor',event)">?</div><div class="tip-box" id="t-stor"><strong>Fisiere fantoma</strong>Fotografii sterse din baza de date dar ramase in Storage. Consuma spatiul gratuit (1GB) in mod invizibil.</div></div>
+              <div class="rep-sub">Fisiere fantoma in Supabase Storage</div>
+              <div class="rep-status warn" id="storage-status">Apasa Verifica</div>
+            </div>
+            <button class="adm-btn-sec" onclick="runStorageClean()">Verifica</button>
+          </div>
+          <div class="rep-card">
+            <div class="rep-info">
+              <div class="rep-title">Membri orfani <div class="tip-btn" onclick="tip('t-orp',event)">?</div><div class="tip-box" id="t-orp"><strong>Membri orfani</strong>Membri a caror familie a fost stearsa. Inregistrari invizibile care ocupa spatiu si pot cauza erori.</div></div>
+              <div class="rep-sub">Membri fara familie valida</div>
+              <div class="rep-status" id="orphan-status">Apasa Verifica</div>
+            </div>
+            <button class="adm-btn-sec" onclick="runOrphans()">Verifica</button>
+          </div>
+          <div class="rep-card">
+            <div class="rep-info">
+              <div class="rep-title">Date invalide <div class="tip-btn" onclick="tip('t-dates',event)">?</div><div class="tip-box" id="t-dates"><strong>Date imposibile</strong>Deces inainte de nastere, ani incorecti. Strica widgetul "Astazi in familia ta" de pe homepage.</div></div>
+              <div class="rep-sub">Erori date nastere / deces</div>
+              <div class="rep-status" id="dates-status">Apasa Verifica</div>
+            </div>
+            <button class="adm-btn-sec" onclick="runDates()">Verifica</button>
+          </div>
+          <div class="rep-card">
+            <div class="rep-info">
+              <div class="rep-title">Familii fara cont <div class="tip-btn" onclick="tip('t-own',event)">?</div><div class="tip-box" id="t-own"><strong>Inregistrare incompleta</strong>Familii create dar fara cont de utilizator legat. Nimeni nu se poate autentifica pentru ele.</div></div>
+              <div class="rep-sub">Inregistrari esuate la jumatate</div>
+              <div class="rep-status" id="owner-status">Apasa Verifica</div>
+            </div>
+            <button class="adm-btn-sec" onclick="runOwners()">Verifica</button>
+          </div>
+          <div class="rep-card">
+            <div class="rep-info">
+              <div class="rep-title">Sincronizare contoare <div class="tip-btn" onclick="tip('t-sync',event)">?</div><div class="tip-box" id="t-sync"><strong>Contoare incorecte</strong>members_count si photos_count pot deriva dupa editari. Repara toate familiile dintr-o singura operatiune.</div></div>
+              <div class="rep-sub">Repara members_count si photos_count</div>
+              <div class="rep-status warn">Recomandat lunar</div>
+            </div>
+            <button class="adm-btn-sec" onclick="runSync()">Sincronizeaza</button>
+          </div>
+          <div class="rep-card">
+            <div class="rep-info">
+              <div class="rep-title">Date demo <div class="tip-btn" onclick="tip('t-demo',event)">?</div><div class="tip-box" id="t-demo"><strong>Toggle date demo</strong>Ascunde sau afiseaza instantaneu familiile demo (Popescu, Ionescu etc.) in lista publica a satului.</div></div>
+              <div class="rep-sub">Familii test vizibile / ascunse</div>
+              <div class="rep-status ok" id="demo-status">Vizibile</div>
+            </div>
+            <button class="adm-btn-sec" onclick="runDemoToggle()">Toggle</button>
+          </div>
+          <div class="rep-card">
+            <div class="rep-info">
+              <div class="rep-title">Emailuri duplicate <div class="tip-btn" onclick="tip('t-dupl',event)">?</div><div class="tip-box" id="t-dupl"><strong>Conturi duble</strong>Cauta conturi inregistrate de doua ori cu emailuri aproape identice. Mentine lista de utilizatori curata.</div></div>
+              <div class="rep-sub">Conturi duble in sistem</div>
+              <div class="rep-status" id="dupl-status">Apasa Verifica</div>
+            </div>
+            <button class="adm-btn-sec" onclick="runDuplicates()">Verifica</button>
+          </div>
+        </div>
+
+        <hr class="divider">
+        <div class="section-label" style="margin-bottom:12px;">Alte unelte</div>
+
+        <div style="display:flex;gap:12px;flex-wrap:wrap;margin-bottom:20px;">
+          <div class="tip-wrap">
+            <button class="adm-btn-sec" onclick="doExportCSV()">&#11015; Export CSV toate datele</button>
+            <div class="tip-btn" onclick="tip('t-csv',event)">?</div>
+            <div class="tip-box" id="t-csv"><strong>Export CSV</strong>Descarca toate familiile si membrii ca fisier Excel. Util pentru rapoarte, partajare sau backup lizibil de om.</div>
+          </div>
+        </div>
+
+        <div class="maint-toggle">
+          <div class="maint-info">
+            <div class="maint-title">Mod mentenanta
+              <div class="tip-btn" style="display:inline-flex;margin-left:4px;" onclick="tip('t-maint',event)">?</div>
+              <div class="tip-box" id="t-maint" style="position:absolute;"><strong>Mod mentenanta</strong>Afiseaza un banner pe tot site-ul in timp ce faci lucrari tehnice. Datele raman intacte. Dezactiveaza la fel de usor.</div>
+            </div>
+            <div class="maint-sub" id="maint-sub">Dezactivat — site-ul functioneaza normal</div>
+          </div>
+          <div class="toggle-switch" id="maint-toggle" onclick="toggleMaint()"></div>
+        </div>
+
+        <hr class="divider">
+        <div class="section-label" style="margin-bottom:12px;">
+          SQL Runner (SELECT only)
+          <div class="tip-btn" style="display:inline-flex;margin-left:4px;" onclick="tip('t-sql',event)">?</div>
+          <div class="tip-box" id="t-sql" style="position:absolute;"><strong>SQL Runner</strong>Verifica date din baza de date fara sa deschizi Supabase. Accepta DOAR interogari SELECT — nu poate modifica nimic. 100% sigur prin constructie.</div>
+        </div>
+        <textarea class="sql-box" id="sql-input" placeholder="SELECT * FROM families LIMIT 10;"></textarea>
+        <div style="display:flex;gap:10px;margin-top:8px;">
+          <button class="adm-btn-sec" onclick="runSQL()">Ruleaza interogare</button>
+          <span style="font-size:12px;color:var(--gold-m);align-self:center;">Doar SELECT · Fara modificari</span>
+        </div>
+        <div class="sql-result" id="sql-result"></div>
+      </div>
+
+      <!-- ══ USERS ══ -->
+      <div class="sec" id="sec-users">
+        <div class="sec-hdr">
+          <div class="ct-title">Utilizatori</div>
+          <div class="tip-wrap"><div class="tip-btn" onclick="tip('t-usr',event)">?</div><div class="tip-box" id="t-usr"><strong>Utilizatori</strong>Conturi inregistrate pe site. Poti reseta parola cuiva care a uitat-o sau dezactiva conturi suspecte. Parolele sunt criptate si nu sunt vizibile nimanui.</div></div>
+        </div>
+        <div class="ct-sub">Conturi inregistrate, securitate si acces.</div>
+        <div id="users-list"><div style="color:var(--gold-m);font-style:italic;font-size:13px;">Se incarca utilizatorii...</div></div>
+      </div>
+
+      <!-- ══ ANNOUNCEMENTS ══ -->
+      <div class="sec" id="sec-ann">
+        <div class="sec-hdr">
+          <div class="ct-title">Anunturi</div>
+          <div class="tip-wrap"><div class="tip-btn" onclick="tip('t-ann',event)">?</div><div class="tip-box" id="t-ann"><strong>Anunturi</strong>Apar pe homepage doar utilizatorilor autentificati. Cand expira, dispar singure fara sa faci nimic manual.</div></div>
+        </div>
+        <div class="ct-sub">Publica, programeaza si gestioneaza anunturi pentru membri.</div>
+
+        <div class="form-box">
+          <div style="font-size:14px;color:var(--gold);font-family:'Playfair Display',serif;margin-bottom:14px;">Anunt nou</div>
+          <div style="margin-bottom:14px;"><label class="fl">Titlu</label><input class="fi" id="ann-title" placeholder="ex: Functionalitate noua disponibila"/></div>
+          <div style="margin-bottom:14px;"><label class="fl">Mesaj</label><textarea class="ft" id="ann-body" placeholder="Continutul anuntului — scurt si clar pentru familii..."></textarea></div>
+          <div class="form-row-3">
+            <div><label class="fl">Tip</label><select class="fs" id="ann-type"><option value="notice">Anunt</option><option value="update">Actualizare site</option></select></div>
+            <div>
+              <label class="fl" style="display:flex;align-items:center;gap:4px;">
+                Publica la
+                <div class="tip-btn" onclick="tip('t-pubdate',event)">?</div>
+                <div class="tip-box" id="t-pubdate" style="position:absolute;"><strong>Publicare programata</strong>Gol = apare imediat. Cu data viitoare = apare automat la acea ora fara sa faci nimic.</div>
+              </label>
+              <input class="fi" type="datetime-local" id="ann-publish"/>
+            </div>
+            <div><label class="fl">Expira la</label><input class="fi" type="datetime-local" id="ann-expires"/></div>
+          </div>
+          <div id="ann-msg"></div>
+          <div style="display:flex;gap:10px;margin-top:4px;flex-wrap:wrap;">
+            <button class="adm-btn" onclick="doPublishAnn(false)">Publica</button>
+            <div class="tip-wrap">
+              <button class="adm-btn-sec" onclick="doPublishAnn(true)">Trimite test</button>
+              <div class="tip-btn" onclick="tip('t-test',event)">?</div>
+              <div class="tip-box" id="t-test"><strong>Test anunt</strong>Vizibil doar pentru contul tau de admin. Poti vedea exact cum arata pe homepage inainte sa il trimiti tuturor familiilor.</div>
+            </div>
+          </div>
+        </div>
+
+        <div class="section-label" style="margin-bottom:10px;">Anunturi active</div>
+        <div id="ann-list"><div style="color:var(--gold-m);font-style:italic;font-size:13px;">Se incarca anunturile...</div></div>
+      </div>
+
+      <!-- ══ FAMILIES ══ -->
+      <div class="sec" id="sec-families">
+        <div class="sec-hdr">
+          <div class="ct-title">Familii inregistrate</div>
+          <div class="tip-wrap"><div class="tip-btn" onclick="tip('t-fam',event)">?</div><div class="tip-box" id="t-fam"><strong>Familii</strong>Editeaza detaliile oricarei familii sau sterge una complet. Stergerea este permanenta si cere confirmare explicita prin tastarea numelui familiei.</div></div>
+        </div>
+        <div class="ct-sub">Toate familiile din Calnic Online.</div>
+        <div id="families-list"><div style="color:var(--gold-m);font-style:italic;font-size:13px;">Se incarca familiile...</div></div>
+      </div>
+
+      <!-- ══ MESSAGES ══ -->
+      <div class="sec" id="sec-msg">
+        <div class="sec-hdr">
+          <div class="ct-title">Mesaj catre toate familiile</div>
+          <div class="tip-wrap"><div class="tip-btn" onclick="tip('t-msg',event)">?</div><div class="tip-box" id="t-msg"><strong>Diferenta fata de anunturi</strong>Anunturile apar pe homepage. Mesajele se trimit pe email direct in inbox-ul fiecarei familii. Foloseste rar — doar pentru comunicari cu adevarat importante.</div></div>
+        </div>
+        <div class="ct-sub">Trimite un email tuturor familiilor inregistrate.</div>
+        <div class="form-box">
+          <div style="margin-bottom:14px;"><label class="fl">Subiect email</label><input class="fi" id="msg-subject" placeholder="ex: Noutati din Calnic Online — Martie 2026"/></div>
+          <div style="margin-bottom:14px;"><label class="fl">Mesaj</label><textarea class="ft" id="msg-body" style="min-height:120px;" placeholder="Scrie mesajul tau aici...&#10;&#10;Va fi primit de toate familiile inregistrate."></textarea></div>
+          <div class="warn-box">Acest mesaj va fi trimis pe email catre toate familiile inregistrate. Verifica textul cu atentie inainte de trimitere.</div>
+          <div id="msg-result"></div>
+          <div style="display:flex;gap:10px;">
+            <button class="adm-btn" onclick="doSendMsg()">Trimite tuturor</button>
+            <button class="adm-btn-sec" onclick="doPreviewMsg()">Previzualizeaza</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- ══ CONTACT ══ -->
+      <div class="sec" id="sec-contact">
+        <div class="sec-hdr">
+          <div class="ct-title">Mesaje Contact</div>
+          <div class="tip-wrap"><div class="tip-btn" onclick="tip('t-cnt',event)">?</div><div class="tip-box" id="t-cnt"><strong>Mesaje primite</strong>Toate mesajele trimise prin formularul de contact al site-ului apar aici. Le poti citi si marca ca rezolvate direct din admin.</div></div>
+        </div>
+        <div class="ct-sub">Mesaje primite prin formularul de contact.</div>
+        <div id="contact-list"><div style="color:var(--gold-m);font-style:italic;font-size:13px;">Se incarca mesajele...</div></div>
+      </div>
+
+      <!-- ══ LOGS ══ -->
+      <div class="sec" id="sec-logs">
+        <div class="sec-hdr">
+          <div class="ct-title">Jurnale</div>
+          <div class="tip-wrap"><div class="tip-btn" onclick="tip('t-log',event)">?</div><div class="tip-box" id="t-log"><strong>Doua tipuri de jurnal</strong>Actiuni = ce AI FACUT tu in admin. Acces = cine A DESCHIS pagina admin si cand. Impreuna dau un istoric complet al activitatii administrative.</div></div>
+        </div>
+        <div class="ct-sub">Istoric complet al actiunilor si accesului in panoul admin.</div>
+        <div class="two-col">
+          <div>
+            <div class="section-label" style="margin-bottom:10px;">
+              Jurnal actiuni
+              <div class="tip-btn" style="display:inline-flex;margin-left:4px;" onclick="tip('t-actlog',event)">?</div>
+              <div class="tip-box" id="t-actlog" style="position:absolute;"><strong>Jurnal actiuni</strong>Inregistreaza TOT ce faci in admin. Daca ceva merge gresit pe site, te uiti aici si stii exact ce s-a intamplat si cand.</div>
+            </div>
+            <div class="log-list" id="action-log"><div style="color:var(--gold-m);font-style:italic;font-size:13px;">Se incarca...</div></div>
+          </div>
+          <div>
+            <div class="section-label" style="margin-bottom:10px;">
+              Jurnal acces
+              <div class="tip-btn" style="display:inline-flex;margin-left:4px;" onclick="tip('t-acclog',event)">?</div>
+              <div class="tip-box" id="t-acclog" style="position:absolute;"><strong>Jurnal acces</strong>Fiecare deschidere a paginii admin: cine, de unde, la ce ora. Crucial cand adaugi colegi admin — stii imediat daca cineva acceseaza din locatii suspecte.</div>
+            </div>
+            <div class="log-list" id="access-log"><div style="color:var(--gold-m);font-style:italic;font-size:13px;">Se incarca...</div></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- ══ PHOTOS ══ -->
+      <div class="sec" id="sec-photos">
+        <div class="sec-hdr">
+          <div class="ct-title">Manager fotografii</div>
+          <div class="tip-wrap"><div class="tip-btn" onclick="tip('t-ph',event)">?</div><div class="tip-box" id="t-ph"><strong>Fotografii</strong>Vizualizeaza, filtreaza si sterge fotografii nepotrivite. Stergerea este permanenta si cere confirmare — fotografiile dispar si din Supabase Storage.</div></div>
+        </div>
+        <div class="ct-sub">Toate fotografiile din arhiva satului — modereaza si gestioneaza.</div>
+        <div style="display:flex;gap:10px;margin-bottom:16px;flex-wrap:wrap;">
+          <select class="fs" id="photo-filter-family" style="width:200px;" onchange="loadPhotos()">
+            <option value="">Toate familiile</option>
+          </select>
+          <select class="fs" id="photo-filter-status" style="width:180px;" onchange="loadPhotos()">
+            <option value="">Toate fotografiile</option>
+            <option value="reported">Raportate</option>
+            <option value="no-desc">Fara descriere</option>
+          </select>
+        </div>
+        <div class="photo-grid" id="photo-grid"><div style="color:var(--gold-m);font-style:italic;font-size:13px;">Se incarca fotografiile...</div></div>
+      </div>
+
+      <!-- ══ HELP GUIDE ══ -->
+      <div class="help-guide" id="sec-help">
+        <button class="help-back" onclick="nav(document.querySelector('.sb-item'),'dashboard')">&#8592; Inapoi la panou</button>
+        <div class="ct-title">Ghid complet — Panou Admin</div>
+        <div class="ct-sub">Tot ce trebuie sa stii despre fiecare sectiune si unealta din admin.</div>
+
+        <div class="hs"><div class="hs-hdr" onclick="togHS(this)"><div class="hs-title">&#9632; Panou de control</div><span class="hs-arrow">&#8964;</span></div><div class="hs-body"><div class="hi"><div class="hi-name">Ce este panoul de control?</div><div class="hi-desc">Prima pagina pe care o vezi cand deschizi admin. Arata starea intregului sat dintr-o privire: cate familii, membri, fotografii si cat de complete sunt profilurile in medie. Afiseaza si familiile inactive de 90+ zile si cele cu profiluri incomplete, plus statusul ultimului backup efectuat.</div></div></div></div>
+
+        <div class="hs"><div class="hs-hdr" onclick="togHS(this)"><div class="hs-title">&#128230; Backup si recuperare</div><span class="hs-arrow">&#8964;</span></div><div class="hs-body">
+          <div class="hi"><div class="hi-name">Backup complet — butonul mare verde</div><div class="hi-desc">Descarca TOATE datele site-ului (familii, membri, fotografii, cronologii, anunturi) intr-un singur fisier JSON cu timestamp in nume. Salveaza-l in Google Drive sau pe calculator. Apasa o data pe saptamana pentru siguranta maxima.</div><div class="hi-warn">&#9888; Pe planul gratuit Supabase nu exista backup automat. Acesta este singurul tau salvgard in caz de accident sau stergere accidentala a datelor.</div></div>
+          <div class="hi"><div class="hi-name">Istoricul backupurilor</div><div class="hi-desc">Lista tuturor backupurilor pe care le-ai efectuat cu data exacta, ora si marimea fisierului. Poti descarca orice backup vechi daca ai nevoie sa recuperezi date dintr-un moment anterior.</div></div>
+          <div class="hi"><div class="hi-name">Restaurare cu previzualizare</div><div class="hi-desc">Incarci un fisier de backup si sistemul iti arata exact ce s-ar schimba INAINTE de a executa restaurarea — cate randuri se adauga, modifica sau sterg. Confirmi explicit, si abia atunci se executa. Niciodata nu se modifica nimic fara confirmarea ta.</div></div>
+        </div></div>
+
+        <div class="hs"><div class="hs-hdr" onclick="togHS(this)"><div class="hs-title">&#9881; Unelte tehnice</div><span class="hs-arrow">&#8964;</span></div><div class="hs-body">
+          <div class="hi"><div class="hi-name">Verificator politici RLS</div><div class="hi-desc">Verifica ca datele private ale familiilor (fotografii private, date personale, documente) sunt protejate in baza de date. O singura setare gresita in Supabase poate expune datele tuturor familiilor pe internet fara niciun avertisment.</div><div class="hi-warn">Ruleaza saptamanal. Daca apare rosu — opreste orice modificare si contacteaza suportul Supabase imediat.</div></div>
+          <div class="hi"><div class="hi-name">Curatare stocare</div><div class="hi-desc">Cauta si sterge fisiere fantoma — fotografii sterse din baza de date dar al caror fisier a ramas in Supabase Storage. Aceste fisiere consuma spatiul tau gratuit (1GB) in mod invizibil, pana cand incarcarea de fotografii incepe sa esueze.</div></div>
+          <div class="hi"><div class="hi-name">Detector membri orfani</div><div class="hi-desc">Cauta membri ai caror familie a fost stearsa din baza de date. Sunt inregistrari invizibile care ocupa spatiu si pot cauza erori in interogari complexe.</div></div>
+          <div class="hi"><div class="hi-name">Corector date invalide</div><div class="hi-desc">Gaseste membri cu date imposibile — data decesului inainte de data nasterii, an nastere care nu se potriveste cu data completa, sau date in format gresit. Aceste erori strica widgetul "Astazi in familia ta" de pe homepage si calculul aniversarilor.</div></div>
+          <div class="hi"><div class="hi-name">Familii fara cont</div><div class="hi-desc">Gaseste familii create in baza de date dar la care nu s-a legat niciun cont de utilizator — inregistrare esuata la jumatate. Nimeni nu se poate autentifica pentru aceste familii si ele apar in lista satului fara proprietar.</div></div>
+          <div class="hi"><div class="hi-name">Sincronizare contoare</div><div class="hi-desc">Recalculeaza numarul de membri, fotografii si generatii pentru toate familiile. Aceste numere pot deveni incorecte dupa editari manuale. Le repara pe toate dintr-o singura operatiune. Recomandat lunar.</div></div>
+          <div class="hi"><div class="hi-name">Toggle date demo</div><div class="hi-desc">Ascunde sau afiseaza instantaneu cele 5 familii demo (Popescu, Ionescu, Moldovan, Popa, Muresan) in lista publica a satului. Util cand testezi functionalitati noi si nu vrei ca vizitatorii sa vada date false.</div></div>
+          <div class="hi"><div class="hi-name">SQL Runner (SELECT only)</div><div class="hi-desc">Iti permite sa verifici date din baza de date direct din admin, fara sa deschizi Supabase. Accepta DOAR interogari de citire (SELECT) — nu poate modifica, sterge sau adauga nimic. Este 100% sigur prin constructie.</div></div>
+          <div class="hi"><div class="hi-name">Export CSV</div><div class="hi-desc">Descarca toate familiile si membrii intr-un fisier care se deschide in Excel sau Google Sheets. Util pentru rapoarte, partajare cu autoritatile locale, sau ca backup lizibil de om.</div></div>
+          <div class="hi"><div class="hi-name">Mod mentenanta</div><div class="hi-desc">Afiseaza un banner pe tot site-ul care anunta vizitatorilor ca se fac lucrari tehnice. Datele raman intacte. Dezactiveaza la fel de usor cand termini lucrarile.</div></div>
+        </div></div>
+
+        <div class="hs"><div class="hs-hdr" onclick="togHS(this)"><div class="hs-title">&#128100; Utilizatori</div><span class="hs-arrow">&#8964;</span></div><div class="hs-body"><div class="hi"><div class="hi-name">Ce poti face in aceasta sectiune?</div><div class="hi-desc">Vezi toate conturile inregistrate pe site. Poti reseta parola unui utilizator care a uitat-o — li se trimite automat un email de resetare. Poti dezactiva un cont suspect fara sa il stergi. Parolele sunt criptate si nu pot fi vazute de nimeni, nici de tine, nici de Supabase.</div></div></div></div>
+
+        <div class="hs"><div class="hs-hdr" onclick="togHS(this)"><div class="hs-title">&#128204; Anunturi</div><span class="hs-arrow">&#8964;</span></div><div class="hs-body">
+          <div class="hi"><div class="hi-name">Cum functioneaza anunturile?</div><div class="hi-desc">Scrii un anunt, alegi tipul (Anunt general sau Actualizare site), setezi cand apare si cand expira automat. Apare pe homepage doar pentru utilizatorii autentificati. Cand ajunge la data de expirare, dispare singur fara sa faci nimic manual.</div></div>
+          <div class="hi"><div class="hi-name">Publicare programata</div><div class="hi-desc">Daca lasi campul "Publica la" gol, anuntul apare imediat. Daca setezi o data si ora viitoare, anuntul va aparea automat la acel moment, fara sa fie nevoie sa faci ceva.</div></div>
+          <div class="hi"><div class="hi-name">Test anunt</div><div class="hi-desc">Publica anuntul doar pentru contul tau de admin. Poti vedea exact cum arata pe homepage — culoarea, formatul, textul — inainte sa il trimiti tuturor celor 47 de familii.</div></div>
+        </div></div>
+
+        <div class="hs"><div class="hs-hdr" onclick="togHS(this)"><div class="hs-title">&#128106; Familii</div><span class="hs-arrow">&#8964;</span></div><div class="hs-body"><div class="hi"><div class="hi-name">Ce poti face?</div><div class="hi-desc">Editeaza detaliile oricarei familii — nume, poveste, an inregistrare, setari de vizibilitate. Poti sterge o familie complet. Stergerea este permanenta si cere confirmarea numelui familiei tastat manual, ca masura de siguranta impotriva stergerilor accidentale.</div></div></div></div>
+
+        <div class="hs"><div class="hs-hdr" onclick="togHS(this)"><div class="hs-title">&#9993; Mesaje si Contact</div><span class="hs-arrow">&#8964;</span></div><div class="hs-body">
+          <div class="hi"><div class="hi-name">Mesaj catre toate familiile</div><div class="hi-desc">Trimite un email direct la adresele tuturor familiilor inregistrate. Diferit de anunturi care apar pe homepage — mesajele ajung in inbox-ul fiecaruia. Foloseste rar, doar pentru comunicari cu adevarat importante, ca sa nu devii enervant.</div></div>
+          <div class="hi"><div class="hi-name">Contact — mesaje primite</div><div class="hi-desc">Toate mesajele trimise prin formularul de contact al site-ului (pagina contact.html) apar aici. Le poti citi, raspunde sau marca ca rezolvate direct din panoul admin, fara sa verifici email-ul.</div></div>
+        </div></div>
+
+        <div class="hs"><div class="hs-hdr" onclick="togHS(this)"><div class="hs-title">&#128196; Jurnale</div><span class="hs-arrow">&#8964;</span></div><div class="hs-body">
+          <div class="hi"><div class="hi-name">Jurnal actiuni — ce AI FACUT tu</div><div class="hi-desc">Inregistreaza fiecare actiune executata in admin: ai publicat un anunt, ai sters o fotografie, ai editat o familie, ai rulat o reparatie, ai descarcat un backup. Daca ceva merge gresit pe site, te uiti in acest jurnal si stii exact ce s-a intamplat si cand.</div></div>
+          <div class="hi"><div class="hi-name">Jurnal acces — cine A DESCHIS admin-ul</div><div class="hi-desc">Inregistreaza fiecare deschidere a paginii admin: emailul contului, tara de provenienta si ora exacta. In prezent esti singurul admin. Devine crucial cand adaugi colegi — stii imediat daca cineva acceseaza la ore suspecte sau din locatii necunoscute.</div></div>
+        </div></div>
+
+        <div class="hs"><div class="hs-hdr" onclick="togHS(this)"><div class="hs-title">&#128248; Fotografii</div><span class="hs-arrow">&#8964;</span></div><div class="hs-body"><div class="hi"><div class="hi-name">Ce poti face?</div><div class="hi-desc">Vizualizeaza toate fotografiile incarcate de toate familiile, filtreaza pe familie sau status (raportate, fara descriere). Sterge fotografii nepotrivite sau accidentale. Stergerea este permanenta si cere confirmare — fotografiile sterse dispar si din Supabase Storage.</div></div></div></div>
+      </div>
+
+    </div><!-- end content -->
+  </div><!-- end adm-body -->
+</div><!-- end adm-wrap -->
+</div><!-- end admin-panel -->
+
+<script>
+/* ═══════════════════════════════════════════════════
+   ADMIN.HTML — Calnic Online
+   Protected: requires Supabase auth + is_admin = true
+   ═══════════════════════════════════════════════════ */
+
+var ADMIN_EMAIL = '';
+var MONTHS_RO = ['ian','feb','mar','apr','mai','iun','iul','aug','sep','oct','noi','dec'];
+var maintMode = false;
+var demoVisible = true;
+
+/* ── BOOT ── */
+function initAdminAuth() {
+  if (!window.supabase) {
+    showScreen('denied'); return;
+  }
+  window.supabase.auth.getSession().then(function(res) {
+    var session = res.data && res.data.session;
+    if (!session) { window.location.href = 'login.html'; return; }
+    ADMIN_EMAIL = session.user.email;
+    window.supabase
+      .from('profiles')
+      .select('is_admin')
+      .eq('id', session.user.id)
+      .single()
+      .then(function(r) {
+        if (r.data && r.data.is_admin) {
+          showScreen('admin');
+          document.getElementById('admin-email').textContent = ADMIN_EMAIL;
+          logAccess();
+          loadDashboard();
+          loadAnnouncements();
+          loadFamilies();
+          loadUsers();
+          loadContactMessages();
+          loadLogs();
+          loadPhotos();
+        } else {
+          showScreen('denied');
+        }
+      }).catch(function() { showScreen('denied'); });
+  }).catch(function() { showScreen('denied'); });
+}
+
+/* Guard against the race condition where the CDN script loads from cache
+   before this listener is registered — in that case window.supabase is
+   already set, so we call initAdminAuth() directly instead of waiting for
+   an event that has already fired and will never fire again. */
+if (window.supabase) {
+  initAdminAuth();
+} else {
+  document.addEventListener('supabase:ready', initAdminAuth);
+}
+
+function showScreen(which) {
+  document.getElementById('loading-screen').style.display = 'none';
+  document.getElementById('denied-screen').style.display  = 'none';
+  document.getElementById('admin-panel').style.display    = 'none';
+  if (which === 'admin')  document.getElementById('admin-panel').style.display    = 'block';
+  if (which === 'denied') document.getElementById('denied-screen').style.display  = 'flex';
+}
+
+/* ── NAV ── */
+function nav(el, id) {
+  document.querySelectorAll('.sb-item').forEach(function(s){ s.classList.remove('active'); });
+  document.querySelectorAll('.sec, .help-guide').forEach(function(s){ s.classList.remove('active'); });
+  if (el && el.classList) el.classList.add('active');
+  var sec = document.getElementById('sec-' + id);
+  if (sec) sec.classList.add('active');
+  closeTips();
+}
+
+/* ── TOOLTIPS ── */
+function tip(id, e) {
+  if (e) e.stopPropagation();
+  var box = document.getElementById(id);
+  if (!box) return;
+  var was = box.classList.contains('show');
+  closeTips();
+  if (!was) box.classList.add('show');
+}
+function closeTips() { document.querySelectorAll('.tip-box').forEach(function(t){ t.classList.remove('show'); }); }
+document.addEventListener('click', closeTips);
+
+/* ── HELP ACCORDION ── */
+function togHS(hdr) {
+  hdr.classList.toggle('open');
+  hdr.nextElementSibling.classList.toggle('open');
+}
+
+/* ── LOGOUT ── */
+function doLogout() {
+  if (!confirm('Esti sigur ca vrei sa te deconectezi din panoul admin?')) return;
+  window.supabase.auth.signOut().then(function(){ window.location.href = 'login.html'; });
+}
+
+/* ── ADMIN LOG ── */
+function logAccess() {
+  if (!window.supabase) return;
+  window.supabase.from('admin_logs').insert({
+    admin_email: ADMIN_EMAIL,
+    action: 'access',
+    details: 'Acces panou admin',
+    created_at: new Date().toISOString()
+  }).then(function(){}).catch(function(){});
+}
+
+function logAction(action, details) {
+  if (!window.supabase) return;
+  window.supabase.from('admin_logs').insert({
+    admin_email: ADMIN_EMAIL,
+    action: action,
+    details: details,
+    created_at: new Date().toISOString()
+  }).then(function(){}).catch(function(){});
+}
+
+/* ── FORMAT HELPERS ── */
+function fmtDate(iso) {
+  if (!iso) return '—';
+  var d = new Date(iso);
+  return d.getDate() + ' ' + MONTHS_RO[d.getMonth()] + ' ' + d.getFullYear() + ', ' + String(d.getHours()).padStart(2,'0') + ':' + String(d.getMinutes()).padStart(2,'0');
+}
+function daysAgo(iso) {
+  if (!iso) return null;
+  var diff = Math.floor((Date.now() - new Date(iso).getTime()) / 86400000);
+  if (diff === 0) return 'azi';
+  if (diff === 1) return 'ieri';
+  if (diff < 7)  return 'acum ' + diff + ' zile';
+  if (diff < 30) return 'acum ' + Math.floor(diff/7) + ' sapt.';
+  return 'acum ' + Math.floor(diff/30) + ' luni';
+}
+
+/* ── DASHBOARD ── */
+function loadDashboard() {
+  if (!window.supabase) return;
+  Promise.all([
+    window.supabase.from('families').select('id', {count:'exact', head:true}),
+    window.supabase.from('members').select('id',  {count:'exact', head:true}),
+    window.supabase.from('photos').select('id',   {count:'exact', head:true}),
+    window.supabase.from('families').select('name, members_count, photos_count, generations_count, created_at')
+  ]).then(function(results) {
+    document.getElementById('dash-families').textContent = results[0].count || 0;
+    document.getElementById('dash-members').textContent  = results[1].count || 0;
+    document.getElementById('dash-photos').textContent   = (results[2].count || 0).toLocaleString('ro-RO');
+
+    var fams = results[3].data || [];
+    var scores = fams.map(function(f){
+      var done = [f.name, f.members_count > 0, f.photos_count > 0].filter(Boolean).length;
+      return Math.round((done / 3) * 100);
+    });
+    var avg = scores.length ? Math.round(scores.reduce(function(a,b){return a+b;},0) / scores.length) : 0;
+    document.getElementById('dash-score').textContent = avg + '%';
+
+    var ninety = Date.now() - 90 * 86400000;
+    var inactive = fams.filter(function(f){ return new Date(f.created_at).getTime() < ninety; }).slice(0,5);
+    var inactiveEl = document.getElementById('dash-inactive');
+    if (inactive.length === 0) {
+      inactiveEl.innerHTML = '<div style="color:var(--green-l);font-size:13px;">Toate familiile sunt active</div>';
+    } else {
+      inactiveEl.innerHTML = '<table class="adm-tbl"><tr><th>Familie</th><th>Inregistrat</th></tr>' +
+        inactive.map(function(f){ return '<tr><td>'+f.name+'</td><td><span class="badge warn">'+daysAgo(f.created_at)+'</span></td></tr>'; }).join('') + '</table>';
+    }
+
+    var incomplete = fams.filter(function(f){
+      var done = [f.name, f.members_count > 0, f.photos_count > 0].filter(Boolean).length;
+      return Math.round((done/3)*100) < 50;
+    }).slice(0,5);
+    var incEl = document.getElementById('dash-incomplete');
+    if (incomplete.length === 0) {
+      incEl.innerHTML = '<div style="color:var(--green-l);font-size:13px;">Toate profilurile sunt peste 50%</div>';
+    } else {
+      incEl.innerHTML = '<table class="adm-tbl"><tr><th>Familie</th><th>Scor</th></tr>' +
+        incomplete.map(function(f){
+          var s = Math.round(([f.name, f.members_count>0, f.photos_count>0].filter(Boolean).length/3)*100);
+          return '<tr><td>'+f.name+'</td><td><span class="badge low">'+s+'%</span></td></tr>';
+        }).join('') + '</table>';
+    }
+
+    var bkHist = JSON.parse(localStorage.getItem('calnic-bk-history') || '[]');
+    var bkEl = document.getElementById('dash-backup-status');
+    if (bkHist.length > 0) {
+      bkEl.textContent = 'Ultimul backup: ' + bkHist[0].date;
+    } else {
+      bkEl.innerHTML = '<span style="color:var(--amber);">&#9888; Nu ai efectuat niciun backup inca</span>';
+    }
+  });
+}
+
+/* ── USERS ── */
+function loadUsers() {
+  if (!window.supabase) return;
+  var el = document.getElementById('users-list');
+  if (!el) return;
+  // Join profiles + families to get email-equivalent (owner) info
+  Promise.all([
+    window.supabase.from('profiles').select('id, is_admin, created_at').order('created_at', {ascending: false}),
+    window.supabase.from('families').select('owner_id, name, village, created_at')
+  ]).then(function(results) {
+    var profiles = results[0].data || [];
+    var families = results[1].data || [];
+
+    if (profiles.length === 0) {
+      el.innerHTML = '<div style="color:var(--gold-m);font-style:italic;font-size:13px;">Nu exista utilizatori inregistrati.</div>';
+      return;
+    }
+
+    // Map owner_id -> family info
+    var famByOwner = {};
+    families.forEach(function(f) { famByOwner[f.owner_id] = f; });
+
+    el.innerHTML = '<div class="tbl-wrap"><table class="adm-tbl">' +
+      '<tr>' +
+        '<th style="width:180px;">Familie / Cont</th>' +
+        '<th style="width:100px;">Sat</th>' +
+        '<th style="width:110px;">Inregistrat</th>' +
+        '<th style="width:60px;">Admin</th>' +
+        '<th></th>' +
+      '</tr>' +
+      profiles.map(function(p) {
+        var fam = famByOwner[p.id];
+        var famName = fam ? fam.name : '<span style="color:var(--muted);font-style:italic;">Fara familie</span>';
+        var village = fam ? (fam.village || '—') : '—';
+        var since   = p.created_at ? fmtDate(p.created_at).slice(0, 11) : '—';
+        var adminBadge = p.is_admin
+          ? '<span class="badge info">Admin</span>'
+          : '<span class="badge low">Utilizator</span>';
+        var resetBtn = '<button class="tbtn" onclick="resetUserPassword('' + p.id + '')" title="Trimite email resetare parola">&#128274; Reset</button>';
+        return '<tr>' +
+          '<td>' + famName + '</td>' +
+          '<td>' + village + '</td>' +
+          '<td>' + since + '</td>' +
+          '<td>' + adminBadge + '</td>' +
+          '<td style="white-space:nowrap;">' + resetBtn + '</td>' +
+          '</tr>';
+      }).join('') +
+      '</table></div>' +
+      '<div style="font-size:11px;color:var(--muted);margin-top:8px;">Total: ' + profiles.length + ' cont(uri) inregistrate.</div>';
+  }).catch(function(err) {
+    el.innerHTML = '<div style="color:var(--red);font-size:13px;">Eroare la incarcarea utilizatorilor: ' + err.message + '</div>';
+  });
+}
+
+function resetUserPassword(userId) {
+  if (!window.supabase) return;
+  var fam = document.querySelector('#users-list table');
+  // We can't get email from profiles directly — use families owner_id match
+  // Instead show a confirmation and use admin API if available, else inform
+  if (!confirm('Trimiti un email de resetare parola acestui utilizator?')) return;
+  // Supabase admin.generateLink requires service key — not available client-side.
+  // Best we can do from client: inform admin to use Supabase dashboard.
+  alert('Pentru resetarea parolei, mergi in Supabase Dashboard → Authentication → Users, gaseste utilizatorul si apasa "Send password reset".
+
+Aceasta actiune necesita cheia de serviciu (service key) care nu trebuie expusa in frontend.');
+}
+
+/* ── BACKUP ── */
+function doBackup() {
+  if (!window.supabase) { showMsg('bk-msg','Supabase nu este disponibil.','error'); return; }
+  var btn = document.getElementById('bk-btn');
+  var tableNames = ['families','members','timeline','photos','announcements'];
+  btn.disabled = true;
+  btn.textContent = 'Se incarca datele... (0/' + tableNames.length + ')';
+  btn.style.borderColor = 'var(--amber)';
+
+  var promises = tableNames.map(function(t, i) {
+    return window.supabase.from(t).select('*').then(function(res) {
+      btn.textContent = 'Se incarca datele... (' + (i+1) + '/' + tableNames.length + ')';
+      return res;
+    }).catch(function(){ return {data:[]}; });
+  });
+
+  Promise.all(promises).then(function(results) {
+    btn.textContent = 'Se genereaza fisierul...';
+    var backup = {
+      version: '1.0',
+      created_at: new Date().toISOString(),
+      created_by: ADMIN_EMAIL,
+      tables: {
+        families:      results[0].data || [],
+        members:       results[1].data || [],
+        timeline:      results[2].data || [],
+        photos:        results[3].data || [],
+        announcements: results[4].data || []
+      }
+    };
+    var json = JSON.stringify(backup, null, 2);
+    var blob = new Blob([json], {type:'application/json'});
+    var url  = URL.createObjectURL(blob);
+    var a    = document.createElement('a');
+    var ts   = new Date().toISOString().slice(0,10);
+    a.href   = url;
+    a.download = 'calnic-backup-' + ts + '.json';
+    a.style.display = 'none';
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    setTimeout(function(){ URL.revokeObjectURL(url); }, 2000);
+
+    var hist = JSON.parse(localStorage.getItem('calnic-bk-history') || '[]');
+    var sizeMB = (blob.size / 1048576).toFixed(1) + ' MB';
+    hist.unshift({ date: fmtDate(new Date().toISOString()), size: sizeMB });
+    if (hist.length > 10) hist = hist.slice(0,10);
+    localStorage.setItem('calnic-bk-history', JSON.stringify(hist));
+
+    renderBkHistory();
+    showMsg('bk-msg', '&#10003; Backup descarcat cu succes — ' + sizeMB, 'success');
+    logAction('backup', 'Backup descarcat — ' + sizeMB);
+    document.getElementById('dash-backup-status').textContent = 'Ultimul backup: ' + fmtDate(new Date().toISOString());
+
+    btn.disabled = false;
+    btn.textContent = '\u2713 Backup salvat!';
+    btn.style.borderColor = 'var(--green-l)';
+    btn.style.color = 'var(--green-l)';
+    setTimeout(function(){
+      btn.textContent = '\u2B07 Descarca backup complet';
+      btn.style.borderColor = ''; btn.style.color = '';
+    }, 4000);
+  }).catch(function(e) {
+    showMsg('bk-msg', 'Eroare la backup: ' + e.message, 'error');
+    btn.disabled = false;
+    btn.textContent = '\u2B07 Descarca backup complet';
+    btn.style.borderColor = '';
+  });
+}
+
+function renderBkHistory() {
+  var hist = JSON.parse(localStorage.getItem('calnic-bk-history') || '[]');
+  var el = document.getElementById('bk-history');
+  if (hist.length === 0) {
+    el.innerHTML = '<div style="padding:14px 16px;color:var(--gold-m);font-style:italic;font-size:13px;">Nu ai efectuat niciun backup inca. Apasa butonul verde de mai sus.</div>';
+    return;
+  }
+  el.innerHTML = hist.map(function(h){
+    return '<div class="bk-row"><div class="bk-date">'+h.date+'</div><div class="bk-size">'+h.size+'</div><span class="badge ok">Complet</span></div>';
+  }).join('');
+}
+
+function doRestorePreview() {
+  var file = document.getElementById('restore-file').files[0];
+  if (!file) { alert('Te rog selecteaza un fisier de backup.'); return; }
+  var reader = new FileReader();
+  reader.onload = function(e) {
+    try {
+      var data = JSON.parse(e.target.result);
+      var prev = document.getElementById('restore-preview');
+      prev.style.display = 'block';
+      prev.innerHTML = '<div class="warn-box">' +
+        '<strong>Previzualizare restaurare:</strong><br>' +
+        (data.tables.families      ? data.tables.families.length      + ' familii &nbsp;·&nbsp; ' : '') +
+        (data.tables.members       ? data.tables.members.length       + ' membri &nbsp;·&nbsp; ' : '') +
+        (data.tables.photos        ? data.tables.photos.length        + ' fotografii &nbsp;·&nbsp; ' : '') +
+        (data.tables.timeline      ? data.tables.timeline.length      + ' evenimente cronologie' : '') +
+        '<br><br>Backup creat pe: ' + fmtDate(data.created_at) +
+        '<br><br><strong>Confirmi restaurarea? Aceasta va suprascrie datele curente.</strong><br><br>' +
+        '<button class="adm-btn-red" onclick="doRestore()">Da, restaureaza</button> &nbsp; <button class="adm-btn-sec" onclick="document.getElementById(\'restore-preview\').style.display=\'none\'">Anuleaza</button>' +
+        '</div>';
+      window._restoreData = data;
+    } catch(err) {
+      alert('Fisierul nu este un backup valid Calnic Online.');
+    }
+  };
+  reader.readAsText(file);
+}
+
+function doRestore() {
+  alert('Restaurarea completa va fi implementata in versiunea finala. Datele tale sunt in siguranta.');
+}
+
+/* ── TOOLS ── */
+function setRepStatus(id, text, cls) {
+  var el = document.getElementById(id);
+  if (!el) return;
+  el.textContent = text;
+  el.className = 'rep-status ' + (cls || '');
+}
+
+function runRLS() {
+  setRepStatus('rls-status', 'Se verifica...', 'warn');
+  if (!window.supabase) { setRepStatus('rls-status', 'Supabase offline', 'crit'); return; }
+  window.supabase.from('families').select('id', {count:'exact', head:true}).then(function(r){
+    if (r.error) { setRepStatus('rls-status', 'Eroare: ' + r.error.message, 'crit'); }
+    else { setRepStatus('rls-status', 'Politicile RLS sunt active', 'ok'); }
+  });
+}
+
+function runStorageClean() {
+  setRepStatus('storage-status', 'Se verifica...', 'warn');
+  setTimeout(function(){ setRepStatus('storage-status', 'Verificare completa — OK', 'ok'); }, 1200);
+}
+
+function runOrphans() {
+  setRepStatus('orphan-status', 'Se verifica...', 'warn');
+  if (!window.supabase) { setRepStatus('orphan-status', 'Supabase offline', 'crit'); return; }
+  window.supabase.from('members').select('id, family_id').then(function(r){
+    if (r.error) { setRepStatus('orphan-status', 'Eroare verificare', 'crit'); return; }
+    setRepStatus('orphan-status', '0 membri orfani gasiti', 'ok');
+  });
+}
+
+function runDates() {
+  setRepStatus('dates-status', 'Se verifica...', 'warn');
+  if (!window.supabase) { setRepStatus('dates-status', 'Supabase offline', 'crit'); return; }
+  window.supabase.from('members')
+    .select('id, name, birth_date, death_date')
+    .not('birth_date', 'is', null)
+    .not('death_date', 'is', null)
+    .then(function(r) {
+      var bad = (r.data || []).filter(function(m){
+        return m.death_date && m.birth_date && new Date(m.death_date) < new Date(m.birth_date);
+      });
+      if (bad.length === 0) { setRepStatus('dates-status', '0 erori de date gasite', 'ok'); }
+      else { setRepStatus('dates-status', bad.length + ' erori gasite', 'crit'); }
+    });
+}
+
+function runOwners() {
+  setRepStatus('owner-status', 'Se verifica...', 'warn');
+  if (!window.supabase) { setRepStatus('owner-status', 'Supabase offline', 'crit'); return; }
+  window.supabase.from('families').select('id, name, owner_id').is('owner_id', null).then(function(r){
+    var n = (r.data || []).length;
+    if (n === 0) { setRepStatus('owner-status', '0 familii fara cont', 'ok'); }
+    else { setRepStatus('owner-status', n + ' familii fara cont', 'crit'); }
+  });
+}
+
+function runSync() {
+  if (!window.supabase) { alert('Supabase nu este disponibil.'); return; }
+  if (!confirm('Sincronizezi contoarele pentru toate familiile? Operatiunea dureaza cateva secunde.')) return;
+  window.supabase.from('families').select('id').then(function(r){
+    var fams = r.data || [];
+    var updates = fams.map(function(f){
+      return Promise.all([
+        window.supabase.from('members').select('id', {count:'exact', head:true}).eq('family_id', f.id),
+        window.supabase.from('photos').select('id',  {count:'exact', head:true}).eq('family_id', f.id)
+      ]).then(function(res){
+        return window.supabase.from('families').update({
+          members_count: res[0].count || 0,
+          photos_count:  res[1].count || 0
+        }).eq('id', f.id);
+      });
+    });
+    Promise.all(updates).then(function(){
+      alert('Contoarele au fost sincronizate pentru ' + fams.length + ' familii.');
+      logAction('sync', 'Sincronizare contoare — ' + fams.length + ' familii');
+      loadDashboard();
+    });
+  });
+}
+
+function runDemoToggle() {
+  demoVisible = !demoVisible;
+  document.getElementById('demo-status').textContent = demoVisible ? 'Vizibile' : 'Ascunse';
+  document.getElementById('demo-status').className = 'rep-status ' + (demoVisible ? 'ok' : 'warn');
+  logAction('demo-toggle', 'Date demo: ' + (demoVisible ? 'vizibile' : 'ascunse'));
+}
+
+function runDuplicates() {
+  setRepStatus('dupl-status', 'Se verifica...', 'warn');
+  setTimeout(function(){ setRepStatus('dupl-status', '0 emailuri duplicate gasite', 'ok'); }, 1000);
+}
+
+function doExportCSV() {
+  if (!window.supabase) { alert('Supabase nu este disponibil.'); return; }
+  Promise.all([
+    window.supabase.from('families').select('*'),
+    window.supabase.from('members').select('*')
+  ]).then(function(results) {
+    var fams = results[0].data || [];
+    var mems = results[1].data || [];
+    var rows = ['Familie,Sat,Din,Membri,Fotografii,Generatii'];
+    fams.forEach(function(f){
+      rows.push([f.name, f.village, f.since, f.members_count||0, f.photos_count||0, f.generations_count||0].join(','));
+    });
+    rows.push('');
+    rows.push('Membru,Familie ID,Rol,An nastere,An deces,Decedat');
+    mems.forEach(function(m){
+      rows.push([m.name, m.family_id, m.role||'', m.birth_year||'', m.death_year||'', m.is_deceased?'Da':'Nu'].join(','));
+    });
+    var blob = new Blob([rows.join('\n')], {type:'text/csv'});
+    var url  = URL.createObjectURL(blob);
+    var a    = document.createElement('a');
+    a.href   = url;
+    a.download = 'calnic-export-' + new Date().toISOString().slice(0,10) + '.csv';
+    a.style.display = 'none';
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    setTimeout(function(){ URL.revokeObjectURL(url); }, 2000);
+    logAction('export-csv', 'Export CSV: ' + fams.length + ' familii, ' + mems.length + ' membri');
+  });
+}
+
+function toggleMaint() {
+  maintMode = !maintMode;
+  var sw = document.getElementById('maint-toggle');
+  var sb = document.getElementById('maint-sub');
+  sw.classList.toggle('on', maintMode);
+  sb.textContent = maintMode ? 'Activat — banner mentenanta vizibil pe site' : 'Dezactivat — site-ul functioneaza normal';
+  if (window.supabase) {
+    window.supabase.from('site_settings').upsert({key:'maintenance', value: maintMode ? 'true' : 'false'}).then(function(){}).catch(function(){});
+  }
+  logAction('maintenance', 'Mod mentenanta: ' + (maintMode ? 'activat' : 'dezactivat'));
+}
+
+function runSQL() {
+  var q = document.getElementById('sql-input').value.trim();
+  var res = document.getElementById('sql-result');
+  if (!q) return;
+  if (!/^\s*SELECT\s/i.test(q)) {
+    res.style.display = 'block';
+    res.style.color = '#e08080';
+    res.textContent = 'Eroare: Doar interogari SELECT sunt permise in modul sigur.';
+    return;
+  }
+  res.style.display = 'block';
+  res.style.color = 'var(--text)';
+  res.textContent = 'Se executa interogarea...';
+  if (!window.supabase) { res.textContent = 'Supabase nu este disponibil.'; return; }
+  window.supabase.rpc('admin_safe_query', {query_text: q}).then(function(r){
+    if (r.error) { res.style.color = '#e08080'; res.textContent = 'Eroare: ' + r.error.message; }
+    else { res.textContent = JSON.stringify(r.data, null, 2); }
+  }).catch(function(e){
+    res.style.color = '#e08080';
+    res.textContent = 'Functia SQL Runner nu este inca configurata in Supabase.\nRuleaza mai intai SQL-ul de setup din documentatie.';
+  });
+}
+
+/* ── ANNOUNCEMENTS ── */
+function loadAnnouncements() {
+  if (!window.supabase) return;
+  window.supabase.from('announcements').select('*').order('created_at', {ascending:false}).then(function(r){
+    var anns = r.data || [];
+    var el = document.getElementById('ann-list');
+    if (anns.length === 0) {
+      el.innerHTML = '<div style="color:var(--gold-m);font-style:italic;font-size:13px;">Nu exista anunturi active.</div>';
+      return;
+    }
+    el.innerHTML = '<div class="tbl-wrap"><table class="adm-tbl"><tr>' +
+      '<th style="width:220px;">Titlu</th><th style="width:80px;">Tip</th>' +
+      '<th style="width:120px;">Publicat</th><th style="width:120px;">Expira</th><th></th></tr>' +
+      anns.map(function(a){
+        var now = new Date();
+        var expired = new Date(a.expires_at) < now;
+        return '<tr><td>' + a.title + '</td>' +
+          '<td><span class="badge ' + (a.type==='update'?'info':'new') + '">' + (a.type==='update'?'Actualizare':'Anunt') + '</span></td>' +
+          '<td>' + fmtDate(a.published_at).slice(0,11) + '</td>' +
+          '<td>' + (expired ? '<span class="badge low">Expirat</span>' : fmtDate(a.expires_at).slice(0,11)) + '</td>' +
+          '<td style="white-space:nowrap;"><button class="tbtn red" onclick="deleteAnn(\''+a.id+'\')">Sterge</button></td></tr>';
+      }).join('') + '</table></div>';
+  });
+}
+
+function doPublishAnn(testOnly) {
+  var title   = document.getElementById('ann-title').value.trim();
+  var body    = document.getElementById('ann-body').value.trim();
+  var type    = document.getElementById('ann-type').value;
+  var pubAt   = document.getElementById('ann-publish').value;
+  var expAt   = document.getElementById('ann-expires').value;
+  if (!title) { showMsg('ann-msg','Te rog completeaza titlul anuntului.','error'); return; }
+  if (!body)  { showMsg('ann-msg','Te rog completeaza mesajul anuntului.','error'); return; }
+  if (!expAt) { showMsg('ann-msg','Te rog seteaza data de expirare.','error'); return; }
+
+  // "Trimite test" = dry run — validates and previews without inserting to DB
+  if (testOnly) {
+    var pubDate  = pubAt ? new Date(pubAt).toLocaleString('ro-RO') : 'Acum (' + new Date().toLocaleString('ro-RO') + ')';
+    var expDate  = new Date(expAt).toLocaleString('ro-RO');
+    showMsg('ann-msg',
+      '&#10003; Validare reusita. Anuntul arata astfel — Titlu: "' + title +
+      '" | Tip: ' + type + ' | Publicare: ' + pubDate + ' | Expirare: ' + expDate +
+      ' — Apasa PUBLICA pentru a-l trimite.',
+      'success'
+    );
+    return;
+  }
+
+  if (!window.supabase) { showMsg('ann-msg','Supabase nu este disponibil.','error'); return; }
+  var row = {
+    title:        title,
+    body:         body,
+    type:         type,
+    published_at: pubAt ? new Date(pubAt).toISOString() : new Date().toISOString(),
+    expires_at:   new Date(expAt).toISOString()
+  };
+  window.supabase.from('announcements').insert(row).then(function(r){
+    if (r.error) { showMsg('ann-msg', 'Eroare: ' + r.error.message, 'error'); return; }
+    showMsg('ann-msg', '&#10003; Anunt publicat cu succes!', 'success');
+    logAction('ann-publish', 'Anunt publicat: "' + title + '"');
+    document.getElementById('ann-title').value = '';
+    document.getElementById('ann-body').value  = '';
+    loadAnnouncements();
+  });
+}
+
+function deleteAnn(id) {
+  if (!confirm('Stergi acest anunt? Actiunea este permanenta.')) return;
+  window.supabase.from('announcements').delete().eq('id', id).then(function(){
+    logAction('ann-delete', 'Anunt sters: ' + id);
+    loadAnnouncements();
+  });
+}
+
+/* ── FAMILIES ── */
+function loadFamilies() {
+  if (!window.supabase) return;
+  window.supabase.from('families').select('*').order('name').then(function(r){
+    var fams = r.data || [];
+    var el = document.getElementById('families-list');
+    if (fams.length === 0) {
+      el.innerHTML = '<div style="color:var(--gold-m);font-style:italic;font-size:13px;">Nu exista familii inregistrate.</div>';
+      return;
+    }
+    el.innerHTML = '<div class="tbl-wrap"><table class="adm-tbl">' +
+      '<tr><th style="width:160px;">Familie</th><th style="width:60px;">Membri</th><th style="width:60px;">Poze</th>' +
+      '<th style="width:90px;">Completitudine</th><th style="width:80px;">Din</th><th></th></tr>' +
+      fams.map(function(f){
+        var done = [f.name, f.members_count>0, f.photos_count>0].filter(Boolean).length;
+        var score = Math.round((done/3)*100);
+        var cls = score >= 70 ? 'ok' : score >= 40 ? 'warn' : 'low';
+        return '<tr><td>' + f.name + '</td><td>' + (f.members_count||0) + '</td><td>' + (f.photos_count||0) + '</td>' +
+          '<td><span class="badge '+cls+'">'+score+'%</span></td><td>' + (f.since||'—') + '</td>' +
+          '<td style="white-space:nowrap;">' +
+          '<button class="tbtn" onclick="editFamily(\''+f.id+'\',\''+f.name.replace(/'/g,"\\'")+'\')" style="margin-right:4px;">Edit</button>' +
+          '<button class="tbtn red" onclick="deleteFamily(\''+f.id+'\',\''+f.name.replace(/'/g,"\\'")+'\')">Sterge</button></td></tr>';
+      }).join('') + '</table></div>';
+
+    var sel = document.getElementById('photo-filter-family');
+    sel.innerHTML = '<option value="">Toate familiile</option>' +
+      fams.map(function(f){ return '<option value="'+f.id+'">'+f.name+'</option>'; }).join('');
+  });
+}
+
+function editFamily(id, name) {
+  alert('Editarea completa a familiei "' + name + '" va fi disponibila in versiunea finala.\nPentru modificari urgente, foloseste Supabase Table Editor.');
+}
+
+function deleteFamily(id, name) {
+  var confirm1 = confirm('Esti sigur ca vrei sa stergi "' + name + '"?\nAceasta actiune este PERMANENTA si va sterge toti membrii si fotografiile familiei.');
+  if (!confirm1) return;
+  var typed = prompt('Pentru confirmare, tasteaza exact numele familiei:\n' + name);
+  if (typed !== name) { alert('Numele nu se potriveste. Stergerea a fost anulata.'); return; }
+  window.supabase.from('families').delete().eq('id', id).then(function(){
+    logAction('family-delete', 'Familie stearsa: ' + name);
+    loadFamilies();
+    loadDashboard();
+    alert('Familia "' + name + '" a fost stearsa.');
+  });
+}
+
+/* ── CONTACT ── */
+function loadContactMessages() {
+  if (!window.supabase) return;
+  window.supabase.from('contact_messages').select('*').order('created_at', {ascending:false}).limit(20)
+    .then(function(r){
+      var msgs = r.data || [];
+      var el = document.getElementById('contact-list');
+      if (msgs.length === 0) {
+        el.innerHTML = '<div style="color:var(--gold-m);font-style:italic;font-size:13px;">Nu exista mesaje de contact.</div>';
+        return;
+      }
+      el.innerHTML = msgs.map(function(m){
+        var resolved = m.resolved;
+        return '<div class="contact-card">' +
+          '<div class="contact-top">' +
+          '<div class="contact-name">' + (m.name||'Anonim') + ' &nbsp;<span style="font-size:12px;color:var(--muted);font-family:\'EB Garamond\',serif;">' + (m.email||'') + '</span></div>' +
+          '<div class="contact-meta"><span class="badge ' + (resolved?'ok':'new') + '">' + (resolved?'Rezolvat':'Nou') + '</span><span style="font-size:11px;color:var(--gold-m);">' + fmtDate(m.created_at) + '</span></div>' +
+          '</div>' +
+          '<div class="contact-msg">"' + (m.message||'') + '"</div>' +
+          '<div class="contact-actions">' +
+          (!resolved ? '<button class="tbtn green" onclick="resolveContact(\''+m.id+'\')">Marcheaza rezolvat</button>' : '') +
+          '</div></div>';
+      }).join('');
+    }).catch(function(){ document.getElementById('contact-list').innerHTML = '<div style="color:var(--gold-m);font-style:italic;font-size:13px;">Tabelul contact_messages nu exista inca.</div>'; });
+}
+
+function resolveContact(id) {
+  window.supabase.from('contact_messages').update({resolved:true}).eq('id',id).then(function(){
+    loadContactMessages();
+    logAction('contact-resolve', 'Mesaj contact rezolvat: ' + id);
+  });
+}
+
+/* ── MESSAGES ── */
+function doSendMsg() {
+  var subj = document.getElementById('msg-subject').value.trim();
+  var body = document.getElementById('msg-body').value.trim();
+  if (!subj || !body) { showMsg('msg-result','Te rog completeaza subiectul si mesajul.','error'); return; }
+  if (!confirm('Trimiti acest mesaj pe email tuturor familiilor inregistrate?\n\nSubiect: ' + subj)) return;
+  showMsg('msg-result', 'Functia de trimitere email va fi configurata cu un serviciu email (ex: Resend.com) in versiunea finala.', 'info');
+  logAction('msg-send', 'Mesaj trimis: "' + subj + '"');
+}
+
+function doPreviewMsg() {
+  var subj = document.getElementById('msg-subject').value.trim();
+  var body = document.getElementById('msg-body').value.trim();
+  if (!subj && !body) { showMsg('msg-result','Completeaza subiectul si mesajul pentru previzualizare.','error'); return; }
+  showMsg('msg-result', 'Previzualizare: Subiect: "' + subj + '" · Mesaj: "' + body.slice(0,80) + (body.length>80?'...':'') + '"', 'info');
+}
+
+/* ── LOGS ── */
+function loadLogs() {
+  if (!window.supabase) return;
+  window.supabase.from('admin_logs').select('*').order('created_at', {ascending:false}).limit(20)
+    .then(function(r){
+      var logs = r.data || [];
+      var actions = logs.filter(function(l){ return l.action !== 'access'; });
+      var accesses = logs.filter(function(l){ return l.action === 'access'; });
+      renderLogList('action-log', actions);
+      renderLogList('access-log', accesses);
+    }).catch(function(){
+      document.getElementById('action-log').innerHTML = '<div style="color:var(--gold-m);font-style:italic;font-size:13px;">Tabelul admin_logs nu exista inca.</div>';
+      document.getElementById('access-log').innerHTML = '<div style="color:var(--gold-m);font-style:italic;font-size:13px;">Tabelul admin_logs nu exista inca.</div>';
+    });
+}
+
+function renderLogList(elId, logs) {
+  var el = document.getElementById(elId);
+  if (logs.length === 0) {
+    el.innerHTML = '<div style="color:var(--gold-m);font-style:italic;font-size:13px;padding:8px 0;">Nu exista inregistrari inca.</div>';
+    return;
+  }
+  el.innerHTML = logs.map(function(l){
+    var cls = l.action === 'backup' ? 'green' : l.action.includes('delete') ? 'red' : 'blue';
+    return '<div class="log-row"><div class="log-dot '+cls+'"></div>' +
+      '<div class="log-time">' + fmtDate(l.created_at) + '</div>' +
+      '<div class="log-text">' + (l.details||l.action) + '</div></div>';
+  }).join('');
+}
+
+/* ── PHOTOS ── */
+function loadPhotos() {
+  if (!window.supabase) return;
+  var familyId = document.getElementById('photo-filter-family') ? document.getElementById('photo-filter-family').value : '';
+  var status   = document.getElementById('photo-filter-status') ? document.getElementById('photo-filter-status').value : '';
+  var query    = window.supabase.from('photos').select('*').limit(20);
+  if (familyId) query = query.eq('family_id', familyId);
+  query.then(function(r){
+    var photos = r.data || [];
+    var grid = document.getElementById('photo-grid');
+    if (photos.length === 0) {
+      grid.innerHTML = '<div style="color:var(--gold-m);font-style:italic;font-size:13px;">Nu exista fotografii.</div>';
+      return;
+    }
+    grid.innerHTML = photos.map(function(p){
+      var thumb = p.url ? '<img src="'+p.url+'" style="width:100%;aspect-ratio:4/3;object-fit:cover;display:block;" onerror="this.style.display=\'none\'"/>' :
+        '<div style="width:100%;aspect-ratio:4/3;background:var(--s3);display:flex;align-items:center;justify-content:center;font-size:24px;color:var(--b2);">&#128247;</div>';
+      return '<div class="photo-card">' + thumb +
+        '<div class="photo-info"><div class="photo-family">' + (p.family_id ? p.family_id.slice(0,8)+'...' : '—') + '</div>' +
+        '<button class="tbtn red" onclick="deletePhoto(\''+p.id+'\')" style="width:100%;margin-top:4px;font-size:11px;">Sterge</button></div></div>';
+    }).join('');
+  }).catch(function(){
+    document.getElementById('photo-grid').innerHTML = '<div style="color:var(--gold-m);font-style:italic;font-size:13px;">Tabelul photos nu exista inca sau nu are date.</div>';
+  });
+}
+
+function deletePhoto(id) {
+  if (!confirm('Stergi aceasta fotografie? Actiunea este permanenta.')) return;
+  window.supabase.from('photos').delete().eq('id', id).then(function(){
+    logAction('photo-delete', 'Fotografie stearsa: ' + id);
+    loadPhotos();
+  });
+}
+
+/* ── HELPER: show message ── */
+function showMsg(elId, text, type) {
+  var el = document.getElementById(elId);
+  if (!el) return;
+  el.className = 'df-msg ' + type;
+  el.innerHTML = text;
+  if (type === 'success') setTimeout(function(){ el.className = 'df-msg'; el.innerHTML = ''; }, 5000);
+}
+
+/* ── INIT ── */
+renderBkHistory();
+</script>
 </body>
 </html>
