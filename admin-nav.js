@@ -256,28 +256,26 @@ admin-nav.js — Calnic Online v2 (COMPLETE FIX)
                 return;
             }
 
-            Promise.all([
-                window.supabase.from('families').select('name,id').eq('owner_id', session.user.id).single(),
-                window.supabase.from('profiles').select('is_admin').eq('id', session.user.id).single()
-            ]).then(function(results) {
-                var familyData = results[0].data;
-                var profileData = results[1].data;
+            // Removed the 'profiles' query entirely
+            window.supabase.from('families').select('name,id').eq('owner_id', session.user.id).single()
+                .then(function(result) {
+                    var familyData = result.data;
+                    var familyName = familyData ? familyData.name : 'Profilul Meu';
+                    var familyId = familyData ? familyData.id : null;
+                    var isAdmin = familyData && familyData.owner_id === session.user.id;
 
-                var familyName = familyData ? familyData.name : 'Profilul Meu';
-                var familyId = familyData ? familyData.id : null;
-                var isAdmin = profileData && profileData.is_admin;
-
-                checkNotifications(familyId).then(function(hasNotif) {
-                    buildProfileButton(session, familyName, hasNotif);
-                    if (isAdmin) {
-                        injectAdminLink();
-                        showAdminLink();
-                    }
+                    checkNotifications(familyId).then(function(hasNotif) {
+                        buildProfileButton(session, familyName, hasNotif);
+                        if (isAdmin) {
+                            injectAdminLink();
+                            showAdminLink();
+                        }
+                    });
+                })
+                .catch(function(error) {
+                    console.error('[Admin-Nav] Error fetching family data:', error);
+                    buildProfileButton(session, null, false);
                 });
-            }).catch(function(error) {
-                console.error('[Admin-Nav] Error fetching data:', error);
-                buildProfileButton(session, null, false);
-            });
         }).catch(function(authError) {
             console.error('[Admin-Nav] Auth error:', authError);
             buildProfileButton(null, null, false);
