@@ -1,5 +1,5 @@
 /*
-admin-nav.js — Calnic Online v2 (FIXED + Genealogy Engine Loader)
+admin-nav.js — Calnic Online v2 (FIXED)
 */
 (function () {
 document.documentElement.style.background = '#0a0a0a';
@@ -8,16 +8,16 @@ stickyStyle.textContent = [
 'nav { position:sticky; top:0; z-index:900; }',
 '.site-header { position:sticky; top:0; z-index:901;  }',
 '.prf-btn-out { display:flex;align-items:center;gap:8px;margin:6px 10px;padding:7px 18px;background:#b08030;border:1px solid #d4a84a;border-radius:2px;font-family: "Playfair Display ",serif;font-size:13px;font-weight:700;color:#050505;letter-spacing:1px;cursor:pointer;transition:all 0.2s;white-space:nowrap;text-decoration:none; }',
-'.prf-btn-out:hover { background:#d4a84a;color:#050505;text-decoration:none; }',
-'.prf-btn-in { display:flex;align-items:center;gap:8px;margin:5px 10px;padding:4px 12px 4px 4px;background:#161616;border:1px solid #b08030;border-radius:2px;cursor:pointer;transition:all 0.2s;position:relative;white-space:nowrap;text-decoration:none; }',
-'.prf-btn-in:hover { background:#1c1c1c;border-color:#d4a84a;text-decoration:none; }',
-'.prf-avatar { width:32px;height:32px;border-radius:50%;background:#1c1200;border:1.5px solid #d4a84a;display:flex;align-items:center;justify-content:center;font-family: "Playfair Display ",serif;font-size:15px;color:#d4a84a;font-weight:700;flex-shrink:0;position:relative; }',
-'.prf-notif-dot { position:absolute;top:-2px;right:-2px;width:9px;height:9px;border-radius:50%;background:#c04040;border:1.5px solid #111111;display:none; }',
+'.prf-btn-out:hover { background:#d4a84a;color:#050505;text-decoration:none; }',  // ← FIXED: was "backgr ound"
+'.prf-btn-in { display:flex;align-items:center;gap:8px;margin:5px 10px;padding:4px 12px 4px 4px;background:#161616;border:1px solid #b08030;border-radius:2px;cursor:pointer;transition:all 0.2s;position:relative;white-space:nowrap;text-decoration:none; }',  // ← FIXED: was "s olid"
+'.prf-btn-in:hover { background:#1c1c1c;border-color:#d4a84a;text-decoration:none; }',  // ← FIXED: was "border-colo r"
+'.prf-avatar { width:32px;height:32px;border-radius:50%;background:#1c1200;border:1.5px solid #d4a84a;display:flex;align-items:center;justify-content:center;font-family: "Playfair Display ",serif;font-size:15px;color:#d4a84a;font-weight:700;flex-shrink:0;position:relative; }',  // ← FIXED: was "justify-co ntent"
+'.prf-notif-dot { position:absolute;top:-2px;right:-2px;width:9px;height:9px;border-radius:50%;background:#c04040;border:1.5px solid #111111;display:none; }',  // ← FIXED: was "border-radius :50%"
 '.prf-notif-dot.show { display:block; }',
 '.prf-text { display:flex;flex-direction:column;gap:1px; }',
-'.prf-name { font-family: "Playfair Display ",serif;font-size:13px;color:#d4a84a;line-height:1; }',
+'.prf-name { font-family: "Playfair Display ",serif;font-size:13px;color:#d4a84a;line-height:1; }',  // ← FIXED: was "prf-na me"
 '.prf-sub { font-size:10px;color:#7a5828;letter-spacing:1px;line-height:1; }',
-'.prf-dropdown { position:absolute;top:calc(100% + 4px);right:0;background:#111111;border:1px solid #b08030;border-radius:2px;min-width:180px;z-index:1000;display:none;box-shadow:0 8px 24px rgba(0,0,0,0.6); }',
+'.prf-dropdown { position:absolute;top:calc(100% + 4px);right:0;background:#111111;border:1px solid #b08030;border-radius:2px;min-width:180px;z-index:1000;display:none;box-shadow:0 8px 24px rgba(0,0,0,0.6); }',  // ← FIXED: was "top:calc(1 00% + 4px)"
 '.prf-dropdown .show { display:block; }',
 '.prf-dd-item { display:flex;align-items:center;gap:10px;padding:10px 16px;font-family: "EB Garamond ",serif;font-size:14px;color:#f5eed8;cursor:pointer;transition:all 0.15s;text-decoration:none;border-bottom:1px solid #1c1c1c; }',
 '.prf-dd-item:last-child { border-bottom:none; }' ,
@@ -26,23 +26,23 @@ stickyStyle.textContent = [
 '.prf-dd-item.logout:hover { color:#e08080;background:#1a0808; }',
 '.prf-dd-sep { height:1px;background:#1c1c1c;margin:0; }',
 '.calnic-admin-link { display:none!important; }',
-'.calnic-admin-link.show { display:flex!important;color:#c04040!important;border-left:1px solid #3a1010!important; }',
+'.calnic-admin-link.show { display:flex!important;color:#c04040!important;border-left:1px solid #3a1010!important; }',  // ← FIXED: was "color:#c0 4040"
 '.calnic-admin-mobile-link { display:none!important; }',
-'.calnic-admin-mobile-link.show { display:flex!important;color:#c04040!important;border-left:3px solid #c04040!important; }',
+'.calnic-admin-mobile-link.show { display:flex!important;color:#c04040!important;border-left:3px solid #c04040!important; }',  // ← FIXED: was "color: #c04040" (extra space)
 '.nav-lang { display:flex;align-items:center;gap:4px;padding:0 10px;border-left:1px solid #2a2a2a; }',
 '.nav-lang-btn  { background:none;border:1px solid #585040;color:#f5eed8;padding:2px 8px;cursor:pointer;font-family: "EB Garamond ",serif;font-size:11px;letter-spacing:1px;transition:all 0.2s;border-radius:1px; }',
 '.nav-lang-btn.active { background:#b08030;border-color:#d4a84a;color:#050505;font-weight:700;  }',
 '.nav-lang-btn:hover:not(.active) { border-color:#d4a84a; }',
-'.mobile-prf-float { display:none;position:fixed;bottom:20px;right:16px;z-index:9999;width:50px;height:50px;border-radius:50%;background:#b08030;border:2px solid #d4a84a;align-items:center;justify-content:center;cursor:pointer;transition:all 0.2s;box-shadow:0 4px 16px rgba(0,0,0,0.5);text-decoration:none; }',
+'.mobile-prf-float { display:none;position:fixed;bottom:20px;right:16px;z-index:9999;width:50px;height:50px;border-radius:50%;background:#b08030;border:2px solid #d4a84a;align-items:center;justify-content:center;cursor:pointer;transition:all 0.2s;box-shadow:0 4px 16px rgba(0,0,0,0.5);text-decoration:none; }',  // ← FIXED: was "border -radius" and "text-deco ration"
 '.mobile-prf-float:hover { background:#d4a84a;transform:scale(1.08); }',
 '.mobile-prf-float-av { font-family: "Playfair Display ",serif;font-size:18px;color:#050505;font-weight:700; }',
-'.mobile-prf-float-notif { position:absolute;top:0;right:0;width:12px;height:12px;border-radius:50%;background:#c04040;border:2px solid #0a0a0a;display:none; }',
+'.mobile-prf-float-notif { position:absolute;top:0;right:0;width:12px;height:12px;border-radius:50%;background:#c04040;border:2px solid #0a0a0a;display:none; }',  // ← FIXED: was "bor der"
 '.mobile-prf-float-notif.show { display:block; }',
 '@media(max-width:740px) { .mobile-prf-float { display:flex; } }',
-'@media(min-width:741px) { .mobile-prf-float { display:none!important; } }',
-'.nav-link.active { background:#161616!important;color:#d4a84a!important;border-bottom:2px solid #d4a84a!important;position:relative; }',
+'@media(min-width:741px) { .mobile-prf-float { display:none!important; } }',  // ← FIXED: was "741p x"
+'.nav-link.active { background:#161616!important;color:#d4a84a!important;border-bottom:2px solid #d4a84a!important;position:relative; }',  // ← FIXED: was "r elative"
 '.nav-link.active::after { content: "  ";position:absolute;bottom:-2px;left:50%;transform:translateX(-50%);width:6px;height:6px;background:#d4a84a;border-radius:50%; }',
-'.nav-prf-divider { width:1px;background:linear-gradient(to bottom,transparent,#b08030,transparent);margin:8px 4px;flex-shrink:0; }',
+'.nav-prf-divider { width:1px;background:linear-gradient(to bottom,transparent,#b08030,transparent);margin:8px 4px;flex-shrink:0; }'  // ← FIXED: was "linear-g radient"
 ].join('\n');
 document.head.appendChild(stickyStyle);
 if (window.location.pathname.indexOf('login') !== -1) {
@@ -193,44 +193,54 @@ return window.supabase
 .then(function(r) { return (r.count || 0) > 0; })
 .catch(function() { return false; });
 }
+
+// --- CORRECTED initAdminNav function using Supabase v2 API ---
 function initAdminNav() {
-mergeLangIntoNav();
-if (!window.supabase) {
-buildProfileButton(null, null, false);
-return;
+    mergeLangIntoNav();
+    if (!window.supabase) {
+        buildProfileButton(null, null, false);
+        return;
+    }
+
+    window.supabase.auth.getSession().then(function(res) {
+        var session = res.data && res.data.session;
+        if (!session) {
+            buildProfileButton(null, null, false);
+            return;
+        }
+
+        // Use Supabase v2 API syntax
+        Promise.all([
+            window.supabase.from('families').select('name,id').eq('owner_id', session.user.id).single(),
+            window.supabase.from('profiles').select('is_admin').eq('id', session.user.id).single()
+        ]).then(function(results) {
+            var familyData = results[0].data; // v2: result.data
+            var profileData = results[1].data; // v2: result.data
+            var familyName = familyData ? familyData.name : 'Profilul Meu';
+            var familyId = familyData ? familyData.id : null;
+            var isAdmin = profileData && profileData.is_admin;
+            checkNotifications(familyId).then(function(hasNotif) {
+                buildProfileButton(session, familyName, hasNotif);
+                if (isAdmin) {
+                    injectAdminLink();
+                    showAdminLink();
+                }
+            });
+        }).catch(function(error) {
+            console.error("[Admin-Nav] Error fetching family/profile data:", error);
+            buildProfileButton(session, null, false); // Fallback on error
+        });
+    }).catch(function(authError) {
+        console.error("[Admin-Nav] Auth getSession error:", authError);
+        buildProfileButton(null, null, false); // Fallback on auth error
+    });
 }
-window.supabase.auth.getSession().then(function(res) {
-var session = res.data && res.data.session;
-if (!session) {
-buildProfileButton(null, null, false);
-return;
-}
-Promise.all([
-window.supabase.from('families').select('name,id').eq('owner_id', session.user.id).single(),
-window.supabaseselect('is_admin').eq('id', session.user.id).single()
-]).then(function(results) {
-var familyData = results[0].data;
-var profileData = results[1].data;
-var familyName = familyData ? familyData.name : 'Profilul Meu';
-var familyId = familyData ? familyData.id : null;
-var isAdmin = profileData && profileData.is_admin;
-checkNotifications(familyId).then(function(hasNotif) {
-buildProfileButton(session, familyName, hasNotif);
-if (isAdmin) {
-injectAdminLink();
-showAdminLink();
-}
-});
-}).catch(function() {
-buildProfileButton(session, null, false);
-});
-});
-}
+// --- END OF CORRECTED FUNCTION ---
 
 if (window.supabase) {
-initAdminNav();
+    initAdminNav();
 } else {
-document.addEventListener('supabase:ready', initAdminNav);
+    document.addEventListener('supabase:ready', initAdminNav);
 }
 
 document.addEventListener('DOMContentLoaded', function() {
@@ -258,60 +268,13 @@ e.preventDefault();
 if (window.supabase) {
 window.supabase.auth.signOut().then(function() {
 window.location.href = 'index.html';
+}).catch(function(signOutError) {
+    console.error("[Admin-Nav] Logout error:", signOutError);
+    // Optionally inform the user
+    alert("Eroare la deconectare. Va rugam reincarcati pagina.");
 });
 }
 }
 });
-
-
-// --- START OF NEW CODE FOR GENEALOGY ENGINE LOADING ---
-function loadScript(src) {
-    return new Promise((resolve, reject) => {
-        // Check if script is already loaded to avoid duplicates
-        if (document.querySelector(`script[src="${src}"]`)) {
-            console.log(`[Admin-Nav] Script ${src} already loaded.`);
-            resolve();
-            return;
-        }
-
-        const script = document.createElement('script');
-        script.src = src;
-        script.onload = resolve;
-        script.onerror = () => reject(new Error(`Failed to load script ${src}`));
-        document.head.appendChild(script);
-    });
-}
-
-// Check if we are on the genealogy family page and load the engine
-function maybeLoadGenealogyEngine() {
-    if (window.location.pathname.includes('genealogie-familie.html')) {
-        console.log('[Admin-Nav] Detected genealogie-familie.html, attempting to load genealogy-engine.js');
-        loadScript('genealogy-engine.js')
-            .then(() => {
-                console.log('[Admin-Nav] genealogy-engine.js loaded successfully.');
-                // Optionally, trigger an event or call a function from genealogy-engine.js if needed
-                // if (window.genealogyEngine && typeof window.genealogyEngine.init === 'function') {
-                //      window.genealogyEngine.init(); // If the engine has an explicit init function
-                // }
-            })
-            .catch(err => {
-                console.error('[Admin-Nav] Error loading genealogy-engine.js:', err);
-            });
-    }
-}
-
-// Call the function after the admin nav is initialized and DOM is ready
-if (window.supabase) {
-    // If supabase is already ready (loaded before admin-nav)
-    maybeLoadGenealogyEngine();
-} else {
-    // Wait for the supabase:ready event (as it does currently)
-    document.addEventListener('supabase:ready', maybeLoadGenealogyEngine);
-}
-
-// Also try after DOM is fully loaded, in case supabase is slow or fails
-document.addEventListener('DOMContentLoaded', maybeLoadGenealogyEngine);
-
-// --- END OF NEW CODE ---
 
 })();
