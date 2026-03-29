@@ -1,4 +1,6 @@
 /* Main Styles for Calnic Online */
+
+/* Reset and base styles */
 * {
     margin: 0;
     padding: 0;
@@ -13,160 +15,50 @@ body {
     overflow-x: hidden;
 }
 
-/* Header & Navigation */
-.site-header {
-    background: linear-gradient(to right, #1a1202, #2a1a04, #1a1202);
-    padding: 0.5rem 0;
-    border-bottom: 1px solid #b08030;
-}
-
-.nav-container {
+/* Container for main content */
+.container {
     max-width: 1200px;
     margin: 0 auto;
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
     padding: 0 1rem;
 }
 
-.nav-links {
-    display: flex;
-    gap: 0.5rem;
-    align-items: center;
-}
-
-.nav-link {
-    padding: 0.5rem 1rem;
-    color: #f5eed8;
-    text-decoration: none;
-    font-size: 0.9rem;
-    transition: all 0.2s;
-    border-bottom: 2px solid transparent;
-}
-
-.nav-link:hover, .nav-link.active {
-    color: #d4a84a;
-    border-bottom: 2px solid #d4a84a;
-}
-
-.nav-right {
-    display: flex;
-    align-items: center;
-    gap: 0.5rem;
-}
-
-.lang-bar {
-    display: flex;
-    gap: 0.2rem;
-    margin-left: 1rem;
-}
-
-.lang-btn {
-    background: #2a2a2a;
-    border: 1px solid #585040;
-    color: #f5eed8;
-    padding: 0.2rem 0.5rem;
-    cursor: pointer;
-    font-size: 0.8rem;
-    transition: all 0.2s;
-    border-radius: 2px;
-}
-
-.lang-btn.active {
-    background: #b08030;
-    border-color: #d4a84a;
-    color: #050505;
-    font-weight: bold;
-}
-
-/* Mobile Menu */
-.nav-mobile-toggle {
-    display: none;
-    background: none;
-    border: none;
-    color: #f5eed8;
-    font-size: 1.5rem;
-    cursor: pointer;
-}
-
-@media (max-width: 768px) {
-    .nav-mobile-toggle {
-        display: block;
-    }
-    
-    .nav-links, .nav-right {
-        display: none;
-    }
-    
-    .nav-mobile-menu {
-        position: fixed;
-        top: 0;
-        right: -100%;
-        width: 250px;
-        height: 100vh;
-        background: #111111;
-        border-left: 2px solid #b08030;
-        z-index: 1000;
-        display: flex;
-        flex-direction: column;
-        padding: 2rem 1rem;
-        transition: right 0.3s;
-    }
-    
-    .nav-mobile-menu.active {
-        right: 0;
-    }
-    
-    .nav-mobile-link {
-        display: block;
-        padding: 0.8rem 1rem;
-        color: #f5eed8;
-        text-decoration: none;
-        border-bottom: 1px solid #1c1c1c;
-    }
-    
-    .nav-mobile-link:hover {
-        color: #d4a84a;
-        background: #161616;
-    }
-}
-
-/* Main Content */
-.main-content {
-    max-width: 1200px;
-    margin: 2rem auto;
-    padding: 0 1rem;
-}
-
-.page-title {
-    text-align: center;
-    margin-bottom: 2rem;
-    color: #d4a84a;
+/* Typography */
+h1, h2, h3, h4 {
     font-family: "Playfair Display", serif;
+    color: #d4a84a;
+    margin-bottom: 1rem;
+}
+
+h1 {
     font-size: 2.5rem;
-}
-
-.section-title {
-    color: #d4a84a;
-    font-family: "Playfair Display", serif;
-    font-size: 1.8rem;
-    margin-bottom: 1rem;
     text-align: center;
 }
 
-/* Cards & Layout */
-.card {
-    background: #161616;
-    border: 1px solid #b08030;
-    border-radius: 4px;
-    padding: 1.5rem;
-    margin-bottom: 1rem;
-    box-shadow: 0 4px 12px rgba(0,0,0,0.3);
+h2 {
+    font-size: 2rem;
 }
 
+h3 {
+    font-size: 1.5rem;
+}
+
+p {
+    margin-bottom: 1rem;
+}
+
+a {
+    color: #d4a84a;
+    text-decoration: none;
+}
+
+a:hover {
+    color: #e6c270;
+}
+
+/* Buttons */
 .btn {
     display: inline-block;
-    padding: 0.8rem 1.5rem;
+    padding: 0.5rem 1rem;
     background: #b08030;
     color: #050505;
     border: 1px solid #d4a84a;
@@ -192,6 +84,20 @@ body {
 .btn-secondary:hover {
     background: #1c1c1c;
     border-color: #d4a84a;
+}
+
+/* Cards and Sections */
+.card {
+    background: #161616;
+    border: 1px solid #b08030;
+    border-radius: 4px;
+    padding: 1.5rem;
+    margin-bottom: 1.5rem;
+    box-shadow: 0 4px 8px rgba(0,0,0,0.3);
+}
+
+.section {
+    margin-bottom: 2rem;
 }
 
 /* Forms */
@@ -221,69 +127,25 @@ body {
     box-shadow: 0 0 0 2px rgba(180, 136, 48, 0.2);
 }
 
-/* Footer */
-footer {
-    background: linear-gradient(to right, #1a1202, #2a1a04, #1a1202);
-    padding: 2rem 0;
-    text-align: center;
-    border-top: 1px solid #b08030;
-    margin-top: 3rem;
-}
-
-.footer-content {
-    max-width: 1200px;
-    margin: 0 auto;
-    padding: 0 1rem;
-}
-
-/* Responsive adjustments */
-@media (max-width: 768px) {
-    .page-title {
-        font-size: 2rem;
-    }
-    
-    .section-title {
-        font-size: 1.5rem;
-    }
-    
-    .main-content {
-        margin: 1rem auto;
-        padding: 0 0.5rem;
-    }
-}
-
-/* Specific page styles */
-.families-grid {
+/* Grids */
+.grid {
     display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
     gap: 1.5rem;
-    margin-top: 2rem;
 }
 
-.family-card {
-    background: #161616;
-    border: 1px solid #b08030;
-    border-radius: 4px;
-    padding: 1.5rem;
-    transition: all 0.2s;
-}
-
-.family-card:hover {
-    transform: translateY(-5px);
-    border-color: #d4a84a;
-    box-shadow: 0 8px 24px rgba(0,0,0,0.4);
+/* Specific grids */
+.families-grid {
+    grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
 }
 
 .gallery-grid {
-    display: grid;
     grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
-    gap: 1.5rem;
-    margin-top: 2rem;
 }
 
+/* Photo Card Specific */
 .photo-card {
     background: #161616;
-    border: 1px solid #b0;
+    border: 1px solid #b08030; /* Fixed incomplete border declaration */
     border-radius: 4px;
     overflow: hidden;
     transition: all 0.2s;
@@ -305,19 +167,58 @@ footer {
     padding: 1rem;
 }
 
-/* Loading states */
+/* Loading States */
 .loading {
     text-align: center;
     padding: 2rem;
     color: #7a5828;
 }
 
-/* Animations */
-@keyframes fadeIn {
-    from { opacity: 0; transform: translateY(20px); }
-    to { opacity: 1; transform: translateY(0); }
+/* Responsive Adjustments */
+@media (max-width: 768px) {
+    .container {
+        padding: 0 0.5rem;
+    }
+
+    h1 {
+        font-size: 2rem;
+    }
+
+    h2 {
+        font-size: 1.7rem;
+    }
+
+    .nav-links, .nav-right {
+        display: none;
+    }
+
+    .nav-mobile-toggle {
+        display: block;
+    }
+
+    .nav-mobile-menu.active {
+        display: flex;
+    }
 }
 
-.fade-in {
-    animation: fadeIn 0.5s ease-out;
+/* Ensure nav elements are visible if managed by admin-nav.js */
+nav, .site-header {
+    /* Styles potentially overridden by admin-nav.js are managed there */
+    /* Keep base visibility */
+    display: block;
+}
+
+/* Footer */
+footer {
+    background: linear-gradient(to right, #1a1202, #2a1a04, #1a1202);
+    padding: 2rem 0;
+    text-align: center;
+    border-top: 1px solid #b08030;
+    margin-top: 3rem;
+}
+
+.footer-content {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 0 1rem;
 }
