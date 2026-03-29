@@ -1,5 +1,5 @@
 /*
-admin-nav.js — Calnic Online v2 (FIXED)
+admin-nav.js — Calnic Online v2 (FIXED + Genealogy Engine Loader)
 */
 (function () {
 document.documentElement.style.background = '#0a0a0a';
@@ -207,7 +207,7 @@ return;
 }
 Promise.all([
 window.supabase.from('families').select('name,id').eq('owner_id', session.user.id).single(),
-window.supabase.from('profiles').select('is_admin').eq('id', session.user.id).single()
+window.supabaseselect('is_admin').eq('id', session.user.id).single()
 ]).then(function(results) {
 var familyData = results[0].data;
 var profileData = results[1].data;
@@ -262,5 +262,56 @@ window.location.href = 'index.html';
 }
 }
 });
+
+
+// --- START OF NEW CODE FOR GENEALOGY ENGINE LOADING ---
+function loadScript(src) {
+    return new Promise((resolve, reject) => {
+        // Check if script is already loaded to avoid duplicates
+        if (document.querySelector(`script[src="${src}"]`)) {
+            console.log(`[Admin-Nav] Script ${src} already loaded.`);
+            resolve();
+            return;
+        }
+
+        const script = document.createElement('script');
+        script.src = src;
+        script.onload = resolve;
+        script.onerror = () => reject(new Error(`Failed to load script ${src}`));
+        document.head.appendChild(script);
+    });
+}
+
+// Check if we are on the genealogy family page and load the engine
+function maybeLoadGenealogyEngine() {
+    if (window.location.pathname.includes('genealogie-familie.html')) {
+        console.log('[Admin-Nav] Detected genealogie-familie.html, attempting to load genealogy-engine.js');
+        loadScript('genealogy-engine.js')
+            .then(() => {
+                console.log('[Admin-Nav] genealogy-engine.js loaded successfully.');
+                // Optionally, trigger an event or call a function from genealogy-engine.js if needed
+                // if (window.genealogyEngine && typeof window.genealogyEngine.init === 'function') {
+                //      window.genealogyEngine.init(); // If the engine has an explicit init function
+                // }
+            })
+            .catch(err => {
+                console.error('[Admin-Nav] Error loading genealogy-engine.js:', err);
+            });
+    }
+}
+
+// Call the function after the admin nav is initialized and DOM is ready
+if (window.supabase) {
+    // If supabase is already ready (loaded before admin-nav)
+    maybeLoadGenealogyEngine();
+} else {
+    // Wait for the supabase:ready event (as it does currently)
+    document.addEventListener('supabase:ready', maybeLoadGenealogyEngine);
+}
+
+// Also try after DOM is fully loaded, in case supabase is slow or fails
+document.addEventListener('DOMContentLoaded', maybeLoadGenealogyEngine);
+
+// --- END OF NEW CODE ---
 
 })();
