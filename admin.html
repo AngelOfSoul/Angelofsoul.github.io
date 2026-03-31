@@ -1384,10 +1384,30 @@ function resolveContact(id) {
 function doSendMsg() {
   var subj = document.getElementById('msg-subject').value.trim();
   var body = document.getElementById('msg-body').value.trim();
-  if (!subj || !body) { showMsg('msg-result','Te rog completeaza subiectul si mesajul.','error'); return; }
+  if (!subj || !body) { showMsg('msg-result','Te rog completeaza subiectul si mesajul.','err'); return; }
   if (!confirm('Trimiti acest mesaj pe email tuturor familiilor inregistrate?\n\nSubiect: ' + subj)) return;
-  showMsg('msg-result', 'Functia de trimitere email va fi configurata cu un serviciu email (ex: Resend.com) in versiunea finala.', 'info');
-  logAction('msg-send', 'Mesaj trimis: "' + subj + '"');
+  showMsg('msg-result', 'Se trimite...', 'info');
+  window.supabase.auth.getSession().then(function(res) {
+    var token = res.data && res.data.session ? res.data.session.access_token : null;
+    if (!token) { showMsg('msg-result', 'Nu esti autentificat.', 'err'); return; }
+    fetch('https://qjgvhirmnxpqqcllzukp.supabase.co/functions/v1/send-email', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + token },
+      body: JSON.stringify({ subject: subj, message: body })
+    })
+    .then(function(r) { return r.json(); })
+    .then(function(data) {
+      if (data.ok) {
+        showMsg('msg-result', 'Mesaj trimis cu succes catre ' + data.sent + ' familii.', 'ok');
+        logAction('msg-send', 'Mesaj trimis: "' + subj + '" catre ' + data.sent + ' destinatari');
+        document.getElementById('msg-subject').value = '';
+        document.getElementById('msg-body').value = '';
+      } else {
+        showMsg('msg-result', 'Eroare: ' + (data.error || 'Necunoscuta'), 'err');
+      }
+    })
+    .catch(function(e) { showMsg('msg-result', 'Eroare retea: ' + e.message, 'err'); });
+  });
 }
 
 function doPreviewMsg() {
