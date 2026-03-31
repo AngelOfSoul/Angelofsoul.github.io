@@ -951,9 +951,7 @@ function resetUserPassword(userId) {
   if (!confirm('Trimiti un email de resetare parola acestui utilizator?')) return;
   // Supabase admin.generateLink requires service key — not available client-side.
   // Best we can do from client: inform admin to use Supabase dashboard.
-  alert('Pentru resetarea parolei, mergi in Supabase Dashboard → Authentication → Users, gaseste utilizatorul si apasa "Send password reset".
-
-Aceasta actiune necesita cheia de serviciu (service key) care nu trebuie expusa in frontend.');
+  alert('Pentru resetarea parolei, mergi in Supabase Dashboard → Authentication → Users, gaseste utilizatorul si apasa "Send password reset".\n\nAceasta actiune necesita cheia de serviciu (service key) care nu trebuie expusa in frontend.');
 }
 
 /* ── BACKUP ── */
