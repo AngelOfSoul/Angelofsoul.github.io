@@ -927,7 +927,7 @@ function loadUsers() {
         var adminBadge = p.is_admin
           ? '<span class="badge info">Admin</span>'
           : '<span class="badge low">Utilizator</span>';
-        var resetBtn = '<button class="tbtn" onclick="resetUserPassword('' + p.id + '')" title="Trimite email resetare parola">&#128274; Reset</button>';
+        var resetBtn = '<button class="tbtn" onclick="resetUserPassword(\'' + p.id + '\')" title="Trimite email resetare parola">&#128274; Reset</button>';
         return '<tr>' +
           '<td>' + famName + '</td>' +
           '<td>' + village + '</td>' +
