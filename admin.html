@@ -1390,7 +1390,7 @@ function doSendMsg() {
   window.supabase.auth.getSession().then(function(res) {
     var token = res.data && res.data.session ? res.data.session.access_token : null;
     if (!token) { showMsg('msg-result', 'Nu esti autentificat.', 'err'); return; }
-    fetch('https://qjgvhirmnxpqqcllzukp.supabase.co/functions/v1/send-email', {
+    fetch('https://qjgvhirmnxpqqcllzukp.supabase.co/functions/v1/hyper-endpoint', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + token },
       body: JSON.stringify({ subject: subj, message: body })
