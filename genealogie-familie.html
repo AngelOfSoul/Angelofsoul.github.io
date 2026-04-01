@@ -630,6 +630,18 @@ var REL_META={
   soacra:    {l:'Soacra',        g:'Socri',            up:1,  isExt:true}
 };
 var REL_GROUPS=['Parinti','Bunici','Strabunici','Copii','Frati','Sot / Sotie','Familie extinsa','Socri'];
+var REL_INVERSE={
+  tata:'Fiu/Fiica', mama:'Fiu/Fiica', step:'Fiu/Fiica (vitreg)', adopted:'Fiu/Fiica (adoptiv)',
+  bunic:'Nepot/Nepoata', bunica:'Nepot/Nepoata',
+  strabunic:'Stranepot/Stranepota', strabunica:'Stranepot/Stranepota',
+  fiu:'Tata', fiica:'Mama',
+  frate:'Frate/Sora', sora:'Frate/Sora',
+  sot:'Sotie', sotie:'Sot',
+  unchi:'Nepot/Nepoata', matusa:'Nepot/Nepoata',
+  nepot:'Unchi/Matusa', nepoata:'Unchi/Matusa',
+  var:'Var/Vara', vara:'Var/Vara',
+  socru:'Ginere/Nora', soacra:'Ginere/Nora'
+};
 
 function roleToGen(role){
   if(!role)return 2;
@@ -688,10 +700,9 @@ function computeLayout(){
     }
     if(meta.isSpouse){spousePairs[a]=b;spousePairs[b]=a;return;}
     if(meta.isParent||meta.isChild){
-      var ga=genOf[a],gb=genOf[b];
       var par, chi;
-      if(meta.isParent){par=ga<=gb?a:b; chi=par===a?b:a;}
-      else             {par=gb<=ga?b:a; chi=par===b?a:b;}
+      if(meta.isParent){par=b; chi=a;} // to_member_id IS the parent of from_member_id
+      else             {par=a; chi=b;} // from_member_id IS the parent of to_member_id
       if(childrenOf[par].indexOf(chi)===-1)childrenOf[par].push(chi);
       if(parentsOf[chi].indexOf(par)===-1)parentsOf[chi].push(par);
     }
@@ -1001,7 +1012,8 @@ function openDetail(id){
     var o=S.members.find(function(x){return x.id===oid;});if(!o)return;
     var chip=document.createElement('div');chip.className='rc '+(r.is_biological!==false?'rc-blood':'rc-alliance');
     var rav=document.createElement('div');rav.className='rc-av';rav.textContent=(o.initial||o.name.charAt(0)).toUpperCase();
-    var info=document.createElement('div');info.innerHTML='<span class="rc-nm">'+escH(o.name)+'</span><span class="rc-tp">'+escH(relLabel(r.relation_type,r.from_member_id,r.to_member_id))+'</span>';
+    var relLbl=r.from_member_id===id?(REL_META[r.relation_type]?REL_META[r.relation_type].l:r.relation_type):(REL_INVERSE[r.relation_type]||r.relation_type);
+    var info=document.createElement('div');info.innerHTML='<span class="rc-tp">'+escH(relLbl)+':</span> <span class="rc-nm">'+escH(o.name)+'</span>';
     chip.appendChild(rav);chip.appendChild(info);
     chip.addEventListener('click',function(){closeDetail();setTimeout(function(){openDetail(oid);},60);});
     rcs.appendChild(chip);
