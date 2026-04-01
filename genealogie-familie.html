@@ -460,20 +460,47 @@
 <script src="js/utils.js"></script>
 <script src="js/admin-nav.js"></script>
 <!-- Adauga legatura modal -->
-<div id="relModal" style="display:none;position:fixed;inset:0;z-index:20000;background:rgba(0,0,0,0.78);align-items:center;justify-content:center;">
-  <div style="background:#0d0d0d;border:1px solid var(--gold-d);border-radius:3px;padding:22px 24px;width:380px;max-width:94vw;max-height:88vh;overflow-y:auto;position:relative;">
-    <button id="relModalClose" style="position:absolute;top:8px;right:12px;background:none;border:none;color:var(--muted);font-size:20px;cursor:pointer;line-height:1;" title="Inchide">&times;</button>
-    <div style="font-family:'Playfair Display',serif;font-size:13px;letter-spacing:2px;text-transform:uppercase;color:var(--gold);margin-bottom:6px;">Adauga legatura</div>
-    <div id="relModalAnchor" style="font-size:12px;color:var(--gold-d);margin-bottom:14px;"></div>
-    <div style="font-size:11px;color:var(--muted);margin-bottom:5px;letter-spacing:.05em;text-transform:uppercase;">Conecteaza cu persoana</div>
-    <select id="relPersonSelect" style="width:100%;background:#1a1208;border:1px solid var(--b2);color:var(--text);font-family:'EB Garamond',serif;font-size:14px;padding:7px 9px;border-radius:2px;margin-bottom:14px;"></select>
-    <div style="font-size:11px;color:var(--muted);margin-bottom:8px;letter-spacing:.05em;text-transform:uppercase;">Aceasta persoana este...</div>
-    <div id="relTypeContainer"></div>
-    <div id="relGenPreview" style="font-size:11px;color:#70a870;background:#0a1a0a;border:1px solid #1a3a1a;border-radius:2px;padding:6px 9px;margin-top:10px;display:none;"></div>
-    <div id="relModalError" style="font-size:12px;color:#c0392b;margin-top:8px;display:none;"></div>
-    <div style="margin-top:16px;display:flex;gap:10px;">
-      <button id="relModalCancel" style="flex:1;background:none;border:1px solid var(--b2);color:var(--muted);font-family:'EB Garamond',serif;font-size:13px;padding:7px;border-radius:2px;cursor:pointer;">Anuleaza</button>
-      <button id="relModalSave" style="flex:1;background:var(--gold-d);border:1px solid var(--gold);color:#050505;font-family:'EB Garamond',serif;font-size:13px;font-weight:700;padding:7px;border-radius:2px;cursor:pointer;">Salveaza</button>
+<div id="relModal" style="display:none;position:fixed;inset:0;z-index:20000;background:rgba(0,0,0,0.82);align-items:center;justify-content:center;">
+  <div style="background:#0d0d0d;border:1px solid var(--gold-d);border-radius:4px;padding:0;width:420px;max-width:96vw;max-height:92vh;overflow-y:auto;position:relative;display:flex;flex-direction:column;">
+    <!-- Header -->
+    <div style="background:#111;border-bottom:1px solid var(--b1);padding:14px 18px 12px;flex-shrink:0;">
+      <div style="font-family:'Playfair Display',serif;font-size:12px;letter-spacing:2px;text-transform:uppercase;color:var(--gold-d);margin-bottom:2px;" id="relModalTitle">ADAUGA LEGATURA</div>
+      <button id="relModalClose" style="position:absolute;top:10px;right:14px;background:none;border:none;color:var(--muted);font-size:22px;cursor:pointer;line-height:1;" title="Inchide">&times;</button>
+    </div>
+    <!-- Two-person visual -->
+    <div style="padding:14px 18px 0;flex-shrink:0;">
+      <div style="display:grid;grid-template-columns:1fr auto 1fr;gap:8px;align-items:center;background:#111;border:1px solid var(--b1);border-radius:3px;padding:12px;">
+        <!-- Anchor (fixed) -->
+        <div style="text-align:center;">
+          <div id="rmAnchorAv" style="width:42px;height:42px;border-radius:50%;background:#1a1208;border:2px solid var(--gold);display:flex;align-items:center;justify-content:center;font-family:'Playfair Display',serif;font-size:18px;color:var(--gold);margin:0 auto 5px;"></div>
+          <div id="rmAnchorName" style="font-family:'Playfair Display',serif;font-size:12px;color:var(--text);word-break:break-word;"></div>
+          <div style="font-size:9px;color:var(--muted);letter-spacing:1px;margin-top:2px;">PERSOANA EDITATA</div>
+        </div>
+        <!-- Arrow / relation label -->
+        <div style="text-align:center;min-width:60px;">
+          <div id="rmArrowLabel" style="font-size:10px;color:var(--muted);font-family:'EB Garamond',serif;font-style:italic;padding:2px 6px;border:1px dashed var(--b2);border-radius:10px;white-space:nowrap;">— ? —</div>
+        </div>
+        <!-- Target (selected) -->
+        <div style="text-align:center;">
+          <div id="rmTargetAv" style="width:42px;height:42px;border-radius:50%;background:#1a1208;border:2px solid var(--b2);display:flex;align-items:center;justify-content:center;font-family:'Playfair Display',serif;font-size:18px;color:var(--muted);margin:0 auto 5px;"></div>
+          <select id="relPersonSelect" style="width:100%;background:#1a1208;border:1px solid var(--b2);color:var(--text);font-family:'EB Garamond',serif;font-size:13px;padding:4px 6px;border-radius:2px;text-align:center;"></select>
+          <div style="font-size:9px;color:var(--muted);letter-spacing:1px;margin-top:4px;">CONECTEAZA CU</div>
+        </div>
+      </div>
+      <!-- Sentence preview — always visible, updates live -->
+      <div id="relSentencePreview" style="margin-top:10px;padding:10px 14px;background:#0d1a0d;border:1px solid #2a4a2a;border-radius:3px;font-family:'EB Garamond',serif;font-size:15px;color:#82c46a;text-align:center;min-height:38px;display:flex;align-items:center;justify-content:center;">
+        <span id="rmSentenceText" style="font-style:italic;color:var(--muted);">← Selecteaza tipul legaturii de mai jos</span>
+      </div>
+    </div>
+    <!-- Type buttons -->
+    <div style="padding:12px 18px;flex:1;">
+      <div style="font-size:9px;color:var(--muted);letter-spacing:.12em;text-transform:uppercase;margin-bottom:8px;">Tipul legaturii</div>
+      <div id="relTypeContainer"></div>
+    </div>
+    <div id="relModalError" style="font-size:12px;color:#c0392b;margin:0 18px 8px;display:none;"></div>
+    <div style="padding:12px 18px 16px;display:flex;gap:10px;border-top:1px solid var(--b1);flex-shrink:0;">
+      <button id="relModalCancel" style="flex:1;background:none;border:1px solid var(--b2);color:var(--muted);font-family:'EB Garamond',serif;font-size:13px;padding:8px;border-radius:2px;cursor:pointer;">Anuleaza</button>
+      <button id="relModalSave" style="flex:2;background:var(--gold-d);border:1px solid var(--gold);color:#050505;font-family:'EB Garamond',serif;font-size:13px;font-weight:700;padding:8px;border-radius:2px;cursor:pointer;">Salveaza legatura</button>
     </div>
   </div>
 </div>
@@ -1012,7 +1039,8 @@ function openDetail(id){
     var o=S.members.find(function(x){return x.id===oid;});if(!o)return;
     var chip=document.createElement('div');chip.className='rc '+(r.is_biological!==false?'rc-blood':'rc-alliance');
     var rav=document.createElement('div');rav.className='rc-av';rav.textContent=(o.initial||o.name.charAt(0)).toUpperCase();
-    var relLbl=r.from_member_id===id?(REL_META[r.relation_type]?REL_META[r.relation_type].l:r.relation_type):(REL_INVERSE[r.relation_type]||r.relation_type);
+    var LEGACY_LBL={spouse:t('Sot/Sotie','Spouse'),parent:t('Parinte','Parent'),sibling:t('Frate/Sora','Sibling'),child:t('Fiu/Fiica','Child'),in_law:t('Fin/Nasa','In-law')};
+    var relLbl=r.from_member_id===id?(REL_META[r.relation_type]?REL_META[r.relation_type].l:(LEGACY_LBL[r.relation_type]||r.relation_type)):(REL_INVERSE[r.relation_type]||LEGACY_LBL[r.relation_type]||r.relation_type);
     var info=document.createElement('div');info.innerHTML='<span class="rc-tp">'+escH(relLbl)+':</span> <span class="rc-nm">'+escH(o.name)+'</span>';
     chip.appendChild(rav);chip.appendChild(info);
     chip.addEventListener('click',function(){closeDetail();setTimeout(function(){openDetail(oid);},60);});
@@ -1197,9 +1225,13 @@ function renderRelList(id){
     var item=document.createElement('div');item.className='rel-item';
     var rav=document.createElement('div');rav.className='rel-av';rav.textContent=(o.initial||o.name.charAt(0)).toUpperCase();
     var info=document.createElement('div');info.style.flex='1';info.innerHTML='<div class="rel-name">'+escH(o.name)+'</div><span class="rel-type-lbl">'+escH(relLabel(r.relation_type,r.from_member_id,r.to_member_id))+'</span>';
-    var rm=document.createElement('button');rm.className='rel-btn rel-btn-rm';rm.textContent=t('Sterge legatura','Remove link');
+    var btns=document.createElement('div');btns.style.cssText='display:flex;gap:5px;flex-shrink:0;';
+    var ed=document.createElement('button');ed.className='rel-btn';ed.style.cssText='border-color:var(--gold-d);color:var(--gold);';ed.textContent=t('Schimba','Change');
+    ed.addEventListener('click',function(){openEditModal(r.id,oid,r.relation_type);});
+    var rm=document.createElement('button');rm.className='rel-btn rel-btn-rm';rm.textContent=t('Sterge','Remove');
     rm.addEventListener('click',function(){removeRel(r.id,item);});
-    item.appendChild(rav);item.appendChild(info);item.appendChild(rm);list.appendChild(item);
+    btns.appendChild(ed);btns.appendChild(rm);
+    item.appendChild(rav);item.appendChild(info);item.appendChild(btns);list.appendChild(item);
   });
 }
 
@@ -1215,6 +1247,27 @@ function removeRel(relId,item){
 // ── RELATION MODAL ──────────────────────────────────────────
 (function(){
   var selRelType=null;
+  var editingRelId=null;
+
+  function updatePreview(){
+    var anchor=S.members.find(function(m){return m.id===S.editingId;});
+    var sel=document.getElementById('relPersonSelect');
+    var targetId=sel?sel.value:null;
+    var target=targetId?S.members.find(function(m){return m.id===targetId;}):null;
+    // Update target avatar
+    var tav=document.getElementById('rmTargetAv');
+    if(tav&&target){tav.textContent=(target.initial||target.name.charAt(0)).toUpperCase();tav.style.borderColor='var(--gold-d)';tav.style.color='var(--gold)';}
+    var st=document.getElementById('rmSentenceText');
+    var arrow=document.getElementById('rmArrowLabel');
+    if(selRelType&&anchor&&target){
+      var lbl=REL_META[selRelType]?REL_META[selRelType].l:selRelType;
+      if(st){st.style.color='#82c46a';st.style.fontStyle='normal';st.innerHTML='<strong>'+escH(target.name)+'</strong> este <strong>'+escH(lbl)+'</strong> lui <strong>'+escH(anchor.name)+'</strong>';}
+      if(arrow){arrow.textContent=lbl;arrow.style.borderColor='var(--gold-d)';arrow.style.color='var(--gold-d)';}
+    } else {
+      if(st){st.style.color='var(--muted)';st.style.fontStyle='italic';st.textContent='\u2190 Selecteaza tipul legaturii de mai jos';}
+      if(arrow){arrow.textContent='\u2014 ? \u2014';arrow.style.borderColor='var(--b2)';arrow.style.color='var(--muted)';}
+    }
+  }
 
   function buildTypeGrid(anchorId){
     var grouped={};
@@ -1237,24 +1290,24 @@ function removeRel(relId,item){
     return html;
   }
 
-  function openModal(){
-    if(!S.editingId)return;
-    var anchor=S.members.find(function(m){return m.id===S.editingId;});
-    if(!anchor)return;
-    selRelType=null;
+  function openModalCore(anchor, preselectPersonId, preselectType){
+    selRelType=preselectType||null;
+    editingRelId=null;
 
-    // Populate person select
     var sel=document.getElementById('relPersonSelect');
     sel.innerHTML='';
     S.members.forEach(function(m){
       if(m.id===S.editingId)return;
-      var opt=document.createElement('option');opt.value=m.id;opt.textContent=m.name;sel.appendChild(opt);
+      var opt=document.createElement('option');opt.value=m.id;opt.textContent=m.name;
+      if(m.id===preselectPersonId)opt.selected=true;
+      sel.appendChild(opt);
     });
+    sel.addEventListener('change',updatePreview);
 
-    // Anchor label
-    document.getElementById('relModalAnchor').textContent=t('Din perspectiva lui: ','From the perspective of: ')+anchor.name;
+    var aav=document.getElementById('rmAnchorAv');if(aav)aav.textContent=(anchor.initial||anchor.name.charAt(0)).toUpperCase();
+    var anm=document.getElementById('rmAnchorName');if(anm)anm.textContent=anchor.name;
+    var ttl=document.getElementById('relModalTitle');if(ttl)ttl.textContent=editingRelId?t('SCHIMBA LEGATURA','CHANGE LINK'):t('ADAUGA LEGATURA','ADD LINK');
 
-    // Type grid
     var container=document.getElementById('relTypeContainer');
     container.innerHTML=buildTypeGrid(S.editingId);
     container.querySelectorAll('button[data-val]').forEach(function(btn){
@@ -1264,30 +1317,38 @@ function removeRel(relId,item){
         });
         btn.style.background='var(--gold-d)';btn.style.borderColor='var(--gold)';btn.style.color='#050505';
         selRelType=btn.dataset.val;
-        // Show generation preview
         var meta=REL_META[selRelType];
-        var preview=document.getElementById('relGenPreview');
-        if(meta&&meta.up!==undefined){
-          var rows=Math.abs(meta.up);
-          var dir=meta.up>0?t('deasupra','above'):meta.up<0?t('dedesubt','below'):'';
-          var msg=rows===0
-            ?t('Va fi pe aceeasi linie in arbore.','Will be on the same row in the tree.')
-            :t('Va fi mutat cu '+rows+' rand(uri) '+dir+' in arbore.','Will be placed '+rows+' row(s) '+dir+' in the tree.');
-          preview.textContent=msg;preview.style.display='block';
-        } else {
-          preview.style.display='none';
-        }
+        updatePreview();
       });
+      if(btn.dataset.val===preselectType){
+        btn.style.background='var(--gold-d)';btn.style.borderColor='var(--gold)';btn.style.color='#050505';
+      }
     });
 
     document.getElementById('relModalError').style.display='none';
-    document.getElementById('relGenPreview').style.display='none';
+    updatePreview();
     document.getElementById('relModal').style.display='flex';
   }
 
+  function openModal(){
+    if(!S.editingId)return;
+    var anchor=S.members.find(function(m){return m.id===S.editingId;});
+    if(!anchor)return;
+    openModalCore(anchor,null,null);
+  }
+
+  function openEditModal(relId, personId, currentType){
+    if(!S.editingId)return;
+    var anchor=S.members.find(function(m){return m.id===S.editingId;});
+    if(!anchor)return;
+    editingRelId=relId;
+    openModalCore(anchor, personId, currentType);
+  }
+  window.openEditModal=openEditModal;
+
   function closeModal(){
     document.getElementById('relModal').style.display='none';
-    selRelType=null;
+    selRelType=null;editingRelId=null;
   }
 
   document.getElementById('relModalClose').addEventListener('click',closeModal);
@@ -1300,12 +1361,12 @@ function removeRel(relId,item){
     var targetId=document.getElementById('relPersonSelect').value;
     if(!targetId){err.textContent=t('Selecteaza o persoana.','Select a person.');err.style.display='block';return;}
     var btn=this;btn.disabled=true;btn.textContent=t('Se salveaza...','Saving...');
-    // Infer generation before saving
     inferGen(S.editingId, targetId, selRelType);
     var bio=REL_META[selRelType]?REL_META[selRelType].bio!==false:true;
-    window.supabase.from('member_relations')
-      .insert({from_member_id:S.editingId,to_member_id:targetId,relation_type:selRelType,is_biological:bio,confidence:100})
-      .then(function(r){
+    var promise=editingRelId
+      ?window.supabase.from('member_relations').update({relation_type:selRelType,is_biological:bio}).eq('id',editingRelId)
+      :window.supabase.from('member_relations').insert({from_member_id:S.editingId,to_member_id:targetId,relation_type:selRelType,is_biological:bio,confidence:100});
+    promise.then(function(r){
         btn.disabled=false;btn.textContent=t('Salveaza','Save');
         if(r.error){err.textContent=r.error.message;err.style.display='block';return;}
         closeModal();reload();setTimeout(function(){openEditor(S.editingId);switchTab(1);},800);
