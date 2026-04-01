@@ -873,7 +873,8 @@ function drawConnectors(svg,layout){
 
   // Parent-child lines
   var drawnParent={};
-  S.members.forEach(function(parentId){
+  S.members.forEach(function(m){
+    var parentId=m.id;
     var ch=childrenOf2[parentId];if(!ch||!ch.length)return;
     var pp=layout[parentId];if(!pp)return;
     var sp=spousePairs2[parentId];
