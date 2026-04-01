@@ -152,7 +152,8 @@ function buildMobileFloat(initial, hasNotif) {
   fb.className = 'mobile-prf-float';
   fb.href = initial ? 'dashboard.html' : 'login.html';
   if (initial) {
-    fb.innerHTML = '' + initial + '';
+    fb.innerHTML = '<span class="mobile-prf-float-av">' + initial + '</span>' +
+      '<span class="mobile-prf-float-notif' + (hasNotif ? ' show' : '') + '"></span>';
   } else {
     fb.innerHTML = '🔒';
   }
@@ -210,11 +211,12 @@ function initAdminNav() {
       return;
     }
     Promise.all([
-      window.supabase.from('families').select('name,id').eq('owner_id', session.user.id).single(),
-      window.supabase.from('profiles').select('is_admin').eq('id', session.user.id).maybeSingle()
+      window.supabase.from('families').select('name,id').eq('owner_id', session.user.id).maybeSingle(),
+      window.supabase.from('profiles').select('is_admin').eq('id', session.user.id).limit(1)
     ]).then(function(results) {
       var familyData = results[0].data;
-      var profileData = results[1].data;
+      var profileArr = results[1].data;
+      var profileData = Array.isArray(profileArr) ? profileArr[0] : profileArr;
       var familyName = familyData ? familyData.name : 'Profilul Meu';
       var familyId = familyData ? familyData.id : null;
       var isAdmin = profileData && profileData.is_admin;
