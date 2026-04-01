@@ -237,21 +237,4 @@ if (window.supabase) {
   document.addEventListener('supabase:ready', initAdminNav); 
 }
 
-document.addEventListener('DOMContentLoaded', function() {
-  var intrebariLink = document.querySelector('a.nav-link[href="intrebari.html"]');
-  if (intrebariLink) {
-    intrebariLink.style.display = 'none';
-    var footer = document.querySelector('footer');
-    if (footer) {
-      var fl = document.createElement('a');
-      fl.href = 'intrebari.html';
-      fl.style.cssText = 'color:#7a5828;font-size:13px;margin-left:8px;';
-      fl.textContent = 'Intrebari frecvente';
-      footer.appendChild(document.createTextNode(' · '));
-      footer.appendChild(fl);
-    }
-  }
-  var mobileIntrebari = document.querySelector('a.nav-mobile-link[href="intrebari.html"]');
-  if (mobileIntrebari) mobileIntrebari.style.display = 'none';
-});
 })();

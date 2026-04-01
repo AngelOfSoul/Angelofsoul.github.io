@@ -69,9 +69,9 @@
 .v-badge{position:absolute;bottom:2px;right:2px;width:11px;height:11px;border-radius:50%;background:var(--green);border:2px solid var(--bg);pointer-events:none;box-shadow:0 0 5px rgba(130,196,106,.55);}
 .own-badge{position:absolute;top:-2px;right:-2px;width:16px;height:16px;border-radius:50%;background:#1a2808;border:1.5px solid var(--gold);display:flex;align-items:center;justify-content:center;font-size:7px;color:var(--gold);pointer-events:none;}
 .nl{margin-top:5px;text-align:center;width:110px;}
-.nn{font-family:'Playfair Display',serif;font-size:10px;color:var(--text);line-height:1.3;display:block;word-break:break-word;}
-.ny{font-size:9px;color:var(--muted);display:block;margin-top:1px;}
-.np{font-size:8px;color:#c8983a;font-style:italic;display:block;}
+.nn{font-family:'Playfair Display',serif;font-size:12px;color:var(--text);line-height:1.3;display:block;word-break:break-word;}
+.ny{font-size:11px;color:var(--muted);display:block;margin-top:1px;}
+.np{font-size:10px;color:#c8983a;font-style:italic;display:block;}
 .es{display:none;gap:4px;margin-top:5px;justify-content:center;}
 .pn.owner:hover .es{display:flex;}
 .eb{font-size:9px;padding:3px 8px;border-radius:3px;border:1px solid;transition:all .15s;white-space:nowrap;}
@@ -1097,7 +1097,7 @@ function buildNode(m,pos){
   wrap.appendChild(av);
   var nl=document.createElement('div');nl.className='nl';
   var yrs='';if(m.birth_year)yrs+=m.birth_year;if(m.birth_year||m.death_year)yrs+=' \u2014 ';if(m.death_year)yrs+=m.death_year;else if(!isLiving&&m.birth_year)yrs+='';else if(m.birth_year)yrs+=t('viu','living');
-  nl.innerHTML='<span class="nn">'+escH(m.name)+'</span>'+(yrs?'<span class="ny">'+escH(yrs)+'</span>':'')+((m.profession||m.role)?'<span class="np">'+escH(m.profession||m.role)+'</span>':'');
+  nl.innerHTML='<span class="nn">'+escH(m.name)+'</span>'+(yrs?'<span class="ny">'+escH(yrs)+'</span>':'')+(m.profession?'<span class="np">'+escH(m.profession)+'</span>':'');
   wrap.appendChild(nl);
   if(isOwner){var es=document.createElement('div');es.className='es';var ee=document.createElement('button');ee.className='eb eb-edit';ee.textContent=t('\u270E Editeaza','\u270E Edit');var ed=document.createElement('button');ed.className='eb eb-del';ed.textContent=t('\u2715 Sterge','\u2715 Delete');ee.addEventListener('click',function(e){e.stopPropagation();openEditor(m.id);});ed.addEventListener('click',function(e){e.stopPropagation();openDelFlow(m.id);});es.appendChild(ee);es.appendChild(ed);wrap.appendChild(es);}
   wrap.addEventListener('click',function(e){e.stopPropagation();openDetail(m.id);});
@@ -1528,19 +1528,24 @@ function doRemoveRel(relId,item){
     inferGen(S.editingId, targetId, selRelType);
     var bio=REL_META[selRelType]?REL_META[selRelType].bio!==false:true;
     var capturedFrom=S.editingId,capturedTo=targetId,capturedType=selRelType;
+    var wasInsert=!editingRelId;
     var promise=editingRelId
-      ?window.supabase.from('member_relations').update({relation_type:selRelType,is_biological:bio}).eq('id',editingRelId)
-      :window.supabase.from('member_relations').insert({from_member_id:capturedFrom,to_member_id:capturedTo,relation_type:capturedType,is_biological:bio,confidence:100});
+      ?window.supabase.from('member_relations').update({relation_type:selRelType,is_biological:bio}).eq('id',editingRelId).select()
+      :window.supabase.from('member_relations').insert({from_member_id:capturedFrom,to_member_id:capturedTo,relation_type:capturedType,is_biological:bio,confidence:100}).select();
     promise.then(function(r){
         btn.disabled=false;btn.textContent=t('Salveaza','Save');
         if(r.error){err.textContent=r.error.message;err.style.display='block';return;}
-        var wasInsert=!editingRelId;
+        // Update S.relations in memory immediately (no reload timing issues)
+        if(wasInsert){
+          var newRel=(r.data&&r.data[0])||{id:'tmp_'+Date.now(),from_member_id:capturedFrom,to_member_id:capturedTo,relation_type:capturedType,is_biological:bio,confidence:100};
+          S.relations.push(newRel);
+        } else {
+          S.relations=S.relations.map(function(x){return x.id===editingRelId?Object.assign({},x,{relation_type:selRelType,is_biological:bio}):x;});
+        }
         closeModal();
-        reload();
-        setTimeout(function(){
-          if(capturedFrom){openEditor(capturedFrom);switchTab(1);}
-          if(wasInsert)inferRelations(capturedFrom,capturedTo,capturedType);
-        },800);
+        render();
+        if(capturedFrom){openEditor(capturedFrom);switchTab(1);}
+        if(wasInsert)inferRelations(capturedFrom,capturedTo,capturedType);
       }).catch(function(e){btn.disabled=false;btn.textContent=t('Salveaza','Save');err.textContent=e.message;err.style.display='block';});
   });
 
