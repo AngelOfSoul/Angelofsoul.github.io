@@ -20,6 +20,9 @@
 /* ── GHID OVERLAY ── */
 .guide-overlay{position:fixed;inset:0;z-index:20000;background:rgba(0,0,0,.78);display:none;align-items:center;justify-content:center;}
 .guide-overlay.open{display:flex;}
+/* Modals care trebuie sa apara DEASUPRA editorului (z-index 15000) */
+#inferModal,#confirmModal{z-index:16000;}
+#deleteModal{z-index:16000;}
 .guide-box{background:#111;border:1px solid #c8983a;border-radius:12px;padding:24px 26px;max-width:380px;width:92%;text-align:center;}
 .guide-title{font-family:'Playfair Display',serif;font-size:19px;color:var(--gold);margin-bottom:8px;}
 .guide-sub{font-size:13px;color:var(--muted);line-height:1.7;margin-bottom:18px;}
@@ -611,7 +614,23 @@ function _getParentsOf(memberId){
   var PT=['tata','mama','step','adopted'],CT=['fiu','fiica'],res=[];
   S.relations.forEach(function(r){
     if(r.from_member_id===memberId&&PT.indexOf(r.relation_type)!==-1)res.push({memberId:r.to_member_id,relType:r.relation_type});
-    else if(r.to_member_id===memberId&&CT.indexOf(r.relation_type)!==-1)res.push({memberId:r.from_member_id,relType:null});
+    else if(r.to_member_id===memberId&&CT.indexOf(r.relation_type)!==-1){
+      // When the relation is from parent's perspective (fiu/fiica), look up the parent's gender
+      // from their own relations to determine if they are tata or mama
+      var parentId=r.from_member_id;
+      var parentMember=S.members.find(function(m){return m.id===parentId;});
+      // Try to infer gender from existing spouse/sibling relations; default to 'tata'
+      var guessedType='tata';
+      if(parentMember){
+        // Check if this parent has a sot (husband) relation — meaning they are a sotie (wife) = mama
+        var hasSot=S.relations.some(function(rx){return(rx.from_member_id===parentId&&rx.relation_type==='sot')||(rx.to_member_id===parentId&&rx.relation_type==='sotie');});
+        if(hasSot)guessedType='mama';
+        // Check if they have sotie (wife) relation — meaning they are sot (husband) = tata
+        var hasSotie=S.relations.some(function(rx){return(rx.from_member_id===parentId&&rx.relation_type==='sotie')||(rx.to_member_id===parentId&&rx.relation_type==='sot');});
+        if(hasSotie)guessedType='tata';
+      }
+      res.push({memberId:parentId,relType:guessedType});
+    }
   });
   return res;
 }
@@ -661,14 +680,19 @@ document.addEventListener('DOMContentLoaded',function(){
     var capturedEditing=S.editingId;
     window.supabase.from('member_relations').insert(rows).select().then(function(r){
       btn.disabled=false;btn.textContent=t('Adauga selectate','Add selected');
-      if(r.error){return;}
+      if(r.error){
+        // Silently ignore inference errors (they are suggestions, not critical)
+        console.warn('[Calnic] Inference insert error:',r.error.message);
+        closeInferModal();
+        return;
+      }
       // Add new relations to memory immediately
       var inserted=r.data&&r.data.length?r.data:rows.map(function(row,i){return Object.assign({id:'tmp_inf_'+Date.now()+'_'+i},row);});
       inserted.forEach(function(rel){S.relations.push(rel);});
       closeInferModal();
       render();
       if(capturedEditing){openEditor(capturedEditing);switchTab(1);}
-    }).catch(function(e){btn.disabled=false;btn.textContent=t('Adauga selectate','Add selected');});
+    }).catch(function(e){btn.disabled=false;btn.textContent=t('Adauga selectate','Add selected');console.warn('[Calnic] Inference insert catch:',e.message);closeInferModal();});
   });
 });
 
@@ -774,24 +798,30 @@ function syncMembersCount(){
 // ── RENDER ───────────────────────────────────────────────
 function render(){
   var cv=document.getElementById('treeCanvas'),svg=document.getElementById('connSvg');
-  Array.from(cv.children).forEach(function(el){if(el!==svg)cv.removeChild(el);});
-  if(!S.members.length){renderEmpty(cv);return;}
-  var layout=computeLayout(),mxX=0,mxY=0;
-  _genYMap={};
-  Object.keys(layout).forEach(function(id){
-    mxX=Math.max(mxX,layout[id].x+CARD_W+80);
-    mxY=Math.max(mxY,layout[id].y+200);
-    var g=layout[id].gen;
-    if(_genYMap[g]==null||layout[id].y<_genYMap[g])_genYMap[g]=layout[id].y;
-  });
-  mxX=Math.max(mxX,800);mxY=Math.max(mxY,680);
-  cv.style.width=mxX+'px';cv.style.height=mxY+'px';
-  svg.setAttribute('width',mxX);svg.setAttribute('height',mxY);svg.style.width=mxX+'px';svg.style.height=mxY+'px';
-  drawConnectors(svg,layout);
-  S.members.forEach(function(m){if(layout[m.id])cv.appendChild(buildNode(m,layout[m.id]));});
-  cv.appendChild(buildGhost(layout,mxX));
-  buildGenLabels(layout,mxX);
-  drawMinimap(mxX,mxY);applyXform();
+  try{
+    Array.from(cv.children).forEach(function(el){if(el!==svg)cv.removeChild(el);});
+    if(!S.members.length){renderEmpty(cv);return;}
+    var layout=computeLayout(),mxX=0,mxY=0;
+    _genYMap={};
+    Object.keys(layout).forEach(function(id){
+      mxX=Math.max(mxX,layout[id].x+CARD_W+80);
+      mxY=Math.max(mxY,layout[id].y+200);
+      var g=layout[id].gen;
+      if(_genYMap[g]==null||layout[id].y<_genYMap[g])_genYMap[g]=layout[id].y;
+    });
+    mxX=Math.max(mxX,800);mxY=Math.max(mxY,680);
+    cv.style.width=mxX+'px';cv.style.height=mxY+'px';
+    svg.setAttribute('width',mxX);svg.setAttribute('height',mxY);svg.style.width=mxX+'px';svg.style.height=mxY+'px';
+    drawConnectors(svg,layout);
+    S.members.forEach(function(m){if(layout[m.id])cv.appendChild(buildNode(m,layout[m.id]));});
+    cv.appendChild(buildGhost(layout,mxX));
+    buildGenLabels(layout,mxX);
+    drawMinimap(mxX,mxY);applyXform();
+  }catch(err){
+    console.error('[Calnic] render() error:',err);
+    // Restore basic usability — don't let a render crash freeze the whole page
+    try{svg.innerHTML='';}catch(e2){}
+  }
 }
 
 // ── RELATION METADATA ────────────────────────────────────
@@ -856,7 +886,8 @@ function inferGen(anchorId, targetId, relType){ /* no-op: BFS handles generation
 // tata/mama chain and should NOT create direct layout links.
 var LAYOUT_PAR={tata:1,mama:1,step:1,adopted:1,parent:1};
 var LAYOUT_CHI={fiu:1,fiica:1,child:1};
-var LAYOUT_SPO={sot:1,sotie:1,spouse:1,in_law:1};
+// in_law (Fin/Nasa) is NOT a spouse — exclude from spouse layout
+var LAYOUT_SPO={sot:1,sotie:1,spouse:1};
 
 function computeLayout(){
   // Auto-compact: shrink node spacing if many members (max width ~2800px)
@@ -910,8 +941,9 @@ function computeLayout(){
       if(!bfsVisited[cid])bfsQueue.push(cid);
     });
   }
-  // Disconnected members → gen 0
-  S.members.forEach(function(m){if(genOf[m.id]===null)genOf[m.id]=0;});
+  // Disconnected members — use their 'role' field as a generation hint,
+  // or fall back to gen 0 (same row as roots).
+  S.members.forEach(function(m){if(genOf[m.id]===null)genOf[m.id]=roleToGen(m.role||m.profession||'');});
   // Sync back
   S.members.forEach(function(m){m.generation=genOf[m.id];});
 
@@ -1019,7 +1051,7 @@ function drawConnectors(svg,layout){
   var drawnSpouse={};
   S.relations.forEach(function(r){
     var meta=REL_META[r.relation_type];
-    var isSpouse=meta?meta.isSpouse:(r.relation_type==='spouse'||r.relation_type==='in_law');
+    var isSpouse=meta?meta.isSpouse:(r.relation_type==='spouse');
     if(!isSpouse)return;
     var k=[r.from_member_id,r.to_member_id].sort().join('|');
     if(drawnSpouse[k])return;drawnSpouse[k]=true;
@@ -1572,13 +1604,17 @@ function doRemoveRel(relId,item){
     if(!selRelType){err.textContent=t('Selecteaza tipul legaturii.','Select a relation type.');err.style.display='block';return;}
     var targetId=document.getElementById('relPersonSelect').value;
     if(!targetId){err.textContent=t('Selecteaza o persoana.','Select a person.');err.style.display='block';return;}
-    // Duplicate check (only for new relations, not edits)
+    // Duplicate check: only block if the EXACT SAME relation type already exists between the two people
     if(!editingRelId){
-      var isDup=S.relations.some(function(r){return(r.from_member_id===S.editingId&&r.to_member_id===targetId)||(r.from_member_id===targetId&&r.to_member_id===S.editingId);});
-      if(isDup){err.textContent=t('Aceasta legatura exista deja intre cele doua persoane.','A relation between these two people already exists.');err.style.display='block';return;}
+      var isDup=S.relations.some(function(r){
+        return r.relation_type===selRelType&&(
+          (r.from_member_id===S.editingId&&r.to_member_id===targetId)||
+          (r.from_member_id===targetId&&r.to_member_id===S.editingId)
+        );
+      });
+      if(isDup){err.textContent=t('Aceasta legatura de tip "'+escH(REL_META[selRelType]?REL_META[selRelType].l:selRelType)+'" exista deja intre cele doua persoane.','A "'+escH(REL_META[selRelType]?REL_META[selRelType].l:selRelType)+'" link already exists between these two people.');err.style.display='block';return;}
     }
     var btn=this;btn.disabled=true;btn.textContent=t('Se salveaza...','Saving...');
-    inferGen(S.editingId, targetId, selRelType);
     var bio=REL_META[selRelType]?REL_META[selRelType].bio!==false:true;
     var capturedFrom=S.editingId,capturedTo=targetId,capturedType=selRelType;
     var wasInsert=!editingRelId;
@@ -1586,8 +1622,20 @@ function doRemoveRel(relId,item){
       ?window.supabase.from('member_relations').update({relation_type:selRelType,is_biological:bio}).eq('id',editingRelId).select()
       :window.supabase.from('member_relations').insert({from_member_id:capturedFrom,to_member_id:capturedTo,relation_type:capturedType,is_biological:bio,confidence:100}).select();
     promise.then(function(r){
-        btn.disabled=false;btn.textContent=t('Salveaza','Save');
-        if(r.error){err.textContent=r.error.message;err.style.display='block';return;}
+        btn.disabled=false;btn.textContent=t('Salveaza legatura','Save link');
+        if(r.error){
+          // Provide a user-friendly message for common database errors
+          var msg=r.error.message||'';
+          if(msg.indexOf('check constraint')!==-1||msg.indexOf('violates')!==-1){
+            err.textContent=t('Eroare baza de date: tipul de legatura nu este suportat. Rulati sql/fix-relation-types.sql in Supabase SQL Editor.','Database error: relation type not supported. Please run sql/fix-relation-types.sql in Supabase SQL Editor.');
+          } else if(msg.indexOf('permission')!==-1||msg.indexOf('policy')!==-1||msg.indexOf('RLS')!==-1){
+            err.textContent=t('Nu aveti permisiunea sa adaugati legaturi in aceasta familie.','You do not have permission to add links to this family.');
+          } else {
+            err.textContent=msg;
+          }
+          err.style.display='block';
+          return;
+        }
         // Update S.relations in memory immediately (no reload timing issues)
         if(wasInsert){
           var newRel=(r.data&&r.data[0])||{id:'tmp_'+Date.now(),from_member_id:capturedFrom,to_member_id:capturedTo,relation_type:capturedType,is_biological:bio,confidence:100};
@@ -1599,7 +1647,7 @@ function doRemoveRel(relId,item){
         render();
         if(capturedFrom){openEditor(capturedFrom);switchTab(1);}
         if(wasInsert)inferRelations(capturedFrom,capturedTo,capturedType);
-      }).catch(function(e){btn.disabled=false;btn.textContent=t('Salveaza','Save');err.textContent=e.message;err.style.display='block';});
+      }).catch(function(e){btn.disabled=false;btn.textContent=t('Salveaza legatura','Save link');err.textContent=e.message;err.style.display='block';});
   });
 
   document.getElementById('addRelBtn').addEventListener('click',openModal);
@@ -1733,6 +1781,24 @@ function subscribeRT(){
   if(S.realtimeCh)window.supabase.removeChannel(S.realtimeCh);
   S.realtimeCh=window.supabase.channel('family:'+S.familyId)
     .on('postgres_changes',{event:'*',schema:'public',table:'members',filter:'family_id=eq.'+S.familyId},function(){reload();})
+    .on('postgres_changes',{event:'*',schema:'public',table:'member_relations'},function(payload){
+      // Re-load only relations when a relation changes, to avoid full page reload
+      if(!S.members.length)return;
+      var ids=S.members.map(function(m){return m.id;});
+      var rid=S.reqId;
+      Promise.all([
+        window.supabase.from('member_relations').select('*').in('from_member_id',ids),
+        window.supabase.from('member_relations').select('*').in('to_member_id',ids)
+      ]).then(function(results){
+        if(rid!==S.reqId)return;
+        var seen={},all=[];
+        (results[0].data||[]).concat(results[1].data||[]).forEach(function(r){
+          if(!seen[r.id]){seen[r.id]=true;all.push(r);}
+        });
+        S.relations=all;
+        render();
+      }).catch(function(){});
+    })
     .subscribe(function(st){if(st==='CLOSED')setTimeout(subscribeRT,3000);});
 }
 
