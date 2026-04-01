@@ -211,7 +211,7 @@ function initAdminNav() {
     }
     Promise.all([
       window.supabase.from('families').select('name,id').eq('owner_id', session.user.id).single(),
-      window.supabase.from('profiles').select('is_admin').eq('id', session.user.id).single()
+      window.supabase.from('profiles').select('is_admin').eq('id', session.user.id).maybeSingle()
     ]).then(function(results) {
       var familyData = results[0].data;
       var profileData = results[1].data;
