@@ -460,6 +460,12 @@
         <div class="ht-foot" data-ro="Click pe poza sau pe nume pentru profilul complet" data-en="Click photo or name for full profile">Click pe poza sau pe nume pentru profilul complet</div>
       </div>
       <div class="minimap" id="minimap"><canvas id="mmCanvas" width="88" height="58"></canvas><div class="mm-vp" id="mmVp"></div></div>
+      <!-- NAV BUTTONS -->
+      <div id="treeNavBtns" style="position:absolute;bottom:10px;left:10px;display:flex;flex-direction:column;gap:5px;z-index:20;">
+        <button onclick="navToGen('top')" title="Mergi la stramosii cei mai vechi" style="width:32px;height:32px;background:#111;border:1px solid #b08030;color:#d4a84a;font-size:14px;cursor:pointer;border-radius:2px;display:flex;align-items:center;justify-content:center;" aria-label="Sus">&#8679;</button>
+        <button onclick="fitTree()" title="Potriveste tot arborele pe ecran" style="width:32px;height:32px;background:#111;border:1px solid #585040;color:#a09070;font-size:12px;cursor:pointer;border-radius:2px;display:flex;align-items:center;justify-content:center;" aria-label="Fit">&#9633;</button>
+        <button onclick="navToGen('bottom')" title="Mergi la cei mai tineri membri" style="width:32px;height:32px;background:#111;border:1px solid #585040;color:#a09070;font-size:14px;cursor:pointer;border-radius:2px;display:flex;align-items:center;justify-content:center;" aria-label="Jos">&#8681;</button>
+      </div>
       <!-- DETAIL PANEL -->
       <div class="dp" id="detailPanel">
         <div class="dp-top"></div>
@@ -771,13 +777,20 @@ function render(){
   Array.from(cv.children).forEach(function(el){if(el!==svg)cv.removeChild(el);});
   if(!S.members.length){renderEmpty(cv);return;}
   var layout=computeLayout(),mxX=0,mxY=0;
-  Object.keys(layout).forEach(function(id){mxX=Math.max(mxX,layout[id].x+CARD_W+80);mxY=Math.max(mxY,layout[id].y+200);});
+  _genYMap={};
+  Object.keys(layout).forEach(function(id){
+    mxX=Math.max(mxX,layout[id].x+CARD_W+80);
+    mxY=Math.max(mxY,layout[id].y+200);
+    var g=layout[id].gen;
+    if(_genYMap[g]==null||layout[id].y<_genYMap[g])_genYMap[g]=layout[id].y;
+  });
   mxX=Math.max(mxX,800);mxY=Math.max(mxY,680);
   cv.style.width=mxX+'px';cv.style.height=mxY+'px';
   svg.setAttribute('width',mxX);svg.setAttribute('height',mxY);svg.style.width=mxX+'px';svg.style.height=mxY+'px';
   drawConnectors(svg,layout);
   S.members.forEach(function(m){if(layout[m.id])cv.appendChild(buildNode(m,layout[m.id]));});
   cv.appendChild(buildGhost(layout,mxX));
+  buildGenLabels(layout,mxX);
   drawMinimap(mxX,mxY);applyXform();
 }
 
@@ -832,121 +845,125 @@ function roleToGen(role){
   return 2;
 }
 
-// Infer and set target's generation based on anchor + relation type
-function inferGen(anchorId, targetId, relType){
-  var meta=REL_META[relType];
-  if(!meta||meta.up===undefined)return;
-  var anchor=S.members.find(function(m){return m.id===anchorId;});
-  var target=S.members.find(function(m){return m.id===targetId;});
-  if(!anchor||!target)return;
-  // up>0 means target is older = smaller gen number
-  target.generation = anchor.generation - meta.up;
-}
+// inferGen is no longer needed — computeLayout uses BFS from relations
+function inferGen(anchorId, targetId, relType){ /* no-op: BFS handles generation */ }
 
 // ─────────────────────────────────────────────────────────────────
-// GENEALOGY TREE LAYOUT ENGINE — Reingold-Tilford style
+// GENEALOGY TREE LAYOUT ENGINE
 // ─────────────────────────────────────────────────────────────────
+// Only direct one-step parent/child relations are used for tree structure.
+// bunic/strabunic etc. are used for labels only — they're inferred via the
+// tata/mama chain and should NOT create direct layout links.
+var LAYOUT_PAR={tata:1,mama:1,step:1,adopted:1,parent:1};
+var LAYOUT_CHI={fiu:1,fiica:1,child:1};
+var LAYOUT_SPO={sot:1,sotie:1,spouse:1,in_law:1};
+
 function computeLayout(){
-  var NODE_W = CARD_W + GEN_GAP_X;
-  var ROW_H  = 180;
+  // Auto-compact: shrink node spacing if many members (max width ~2800px)
+  var n=S.members.length;
+  var rawNodeW=CARD_W+GEN_GAP_X; // 138px default
+  var NODE_W=n<=20?rawNodeW:n<=40?120:n<=70?105:92;
+  var ROW_H  = 220;
   var PAD    = 60;
 
-  // 1. Generation of every member
-  var genOf={};
-  S.members.forEach(function(m){
-    genOf[m.id]=m.generation!=null?m.generation:roleToGen(m.role);
-    if(genOf[m.id]==null||isNaN(genOf[m.id]))genOf[m.id]=2;
-    genOf[m.id]=Math.max(0,Math.min(3,genOf[m.id]));
-  });
-
-  // 2. Build parent→child + spouse maps
-  var childrenOf={},parentsOf={},spousePairs={};
+  // 1. Build parent→child + spouse maps using ONLY direct relations
+  var childrenOf={}, parentsOf={}, spousePairs={};
   S.members.forEach(function(m){childrenOf[m.id]=[];parentsOf[m.id]=[];});
 
   S.relations.forEach(function(r){
-    var meta=REL_META[r.relation_type];
-    var a=r.from_member_id, b=r.to_member_id;
-    if(!meta){
-      // Legacy relation types fallback
-      if(r.relation_type==='spouse'||r.relation_type==='in_law'){spousePairs[a]=b;spousePairs[b]=a;}
-      else if(r.relation_type==='parent'||r.relation_type==='sibling'||r.relation_type==='step'||r.relation_type==='adopted'){
-        var ga=genOf[a],gb=genOf[b];
-        var par=ga<=gb?a:b, chi=par===a?b:a;
-        if(childrenOf[par].indexOf(chi)===-1)childrenOf[par].push(chi);
-        if(parentsOf[chi].indexOf(par)===-1)parentsOf[chi].push(par);
-      }
+    var rt=r.relation_type, a=r.from_member_id, b=r.to_member_id;
+    if(LAYOUT_SPO[rt]){spousePairs[a]=b;spousePairs[b]=a;return;}
+    if(LAYOUT_PAR[rt]){
+      // from=child, to=parent
+      if(childrenOf[b]&&childrenOf[b].indexOf(a)===-1)childrenOf[b].push(a);
+      if(parentsOf[a]&&parentsOf[a].indexOf(b)===-1)parentsOf[a].push(b);
       return;
     }
-    if(meta.isSpouse){spousePairs[a]=b;spousePairs[b]=a;return;}
-    if(meta.isParent||meta.isChild){
-      var par, chi;
-      if(meta.isParent){par=b; chi=a;} // to_member_id IS the parent of from_member_id
-      else             {par=a; chi=b;} // from_member_id IS the parent of to_member_id
-      if(childrenOf[par].indexOf(chi)===-1)childrenOf[par].push(chi);
-      if(parentsOf[chi].indexOf(par)===-1)parentsOf[chi].push(par);
+    if(LAYOUT_CHI[rt]){
+      // from=parent, to=child
+      if(childrenOf[a]&&childrenOf[a].indexOf(b)===-1)childrenOf[a].push(b);
+      if(parentsOf[b]&&parentsOf[b].indexOf(a)===-1)parentsOf[b].push(a);
+      return;
     }
   });
 
-  // 3. Propagate gen constraints
-  var changed=true,guard=0;
-  while(changed&&guard++<100){
-    changed=false;
-    S.members.forEach(function(m){
-      (parentsOf[m.id]||[]).forEach(function(pid){
-        if(genOf[pid]>=genOf[m.id]){genOf[m.id]=genOf[pid]+1;changed=true;}
-      });
-      (childrenOf[m.id]||[]).forEach(function(cid){
-        if(genOf[cid]<=genOf[m.id]){genOf[cid]=genOf[m.id]+1;changed=true;}
-      });
+  // 2. BFS generation assignment — roots (no parents) start at gen 0
+  var genOf={};
+  S.members.forEach(function(m){genOf[m.id]=null;});
+  var roots=S.members.filter(function(m){return !parentsOf[m.id].length;});
+  if(!roots.length)roots=S.members.slice(0,1); // cycle fallback
+
+  var bfsQueue=[], bfsVisited={};
+  roots.forEach(function(m){genOf[m.id]=0;bfsQueue.push(m.id);});
+
+  while(bfsQueue.length){
+    var cur=bfsQueue.shift();
+    if(bfsVisited[cur])continue;
+    bfsVisited[cur]=true;
+    // Spouse → same generation
+    var sp=spousePairs[cur];
+    if(sp&&genOf[sp]===null){genOf[sp]=genOf[cur];bfsQueue.push(sp);}
+    // Children → gen+1 (take max if multiple parents)
+    (childrenOf[cur]||[]).forEach(function(cid){
+      var cg=genOf[cur]+1;
+      if(genOf[cid]===null||genOf[cid]<cg)genOf[cid]=cg;
+      if(!bfsVisited[cid])bfsQueue.push(cid);
     });
   }
-  // Sync back to members
+  // Disconnected members → gen 0
+  S.members.forEach(function(m){if(genOf[m.id]===null)genOf[m.id]=0;});
+  // Sync back
   S.members.forEach(function(m){m.generation=genOf[m.id];});
 
-  // 4. Y positions — one row per unique generation
+  // 3. Y positions — one row per unique generation, oldest at top (gen 0)
   var allGens=[];
   S.members.forEach(function(m){if(allGens.indexOf(genOf[m.id])===-1)allGens.push(genOf[m.id]);});
   allGens.sort(function(a,b){return a-b;});
   var genY={};
   allGens.forEach(function(g,i){genY[g]=PAD+i*ROW_H;});
 
-  // 5. Subtree width
-  var stW={};
+  // 4. Subtree width — with cycle protection via inStk
+  var stW={}, inStk={};
   function subtreeWidth(id){
     if(stW[id]!=null)return stW[id];
+    if(inStk[id]){stW[id]=1;return 1;}
+    inStk[id]=true;
     var sp=spousePairs[id];
     var allCh=childrenOf[id].slice();
     if(sp)(childrenOf[sp]||[]).forEach(function(c){if(allCh.indexOf(c)===-1)allCh.push(c);});
-    if(!allCh.length){stW[id]=sp?2:1;return stW[id];}
-    var w=0;allCh.forEach(function(c){w+=subtreeWidth(c);});
-    stW[id]=Math.max(w,sp?2:1);return stW[id];
+    var w=0;
+    if(!allCh.length){stW[id]=sp?2:1;}
+    else{allCh.forEach(function(c){w+=subtreeWidth(c);});stW[id]=Math.max(w,sp?2:1);}
+    inStk[id]=false;
+    return stW[id];
   }
-  S.members.forEach(function(m){subtreeWidth(m.id);});
+  S.members.forEach(function(m){if(stW[m.id]==null)subtreeWidth(m.id);});
 
-  // 6. X assignment top-down
-  var xPos={},visited={},cursor=PAD;
+  // 5. X assignment top-down
+  var xPos={}, visitedX={}, cursor=PAD;
   function assignX(id,leftPx){
-    if(visited[id])return;visited[id]=true;
-    var sp=spousePairs[id],w=subtreeWidth(id)*NODE_W;
+    if(visitedX[id])return;visitedX[id]=true;
+    var sp=spousePairs[id], w=subtreeWidth(id)*NODE_W;
     xPos[id]=leftPx+(w-CARD_W)/2;
-    if(sp&&!visited[sp]){visited[sp]=true;xPos[sp]=xPos[id]+NODE_W;}
+    if(sp&&!visitedX[sp]){visitedX[sp]=true;xPos[sp]=xPos[id]+NODE_W;}
     var allCh=childrenOf[id].slice();
     if(sp)(childrenOf[sp]||[]).forEach(function(c){if(allCh.indexOf(c)===-1)allCh.push(c);});
     var tc=0;allCh.forEach(function(c){tc+=subtreeWidth(c)*NODE_W;});
     var cc=sp?(xPos[id]+xPos[sp]+CARD_W)/2:xPos[id]+CARD_W/2;
     var cx=cc-tc/2;
-    allCh.forEach(function(c){if(!visited[c]){assignX(c,cx);}cx+=subtreeWidth(c)*NODE_W;});
+    allCh.forEach(function(c){if(!visitedX[c]){assignX(c,cx);}cx+=subtreeWidth(c)*NODE_W;});
   }
-  var roots=S.members.filter(function(m){return !parentsOf[m.id]||!parentsOf[m.id].length;});
-  roots.sort(function(a,b){return genOf[a.id]-genOf[b.id]||(a.id<b.id?-1:1);});
-  roots.forEach(function(r){if(!visited[r.id]){assignX(r.id,cursor);cursor+=subtreeWidth(r.id)*NODE_W+GEN_GAP_X*2;}});
+  roots.sort(function(a,b){return a.id<b.id?-1:1;});
+  roots.forEach(function(r){if(!visitedX[r.id]){assignX(r.id,cursor);cursor+=subtreeWidth(r.id)*NODE_W+GEN_GAP_X*2;}});
   S.members.forEach(function(m){if(xPos[m.id]==null){xPos[m.id]=cursor;cursor+=NODE_W;}});
 
-  // 7. Normalise so min X = PAD
-  var minX=Infinity;S.members.forEach(function(m){if(xPos[m.id]<minX)minX=xPos[m.id];});
-  var shiftX=PAD-minX;S.members.forEach(function(m){xPos[m.id]+=shiftX;});
+  // 6. Normalise so min X = PAD
+  var minX=Infinity;
+  S.members.forEach(function(m){if(xPos[m.id]<minX)minX=xPos[m.id];});
+  var shiftX=PAD-minX;
+  S.members.forEach(function(m){xPos[m.id]+=shiftX;});
 
-  // 8. Build layout
+  // 7. Build layout
   var layout={};
   S.members.forEach(function(m){layout[m.id]={x:xPos[m.id],y:genY[genOf[m.id]],gen:genOf[m.id]};});
   return layout;
@@ -981,30 +998,21 @@ function drawConnectors(svg,layout){
   svg.innerHTML='';
   if(!S.relations.length&&S.members.length>1){drawHeuristic(svg,layout);return;}
 
-  var CARD_H=76, CARD_MID=38, JOIN_DROP=20;
+  var CARD_H=110, CARD_MID=40;
   var childrenOf2={},spousePairs2={};
   S.members.forEach(function(m){childrenOf2[m.id]=[];});
 
   S.relations.forEach(function(r){
-    var meta=REL_META[r.relation_type];
-    var a=r.from_member_id, b=r.to_member_id;
-    var isSpouse=meta?meta.isSpouse:(r.relation_type==='spouse'||r.relation_type==='in_law');
-    var isParentType=meta?(meta.isParent||meta.isChild):(r.relation_type==='parent'||r.relation_type==='step'||r.relation_type==='adopted');
-    if(isSpouse){spousePairs2[a]=b;spousePairs2[b]=a;return;}
-    if(isParentType){
-      if(!layout[a]||!layout[b])return;
-      var par,chi;
-      if(meta){
-        if(meta.isParent){par=b;chi=a;}  // to_member_id is the parent
-        else             {par=a;chi=b;}  // from_member_id is the parent
-      } else {
-        par=layout[a].y<=layout[b].y?a:b;chi=par===a?b:a;
-      }
-      var bio=meta?meta.bio!==false:r.is_biological!==false;
-      if(!childrenOf2[par])childrenOf2[par]=[];
-      if(!childrenOf2[par].find(function(x){return x.id===chi;}))
-        childrenOf2[par].push({id:chi,bio:bio});
-    }
+    var rt=r.relation_type, a=r.from_member_id, b=r.to_member_id;
+    if(LAYOUT_SPO[rt]){spousePairs2[a]=b;spousePairs2[b]=a;return;}
+    var par,chi,bio=r.is_biological!==false;
+    if(LAYOUT_PAR[rt]){par=b;chi=a;bio=REL_META[rt]?REL_META[rt].bio!==false:bio;}
+    else if(LAYOUT_CHI[rt]){par=a;chi=b;bio=REL_META[rt]?REL_META[rt].bio!==false:bio;}
+    else return; // bunic/strabunic/ext → skip tree lines
+    if(!layout[par]||!layout[chi])return;
+    if(!childrenOf2[par])childrenOf2[par]=[];
+    if(!childrenOf2[par].find(function(x){return x.id===chi;}))
+      childrenOf2[par].push({id:chi,bio:bio});
   });
 
   // Spouse lines
@@ -1076,7 +1084,7 @@ function drawHeuristic(svg,layout){
   for(var i=0;i<gens.length-1;i++){
     var u=gm[gens[i]],l=gm[gens[i+1]];if(!u.length||!l.length)continue;
     var p1=layout[u[0].id],p2=layout[l[0].id];if(!p1||!p2)continue;
-    var x1=p1.x+CARD_W/2,y1=p1.y+76,x2=p2.x+CARD_W/2,y2=p2.y;
+    var x1=p1.x+CARD_W/2,y1=p1.y+110,x2=p2.x+CARD_W/2,y2=p2.y;
     addPath(svg,'M'+x1+' '+y1+' L'+x1+' '+(y1+40)+' L'+x2+' '+(y1+40)+' L'+x2+' '+y2,'#c87050',1.2,'4 3');
   }
 }
@@ -1088,10 +1096,12 @@ function mkSvg(tag){return document.createElementNS('http://www.w3.org/2000/svg'
 function buildNode(m,pos){
   var isOwner=S.sessionUid&&S.family&&S.family.owner_id===S.sessionUid;
   var isLiving=m.is_living||(!m.death_year&&!m.is_deceased);
-  var avSz=pos.gen===0?78:pos.gen>=3?54:68;
+  var _dn=S.members.length;
+  var _base=_dn<=20?68:_dn<=50?58:50;
+  var avSz=pos.gen===0?Math.round(_base*1.15):pos.gen>=2?Math.round(_base*.82):_base;
   var conf=m.confidence!=null?m.confidence:100;
   var wrap=document.createElement('div');
-  wrap.className='pn g'+pos.gen+(m.is_deceased?' dec':'')+(isOwner?' owner':'')+(conf<60?' low-conf':'');
+  wrap.className='pn g'+Math.min(pos.gen,3)+(m.is_deceased?' dec':'')+(isOwner?' owner':'')+(conf<60?' low-conf':'');
   wrap.style.left=pos.x+'px';wrap.style.top=pos.y+'px';
   wrap.setAttribute('data-id',m.id);wrap.setAttribute('tabindex','0');wrap.setAttribute('role','button');
   wrap.setAttribute('aria-label',escH(m.name)+(m.birth_year?', '+m.birth_year:''));
@@ -1131,6 +1141,36 @@ function buildGhost(layout,mxX){
   ag.appendChild(c);ag.appendChild(l);ag.setAttribute('role','button');ag.setAttribute('tabindex','0');
   ag.addEventListener('click',openAddModal);ag.addEventListener('keydown',function(e){if(e.key==='Enter')openAddModal();});
   return ag;
+}
+
+var ROMAN=['I','II','III','IV','V','VI','VII','VIII','IX','X','XI','XII','XIII','XIV','XV'];
+function buildGenLabels(layout,mxX){
+  // Remove old gen-label elements from stage (not canvas)
+  var stage=document.getElementById('treeStage');
+  stage.querySelectorAll('.gen-label').forEach(function(el){el.remove();});
+  // Build per-gen year ranges
+  var genYears={};
+  S.members.forEach(function(m){
+    var g=m.generation!=null?m.generation:0;
+    var y=m.birth_year||m.death_year;
+    if(!y)return;
+    if(!genYears[g])genYears[g]={min:y,max:y};
+    if(y<genYears[g].min)genYears[g].min=y;
+    if(y>genYears[g].max)genYears[g].max=y;
+  });
+  var gens=Object.keys(_genYMap).map(Number).sort(function(a,b){return a-b;});
+  gens.forEach(function(g){
+    var el=document.createElement('div');
+    el.className='gen-label';
+    el.id='gl'+g;
+    var roman=ROMAN[g]||('Gen '+(g+1));
+    var yr=genYears[g];
+    var yrStr=yr?(yr.min===yr.max?yr.min:(yr.min+' – '+yr.max)):'';
+    el.textContent='Gen. '+roman+(yrStr?' · '+yrStr:'');
+    el.style.opacity='0';
+    stage.appendChild(el);
+  });
+  updateGenLabels();
 }
 
 function renderEmpty(cv){
@@ -1698,20 +1738,49 @@ function subscribeRT(){
 
 // ── ZOOM / PAN ────────────────────────────────────────────
 function applyXform(){document.getElementById('treeCanvas').style.transform='translate('+S.panX+'px,'+S.panY+'px) scale('+S.zoom+')';drawMinimap();}
+// Dynamic gen-Y map built after each render — keyed by gen number → Y px in canvas space
+var _genYMap={};
 function updateGenLabels(){
   var stage=document.getElementById('treeStage');
   var sh=stage?stage.clientHeight:660;
-  [0,1,2,3].forEach(function(g){
+  Object.keys(_genYMap).forEach(function(g){
     var el=document.getElementById('gl'+g);
     if(!el)return;
-    var rawTop=Math.round(S.panY+GEN_Y[g]*S.zoom);
-    var visible=rawTop>0&&rawTop<sh-10;
-    el.style.top=rawTop+'px';
+    var canvasY=_genYMap[g];
+    var rawTop=Math.round(S.panY+canvasY*S.zoom);
+    var visible=rawTop>-10&&rawTop<sh+10;
+    el.style.top=Math.max(0,rawTop)+'px';
     el.style.opacity=visible?'0.65':'0';
     el.style.pointerEvents=visible?'':'none';
   });
 }
 function center(){var stage=document.getElementById('treeStage'),cv=document.getElementById('treeCanvas');var sw=stage.clientWidth||800,sh=stage.clientHeight||660;var cw=parseFloat(cv.style.width)||800,ch=parseFloat(cv.style.height)||680;S.panX=Math.max(20,(sw-cw*S.zoom)/2);S.panY=Math.max(10,(sh-ch*S.zoom)/3);applyXform();}
+
+function fitTree(){
+  var stage=document.getElementById('treeStage'),cv=document.getElementById('treeCanvas');
+  var sw=stage.clientWidth||800,sh=stage.clientHeight||660;
+  var cw=parseFloat(cv.style.width)||800,ch=parseFloat(cv.style.height)||680;
+  var zx=sw/cw, zy=sh/ch;
+  S.zoom=Math.max(0.15,Math.min(0.95,Math.min(zx,zy)*0.92));
+  S.panX=(sw-cw*S.zoom)/2;
+  S.panY=Math.max(10,(sh-ch*S.zoom)/2);
+  applyXform();
+}
+
+function navToGen(dir){
+  if(!S.members.length)return;
+  var stage=document.getElementById('treeStage'),cv=document.getElementById('treeCanvas');
+  var sw=stage.clientWidth||800,sh=stage.clientHeight||660;
+  var cw=parseFloat(cv.style.width)||800;
+  // Find min (top/oldest) or max (bottom/youngest) Y across all members
+  var gens=S.members.map(function(m){return m.generation!=null?m.generation:0;});
+  var targetGen=dir==='top'?Math.min.apply(null,gens):Math.max.apply(null,gens);
+  var canvasY=_genYMap[targetGen]!=null?_genYMap[targetGen]:0;
+  S.panX=(sw-cw*S.zoom)/2;
+  if(dir==='top'){S.panY=Math.max(10,-canvasY*S.zoom+60);}
+  else{S.panY=sh-canvasY*S.zoom-180;}
+  applyXform();
+}
 function debounce(fn,ms){var t;return function(){clearTimeout(t);t=setTimeout(fn,ms);};}
 
 function initZoomPan(){

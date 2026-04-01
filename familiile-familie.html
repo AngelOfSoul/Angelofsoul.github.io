@@ -651,7 +651,11 @@ function loadFamilyData() {
         initial: m.initial || (m.name ? m.name[0] : '?'),
         role: m.role || '',
         years: years,
-        deceased: !!m.is_deceased
+        deceased: !!m.is_deceased,
+        birth_year: m.birth_year || null,
+        death_year: m.death_year || null,
+        profession: m.profession || '',
+        location: m.location || ''
       };
     });
 
@@ -713,18 +717,24 @@ function renderMembers() {
     return;
   }
   grid.innerHTML = MEMBERS.map(function(m) {
-    var editBtn = isOwner
-      ? '<a href="genealogie-familie.html?family=' + (FAM ? FAM.id : familyId) + '&edit_member=' + m.id + '" '
-        + 'style="display:inline-block;margin-top:8px;padding:3px 12px;background:var(--s2);border:1px solid var(--b2);color:var(--gold);font-family:\'EB Garamond\',serif;font-size:12px;border-radius:2px;text-decoration:none;transition:border-color 0.15s;" '
-        + 'onmouseover="this.style.borderColor=\'var(--gold)\'" onmouseout="this.style.borderColor=\'var(--b2)\'">'
-        + (currentLang === 'ro' ? '✎ Editeaza' : '✎ Edit') + '</a>'
+    var SYS_ROLES = ['parent','grandparent','child','sibling','spouse','step','other','member','in_law'];
+    var showRole = m.role && SYS_ROLES.indexOf(m.role.toLowerCase()) === -1 ? m.role : '';
+    var ownerBtns = isOwner
+      ? '<div style="display:flex;gap:5px;justify-content:center;margin-top:8px;">'
+        + '<button onclick="openMemberEdit(\'' + escH(m.id) + '\')" '
+        + 'style="padding:3px 10px;background:var(--s2);border:1px solid var(--b2);color:var(--gold);font-family:\'EB Garamond\',serif;font-size:12px;border-radius:2px;cursor:pointer;transition:border-color 0.15s;" '
+        + 'onmouseover="this.style.borderColor=\'var(--gold)\'" onmouseout="this.style.borderColor=\'var(--b2)\'">✎ Editeaza</button>'
+        + '<button onclick="openMemberDel(\'' + escH(m.id) + '\')" '
+        + 'style="padding:3px 10px;background:#1a0808;border:1px solid #6a2020;color:#c04040;font-family:\'EB Garamond\',serif;font-size:12px;border-radius:2px;cursor:pointer;transition:border-color 0.15s;" '
+        + 'onmouseover="this.style.borderColor=\'#c04040\'" onmouseout="this.style.borderColor=\'#6a2020\'">✕ Sterge</button>'
+        + '</div>'
       : '';
     return '<div class="member-card' + (m.deceased ? ' deceased' : '') + '">'
       + '<div class="mem-avatar">' + escH(m.initial) + '</div>'
       + '<div class="mem-name">' + escH(m.name) + '</div>'
-      + '<div class="mem-role">' + escH(m.role) + '</div>'
+      + (showRole ? '<div class="mem-role">' + escH(showRole) + '</div>' : '')
       + '<div class="mem-years">' + escH(m.years) + '</div>'
-      + editBtn
+      + ownerBtns
       + '</div>';
   }).join('');
 }
@@ -916,6 +926,158 @@ if (ham && mobileMenu) {
     ham.textContent = mobileMenu.classList.contains('open') ? '✕' : '☰';
   });
 }
+</script>
+
+<!-- ── MEMBER EDIT MODAL ── -->
+<div id="memEditOverlay" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,.72);z-index:9000;align-items:center;justify-content:center;">
+  <div style="background:#111;border:1px solid #b08030;border-radius:3px;width:100%;max-width:420px;margin:16px;max-height:90vh;overflow-y:auto;">
+    <div style="background:#0a0a0a;border-bottom:1px solid #2a2a2a;padding:14px 18px;display:flex;align-items:center;justify-content:space-between;">
+      <span id="memEditTitle" style="font-family:'Playfair Display',serif;font-size:15px;color:#d4a84a;"></span>
+      <button onclick="closeMemberEdit()" style="background:none;border:none;color:#a09070;font-size:22px;cursor:pointer;line-height:1;">&times;</button>
+    </div>
+    <div style="padding:18px 20px;">
+      <div style="margin-bottom:12px;">
+        <label style="display:block;font-size:11px;letter-spacing:1px;color:#a09070;margin-bottom:4px;">NUME</label>
+        <input id="me-name" style="width:100%;background:#161616;border:1px solid #383838;color:#f0e8d0;padding:7px 10px;font-family:'EB Garamond',serif;font-size:14px;border-radius:2px;outline:none;" />
+      </div>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:12px;">
+        <div>
+          <label style="display:block;font-size:11px;letter-spacing:1px;color:#a09070;margin-bottom:4px;">AN NASTERE</label>
+          <input id="me-birth" type="number" style="width:100%;background:#161616;border:1px solid #383838;color:#f0e8d0;padding:7px 10px;font-family:'EB Garamond',serif;font-size:14px;border-radius:2px;outline:none;" />
+        </div>
+        <div>
+          <label style="display:block;font-size:11px;letter-spacing:1px;color:#a09070;margin-bottom:4px;">AN DECES</label>
+          <input id="me-death" type="number" style="width:100%;background:#161616;border:1px solid #383838;color:#f0e8d0;padding:7px 10px;font-family:'EB Garamond',serif;font-size:14px;border-radius:2px;outline:none;" />
+        </div>
+      </div>
+      <div style="margin-bottom:12px;">
+        <label style="display:block;font-size:11px;letter-spacing:1px;color:#a09070;margin-bottom:4px;">PROFESIE</label>
+        <input id="me-prof" style="width:100%;background:#161616;border:1px solid #383838;color:#f0e8d0;padding:7px 10px;font-family:'EB Garamond',serif;font-size:14px;border-radius:2px;outline:none;" />
+      </div>
+      <div style="margin-bottom:16px;">
+        <label style="display:block;font-size:11px;letter-spacing:1px;color:#a09070;margin-bottom:4px;">LOCALITATE</label>
+        <input id="me-loc" style="width:100%;background:#161616;border:1px solid #383838;color:#f0e8d0;padding:7px 10px;font-family:'EB Garamond',serif;font-size:14px;border-radius:2px;outline:none;" />
+      </div>
+      <div id="me-msg" style="display:none;padding:8px 10px;border-radius:2px;font-size:13px;margin-bottom:12px;"></div>
+      <div style="display:flex;gap:8px;justify-content:flex-end;">
+        <button id="me-save" onclick="saveMemberEdit()" style="padding:7px 20px;background:#b08030;border:1px solid #d4a84a;color:#050505;font-family:'Playfair Display',serif;font-size:13px;font-weight:700;letter-spacing:1px;cursor:pointer;border-radius:2px;">Salveaza</button>
+        <button onclick="closeMemberEdit()" style="padding:7px 16px;background:transparent;border:1px solid #383838;color:#a09070;font-family:'EB Garamond',serif;font-size:13px;cursor:pointer;border-radius:2px;">Anuleaza</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ── MEMBER DELETE CONFIRM MODAL ── -->
+<div id="memDelOverlay" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,.72);z-index:9100;align-items:center;justify-content:center;">
+  <div style="background:#111;border:1px solid #6a2020;border-radius:3px;width:100%;max-width:360px;margin:16px;">
+    <div style="background:#0a0a0a;border-bottom:1px solid #3a1010;padding:14px 18px;display:flex;align-items:center;justify-content:space-between;">
+      <span style="font-family:'Playfair Display',serif;font-size:15px;color:#c04040;">Sterge membru</span>
+      <button onclick="closeMemberDel()" style="background:none;border:none;color:#a09070;font-size:22px;cursor:pointer;line-height:1;">&times;</button>
+    </div>
+    <div style="padding:18px 20px;">
+      <p id="me-del-text" style="font-family:'EB Garamond',serif;font-size:14px;color:#f0e8d0;margin-bottom:14px;line-height:1.6;"></p>
+      <p style="font-size:12px;color:#a09070;margin-bottom:14px;">Aceasta actiune este permanenta si va sterge si toate relatiile acestui membru.</p>
+      <div id="me-del-msg" style="display:none;padding:8px 10px;border-radius:2px;font-size:13px;margin-bottom:12px;"></div>
+      <div style="display:flex;gap:8px;justify-content:flex-end;">
+        <button id="me-del-confirm" onclick="execMemberDel()" style="padding:7px 18px;background:#3a0808;border:1px solid #c04040;color:#e08080;font-family:'Playfair Display',serif;font-size:13px;font-weight:700;letter-spacing:1px;cursor:pointer;border-radius:2px;">Sterge definitiv</button>
+        <button onclick="closeMemberDel()" style="padding:7px 16px;background:transparent;border:1px solid #383838;color:#a09070;font-family:'EB Garamond',serif;font-size:13px;cursor:pointer;border-radius:2px;">Anuleaza</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+var _memEditId = null;
+var _memDelId = null;
+
+function openMemberEdit(id) {
+  var m = MEMBERS.find(function(x){ return x.id === id; });
+  if (!m) return;
+  _memEditId = id;
+  document.getElementById('memEditTitle').textContent = 'Editeaza: ' + m.name;
+  document.getElementById('me-name').value = m.name || '';
+  document.getElementById('me-birth').value = m.birth_year || '';
+  document.getElementById('me-death').value = m.death_year || '';
+  document.getElementById('me-prof').value = m.profession || '';
+  document.getElementById('me-loc').value = m.location || '';
+  var msg = document.getElementById('me-msg'); msg.style.display='none'; msg.textContent='';
+  document.getElementById('memEditOverlay').style.display = 'flex';
+  document.body.style.overflow = 'hidden';
+}
+
+function closeMemberEdit() {
+  document.getElementById('memEditOverlay').style.display = 'none';
+  document.body.style.overflow = '';
+  _memEditId = null;
+}
+
+function saveMemberEdit() {
+  if (!_memEditId || !window.supabase) return;
+  var btn = document.getElementById('me-save');
+  var msg = document.getElementById('me-msg');
+  var name = document.getElementById('me-name').value.trim();
+  if (!name) { msg.style.cssText='display:block;background:#2a0808;border:1px solid #6a2020;color:#e08080;'; msg.textContent='Numele este obligatoriu.'; return; }
+  btn.disabled = true; btn.textContent = 'Se salveaza...';
+  var updates = {
+    name: name,
+    birth_year: document.getElementById('me-birth').value ? parseInt(document.getElementById('me-birth').value) : null,
+    death_year: document.getElementById('me-death').value ? parseInt(document.getElementById('me-death').value) : null,
+    profession: document.getElementById('me-prof').value.trim() || null,
+    location: document.getElementById('me-loc').value.trim() || null
+  };
+  window.supabase.from('members').update(updates).eq('id', _memEditId).then(function(r) {
+    btn.disabled = false; btn.textContent = 'Salveaza';
+    if (r.error) { msg.style.cssText='display:block;background:#2a0808;border:1px solid #6a2020;color:#e08080;'; msg.textContent=r.error.message; return; }
+    // Update local MEMBERS array
+    MEMBERS = MEMBERS.map(function(m) {
+      if (m.id !== _memEditId) return m;
+      var by = updates.birth_year, dy = updates.death_year;
+      var years = (by?String(by):'') + (dy?' — '+dy:(by?' —':''));
+      return Object.assign({}, m, updates, {years: years, birth_year: by, death_year: dy});
+    });
+    closeMemberEdit();
+    renderMembers();
+  }).catch(function(e) { btn.disabled=false; btn.textContent='Salveaza'; msg.style.cssText='display:block;background:#2a0808;border:1px solid #6a2020;color:#e08080;'; msg.textContent=e.message; });
+}
+
+function openMemberDel(id) {
+  var m = MEMBERS.find(function(x){ return x.id === id; });
+  if (!m) return;
+  _memDelId = id;
+  document.getElementById('me-del-text').textContent = 'Esti sigur ca vrei sa stergi pe ' + m.name + '?';
+  var msg = document.getElementById('me-del-msg'); msg.style.display='none';
+  document.getElementById('memDelOverlay').style.display = 'flex';
+  document.body.style.overflow = 'hidden';
+}
+
+function closeMemberDel() {
+  document.getElementById('memDelOverlay').style.display = 'none';
+  document.body.style.overflow = '';
+  _memDelId = null;
+}
+
+function execMemberDel() {
+  if (!_memDelId || !window.supabase) return;
+  var btn = document.getElementById('me-del-confirm');
+  var msg = document.getElementById('me-del-msg');
+  btn.disabled = true; btn.textContent = 'Se sterge...';
+  window.supabase.from('members').delete().eq('id', _memDelId).then(function(r) {
+    btn.disabled = false; btn.textContent = 'Sterge definitiv';
+    if (r.error) { msg.style.cssText='display:block;background:#2a0808;border:1px solid #6a2020;color:#e08080;'; msg.textContent=r.error.message; msg.style.display='block'; return; }
+    MEMBERS = MEMBERS.filter(function(m){ return m.id !== _memDelId; });
+    closeMemberDel();
+    renderMembers();
+  }).catch(function(e) { btn.disabled=false; btn.textContent='Sterge definitiv'; msg.style.cssText='display:block;background:#2a0808;border:1px solid #6a2020;color:#e08080;'; msg.style.display='block'; msg.textContent=e.message; });
+}
+
+document.addEventListener('keydown', function(e) {
+  if (e.key === 'Escape') {
+    if (document.getElementById('memDelOverlay').style.display === 'flex') closeMemberDel();
+    else if (document.getElementById('memEditOverlay').style.display === 'flex') closeMemberEdit();
+  }
+});
+document.getElementById('memEditOverlay').addEventListener('click', function(e){ if(e.target===this) closeMemberEdit(); });
+document.getElementById('memDelOverlay').addEventListener('click', function(e){ if(e.target===this) closeMemberDel(); });
 </script>
 
 <!-- Load Supabase client -->
