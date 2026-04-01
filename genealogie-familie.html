@@ -652,9 +652,16 @@ document.addEventListener('DOMContentLoaded',function(){
     if(!toAdd.length){closeInferModal();return;}
     var btn=this;btn.disabled=true;btn.textContent=t('Se salveaza...','Saving...');
     var rows=toAdd.map(function(p){return{from_member_id:p.from,to_member_id:p.to,relation_type:p.type,is_biological:p.bio,confidence:100};});
-    window.supabase.from('member_relations').insert(rows).then(function(r){
+    var capturedEditing=S.editingId;
+    window.supabase.from('member_relations').insert(rows).select().then(function(r){
       btn.disabled=false;btn.textContent=t('Adauga selectate','Add selected');
-      closeInferModal();reload();
+      if(r.error){return;}
+      // Add new relations to memory immediately
+      var inserted=r.data&&r.data.length?r.data:rows.map(function(row,i){return Object.assign({id:'tmp_inf_'+Date.now()+'_'+i},row);});
+      inserted.forEach(function(rel){S.relations.push(rel);});
+      closeInferModal();
+      render();
+      if(capturedEditing){openEditor(capturedEditing);switchTab(1);}
     }).catch(function(e){btn.disabled=false;btn.textContent=t('Adauga selectate','Add selected');});
   });
 });
@@ -1097,7 +1104,9 @@ function buildNode(m,pos){
   wrap.appendChild(av);
   var nl=document.createElement('div');nl.className='nl';
   var yrs='';if(m.birth_year)yrs+=m.birth_year;if(m.birth_year||m.death_year)yrs+=' \u2014 ';if(m.death_year)yrs+=m.death_year;else if(!isLiving&&m.birth_year)yrs+='';else if(m.birth_year)yrs+=t('viu','living');
-  nl.innerHTML='<span class="nn">'+escH(m.name)+'</span>'+(yrs?'<span class="ny">'+escH(yrs)+'</span>':'')+(m.profession?'<span class="np">'+escH(m.profession)+'</span>':'');
+  var SYS_ROLES=['parent','grandparent','child','sibling','spouse','step','other','member','in_law'];
+  var showProf=m.profession&&SYS_ROLES.indexOf(m.profession.toLowerCase())===-1;
+  nl.innerHTML='<span class="nn">'+escH(m.name)+'</span>'+(yrs?'<span class="ny">'+escH(yrs)+'</span>':'')+(showProf?'<span class="np">'+escH(m.profession)+'</span>':'');
   wrap.appendChild(nl);
   if(isOwner){var es=document.createElement('div');es.className='es';var ee=document.createElement('button');ee.className='eb eb-edit';ee.textContent=t('\u270E Editeaza','\u270E Edit');var ed=document.createElement('button');ed.className='eb eb-del';ed.textContent=t('\u2715 Sterge','\u2715 Delete');ee.addEventListener('click',function(e){e.stopPropagation();openEditor(m.id);});ed.addEventListener('click',function(e){e.stopPropagation();openDelFlow(m.id);});es.appendChild(ee);es.appendChild(ed);wrap.appendChild(es);}
   wrap.addEventListener('click',function(e){e.stopPropagation();openDetail(m.id);});
@@ -1154,7 +1163,8 @@ function startTT(m,cardEl){
     var yrs='';if(m.birth_year)yrs+=m.birth_year;if(m.birth_year||m.death_year)yrs+=' \u2014 ';if(m.death_year)yrs+=m.death_year;else if(m.birth_year)yrs+=t('viu','living');
     document.getElementById('ht-yrs').textContent=yrs;
     var rows='';
-    if(m.profession||m.role)rows+='<div class="ht-row"><span class="ht-l">'+escH(t('Profesie','Profession'))+'</span><span class="ht-v">'+escH(m.profession||m.role)+'</span></div>';
+    var _htProf=m.profession&&['parent','grandparent','child','sibling','spouse','step','other','member','in_law'].indexOf(m.profession.toLowerCase())===-1?m.profession:null;
+    if(_htProf)rows+='<div class="ht-row"><span class="ht-l">'+escH(t('Profesie','Profession'))+'</span><span class="ht-v">'+escH(_htProf)+'</span></div>';
     if(m.location)rows+='<div class="ht-row"><span class="ht-l">'+escH(t('Localitate','Location'))+'</span><span class="ht-v">'+escH(m.location)+'</span></div>';
     var c=m.confidence!=null?m.confidence:100;if(c<100)rows+='<div class="ht-row"><span class="ht-l">'+escH(t('Certitudine','Confidence'))+'</span><span class="ht-v">'+c+'%</span></div>';
     document.getElementById('ht-rows').innerHTML=rows;
@@ -1181,7 +1191,8 @@ function openDetail(id){
   document.getElementById('dpYears').textContent=yrs;
   document.getElementById('dp-birth').textContent=m.birth_year?String(m.birth_year):'\u2014';
   document.getElementById('dp-death').textContent=m.is_deceased?(m.death_year?String(m.death_year):t('Decedat','Deceased')):t('In viata','Living');
-  document.getElementById('dp-prof').textContent=m.profession||m.role||'\u2014';
+  var _dpProf=m.profession&&['parent','grandparent','child','sibling','spouse','step','other','member','in_law'].indexOf(m.profession.toLowerCase())===-1?m.profession:null;
+  document.getElementById('dp-prof').textContent=_dpProf||'\u2014';
   document.getElementById('dp-loc').textContent=m.location||(S.family?S.family.village:'')||'\u2014';
   var bdg='';
   if(m.location)bdg+='<span class="dba dba-loc">'+escH(m.location)+'</span>';
@@ -1232,7 +1243,7 @@ function openEditor(id){
   var flds=['ef-name','ef-birth','ef-death','ef-loc','ef-prof','ef-bio','ef-story'];
   var vals={
     'ef-name':m.name||'','ef-birth':m.birth_year||'','ef-death':m.death_year||'',
-    'ef-loc':m.location||'','ef-prof':m.profession||m.role||'',
+    'ef-loc':m.location||'','ef-prof':m.profession||'',
     'ef-bio':m.biography||m.bio||'','ef-story':m.story||''
   };
   flds.forEach(function(fid){var el=document.getElementById(fid);if(!el)return;el.value=vals[fid];S.origVals[fid]=vals[fid];el.classList.remove('changed');});
@@ -1382,7 +1393,9 @@ function renderRelList(id){
     var o=S.members.find(function(x){return x.id===oid;});if(!o)return;
     var item=document.createElement('div');item.className='rel-item';
     var rav=document.createElement('div');rav.className='rel-av';rav.textContent=(o.initial||o.name.charAt(0)).toUpperCase();
-    var info=document.createElement('div');info.style.flex='1';info.innerHTML='<div class="rel-name">'+escH(o.name)+'</div><span class="rel-type-lbl">'+escH(relLabel(r.relation_type,r.from_member_id,r.to_member_id))+'</span>';
+    var RLBK={spouse:t('Sot/Sotie','Spouse'),parent:t('Parinte','Parent'),sibling:t('Frate/Sora','Sibling'),child:t('Fiu/Fiica','Child'),in_law:t('Fin/Nasa','In-law')};
+    var rtl=r.from_member_id===id?(REL_META[r.relation_type]?REL_META[r.relation_type].l:(RLBK[r.relation_type]||r.relation_type)):(REL_INVERSE[r.relation_type]||RLBK[r.relation_type]||r.relation_type);
+    var info=document.createElement('div');info.style.flex='1';info.innerHTML='<div class="rel-name">'+escH(o.name)+'</div><span class="rel-type-lbl">'+escH(rtl)+'</span>';
     var btns=document.createElement('div');btns.style.cssText='display:flex;gap:5px;flex-shrink:0;';
     var ed=document.createElement('button');ed.className='rel-btn';ed.style.cssText='border-color:var(--gold-d);color:var(--gold);';ed.textContent=t('Schimba','Change');
     ed.addEventListener('click',function(){openEditModal(r.id,oid,r.relation_type);});
@@ -1397,10 +1410,10 @@ function removeRel(relId,item){
   showConfirm(t('Stergi aceasta legatura? Persoana ramane in arbore.','Remove this connection? The person stays in the tree.'),function(){doRemoveRel(relId,item);});return;}
 function doRemoveRel(relId,item){
   window.supabase.from('member_relations').delete().eq('id',relId).then(function(r){
-    if(r.error){alert(r.error.message);return;}
+    if(r.error){showMsg('ef-msg','error',r.error.message);return;}
     S.relations=S.relations.filter(function(x){return x.id!==relId;});
     item.style.opacity='.3';setTimeout(function(){item.remove();},300);render();
-  }).catch(function(err){alert(err.message);});
+  }).catch(function(err){showMsg('ef-msg','error',err.message);});
 }
 
 // ── RELATION MODAL ──────────────────────────────────────────
@@ -1461,7 +1474,7 @@ function doRemoveRel(relId,item){
       if(m.id===preselectPersonId)opt.selected=true;
       sel.appendChild(opt);
     });
-    sel.addEventListener('change',updatePreview);
+    sel.onchange=updatePreview;
 
     var aav=document.getElementById('rmAnchorAv');if(aav)aav.textContent=(anchor.initial||anchor.name.charAt(0)).toUpperCase();
     var anm=document.getElementById('rmAnchorName');if(anm)anm.textContent=anchor.name;
