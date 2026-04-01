@@ -275,10 +275,6 @@
           <button class="ma-save" id="ef-save-btn" data-ro="Salveaza modificarile" data-en="Save changes">Salveaza modificarile</button>
           <button class="ma-cancel" id="ef-discard-btn" data-ro="Renunta la modificari" data-en="Discard changes">Renunta</button>
         </div>
-        <div id="delSection" style="display:none;margin-top:14px;"><div style="border-top:1px solid #3a1a1a;padding-top:12px;"><button class="tree-btn" id="showDelBtn" style="border-color:var(--red-br);color:var(--red);background:var(--red-bg);font-size:11px;" data-ro="Sterge aceasta persoana" data-en="Delete this person">Sterge aceasta persoana</button></div>
-        <div class="del-confirm" id="delConfirm" style="display:none;"><div class="del-title" data-ro="Confirma stergerea" data-en="Confirm deletion">Confirma stergerea</div><div class="del-body" data-ro="Aceasta actiune poate fi anulata in 30 de zile din Istoricul modificarilor." data-en="This action can be undone within 30 days from the Change History.">Aceasta actiune poate fi anulata in 30 de zile din Istoricul modificarilor.</div><div class="del-affects" id="delAffects"></div>
-        <div class="fi-wrap"><label class="fi-label" data-ro="Scrie numele persoanei pentru confirmare" data-en="Type the person's name to confirm">Scrie numele persoanei pentru confirmare</label><input class="fi-input" id="delConfirmInput" type="text" placeholder=""/></div>
-        <div style="display:flex;gap:8px;"><button class="ma-save" id="delExecuteBtn" style="background:var(--red-bg);border-color:var(--red-br);color:var(--red);" disabled data-ro="Sterge definitiv" data-en="Delete permanently">Sterge definitiv</button><button class="ma-cancel" id="delCancelBtn" data-ro="Anuleaza" data-en="Cancel">Anuleaza</button></div></div></div>
       </div>
       <!-- TAB 1: RELATII -->
       <div class="mt-body" id="mtb1">
@@ -319,6 +315,60 @@
       <div class="mt-body" id="mtb4">
         <div style="font-size:12px;color:var(--muted);margin-bottom:10px;" data-ro="Toate modificarile acestei persoane." data-en="All changes to this person.">Toate modificarile acestei persoane.</div>
         <div id="histList"></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- INFERENCE DIALOG -->
+<div class="modal-overlay" id="inferModal" role="dialog" aria-modal="true">
+  <div class="modal-box" style="max-width:420px;">
+    <div class="modal-top"></div>
+    <div class="modal-body">
+      <div style="display:flex;align-items:center;gap:10px;margin-bottom:12px;padding-bottom:10px;border-bottom:1px solid #2a2010;">
+        <div style="font-family:'Playfair Display',serif;font-size:15px;color:var(--gold);flex:1;">&#128161; Relatii implicite detectate</div>
+        <button onclick="closeInferModal()" style="background:none;border:none;color:var(--muted);font-size:22px;cursor:pointer;line-height:1;">&times;</button>
+      </div>
+      <div style="font-size:12px;color:var(--muted);margin-bottom:12px;line-height:1.6;" data-ro="Bazat pe legaturile existente, am detectat relatii care pot fi adaugate automat. Bifeaza pe cele pe care vrei sa le salvezi." data-en="Based on existing links, these relations can be added automatically. Check the ones you want to save.">Bazat pe legaturile existente, am detectat relatii care pot fi adaugate automat. Bifeaza pe cele pe care vrei sa le salvezi.</div>
+      <div id="inferList"></div>
+      <div class="modal-acts" style="margin-top:14px;">
+        <button class="ma-save" id="inferAddBtn">Adauga selectate</button>
+        <button class="ma-cancel" id="inferSkipBtn">Ignora</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- CONFIRM DIALOG -->
+<div class="modal-overlay" id="confirmModal" role="dialog" aria-modal="true">
+  <div class="modal-box" style="max-width:340px;">
+    <div class="modal-top"></div>
+    <div class="modal-body" style="padding:20px 22px 18px;">
+      <div id="confirmMsg" style="font-family:'EB Garamond',serif;font-size:15px;color:var(--text);line-height:1.55;margin-bottom:18px;"></div>
+      <div style="display:flex;gap:10px;justify-content:flex-end;">
+        <button id="confirmCancelBtn" style="padding:7px 20px;background:none;border:1px solid var(--b2);color:var(--muted);font-family:'EB Garamond',serif;font-size:13px;border-radius:2px;cursor:pointer;transition:all .15s;">Anuleaza</button>
+        <button id="confirmOkBtn" style="padding:7px 20px;background:var(--red-bg);border:1px solid var(--red-br);color:var(--red);font-family:'EB Garamond',serif;font-size:13px;font-weight:700;border-radius:2px;cursor:pointer;transition:all .15s;">OK</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- DELETE PERSON MODAL -->
+<div class="modal-overlay" id="deleteModal" role="dialog" aria-modal="true">
+  <div class="modal-box" style="max-width:400px;">
+    <div class="modal-top"></div>
+    <div class="modal-body">
+      <div style="display:flex;align-items:center;gap:10px;margin-bottom:16px;padding-bottom:10px;border-bottom:1px solid #3a1a1a;">
+        <div style="font-family:'Playfair Display',serif;font-size:16px;color:var(--red);flex:1;" data-ro="Sterge persoana" data-en="Delete person">Sterge persoana</div>
+        <button onclick="closeDeleteModal()" style="background:none;border:none;color:var(--muted);font-size:22px;cursor:pointer;line-height:1;padding:0 0 0 8px;" title="Inchide">&times;</button>
+      </div>
+      <div style="font-size:13px;color:var(--muted);margin-bottom:10px;" data-ro="Aceasta actiune poate fi anulata in 30 de zile din Istoricul modificarilor." data-en="This action can be undone within 30 days from the Change History.">Aceasta actiune poate fi anulata in 30 de zile din Istoricul modificarilor.</div>
+      <div class="del-affects" id="delAffects" style="font-size:12px;color:var(--muted);margin-bottom:12px;"></div>
+      <div class="fi-wrap"><label class="fi-label" data-ro="Scrie numele persoanei pentru confirmare" data-en="Type the person's name to confirm">Scrie numele persoanei pentru confirmare</label><input class="fi-input" id="delConfirmInput" type="text" placeholder=""/></div>
+      <div id="del-msg" class="m-msg"></div>
+      <div class="modal-acts">
+        <button class="ma-save" id="delExecuteBtn" style="background:var(--red-bg);border-color:var(--red-br);color:var(--red);" disabled data-ro="Sterge definitiv" data-en="Delete permanently">Sterge definitiv</button>
+        <button class="ma-cancel" id="delCancelBtn" data-ro="Anuleaza" data-en="Cancel">Anuleaza</button>
       </div>
     </div>
   </div>
@@ -513,6 +563,101 @@
 function lang(){return localStorage.getItem('calnic-lang')||'ro';}
 function t(ro,en){return lang()==='en'?en:ro;}
 function showMsg(id,type,txt){var e=document.getElementById(id);if(!e)return;e.className='m-msg '+type;e.textContent=txt;e.style.display='block';setTimeout(function(){e.style.display='none';},5000);}
+var _confirmCb=null;
+function showConfirm(msg,onOk){
+  _confirmCb=onOk;
+  document.getElementById('confirmMsg').textContent=msg;
+  document.getElementById('confirmModal').classList.add('open');
+}
+function _closeConfirm(ok){
+  document.getElementById('confirmModal').classList.remove('open');
+  var cb=_confirmCb;_confirmCb=null;
+  if(ok&&cb)cb();
+}
+document.addEventListener('DOMContentLoaded',function(){
+  document.getElementById('confirmOkBtn').addEventListener('click',function(){_closeConfirm(true);});
+  document.getElementById('confirmCancelBtn').addEventListener('click',function(){_closeConfirm(false);});
+  document.getElementById('confirmModal').addEventListener('click',function(e){if(e.target===this)_closeConfirm(false);});
+});
+
+// ── RELATION INFERENCE ──────────────────────────────────
+var _inferProposals=[];
+function _relHasBetween(idA,idB){return S.relations.some(function(r){return(r.from_member_id===idA&&r.to_member_id===idB)||(r.from_member_id===idB&&r.to_member_id===idA);});}
+function _parentChildExists(childId,parentId){
+  var PT=['tata','mama','step','adopted'],CT=['fiu','fiica'];
+  return S.relations.some(function(r){
+    return(r.from_member_id===childId&&r.to_member_id===parentId&&PT.indexOf(r.relation_type)!==-1)||
+           (r.from_member_id===parentId&&r.to_member_id===childId&&CT.indexOf(r.relation_type)!==-1);
+  });
+}
+function _getSpousesOf(memberId){
+  var res=[];
+  S.relations.forEach(function(r){
+    if(r.relation_type!=='sot'&&r.relation_type!=='sotie')return;
+    var spId,pType;
+    if(r.from_member_id===memberId){spId=r.to_member_id;pType=r.relation_type==='sot'?'tata':'mama';}
+    else if(r.to_member_id===memberId){spId=r.from_member_id;pType=r.relation_type==='sot'?'mama':'tata';}
+    if(spId)res.push({memberId:spId,parentType:pType});
+  });
+  return res;
+}
+function _getParentsOf(memberId){
+  var PT=['tata','mama','step','adopted'],CT=['fiu','fiica'],res=[];
+  S.relations.forEach(function(r){
+    if(r.from_member_id===memberId&&PT.indexOf(r.relation_type)!==-1)res.push({memberId:r.to_member_id,relType:r.relation_type});
+    else if(r.to_member_id===memberId&&CT.indexOf(r.relation_type)!==-1)res.push({memberId:r.from_member_id,relType:null});
+  });
+  return res;
+}
+function inferRelations(fromId,toId,relType){
+  var BIO=['tata','mama','fiu','fiica'];
+  if(BIO.indexOf(relType)===-1)return;
+  var parentId,childId;
+  if(relType==='tata'||relType==='mama'){parentId=toId;childId=fromId;}
+  else{parentId=fromId;childId=toId;}
+  var proposals=[];
+  _getSpousesOf(parentId).forEach(function(sp){
+    if(!_parentChildExists(childId,sp.memberId)){
+      var sm=S.members.find(function(m){return m.id===sp.memberId;});
+      var cm=S.members.find(function(m){return m.id===childId;});
+      if(sm&&cm){var lbl=REL_META[sp.parentType]?REL_META[sp.parentType].l:sp.parentType;proposals.push({from:childId,to:sp.memberId,type:sp.parentType,bio:true,text:sm.name+' este '+lbl+' lui '+cm.name});}
+    }
+  });
+  _getParentsOf(parentId).forEach(function(gp){
+    if(!_parentChildExists(childId,gp.memberId)){
+      var gpType=gp.relType==='mama'?'bunica':'bunic';
+      var gm=S.members.find(function(m){return m.id===gp.memberId;});
+      var cm=S.members.find(function(m){return m.id===childId;});
+      if(gm&&cm){var lbl=REL_META[gpType]?REL_META[gpType].l:gpType;proposals.push({from:childId,to:gp.memberId,type:gpType,bio:true,text:gm.name+' este '+lbl+' lui '+cm.name});}
+    }
+  });
+  if(!proposals.length)return;
+  _inferProposals=proposals;
+  var list=document.getElementById('inferList');list.innerHTML='';
+  proposals.forEach(function(p,i){
+    var row=document.createElement('label');
+    row.style.cssText='display:flex;align-items:center;gap:10px;padding:9px 12px;background:var(--s1);border:1px solid var(--b1);border-radius:3px;margin-bottom:7px;cursor:pointer;font-family:"EB Garamond",serif;font-size:14px;color:var(--text);line-height:1.4;';
+    var cb=document.createElement('input');cb.type='checkbox';cb.checked=true;cb.dataset.idx=i;cb.style.cssText='accent-color:var(--gold-d);width:15px;height:15px;flex-shrink:0;cursor:pointer;';
+    row.appendChild(cb);row.appendChild(document.createTextNode(p.text));list.appendChild(row);
+  });
+  document.getElementById('inferModal').classList.add('open');
+}
+function closeInferModal(){document.getElementById('inferModal').classList.remove('open');_inferProposals=[];}
+document.addEventListener('DOMContentLoaded',function(){
+  document.getElementById('inferSkipBtn').addEventListener('click',closeInferModal);
+  document.getElementById('inferModal').addEventListener('click',function(e){if(e.target===this)closeInferModal();});
+  document.getElementById('inferAddBtn').addEventListener('click',function(){
+    var checks=document.querySelectorAll('#inferList input[type=checkbox]');
+    var toAdd=[];checks.forEach(function(cb){if(cb.checked)toAdd.push(_inferProposals[parseInt(cb.dataset.idx)]);});
+    if(!toAdd.length){closeInferModal();return;}
+    var btn=this;btn.disabled=true;btn.textContent=t('Se salveaza...','Saving...');
+    var rows=toAdd.map(function(p){return{from_member_id:p.from,to_member_id:p.to,relation_type:p.type,is_biological:p.bio,confidence:100};});
+    window.supabase.from('member_relations').insert(rows).then(function(r){
+      btn.disabled=false;btn.textContent=t('Adauga selectate','Add selected');
+      closeInferModal();reload();
+    }).catch(function(e){btn.disabled=false;btn.textContent=t('Adauga selectate','Add selected');});
+  });
+});
 
 // ── STATE ────────────────────────────────────────────────
 var S={familyId:null,family:null,members:[],relations:[],sessionUid:null,zoom:.88,panX:0,panY:0,panning:false,lastMouse:{x:0,y:0},selectedId:null,editingId:null,addVis:'public',editVis:'public',ttTimer:null,reqId:0,undoTimer:null,resizeObs:null,realtimeCh:null,origVals:{}};
@@ -1099,8 +1244,6 @@ function openEditor(id){
   var pp=document.getElementById('photoPreviewCircle');pp.innerHTML='';
   if(m.photo_url){var img=document.createElement('img');img.src=m.photo_url;img.alt=escH(m.name);img.style.cssText='width:100%;height:100%;object-fit:cover;border-radius:50%;';pp.appendChild(img);}
   else{pp.textContent=(m.initial||(m.name?m.name.charAt(0):'?')).toUpperCase();}
-  var isOwner=S.sessionUid&&S.family&&S.family.owner_id===S.sessionUid;
-  document.getElementById('delSection').style.display=isOwner?'':'none';
   checkConflicts(m);
   switchTab(0);
   document.getElementById('editorOverlay').classList.add('open');document.body.style.overflow='hidden';
@@ -1219,12 +1362,13 @@ document.getElementById('photoSaveBtn').addEventListener('click',function(){
 
 document.getElementById('photoDeleteBtn').addEventListener('click',function(){
   var id=S.editingId;if(!id)return;
-  if(!confirm(t('Stergi poza acestei persoane?','Delete this person\'s photo?')))return;
+  showConfirm(t('Stergi poza acestei persoane?','Delete this person\'s photo?'),function(){
   window.supabase.from('members').update({photo_url:null}).eq('id',id).then(function(r){
     if(r.error){showMsg('ef-msg-photo','error',r.error.message);return;}
     S.members=S.members.map(function(m){return m.id===id?Object.assign({},m,{photo_url:null}):m;});
     var pp=document.getElementById('photoPreviewCircle');pp.innerHTML='';var m=S.members.find(function(x){return x.id===id;});if(m)pp.textContent=(m.initial||(m.name?m.name.charAt(0):'?')).toUpperCase();
     showMsg('ef-msg-photo','success',t('Poza stearsa.','Photo deleted.'));render();
+  });
   });
 });
 
@@ -1250,7 +1394,8 @@ function renderRelList(id){
 }
 
 function removeRel(relId,item){
-  if(!confirm(t('Stergi aceasta legatura? Persoana ramane in arbore.','Remove this connection? The person stays in the tree.')))return;
+  showConfirm(t('Stergi aceasta legatura? Persoana ramane in arbore.','Remove this connection? The person stays in the tree.'),function(){doRemoveRel(relId,item);});return;}
+function doRemoveRel(relId,item){
   window.supabase.from('member_relations').delete().eq('id',relId).then(function(r){
     if(r.error){alert(r.error.message);return;}
     S.relations=S.relations.filter(function(x){return x.id!==relId;});
@@ -1374,16 +1519,28 @@ function removeRel(relId,item){
     if(!selRelType){err.textContent=t('Selecteaza tipul legaturii.','Select a relation type.');err.style.display='block';return;}
     var targetId=document.getElementById('relPersonSelect').value;
     if(!targetId){err.textContent=t('Selecteaza o persoana.','Select a person.');err.style.display='block';return;}
+    // Duplicate check (only for new relations, not edits)
+    if(!editingRelId){
+      var isDup=S.relations.some(function(r){return(r.from_member_id===S.editingId&&r.to_member_id===targetId)||(r.from_member_id===targetId&&r.to_member_id===S.editingId);});
+      if(isDup){err.textContent=t('Aceasta legatura exista deja intre cele doua persoane.','A relation between these two people already exists.');err.style.display='block';return;}
+    }
     var btn=this;btn.disabled=true;btn.textContent=t('Se salveaza...','Saving...');
     inferGen(S.editingId, targetId, selRelType);
     var bio=REL_META[selRelType]?REL_META[selRelType].bio!==false:true;
+    var capturedFrom=S.editingId,capturedTo=targetId,capturedType=selRelType;
     var promise=editingRelId
       ?window.supabase.from('member_relations').update({relation_type:selRelType,is_biological:bio}).eq('id',editingRelId)
-      :window.supabase.from('member_relations').insert({from_member_id:S.editingId,to_member_id:targetId,relation_type:selRelType,is_biological:bio,confidence:100});
+      :window.supabase.from('member_relations').insert({from_member_id:capturedFrom,to_member_id:capturedTo,relation_type:capturedType,is_biological:bio,confidence:100});
     promise.then(function(r){
         btn.disabled=false;btn.textContent=t('Salveaza','Save');
         if(r.error){err.textContent=r.error.message;err.style.display='block';return;}
-        closeModal();reload();setTimeout(function(){openEditor(S.editingId);switchTab(1);},800);
+        var wasInsert=!editingRelId;
+        closeModal();
+        reload();
+        setTimeout(function(){
+          if(capturedFrom){openEditor(capturedFrom);switchTab(1);}
+          if(wasInsert)inferRelations(capturedFrom,capturedTo,capturedType);
+        },800);
       }).catch(function(e){btn.disabled=false;btn.textContent=t('Salveaza','Save');err.textContent=e.message;err.style.display='block';});
   });
 
@@ -1420,27 +1577,32 @@ function checkConflicts(m){
 }
 
 // Delete flow
-function openDelFlow(id){openEditor(id);setTimeout(function(){document.getElementById('showDelBtn').click();},100);}
-document.getElementById('showDelBtn').addEventListener('click',function(){
-  var id=S.editingId;if(!id)return;var m=S.members.find(function(x){return x.id===id;});if(!m)return;
+function openDeleteModal(id){
+  S.editingId=id;
+  var m=S.members.find(function(x){return x.id===id;});if(!m)return;
   var aff=S.relations.filter(function(r){return r.from_member_id===id||r.to_member_id===id;});
-  document.getElementById('delConfirm').style.display='block';
   document.getElementById('delAffects').textContent=aff.length?t(aff.length+' legatura/legaturi vor fi sterse.',aff.length+' connection(s) will be removed.'):t('Nicio legatura activa.','No active connections.');
-  document.getElementById('delConfirmInput').value='';document.getElementById('delExecuteBtn').disabled=true;
-});
+  document.getElementById('delConfirmInput').value='';
+  document.getElementById('delExecuteBtn').disabled=true;
+  var dmsg=document.getElementById('del-msg');if(dmsg){dmsg.style.display='none';dmsg.textContent='';}
+  document.getElementById('deleteModal').classList.add('open');document.body.style.overflow='hidden';
+  setTimeout(function(){document.getElementById('delConfirmInput').focus();},80);
+}
+function closeDeleteModal(){document.getElementById('deleteModal').classList.remove('open');document.body.style.overflow='';S.editingId=null;}
+function openDelFlow(id){openDeleteModal(id);}
 document.getElementById('delConfirmInput').addEventListener('input',function(){
   var id=S.editingId;if(!id)return;var m=S.members.find(function(x){return x.id===id;});
   document.getElementById('delExecuteBtn').disabled=!m||this.value.trim().toLowerCase()!==m.name.trim().toLowerCase();
 });
-document.getElementById('delCancelBtn').addEventListener('click',function(){document.getElementById('delConfirm').style.display='none';});
+document.getElementById('delCancelBtn').addEventListener('click',closeDeleteModal);
 document.getElementById('delExecuteBtn').addEventListener('click',function(){
   var id=S.editingId;if(!id)return;var m=S.members.find(function(x){return x.id===id;});if(!m)return;
   var btn=this;btn.disabled=true;btn.textContent=t('Se sterge...','Deleting...');
   window.supabase.from('members').delete().eq('id',id).then(function(r){
-    if(r.error){btn.disabled=false;btn.textContent=t('Sterge definitiv','Delete permanently');alert(r.error.message);return;}
+    if(r.error){btn.disabled=false;btn.textContent=t('Sterge definitiv','Delete permanently');var dmsg=document.getElementById('del-msg');if(dmsg){dmsg.className='m-msg error';dmsg.textContent=r.error.message;dmsg.style.display='block';}return;}
     S.members=S.members.filter(function(x){return x.id!==id;});S.relations=S.relations.filter(function(r){return r.from_member_id!==id&&r.to_member_id!==id;});
-    closeEditor();closeDetail();syncMembersCount();showUndo(t(m.name+' a fost sters.',''+m.name+' was deleted.'),null);render();
-  }).catch(function(err){btn.disabled=false;btn.textContent=t('Sterge definitiv','Delete permanently');alert(err.message);});
+    closeDeleteModal();closeDetail();syncMembersCount();showUndo(t(m.name+' a fost sters.',''+m.name+' was deleted.'),null);render();
+  }).catch(function(err){btn.disabled=false;btn.textContent=t('Sterge definitiv','Delete permanently');var dmsg=document.getElementById('del-msg');if(dmsg){dmsg.className='m-msg error';dmsg.textContent=err.message;dmsg.style.display='block';}});
 });
 
 // ── ADD PERSON MODAL ─────────────────────────────────────
@@ -1564,7 +1726,7 @@ function initKeyboard(){
   document.addEventListener('keydown',function(e){
     if(e.target.matches('input,textarea,select'))return;
     switch(e.key){
-      case 'Escape':if(document.getElementById('editorOverlay').classList.contains('open'))closeEditor();else if(document.getElementById('addOverlay').classList.contains('open'))closeAddModal();else if(document.getElementById('guideOverlay').classList.contains('open'))closeGuide();else closeDetail();break;
+      case 'Escape':if(document.getElementById('inferModal').classList.contains('open'))closeInferModal();else if(document.getElementById('confirmModal').classList.contains('open'))_closeConfirm(false);else if(document.getElementById('deleteModal').classList.contains('open'))closeDeleteModal();else if(document.getElementById('editorOverlay').classList.contains('open'))closeEditor();else if(document.getElementById('addOverlay').classList.contains('open'))closeAddModal();else if(document.getElementById('guideOverlay').classList.contains('open'))closeGuide();else closeDetail();break;
       case ' ':e.preventDefault();center();break;
       case 'n':case 'N':openAddModal();break;
       case '?':showGuide();break;
@@ -1576,6 +1738,7 @@ function initKeyboard(){
 function initUI(){
   ['mt0','mt1','mt2','mt3','mt4'].forEach(function(id,i){var el=document.getElementById(id);if(el)el.addEventListener('click',function(){switchTab(i);});});
   document.getElementById('editorOverlay').addEventListener('click',function(e){if(e.target===this)closeEditor();});
+  document.getElementById('deleteModal').addEventListener('click',function(e){if(e.target===this)closeDeleteModal();});
   document.getElementById('addOverlay').addEventListener('click',function(e){if(e.target===this)closeAddModal();});
   document.getElementById('dpClose').addEventListener('click',closeDetail);
   document.getElementById('dpClose2').addEventListener('click',closeDetail);
