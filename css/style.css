@@ -5,6 +5,15 @@
  */
 
 /* ═══════════════════════════════════════════════════════════
+   SCROLLBAR CUSTOM
+   ═══════════════════════════════════════════════════════════ */
+::-webkit-scrollbar { width: 6px; height: 6px; }
+::-webkit-scrollbar-track { background: #111; }
+::-webkit-scrollbar-thumb { background: #3a2a10; border-radius: 3px; }
+::-webkit-scrollbar-thumb:hover { background: #b08030; }
+* { scrollbar-width: thin; scrollbar-color: #3a2a10 #111; }
+
+/* ═══════════════════════════════════════════════════════════
    1. VARIABILE CSS
    ═══════════════════════════════════════════════════════════ */
 :root {
