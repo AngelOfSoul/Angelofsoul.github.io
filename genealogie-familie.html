@@ -247,6 +247,7 @@
       <div style="display:flex;align-items:center;gap:10px;margin-bottom:14px;padding-bottom:10px;border-bottom:1px solid #2a2010;">
         <div class="modal-title" id="editorTitle" style="margin:0;padding:0;border:none;flex:1;"></div>
         <span class="change-pill" id="changePill">&#9679; <span data-ro="Modificari nesalvate" data-en="Unsaved changes">Modificari nesalvate</span></span>
+        <button onclick="closeEditor()" style="background:none;border:none;color:var(--muted);font-size:22px;cursor:pointer;line-height:1;padding:0 0 0 8px;" title="Inchide">&times;</button>
       </div>
       <div class="conflict-banner" id="conflictBanner"><span style="font-size:16px;flex-shrink:0;">&#9888;&#65039;</span><span id="conflictMsg"></span></div>
       <div class="modal-tabs">
@@ -459,7 +460,7 @@
 <script src="js/utils.js"></script>
 <script src="js/admin-nav.js"></script>
 <!-- Adauga legatura modal -->
-<div id="relModal" style="display:none;position:fixed;inset:0;z-index:10000;background:rgba(0,0,0,0.78);align-items:center;justify-content:center;">
+<div id="relModal" style="display:none;position:fixed;inset:0;z-index:20000;background:rgba(0,0,0,0.78);align-items:center;justify-content:center;">
   <div style="background:#0d0d0d;border:1px solid var(--gold-d);border-radius:3px;padding:22px 24px;width:380px;max-width:94vw;max-height:88vh;overflow-y:auto;position:relative;">
     <button id="relModalClose" style="position:absolute;top:8px;right:12px;background:none;border:none;color:var(--muted);font-size:20px;cursor:pointer;line-height:1;" title="Inchide">&times;</button>
     <div style="font-family:'Playfair Display',serif;font-size:13px;letter-spacing:2px;text-transform:uppercase;color:var(--gold);margin-bottom:6px;">Adauga legatura</div>
