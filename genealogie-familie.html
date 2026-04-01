@@ -840,9 +840,16 @@ function drawConnectors(svg,layout){
     var isParentType=meta?(meta.isParent||meta.isChild):(r.relation_type==='parent'||r.relation_type==='step'||r.relation_type==='adopted');
     if(isSpouse){spousePairs2[a]=b;spousePairs2[b]=a;return;}
     if(isParentType){
-      var pa=layout[a],pb=layout[b];if(!pa||!pb)return;
-      var par=pa.y<=pb.y?a:b, chi=par===a?b:a;
+      if(!layout[a]||!layout[b])return;
+      var par,chi;
+      if(meta){
+        if(meta.isParent){par=b;chi=a;}  // to_member_id is the parent
+        else             {par=a;chi=b;}  // from_member_id is the parent
+      } else {
+        par=layout[a].y<=layout[b].y?a:b;chi=par===a?b:a;
+      }
       var bio=meta?meta.bio!==false:r.is_biological!==false;
+      if(!childrenOf2[par])childrenOf2[par]=[];
       if(!childrenOf2[par].find(function(x){return x.id===chi;}))
         childrenOf2[par].push({id:chi,bio:bio});
     }
@@ -876,8 +883,14 @@ function drawConnectors(svg,layout){
     if(sp)(childrenOf2[sp]||[]).forEach(function(c){if(!allCh.find(function(x){return x.id===c.id;}))allCh.push(c);});
     if(!allCh.length)return;
     var px1=pp.x+CARD_W/2,px2=sp&&layout[sp]?layout[sp].x+CARD_W/2:px1;
-    var dropX=(px1+px2)/2,dropY=pp.y+CARD_H+JOIN_DROP;
-    addLine(svg,dropX,pp.y+CARD_H,dropX,dropY,'#c87050',1.5,null);
+    var dropX=(px1+px2)/2;
+    // dropY = midpoint between parent bottom and first child top
+    var firstChildY=Infinity;
+    allCh.forEach(function(c){var cp=layout[c.id];if(cp&&cp.y<firstChildY)firstChildY=cp.y;});
+    if(firstChildY===Infinity)return;
+    var parentBottom=pp.y+CARD_H;
+    var dropY=Math.round((parentBottom+firstChildY)/2);
+    addLine(svg,dropX,parentBottom,dropX,dropY,'#c87050',1.5,null);
     if(allCh.length===1){
       var cp=layout[allCh[0].id];if(!cp)return;
       var col=allCh[0].bio?'#c87050':'#5080c8',dash=allCh[0].bio?null:'5 3';
