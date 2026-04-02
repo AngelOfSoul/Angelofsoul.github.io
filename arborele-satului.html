@@ -212,16 +212,16 @@ footer .g{color:var(--gold-d);font-style:normal;}
       <span class="section-head-title" data-ro="Vizualizare" data-en="View">Vizualizare</span>
     </div>
     <div class="view-toggle-bar">
-      <button class="vt-btn active" id="btn-view-list" onclick="switchView('list')">
+      <button class="vt-btn" id="btn-view-list" onclick="switchView('list')">
         &#128100; <span data-ro="Lista + Arbore" data-en="List + Tree">Lista + Arbore</span>
       </button>
-      <button class="vt-btn" id="btn-view-map" onclick="switchView('map')">
+      <button class="vt-btn active" id="btn-view-map" onclick="switchView('map')">
         &#127774; <span data-ro="Harta Satului" data-en="Village Map">Harta Satului</span>
       </button>
     </div>
 
     <!-- VIEW LISTA + ARBORE -->
-    <div id="view-list">
+    <div id="view-list" style="display:none;">
       <div class="list-view">
         <div class="fam-list-panel">
           <div class="fam-list-search">
@@ -248,7 +248,7 @@ footer .g{color:var(--gold-d);font-style:normal;}
     </div>
 
     <!-- VIEW HARTA SATULUI -->
-    <div id="view-map" style="display:none;">
+    <div id="view-map">
       <div class="map-view" id="mapView">
         <div class="map-hint" data-ro="scroll zoom &middot; drag pan &middot; click pe familie" data-en="scroll zoom &middot; drag pan &middot; click family">scroll zoom &middot; drag pan &middot; click pe familie</div>
         <svg class="map-canvas" id="mapSvg" viewBox="0 0 700 480" xmlns="http://www.w3.org/2000/svg">
@@ -351,7 +351,7 @@ function loadAll() {
     buildFamList();
     updateStats();
     document.getElementById('statsBar').style.display = 'flex';
-    if (families.length) selectFamily(families[0].id);
+    drawMap();
   }).catch(function(err) { showGlobalError(err.message); });
 }
 
@@ -421,10 +421,10 @@ function loadFamilyTree(famId, fam) {
   /* FIX P3: cerem NUMAI membri decedați cu visibility=public (accesibili anonim conform RLS) */
   window.supabase
     .from('members')
-    .select('id,name,birth_year,death_year,visibility,is_deceased,profession,generation,confidence')
+    .select('id,name,birth_year,death_year,visibility,is_living,profession,generation,confidence')
     .eq('family_id', famId)
     .eq('visibility', 'public')
-    .eq('is_deceased', true)
+    .eq('is_living', false)
     .order('birth_year')
     .then(function(r) {
       var members = (r.error ? [] : r.data) || [];
@@ -510,7 +510,7 @@ function drawFamilyTree(fam, members, rels) {
 
 function buildMemberNode(m, famId) {
   var cls = 't-node'
-    + (m.is_deceased || m.death_year ? ' deceased' : '')
+    + (!m.is_living || m.death_year ? ' deceased' : '')
     + (!m.name || m.name === '?' ? ' unknown' : '')
     + (m.confidence != null && m.confidence < 70 ? ' low-conf' : '');
   var node = document.createElement('div');
@@ -597,6 +597,8 @@ function calcMapPositions() {
 }
 
 function drawMap() {
+  mapTr = {scale:1, tx:0, ty:0};
+  applyMapTr();
   var g = document.getElementById('mapG');
   g.innerHTML = '';
   var ns  = 'http://www.w3.org/2000/svg';

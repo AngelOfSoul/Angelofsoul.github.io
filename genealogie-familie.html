@@ -822,7 +822,7 @@ function loadRelations(rid){
 
 function afterLoad(rid){
   if(rid!==S.reqId)return;
-  updateTitle();render();if(S.members.length)center();
+  updateTitle();render();if(S.members.length)fitTree();
   if(S.members.length===0){
     var cv=document.getElementById('treeCanvas');
     if(cv){
@@ -838,7 +838,7 @@ function afterLoad(rid){
   // Safety re-center after layout settles — 300 ms is enough for the
   // browser to finish a paint cycle after the Supabase response, so
   // stage.clientWidth returns the real value instead of 0.
-  setTimeout(function(){if(S.members.length)center();},300);
+  setTimeout(function(){if(S.members.length)fitTree();},300);
   // Auto-open editor if ?edit_member= param is present (e.g. coming from familiile-familie.html)
   var autoEdit=new URLSearchParams(window.location.search).get('edit_member');
   if(autoEdit){

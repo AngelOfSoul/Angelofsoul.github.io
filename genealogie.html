@@ -277,8 +277,8 @@ footer .g{color:var(--gold-d);font-style:normal;}
       <div class="sb-title" data-ro="Gaseste o legatura" data-en="Find a connection">Gaseste o legatura</div>
       <div style="font-size:12px;color:var(--muted);margin-bottom:10px;" data-ro="Alege doua familii si gaseste cum sunt inrudite (daca exista o legatura)." data-en="Choose two families and find how they are related (if a connection exists).">Alege doua familii si gaseste cum sunt inrudite (daca exista o legatura).</div>
       <div class="pf-wrap">
-        <select class="pf-select" id="pfFrom" data-ro="— Familie de start —" data-en="— Start family —"><option value="" data-ro="— Familie de start —" data-en="— Start family —">— Familie de start —</option></select>
-        <select class="pf-select" id="pfTo"   data-ro="— Familie destinatie —" data-en="— Destination family —"><option value="" data-ro="— Familie destinatie —" data-en="— Destination family —">— Familie destinatie —</option></select>
+        <select class="pf-select" id="pfFrom"><option value="" data-ro="— Familie de start —" data-en="— Start family —">— Familie de start —</option></select>
+        <select class="pf-select" id="pfTo"><option value="" data-ro="— Familie destinatie —" data-en="— Destination family —">— Familie destinatie —</option></select>
         <button class="pf-btn" id="pfBtn" data-ro="Cauta legatura" data-en="Find connection">Cauta legatura</button>
         <div class="pf-result" id="pfResult"></div>
       </div>
@@ -343,6 +343,7 @@ function renderFamilies(fams){
 }
 
 function buildCard(f){
+  if(!f||!f.id)return document.createDocumentFragment();
   var div=document.createElement('div');
   var isCalnic=(f.village||'').toLowerCase().includes('deal')?false:true;
   div.className='fc'+(f.connected_to_village?' connected':'');
@@ -393,6 +394,7 @@ document.getElementById('pfBtn').addEventListener('click',function(){
   if(!from||!to){result.classList.add('on');result.textContent=t('Selecteaza doua familii diferite.','Select two different families.');return;}
   if(from===to){result.classList.add('on');result.textContent=t('Selecteaza doua familii diferite.','Select two different families.');return;}
   result.classList.add('on');result.textContent=t('Se cauta legatura...','Finding connection...');
+  if(!window.supabase){result.textContent=t('Serviciul nu este disponibil momentan.','Service not available right now.');return;}
   window.supabase.from('family_links').select('*').or('family_a_id.eq.'+from+',family_b_id.eq.'+from)
     .then(function(r){
       if(r.error||!r.data){result.textContent=t('Nu s-au putut verifica legaturile.','Could not check connections.');return;}
@@ -421,9 +423,10 @@ document.addEventListener('click',function(e){if(!e.target.closest('.search-bar'
 function doSearch(q){
   var res=document.getElementById('searchResults');
   // First search family names
-  var fFams=families.filter(function(f){return f.name.toLowerCase().includes(q.toLowerCase());});
+  var fFams=families.filter(function(f){return f.name&&f.name.toLowerCase().includes(q.toLowerCase());});
   var results=fFams.map(function(f){return {type:'family',name:f.name,meta:f.village||'Calnic',id:f.id};});
   // Also search members via Supabase
+  if(!window.supabase){renderSearchResults(results,q,res);return;}
   var p=window.supabase.from('members').select('id,name,birth_year,death_year,family_id,location').ilike('name','%'+q+'%').limit(8);
   p.then(function(r){
     if(!r.error&&r.data){
@@ -456,7 +459,14 @@ function showError(msg){
 function applyLang(l){
   document.getElementById('btn-ro').classList.toggle('active',l==='ro');
   document.getElementById('btn-en').classList.toggle('active',l==='en');
-  document.querySelectorAll('[data-ro]').forEach(function(el){var v=el.getAttribute('data-'+l);if(v!==null)el.textContent=v;});
+  document.querySelectorAll('[data-ro]').forEach(function(el){
+    var v=el.getAttribute('data-'+l);
+    if(v===null)return;
+    var tag=el.tagName;
+    if(tag==='INPUT'||tag==='TEXTAREA'){el.placeholder=v;}
+    else if(tag==='SELECT'){}
+    else{el.textContent=v;}
+  });
 }
 function initLang(){
   document.getElementById('btn-ro').addEventListener('click',function(){localStorage.setItem('calnic-lang','ro');applyLang('ro');renderFamilies(families);});
