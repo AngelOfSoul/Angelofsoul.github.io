@@ -38,7 +38,7 @@
 .tree-stage:active{cursor:grabbing;}
 .tree-canvas{position:absolute;transform-origin:0 0;}
 /* ── GEN LABELS ── */
-.gen-label{position:absolute;right:10px;left:auto;z-index:6;pointer-events:none;font-size:9px;letter-spacing:2px;text-transform:uppercase;color:var(--gold-m);font-family:'Playfair Display',serif;opacity:.65;background:rgba(10,10,10,.6);padding:1px 5px;border-radius:2px;}
+.gen-label{position:absolute;left:4px;right:auto;z-index:6;pointer-events:none;font-size:9px;letter-spacing:2px;text-transform:uppercase;color:var(--gold-m);font-family:'Playfair Display',serif;opacity:.65;background:rgba(10,10,10,.75);padding:2px 6px;border-radius:2px;white-space:nowrap;max-width:180px;overflow:hidden;text-overflow:ellipsis;}
 /* ── MINIMAP ── */
 .minimap{position:absolute;bottom:10px;right:10px;background:rgba(8,8,8,.92);border:1px solid var(--b2);border-radius:3px;padding:3px;z-index:20;}
 .minimap canvas{display:block;}
@@ -443,6 +443,7 @@
     <div class="leg"><svg width="22" height="3"><line x1="0" y1="1.5" x2="22" y2="1.5" stroke="#5080c8" stroke-width="1.5" stroke-dasharray="4 2"/></svg><span data-ro="Alianta prin casatorie" data-en="Alliance by marriage">Alianta prin casatorie</span></div>
     <div class="leg"><span style="display:inline-block;width:12px;height:12px;border-radius:50%;border:1.5px dashed #5a4020;flex-shrink:0;"></span><span data-ro="Persoana decedata" data-en="Deceased person">Persoana decedata</span></div>
     <div class="leg"><span style="display:inline-block;width:11px;height:11px;border-radius:50%;background:var(--green);border:2px solid var(--bg);flex-shrink:0;box-shadow:0 0 4px rgba(130,196,106,.5);"></span><span data-ro="In sat" data-en="In village">In sat</span></div>
+    <div class="leg"><svg width="22" height="10"><path d="M2 8 Q11 1 20 8" fill="none" stroke="#8a7040" stroke-width="1" stroke-dasharray="4 2"/></svg><span data-ro="Frate/Sora (fara parinte comun cunoscut)" data-en="Sibling (no shared parent yet)">Frate/Sora</span></div>
     <div class="leg"><span style="width:14px;height:14px;border-radius:50%;background:#1a2808;border:1.5px solid var(--gold);display:inline-flex;align-items:center;justify-content:center;font-size:7px;color:var(--gold);">&#10003;</span><span data-ro="Adaugat de tine — poti edita" data-en="Added by you — you can edit">Adaugat de tine</span></div>
   </div>
 
@@ -615,6 +616,24 @@ function _getParentsOf(memberId){
   });
   return res;
 }
+function _getSiblingsOf(memberId){
+  var res=[];
+  S.relations.forEach(function(r){
+    if(r.relation_type!=='frate'&&r.relation_type!=='sora')return;
+    if(r.from_member_id===memberId)res.push(r.to_member_id);
+    else if(r.to_member_id===memberId)res.push(r.from_member_id);
+  });
+  return res;
+}
+// Guess whether a member is tata or mama based on their existing relations
+function _guessParentType(parentId){
+  var isFemale=false;
+  S.relations.forEach(function(r){
+    if(r.from_member_id===parentId&&(r.relation_type==='sotie'||r.relation_type==='mama'))isFemale=true;
+    if(r.to_member_id===parentId&&r.relation_type==='sot')isFemale=true;
+  });
+  return isFemale?'mama':'tata';
+}
 function inferRelations(fromId,toId,relType){
   var proposals=[];
 
@@ -646,6 +665,7 @@ function inferRelations(fromId,toId,relType){
   var parentId,childId;
   if(relType==='tata'||relType==='mama'){parentId=toId;childId=fromId;}
   else{parentId=fromId;childId=toId;}
+  // 1. Suggest other parent (spouse of parentId) for this child
   _getSpousesOf(parentId).forEach(function(sp){
     if(!_parentChildExists(childId,sp.memberId)){
       var sm=S.members.find(function(m){return m.id===sp.memberId;});
@@ -653,12 +673,22 @@ function inferRelations(fromId,toId,relType){
       if(sm&&cm){var lbl=REL_META[sp.parentType]?REL_META[sp.parentType].l:sp.parentType;proposals.push({from:childId,to:sp.memberId,type:sp.parentType,bio:true,text:sm.name+' este '+lbl+' lui '+cm.name});}
     }
   });
+  // 2. Suggest grandparents (parents of parentId) for this child
   _getParentsOf(parentId).forEach(function(gp){
     if(!_parentChildExists(childId,gp.memberId)){
       var gpType=gp.relType==='mama'?'bunica':'bunic';
       var gm=S.members.find(function(m){return m.id===gp.memberId;});
       var cm=S.members.find(function(m){return m.id===childId;});
       if(gm&&cm){var lbl=REL_META[gpType]?REL_META[gpType].l:gpType;proposals.push({from:childId,to:gp.memberId,type:gpType,bio:true,text:gm.name+' este '+lbl+' lui '+cm.name});}
+    }
+  });
+  // 3. Suggest this same parent for child's existing siblings
+  var pType=relType==='tata'||relType==='step'||relType==='adopted'?relType:(relType==='mama'?'mama':_guessParentType(parentId));
+  var pm=S.members.find(function(m){return m.id===parentId;});
+  _getSiblingsOf(childId).forEach(function(sibId){
+    if(!_parentChildExists(sibId,parentId)){
+      var sibM=S.members.find(function(m){return m.id===sibId;});
+      if(sibM&&pm){var lbl=REL_META[pType]?REL_META[pType].l:pType;proposals.push({from:sibId,to:parentId,type:pType,bio:true,text:pm.name+' este '+lbl+' lui '+sibM.name});}
     }
   });
   if(!proposals.length)return;
@@ -819,7 +849,7 @@ function render(){
   S.members.forEach(function(m){if(layout[m.id])cv.appendChild(buildNode(m,layout[m.id]));});
   cv.appendChild(buildGhost(layout,mxX));
   buildGenLabels(layout,mxX);
-  drawMinimap(mxX,mxY);applyXform();
+  applyXform(); // also calls updateGenLabels + drawMinimap
 }
 
 // ── RELATION METADATA ────────────────────────────────────
@@ -944,6 +974,15 @@ function computeLayout(){
         var cg=genOf[m.id]+1;
         if(genOf[cid]===null||genOf[cid]<cg){genOf[cid]=cg;_anyChange=true;}
       });
+    });
+    // Align siblings (frate/sora) to the same generation as the highest-gen sibling
+    S.relations.forEach(function(r){
+      if(r.relation_type!=='frate'&&r.relation_type!=='sora')return;
+      var ga=genOf[r.from_member_id], gb=genOf[r.to_member_id];
+      if(ga===null&&gb===null)return;
+      var sg=Math.max(ga!=null?ga:0, gb!=null?gb:0);
+      if(ga!==sg){genOf[r.from_member_id]=sg;_anyChange=true;}
+      if(gb!==sg){genOf[r.to_member_id]=sg;_anyChange=true;}
     });
     if(!_anyChange)break;
   }
@@ -1121,6 +1160,24 @@ function drawConnectors(svg,layout){
     var meta=REL_META[r.relation_type];if(!meta||!meta.isExt)return;
     var pa=layout[r.from_member_id],pb=layout[r.to_member_id];if(!pa||!pb)return;
     addLine(svg,pa.x+CARD_W/2,pa.y+avMid(r.from_member_id),pb.x+CARD_W/2,pb.y+avMid(r.to_member_id),'#70a870',1.5,'4 3');
+  });
+
+  // Sibling indicator lines — only drawn when siblings have NO shared parent in the tree
+  // (once a parent is linked, the structural parent→child lines make it obvious)
+  var drawnSib={};
+  S.relations.forEach(function(r){
+    if(r.relation_type!=='frate'&&r.relation_type!=='sora')return;
+    var k=[r.from_member_id,r.to_member_id].sort().join('|');
+    if(drawnSib[k])return; drawnSib[k]=true;
+    var pa=layout[r.from_member_id],pb=layout[r.to_member_id];if(!pa||!pb)return;
+    // Skip if they already share a known parent (structural lines will show the connection)
+    var sharedParent=_getParentsOf(r.from_member_id).some(function(p){return _parentChildExists(r.to_member_id,p.memberId);});
+    if(sharedParent)return;
+    // Draw a short curved bracket between the two sibling avatars
+    var x1=pa.x+CARD_W/2, x2=pb.x+CARD_W/2;
+    var y1=pa.y+avMid(r.from_member_id), y2=pb.y+avMid(r.to_member_id);
+    var mx=(x1+x2)/2, my=Math.min(y1,y2)-18;
+    addPath(svg,'M'+x1+' '+y1+' Q'+mx+' '+my+' '+x2+' '+y2,'#8a7040',1,'5 3');
   });
 }
 
@@ -1787,12 +1844,17 @@ function subscribeRT(){
 }
 
 // ── ZOOM / PAN ────────────────────────────────────────────
-function applyXform(){document.getElementById('treeCanvas').style.transform='translate('+S.panX+'px,'+S.panY+'px) scale('+S.zoom+')';drawMinimap();}
+function applyXform(){document.getElementById('treeCanvas').style.transform='translate('+S.panX+'px,'+S.panY+'px) scale('+S.zoom+')';updateGenLabels();drawMinimap();}
 // Dynamic gen-Y map built after each render — keyed by gen number → Y px in canvas space
 var _genYMap={};
 function updateGenLabels(){
   var stage=document.getElementById('treeStage');
   var sh=stage?stage.clientHeight:660;
+  var sw=stage?stage.clientWidth:800;
+  // Left edge of canvas content in stage coords (PAD=60 is leftmost canvas x)
+  var canvasLeft=Math.round(S.panX+60*S.zoom);
+  // Place label just inside the left edge, but never past the right half of stage
+  var labelLeft=Math.max(4,Math.min(canvasLeft-4,Math.round(sw*0.4)));
   Object.keys(_genYMap).forEach(function(g){
     var el=document.getElementById('gl'+g);
     if(!el)return;
@@ -1800,6 +1862,7 @@ function updateGenLabels(){
     var rawTop=Math.round(S.panY+canvasY*S.zoom);
     var visible=rawTop>-10&&rawTop<sh+10;
     el.style.top=Math.max(0,rawTop)+'px';
+    el.style.left=labelLeft+'px';
     el.style.opacity=visible?'0.65':'0';
     el.style.pointerEvents=visible?'':'none';
   });
