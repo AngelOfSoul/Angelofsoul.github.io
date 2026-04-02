@@ -451,8 +451,9 @@ footer .g{color:var(--gold-d);font-style:normal;}
     <p class="fam-story" id="fam-story"></p>
 
     <!-- Members -->
-    <div class="section-head">
+    <div class="section-head" style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:8px;">
       <span class="section-head-title" data-ro="Membri" data-en="Members">Membri</span>
+      <button id="addMemberBtn" onclick="openAddMember()" style="display:none;padding:5px 14px;background:var(--s2);border:1px solid var(--gold-d);color:var(--gold);font-family:'EB Garamond',serif;font-size:13px;border-radius:2px;cursor:pointer;transition:all .15s;" onmouseover="this.style.background='var(--s3)'" onmouseout="this.style.background='var(--s2)'">+ Adauga membru</button>
     </div>
     <div class="members-grid" id="membersGrid"></div>
 
@@ -720,6 +721,8 @@ function loadFamilyData() {
       if (res.data && res.data.user && res.data.user.id === FAM.ownerId) {
         isOwner = true;
         renderMembers(); // re-render with edit buttons
+        var addBtn = document.getElementById('addMemberBtn');
+        if (addBtn) addBtn.style.display = 'inline-block';
         var editBtn = document.createElement('a');
         editBtn.href = 'dashboard.html?family=' + familyId;
         editBtn.textContent = currentLang === 'ro' ? '✎ Editeaza familia' : '✎ Edit family';
@@ -980,6 +983,34 @@ if (ham && mobileMenu) {
 }
 </script>
 
+<!-- ── ADD MEMBER MODAL ── -->
+<div class="modal-overlay" id="addMemberOverlay">
+  <div class="modal-box">
+    <div class="modal-top"></div>
+    <div class="modal-body">
+      <div style="display:flex;align-items:center;gap:10px;margin-bottom:14px;padding-bottom:10px;border-bottom:1px solid #2a2010;">
+        <div style="font-family:'Playfair Display',serif;font-size:15px;color:var(--gold);flex:1;">+ Adauga membru nou</div>
+        <button onclick="closeAddMember()" style="background:none;border:none;color:var(--muted);font-size:22px;cursor:pointer;line-height:1;">&times;</button>
+      </div>
+      <div class="fi-wrap"><label class="fi-label">NUME COMPLET *</label><input class="fi-input" id="am-name" type="text" placeholder="ex. Ion Popescu" autocomplete="off"/></div>
+      <div class="fi-2col">
+        <div class="fi-wrap"><label class="fi-label">AN NASTERE</label><input class="fi-input" id="am-birth" type="text" placeholder="ex. 1920"/></div>
+        <div class="fi-wrap"><label class="fi-label">AN DECES (gol=in viata)</label><input class="fi-input" id="am-death" type="text" placeholder="gol=in viata"/></div>
+      </div>
+      <div class="fi-2col">
+        <div class="fi-wrap"><label class="fi-label">LOCALITATE</label><input class="fi-input" id="am-loc" type="text" placeholder="ex. Calnic"/></div>
+        <div class="fi-wrap"><label class="fi-label">PROFESIE</label><input class="fi-input" id="am-prof" type="text" placeholder="ex. Agricultor"/></div>
+      </div>
+      <div class="fi-wrap"><label class="fi-label">BIOGRAFIE SCURTA</label><textarea class="fi-textarea" id="am-bio" rows="2" placeholder="Cateva cuvinte despre aceasta persoana..."></textarea></div>
+      <div id="am-msg" class="m-msg"></div>
+      <div class="modal-acts">
+        <button class="ma-save" id="am-save-btn" onclick="saveAddMember()">Adauga in arbore</button>
+        <button class="ma-cancel" onclick="closeAddMember()">Anuleaza</button>
+      </div>
+    </div>
+  </div>
+</div>
+
 <!-- ── MEMBER EDIT MODAL ── -->
 <div class="modal-overlay" id="memEditOverlay">
   <div class="modal-box">
@@ -1083,6 +1114,76 @@ if (ham && mobileMenu) {
 </div>
 
 <script>
+// ── ADD MEMBER ────────────────────────────────────────────
+function openAddMember() {
+  ['am-name','am-birth','am-death','am-loc','am-prof','am-bio'].forEach(function(id){ var el=document.getElementById(id); if(el)el.value=''; });
+  var msg=document.getElementById('am-msg'); if(msg){msg.className='m-msg';msg.textContent='';}
+  document.getElementById('addMemberOverlay').classList.add('open');
+  document.body.style.overflow='hidden';
+  setTimeout(function(){var el=document.getElementById('am-name');if(el)el.focus();},80);
+}
+function closeAddMember() {
+  document.getElementById('addMemberOverlay').classList.remove('open');
+  document.body.style.overflow='';
+}
+function saveAddMember() {
+  if (!window.supabase || !familyId) return;
+  var name = (document.getElementById('am-name').value||'').trim();
+  if (!name || name.length < 2) {
+    var msg=document.getElementById('am-msg'); msg.className='m-msg err'; msg.textContent='Numele este obligatoriu (min 2 caractere).'; return;
+  }
+  var bv=(document.getElementById('am-birth').value||'').trim();
+  var dv=(document.getElementById('am-death').value||'').trim();
+  var by=bv?parseInt(bv,10)||null:null;
+  var dy=dv?parseInt(dv,10)||null:null;
+  if(by&&dy&&dy<=by){var msg=document.getElementById('am-msg');msg.className='m-msg err';msg.textContent='Decesul nu poate fi inainte de nastere.';return;}
+  var btn=document.getElementById('am-save-btn'); btn.disabled=true; btn.textContent='Se salveaza...';
+  var nm={
+    family_id: familyId,
+    name: name,
+    initial: name.charAt(0).toUpperCase(),
+    birth_year: by||null,
+    death_year: dy||null,
+    is_deceased: !!dy,
+    is_living: !dy,
+    location: (document.getElementById('am-loc').value||'').trim()||null,
+    profession: (document.getElementById('am-prof').value||'').trim()||null,
+    biography: (document.getElementById('am-bio').value||'').trim()||null,
+    visibility: 'public',
+    confidence: 100
+  };
+  window.supabase.from('members').insert([nm]).select().then(function(r){
+    btn.disabled=false; btn.textContent='Adauga in arbore';
+    if(r.error){var msg=document.getElementById('am-msg');msg.className='m-msg err';msg.textContent=r.error.message;return;}
+    var inserted=r.data&&r.data[0];
+    if(inserted){
+      var birthStr=inserted.birth_year?String(inserted.birth_year):'';
+      var deathStr=inserted.death_year?String(inserted.death_year):'';
+      var years=birthStr+(deathStr?' — '+deathStr:(birthStr?' —':''));
+      MEMBERS.push({
+        id:inserted.id, name:inserted.name, initial:inserted.initial||inserted.name.charAt(0),
+        role:'', years:years, deceased:!!inserted.is_deceased,
+        birth_year:inserted.birth_year||null, death_year:inserted.death_year||null,
+        profession:inserted.profession||'', location:inserted.location||'',
+        biography:inserted.biography||'', story:'', visibility:'public',
+        is_living:!inserted.is_deceased, confidence:100, photo_url:null
+      });
+    }
+    closeAddMember();
+    renderMembers();
+    // Update members count in sidebar
+    var sc=document.getElementById('sc-members');
+    if(sc)sc.textContent=MEMBERS.length;
+    var st=document.getElementById('stat-members');
+    if(st)st.textContent=MEMBERS.length;
+  }).catch(function(e){btn.disabled=false;btn.textContent='Adauga in arbore';var msg=document.getElementById('am-msg');msg.className='m-msg err';msg.textContent=e.message;});
+}
+
+document.getElementById('addMemberOverlay').addEventListener('click',function(e){if(e.target===this)closeAddMember();});
+document.addEventListener('keydown',function(e){
+  if(e.key==='Escape'&&document.getElementById('addMemberOverlay').classList.contains('open'))closeAddMember();
+});
+
 var _memEditId = null;
 var _memDelId = null;
 var _fmeVis = 'public';
