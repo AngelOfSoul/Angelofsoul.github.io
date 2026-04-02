@@ -4,6 +4,13 @@ admin-nav.js — Calnic Online v2 (FIXED)
 (function () {
 document.documentElement.style.background = '#0a0a0a';
 
+/* Local HTML-escape helper to prevent XSS from user-supplied data */
+function _escH(s) {
+  return String(s == null ? '' : s)
+    .replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;').replace(/'/g, '&#39;');
+}
+
 var stickyStyle = document.createElement('style');
 stickyStyle.textContent = [
   'nav { position:sticky; top:0; z-index:900; }',
@@ -115,11 +122,11 @@ function buildProfileButton(session, familyName, hasNotif) {
     btn.className = 'prf-btn-in';
     btn.href = 'dashboard.html';
     btn.innerHTML =
-      ' <div class="prf-avatar">' + initial +
+      ' <div class="prf-avatar">' + _escH(initial) +
         ' <div class="prf-notif-dot' + (hasNotif ? ' show' : '') + '" id="prf-notif-dot"> </div>' +
       ' </div>' +
       ' <div class="prf-text">' +
-        ' <div class="prf-name">' + (familyName || 'Profilul Meu') + ' </div>' +
+        ' <div class="prf-name">' + _escH(familyName || 'Profilul Meu') + ' </div>' +
         ' <div class="prf-sub">PROFILUL MEU </div>' +
       ' </div>';
     var dd = document.createElement('div');
@@ -152,7 +159,7 @@ function buildMobileFloat(initial, hasNotif) {
   fb.className = 'mobile-prf-float';
   fb.href = initial ? 'dashboard.html' : 'login.html';
   if (initial) {
-    fb.innerHTML = '<span class="mobile-prf-float-av">' + initial + '</span>' +
+    fb.innerHTML = '<span class="mobile-prf-float-av">' + _escH(initial) + '</span>' +
       '<span class="mobile-prf-float-notif' + (hasNotif ? ' show' : '') + '"></span>';
   } else {
     fb.innerHTML = '🔒';
