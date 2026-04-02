@@ -625,6 +625,14 @@ function _getSiblingsOf(memberId){
   });
   return res;
 }
+function _getChildrenOf(memberId){
+  var PT=['tata','mama','step','adopted'],CT=['fiu','fiica'],res=[];
+  S.relations.forEach(function(r){
+    if(r.to_member_id===memberId&&PT.indexOf(r.relation_type)!==-1)res.push({memberId:r.from_member_id,relType:r.relation_type});
+    else if(r.from_member_id===memberId&&CT.indexOf(r.relation_type)!==-1)res.push({memberId:r.to_member_id,relType:r.relation_type});
+  });
+  return res;
+}
 // Guess whether a member is tata or mama based on their existing relations
 function _guessParentType(parentId){
   var isFemale=false;
@@ -636,6 +644,27 @@ function _guessParentType(parentId){
 }
 function inferRelations(fromId,toId,relType){
   var proposals=[];
+
+  // ── SPOUSE inference: suggest each other's existing children ─
+  if(relType==='sot'||relType==='sotie'||relType==='spouse'){
+    [[fromId,toId],[toId,fromId]].forEach(function(pair){
+      var pid=pair[0], spId=pair[1];
+      var spM=S.members.find(function(m){return m.id===spId;});
+      if(!spM)return;
+      _getChildrenOf(pid).forEach(function(ch){
+        if(!_parentChildExists(ch.memberId,spId)){
+          var chM=S.members.find(function(m){return m.id===ch.memberId;});
+          if(!chM)return;
+          var pType=_guessParentType(spId);
+          var lbl=REL_META[pType]?REL_META[pType].l:pType;
+          proposals.push({from:ch.memberId,to:spId,type:pType,bio:true,text:spM.name+' este '+lbl+' lui '+chM.name});
+        }
+      });
+    });
+    if(!proposals.length)return;
+    _showInferModal(proposals);
+    return;
+  }
 
   // ── SIBLING inference: share known parents ────────────────
   if(relType==='frate'||relType==='sora'){
@@ -983,6 +1012,17 @@ function computeLayout(){
       var sg=Math.max(ga!=null?ga:0, gb!=null?gb:0);
       if(ga!==sg){genOf[r.from_member_id]=sg;_anyChange=true;}
       if(gb!==sg){genOf[r.to_member_id]=sg;_anyChange=true;}
+    });
+    // Push UP: if a child is at gen G, its parents must be at gen ≥ G-1
+    // (fixes cases where sibling-alignment bumped a child's gen above parent+1)
+    S.members.forEach(function(m){
+      var g=genOf[m.id];
+      if(g===null||g===0)return;
+      (parentsOf[m.id]||[]).forEach(function(pid){
+        var pg=genOf[pid];
+        var needed=g-1;
+        if(pg===null||pg<needed){genOf[pid]=needed;_anyChange=true;}
+      });
     });
     if(!_anyChange)break;
   }
