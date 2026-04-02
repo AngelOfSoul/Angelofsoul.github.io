@@ -66,38 +66,12 @@ Assumes:
         return Array.from(context.querySelectorAll(selector));
     }
 
-    const SVG_NS = 'http://www.w3.org/2000/svg';
-
     function createElement(tag, props = {}, children = []) {
-        const isSvgTag = ['svg', 'line', 'path', 'circle', 'rect', 'g', 'polyline', 'polygon', 'text', 'use', 'defs', 'marker'].includes(tag);
-        const el = isSvgTag
-            ? document.createElementNS(SVG_NS, tag)
-            : document.createElement(tag);
-        Object.keys(props).forEach(key => {
-            if (key === 'className') {
-                el.className = props[key];
-            } else if (key === 'dataset') {
-                Object.keys(props[key]).forEach(dk => {
-                    el.dataset[dk] = props[key][dk];
-                });
-            } else if (key === 'style' && typeof props[key] === 'string') {
-                el.style.cssText = props[key];
-            } else if (isSvgTag && key !== 'style') {
-                // SVG attributes must use setAttribute with kebab-case names
-                // Skip empty string values (used to mean "no attribute")
-                if (props[key] === '' || props[key] === null || props[key] === undefined) return;
-                const attrName = key.replace(/([A-Z])/g, '-$1').toLowerCase();
-                el.setAttribute(attrName, props[key]);
-            } else {
-                el[key] = props[key];
-            }
-        });
+        const el = document.createElement(tag);
+        Object.assign(el, props);
         children.forEach(child => {
-            if (typeof child === 'string') {
-                el.appendChild(document.createTextNode(child));
-            } else if (child) {
-                el.appendChild(child);
-            }
+            if (typeof child === 'string') el.textContent += child;
+            else el.appendChild(child);
         });
         return el;
     }
@@ -161,36 +135,19 @@ Assumes:
         // Try Supabase first
         if (window.supabase) {
             try {
-                const [familyRes, membersRes] = await Promise.all([
+                const [familyRes, membersRes, relationsRes] = await Promise.all([
                     window.supabase.from('families').select('*').eq('id', state.familyId).single(),
-                    window.supabase.from('members').select('*').eq('family_id', state.familyId)
+                    window.supabase.from('members').select('*').eq('family_id', state.familyId),
+                    window.supabase.from('member_relations').select('*').or(`from_member_id.eq.${state.familyId},to_member_id.eq.${state.familyId}`)
                 ]);
 
                 if (familyRes.error) throw familyRes.error;
                 if (membersRes.error) throw membersRes.error;
+                if (relationsRes.error) throw relationsRes.error;
 
                 state.family = familyRes.data;
                 state.members = membersRes.data || [];
-
-                // Fetch relations for these members (from both directions)
-                const memberIds = state.members.map(m => m.id);
-                let relations = [];
-                if (memberIds.length > 0) {
-                    const [fromRes, toRes] = await Promise.all([
-                        window.supabase.from('member_relations').select('*').in('from_member_id', memberIds),
-                        window.supabase.from('member_relations').select('*').in('to_member_id', memberIds)
-                    ]);
-                    const seen = {};
-                    (fromRes.data || []).concat(toRes.data || []).forEach(r => {
-                        if (!seen[r.id]) { seen[r.id] = true; relations.push(r); }
-                    });
-                }
-                // Normalize: support both old (from/to) and new (from_member_id/to_member_id) field names
-                state.relations = relations.map(r => ({
-                    ...r,
-                    from: r.from_member_id || r.from,
-                    to: r.to_member_id || r.to
-                }));
+                state.relations = relationsRes.data || [];
                 state.isDemoMode = false;
                 console.log('[Genealogy] Loaded real data:', state.family, state.members.length, 'members', state.relations.length, 'relations');
             } catch (err) {
@@ -408,17 +365,16 @@ Assumes:
                     width: 100%;
                     height: 100%;
                     pointer-events: none;
-                    overflow: visible;
                 `
             });
             const line = createElement('line', {
-                x1: String(fromX),
-                y1: String(fromY),
-                x2: String(toX),
-                y2: String(toY),
+                x1: fromX,
+                y1: fromY,
+                x2: toX,
+                y2: toY,
                 stroke: style.color,
                 strokeWidth: '2',
-                strokeDasharray: style.dash || ''
+                strokeDash: style.dash
             });
 
             svg.appendChild(line);
@@ -541,12 +497,7 @@ Assumes:
             // Remove from members
             state.members = state.members.filter(m => m.id !== state.selectedPersonId);
             // Remove relations involving this person
-            state.relations = state.relations.filter(r =>
-                r.from !== state.selectedPersonId &&
-                r.to !== state.selectedPersonId &&
-                r.from_member_id !== state.selectedPersonId &&
-                r.to_member_id !== state.selectedPersonId
-            );
+            state.relations = state.relations.filter(r => r.from !== state.selectedPersonId && r.to !== state.selectedPersonId);
             renderTree();
             state.unsavedChanges = true;
             updateUnsavedIndicator();

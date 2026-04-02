@@ -20,9 +20,6 @@
 /* ── GHID OVERLAY ── */
 .guide-overlay{position:fixed;inset:0;z-index:20000;background:rgba(0,0,0,.78);display:none;align-items:center;justify-content:center;}
 .guide-overlay.open{display:flex;}
-/* Modals care trebuie sa apara DEASUPRA editorului (z-index 15000) */
-#inferModal,#confirmModal{z-index:16000;}
-#deleteModal{z-index:16000;}
 .guide-box{background:#111;border:1px solid #c8983a;border-radius:12px;padding:24px 26px;max-width:380px;width:92%;text-align:center;}
 .guide-title{font-family:'Playfair Display',serif;font-size:19px;color:var(--gold);margin-bottom:8px;}
 .guide-sub{font-size:13px;color:var(--muted);line-height:1.7;margin-bottom:18px;}
@@ -614,23 +611,7 @@ function _getParentsOf(memberId){
   var PT=['tata','mama','step','adopted'],CT=['fiu','fiica'],res=[];
   S.relations.forEach(function(r){
     if(r.from_member_id===memberId&&PT.indexOf(r.relation_type)!==-1)res.push({memberId:r.to_member_id,relType:r.relation_type});
-    else if(r.to_member_id===memberId&&CT.indexOf(r.relation_type)!==-1){
-      // When the relation is from parent's perspective (fiu/fiica), look up the parent's gender
-      // from their own relations to determine if they are tata or mama
-      var parentId=r.from_member_id;
-      var parentMember=S.members.find(function(m){return m.id===parentId;});
-      // Try to infer gender from existing spouse/sibling relations; default to 'tata'
-      var guessedType='tata';
-      if(parentMember){
-        // Check if this parent has a sot (husband) relation — meaning they are a sotie (wife) = mama
-        var hasSot=S.relations.some(function(rx){return(rx.from_member_id===parentId&&rx.relation_type==='sot')||(rx.to_member_id===parentId&&rx.relation_type==='sotie');});
-        if(hasSot)guessedType='mama';
-        // Check if they have sotie (wife) relation — meaning they are sot (husband) = tata
-        var hasSotie=S.relations.some(function(rx){return(rx.from_member_id===parentId&&rx.relation_type==='sotie')||(rx.to_member_id===parentId&&rx.relation_type==='sot');});
-        if(hasSotie)guessedType='tata';
-      }
-      res.push({memberId:parentId,relType:guessedType});
-    }
+    else if(r.to_member_id===memberId&&CT.indexOf(r.relation_type)!==-1)res.push({memberId:r.from_member_id,relType:null});
   });
   return res;
 }
@@ -680,19 +661,14 @@ document.addEventListener('DOMContentLoaded',function(){
     var capturedEditing=S.editingId;
     window.supabase.from('member_relations').insert(rows).select().then(function(r){
       btn.disabled=false;btn.textContent=t('Adauga selectate','Add selected');
-      if(r.error){
-        // Silently ignore inference errors (they are suggestions, not critical)
-        console.warn('[Calnic] Inference insert error:',r.error.message);
-        closeInferModal();
-        return;
-      }
+      if(r.error){return;}
       // Add new relations to memory immediately
       var inserted=r.data&&r.data.length?r.data:rows.map(function(row,i){return Object.assign({id:'tmp_inf_'+Date.now()+'_'+i},row);});
       inserted.forEach(function(rel){S.relations.push(rel);});
       closeInferModal();
       render();
       if(capturedEditing){openEditor(capturedEditing);switchTab(1);}
-    }).catch(function(e){btn.disabled=false;btn.textContent=t('Adauga selectate','Add selected');console.warn('[Calnic] Inference insert catch:',e.message);closeInferModal();});
+    }).catch(function(e){btn.disabled=false;btn.textContent=t('Adauga selectate','Add selected');});
   });
 });
 
@@ -782,7 +758,7 @@ function afterLoad(rid){
   }
 }
 
-function reload(){S.relations=[];loadFamily();}
+function reload(){loadFamily();}
 
 // ── SYNC MEMBERS COUNT ───────────────────────────────────
 function syncMembersCount(){
@@ -798,30 +774,24 @@ function syncMembersCount(){
 // ── RENDER ───────────────────────────────────────────────
 function render(){
   var cv=document.getElementById('treeCanvas'),svg=document.getElementById('connSvg');
-  try{
-    Array.from(cv.children).forEach(function(el){if(el!==svg)cv.removeChild(el);});
-    if(!S.members.length){renderEmpty(cv);return;}
-    var layout=computeLayout(),mxX=0,mxY=0;
-    _genYMap={};
-    Object.keys(layout).forEach(function(id){
-      mxX=Math.max(mxX,layout[id].x+CARD_W+80);
-      mxY=Math.max(mxY,layout[id].y+200);
-      var g=layout[id].gen;
-      if(_genYMap[g]==null||layout[id].y<_genYMap[g])_genYMap[g]=layout[id].y;
-    });
-    mxX=Math.max(mxX,800);mxY=Math.max(mxY,680);
-    cv.style.width=mxX+'px';cv.style.height=mxY+'px';
-    svg.setAttribute('width',mxX);svg.setAttribute('height',mxY);svg.style.width=mxX+'px';svg.style.height=mxY+'px';
-    drawConnectors(svg,layout);
-    S.members.forEach(function(m){if(layout[m.id])cv.appendChild(buildNode(m,layout[m.id]));});
-    cv.appendChild(buildGhost(layout,mxX));
-    buildGenLabels(layout,mxX);
-    drawMinimap(mxX,mxY);applyXform();
-  }catch(err){
-    console.error('[Calnic] render() error:',err);
-    // Restore basic usability — don't let a render crash freeze the whole page
-    try{svg.innerHTML='';}catch(e2){}
-  }
+  Array.from(cv.children).forEach(function(el){if(el!==svg)cv.removeChild(el);});
+  if(!S.members.length){renderEmpty(cv);return;}
+  var layout=computeLayout(),mxX=0,mxY=0;
+  _genYMap={};
+  Object.keys(layout).forEach(function(id){
+    mxX=Math.max(mxX,layout[id].x+CARD_W+80);
+    mxY=Math.max(mxY,layout[id].y+200);
+    var g=layout[id].gen;
+    if(_genYMap[g]==null||layout[id].y<_genYMap[g])_genYMap[g]=layout[id].y;
+  });
+  mxX=Math.max(mxX,800);mxY=Math.max(mxY,680);
+  cv.style.width=mxX+'px';cv.style.height=mxY+'px';
+  svg.setAttribute('width',mxX);svg.setAttribute('height',mxY);svg.style.width=mxX+'px';svg.style.height=mxY+'px';
+  drawConnectors(svg,layout);
+  S.members.forEach(function(m){if(layout[m.id])cv.appendChild(buildNode(m,layout[m.id]));});
+  cv.appendChild(buildGhost(layout,mxX));
+  buildGenLabels(layout,mxX);
+  drawMinimap(mxX,mxY);applyXform();
 }
 
 // ── RELATION METADATA ────────────────────────────────────
@@ -886,7 +856,6 @@ function inferGen(anchorId, targetId, relType){ /* no-op: BFS handles generation
 // tata/mama chain and should NOT create direct layout links.
 var LAYOUT_PAR={tata:1,mama:1,step:1,adopted:1,parent:1};
 var LAYOUT_CHI={fiu:1,fiica:1,child:1};
-// in_law (Fin/Nasa) is NOT a spouse — exclude from spouse layout
 var LAYOUT_SPO={sot:1,sotie:1,spouse:1};
 
 function computeLayout(){
@@ -924,26 +893,34 @@ function computeLayout(){
   var roots=S.members.filter(function(m){return !parentsOf[m.id].length;});
   if(!roots.length)roots=S.members.slice(0,1); // cycle fallback
 
-  var bfsQueue=[], bfsVisited={};
-  roots.forEach(function(m){genOf[m.id]=0;bfsQueue.push(m.id);});
-
-  while(bfsQueue.length){
-    var cur=bfsQueue.shift();
-    if(bfsVisited[cur])continue;
-    bfsVisited[cur]=true;
-    // Spouse → same generation
-    var sp=spousePairs[cur];
-    if(sp&&genOf[sp]===null){genOf[sp]=genOf[cur];bfsQueue.push(sp);}
-    // Children → gen+1 (take max if multiple parents)
-    (childrenOf[cur]||[]).forEach(function(cid){
-      var cg=genOf[cur]+1;
-      if(genOf[cid]===null||genOf[cid]<cg)genOf[cid]=cg;
-      if(!bfsVisited[cid])bfsQueue.push(cid);
+  // Seed roots at gen 0
+  roots.forEach(function(m){genOf[m.id]=0;});
+  // Multi-pass relaxation (Bellman-Ford style for longest path).
+  // Guaranteed to converge in O(depth) passes for a DAG.
+  // Cycles: stops after at most n passes — no infinite loop possible.
+  for(var _pass=0;_pass<n;_pass++){
+    var _anyChange=false;
+    S.members.forEach(function(m){
+      var g=genOf[m.id];
+      if(g===null)return;
+      // Align spouse to same gen (always take the max of the two)
+      var sp2=spousePairs[m.id];
+      if(sp2!=null){
+        var spg=genOf[sp2];
+        var sg=Math.max(g,spg!=null?spg:g);
+        if(genOf[m.id]!==sg){genOf[m.id]=sg;_anyChange=true;}
+        if(genOf[sp2]!==sg){genOf[sp2]=sg;_anyChange=true;}
+      }
+      // Push gen+1 to each child
+      (childrenOf[m.id]||[]).forEach(function(cid){
+        var cg=genOf[m.id]+1;
+        if(genOf[cid]===null||genOf[cid]<cg){genOf[cid]=cg;_anyChange=true;}
+      });
     });
+    if(!_anyChange)break;
   }
-  // Disconnected members — use their 'role' field as a generation hint,
-  // or fall back to gen 0 (same row as roots).
-  S.members.forEach(function(m){if(genOf[m.id]===null)genOf[m.id]=roleToGen(m.role||m.profession||'');});
+  // Any still-null member (fully disconnected) → gen 0
+  S.members.forEach(function(m){if(genOf[m.id]===null)genOf[m.id]=0;});
   // Sync back
   S.members.forEach(function(m){m.generation=genOf[m.id];});
 
@@ -958,7 +935,7 @@ function computeLayout(){
   var stW={}, inStk={};
   function subtreeWidth(id){
     if(stW[id]!=null)return stW[id];
-    if(inStk[id]){stW[id]=1;return 1;}
+    if(inStk[id])return 1; // cycle: return fallback WITHOUT caching so real value can be set later
     inStk[id]=true;
     var sp=spousePairs[id];
     var allCh=childrenOf[id].slice();
@@ -995,9 +972,15 @@ function computeLayout(){
   var shiftX=PAD-minX;
   S.members.forEach(function(m){xPos[m.id]+=shiftX;});
 
-  // 7. Build layout
+  // 7. Build layout — include avSz/cardH so drawConnectors uses correct positions
   var layout={};
-  S.members.forEach(function(m){layout[m.id]={x:xPos[m.id],y:genY[genOf[m.id]],gen:genOf[m.id]};});
+  var _baseN=n<=20?68:n<=50?58:50;
+  S.members.forEach(function(m){
+    var g=genOf[m.id];
+    var avSz=g===0?Math.round(_baseN*1.15):g>=2?Math.round(_baseN*.82):_baseN;
+    var cardH=avSz+39; // avatar + 5px margin-top + ~34px text (name + years)
+    layout[m.id]={x:xPos[m.id],y:genY[g],gen:g,avSz:avSz,cardH:cardH};
+  });
   return layout;
 }
 
@@ -1030,7 +1013,10 @@ function drawConnectors(svg,layout){
   svg.innerHTML='';
   if(!S.relations.length&&S.members.length>1){drawHeuristic(svg,layout);return;}
 
-  var CARD_H=110, CARD_MID=40;
+  // avMid(id): vertical center of avatar from node top — varies by gen/tree size
+  function avMid(id){var l=layout[id];return l?Math.round((l.avSz||68)/2):34;}
+  // cardBot(id): bottom of card from node top
+  function cardBot(id){var l=layout[id];return l?(l.cardH||110):110;}
   var childrenOf2={},spousePairs2={};
   S.members.forEach(function(m){childrenOf2[m.id]=[];});
 
@@ -1056,7 +1042,7 @@ function drawConnectors(svg,layout){
     var k=[r.from_member_id,r.to_member_id].sort().join('|');
     if(drawnSpouse[k])return;drawnSpouse[k]=true;
     var pa=layout[r.from_member_id],pb=layout[r.to_member_id];if(!pa||!pb)return;
-    var x1=pa.x+CARD_W/2,x2=pb.x+CARD_W/2,y=pa.y+CARD_MID;
+    var x1=pa.x+CARD_W/2,x2=pb.x+CARD_W/2,y=pa.y+avMid(r.from_member_id);
     addLine(svg,x1,y,x2,y,'#d4a84a',2,null);
     var tx=mkSvg('text');tx.setAttribute('x',(x1+x2)/2);tx.setAttribute('y',y-4);
     tx.setAttribute('text-anchor','middle');tx.setAttribute('font-size','13');
@@ -1081,7 +1067,7 @@ function drawConnectors(svg,layout){
     var firstChildY=Infinity;
     allCh.forEach(function(c){var cp=layout[c.id];if(cp&&cp.y<firstChildY)firstChildY=cp.y;});
     if(firstChildY===Infinity)return;
-    var parentBottom=pp.y+CARD_H;
+    var parentBottom=pp.y+cardBot(parentId);
     var dropY=Math.round((parentBottom+firstChildY)/2);
     addLine(svg,dropX,parentBottom,dropX,dropY,'#c87050',1.5,null);
     if(allCh.length===1){
@@ -1106,7 +1092,7 @@ function drawConnectors(svg,layout){
   S.relations.forEach(function(r){
     var meta=REL_META[r.relation_type];if(!meta||!meta.isExt)return;
     var pa=layout[r.from_member_id],pb=layout[r.to_member_id];if(!pa||!pb)return;
-    addLine(svg,pa.x+CARD_W/2,pa.y+CARD_MID,pb.x+CARD_W/2,pb.y+CARD_MID,'#70a870',1.5,'4 3');
+    addLine(svg,pa.x+CARD_W/2,pa.y+avMid(r.from_member_id),pb.x+CARD_W/2,pb.y+avMid(r.to_member_id),'#70a870',1.5,'4 3');
   });
 }
 
@@ -1190,7 +1176,10 @@ function buildGenLabels(layout,mxX){
     if(y<genYears[g].min)genYears[g].min=y;
     if(y>genYears[g].max)genYears[g].max=y;
   });
-  var gens=Object.keys(_genYMap).map(Number).sort(function(a,b){return a-b;});
+  // Use the layout's actual generations (not _genYMap which may be stale before updateGenLabels runs)
+  var layoutGens={};
+  Object.keys(layout).forEach(function(id){var g=layout[id].gen;if(g!=null)layoutGens[g]=1;});
+  var gens=Object.keys(layoutGens).map(Number).sort(function(a,b){return a-b;});
   gens.forEach(function(g){
     var el=document.createElement('div');
     el.className='gen-label';
@@ -1604,17 +1593,13 @@ function doRemoveRel(relId,item){
     if(!selRelType){err.textContent=t('Selecteaza tipul legaturii.','Select a relation type.');err.style.display='block';return;}
     var targetId=document.getElementById('relPersonSelect').value;
     if(!targetId){err.textContent=t('Selecteaza o persoana.','Select a person.');err.style.display='block';return;}
-    // Duplicate check: only block if the EXACT SAME relation type already exists between the two people
+    // Duplicate check (only for new relations, not edits)
     if(!editingRelId){
-      var isDup=S.relations.some(function(r){
-        return r.relation_type===selRelType&&(
-          (r.from_member_id===S.editingId&&r.to_member_id===targetId)||
-          (r.from_member_id===targetId&&r.to_member_id===S.editingId)
-        );
-      });
-      if(isDup){err.textContent=t('Aceasta legatura de tip "'+escH(REL_META[selRelType]?REL_META[selRelType].l:selRelType)+'" exista deja intre cele doua persoane.','A "'+escH(REL_META[selRelType]?REL_META[selRelType].l:selRelType)+'" link already exists between these two people.');err.style.display='block';return;}
+      var isDup=S.relations.some(function(r){return(r.from_member_id===S.editingId&&r.to_member_id===targetId)||(r.from_member_id===targetId&&r.to_member_id===S.editingId);});
+      if(isDup){err.textContent=t('Aceasta legatura exista deja intre cele doua persoane.','A relation between these two people already exists.');err.style.display='block';return;}
     }
     var btn=this;btn.disabled=true;btn.textContent=t('Se salveaza...','Saving...');
+    inferGen(S.editingId, targetId, selRelType);
     var bio=REL_META[selRelType]?REL_META[selRelType].bio!==false:true;
     var capturedFrom=S.editingId,capturedTo=targetId,capturedType=selRelType;
     var wasInsert=!editingRelId;
@@ -1622,20 +1607,8 @@ function doRemoveRel(relId,item){
       ?window.supabase.from('member_relations').update({relation_type:selRelType,is_biological:bio}).eq('id',editingRelId).select()
       :window.supabase.from('member_relations').insert({from_member_id:capturedFrom,to_member_id:capturedTo,relation_type:capturedType,is_biological:bio,confidence:100}).select();
     promise.then(function(r){
-        btn.disabled=false;btn.textContent=t('Salveaza legatura','Save link');
-        if(r.error){
-          // Provide a user-friendly message for common database errors
-          var msg=r.error.message||'';
-          if(msg.indexOf('check constraint')!==-1||msg.indexOf('violates')!==-1){
-            err.textContent=t('Eroare baza de date: tipul de legatura nu este suportat. Rulati sql/fix-relation-types.sql in Supabase SQL Editor.','Database error: relation type not supported. Please run sql/fix-relation-types.sql in Supabase SQL Editor.');
-          } else if(msg.indexOf('permission')!==-1||msg.indexOf('policy')!==-1||msg.indexOf('RLS')!==-1){
-            err.textContent=t('Nu aveti permisiunea sa adaugati legaturi in aceasta familie.','You do not have permission to add links to this family.');
-          } else {
-            err.textContent=msg;
-          }
-          err.style.display='block';
-          return;
-        }
+        btn.disabled=false;btn.textContent=t('Salveaza','Save');
+        if(r.error){err.textContent=r.error.message;err.style.display='block';return;}
         // Update S.relations in memory immediately (no reload timing issues)
         if(wasInsert){
           var newRel=(r.data&&r.data[0])||{id:'tmp_'+Date.now(),from_member_id:capturedFrom,to_member_id:capturedTo,relation_type:capturedType,is_biological:bio,confidence:100};
@@ -1647,7 +1620,7 @@ function doRemoveRel(relId,item){
         render();
         if(capturedFrom){openEditor(capturedFrom);switchTab(1);}
         if(wasInsert)inferRelations(capturedFrom,capturedTo,capturedType);
-      }).catch(function(e){btn.disabled=false;btn.textContent=t('Salveaza legatura','Save link');err.textContent=e.message;err.style.display='block';});
+      }).catch(function(e){btn.disabled=false;btn.textContent=t('Salveaza','Save');err.textContent=e.message;err.style.display='block';});
   });
 
   document.getElementById('addRelBtn').addEventListener('click',openModal);
@@ -1781,24 +1754,7 @@ function subscribeRT(){
   if(S.realtimeCh)window.supabase.removeChannel(S.realtimeCh);
   S.realtimeCh=window.supabase.channel('family:'+S.familyId)
     .on('postgres_changes',{event:'*',schema:'public',table:'members',filter:'family_id=eq.'+S.familyId},function(){reload();})
-    .on('postgres_changes',{event:'*',schema:'public',table:'member_relations'},function(payload){
-      // Re-load only relations when a relation changes, to avoid full page reload
-      if(!S.members.length)return;
-      var ids=S.members.map(function(m){return m.id;});
-      var rid=S.reqId;
-      Promise.all([
-        window.supabase.from('member_relations').select('*').in('from_member_id',ids),
-        window.supabase.from('member_relations').select('*').in('to_member_id',ids)
-      ]).then(function(results){
-        if(rid!==S.reqId)return;
-        var seen={},all=[];
-        (results[0].data||[]).concat(results[1].data||[]).forEach(function(r){
-          if(!seen[r.id]){seen[r.id]=true;all.push(r);}
-        });
-        S.relations=all;
-        render();
-      }).catch(function(){});
-    })
+    .on('postgres_changes',{event:'*',schema:'public',table:'member_relations'},function(){reload();})
     .subscribe(function(st){if(st==='CLOSED')setTimeout(subscribeRT,3000);});
 }
 
@@ -1859,6 +1815,19 @@ function initZoomPan(){
   stage.addEventListener('touchstart',function(e){if(e.touches.length===1)lt={x:e.touches[0].clientX,y:e.touches[0].clientY};},{passive:true});
   stage.addEventListener('touchmove',function(e){if(e.touches.length===1&&lt){S.panX+=e.touches[0].clientX-lt.x;S.panY+=e.touches[0].clientY-lt.y;lt={x:e.touches[0].clientX,y:e.touches[0].clientY};applyXform();}},{passive:true});
   stage.addEventListener('click',function(e){if(!e.target.closest('.pn,.ag,.dp'))closeDetail();});
+  // Scroll-wheel zoom toward cursor
+  stage.addEventListener('wheel',function(e){
+    e.preventDefault();
+    var delta=e.deltaY<0?0.1:-0.1;
+    var newZoom=Math.max(0.12,Math.min(2.5,S.zoom+delta));
+    var rect=stage.getBoundingClientRect();
+    var mx=e.clientX-rect.left, my=e.clientY-rect.top;
+    // Keep the point under the cursor stationary
+    S.panX=mx-(mx-S.panX)*(newZoom/S.zoom);
+    S.panY=my-(my-S.panY)*(newZoom/S.zoom);
+    S.zoom=newZoom;
+    applyXform();
+  },{passive:false});
   if(window.ResizeObserver){S.resizeObs=new ResizeObserver(debounce(function(){if(S.members.length)render();center();},150));S.resizeObs.observe(stage);}
 }
 

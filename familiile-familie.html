@@ -100,10 +100,53 @@ footer .g{color:var(--gold-d);font-style:normal;}
 .member-card{background:var(--s1);border:1px solid var(--b1);border-radius:2px;padding:14px 12px;text-align:center;transition:border-color 0.2s;}
 .member-card:hover{border-color:var(--gold-d);}
 .member-card.deceased{opacity:0.5;}
-.mem-avatar{width:40px;height:40px;border-radius:50%;background:var(--s3);border:1px solid var(--gold-d);display:flex;align-items:center;justify-content:center;margin:0 auto 8px;font-family:'Playfair Display',serif;font-size:16px;color:var(--gold);}
+.mem-avatar{width:40px;height:40px;border-radius:50%;background:var(--s3);border:1px solid var(--gold-d);display:flex;align-items:center;justify-content:center;margin:0 auto 8px;font-family:'Playfair Display',serif;font-size:16px;color:var(--gold);overflow:hidden;flex-shrink:0;}
 .mem-name{font-family:'Playfair Display',serif;font-size:13px;color:var(--text);margin-bottom:2px;}
 .mem-role{font-size:11px;color:var(--muted);font-style:italic;}
 .mem-years{font-size:10px;color:var(--b2);margin-top:4px;}
+
+/* ── MEMBER EDIT MODAL (genealogie-style) ── */
+.modal-overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,.78);z-index:9000;align-items:center;justify-content:center;padding:12px;}
+.modal-overlay.open{display:flex;}
+.modal-box{background:#111;border:1px solid var(--gold-d);border-radius:3px;width:100%;max-width:480px;max-height:92vh;overflow-y:auto;}
+.modal-top{height:3px;background:linear-gradient(90deg,var(--gold-d),var(--gold),var(--gold-d));border-radius:3px 3px 0 0;}
+.modal-body{padding:18px 20px 20px;}
+.modal-title{font-family:'Playfair Display',serif;font-size:15px;color:var(--gold);padding-bottom:10px;border-bottom:1px solid #2a2010;margin-bottom:14px;}
+.modal-tabs{display:flex;gap:0;margin-bottom:14px;background:var(--s2);border-radius:4px;overflow:hidden;}
+.fme-tab{flex:1;padding:7px 4px;text-align:center;font-size:11px;cursor:pointer;transition:all .15s;color:var(--muted);border-right:1px solid var(--b2);letter-spacing:.5px;}
+.fme-tab:last-child{border-right:none;}
+.fme-tab.on{background:#1a1208;color:var(--gold);}
+.fme-body{display:none;}.fme-body.on{display:block;}
+.fi-wrap{margin-bottom:12px;}
+.fi-label{display:block;font-size:11px;letter-spacing:1px;color:var(--muted);margin-bottom:4px;}
+.fi-input{width:100%;background:var(--s2);border:1px solid var(--b2);color:var(--text);padding:7px 10px;font-family:'EB Garamond',serif;font-size:14px;border-radius:2px;outline:none;transition:border-color .15s;}
+.fi-input:focus{border-color:var(--gold-d);}
+.fi-input.changed{border-color:var(--amber-br);}
+.fi-textarea{width:100%;background:var(--s2);border:1px solid var(--b2);color:var(--text);padding:7px 10px;font-family:'EB Garamond',serif;font-size:14px;border-radius:2px;outline:none;resize:vertical;transition:border-color .15s;}
+.fi-textarea:focus{border-color:var(--gold-d);}
+.fi-textarea.changed{border-color:var(--amber-br);}
+.fi-select{width:100%;background:var(--s2);border:1px solid var(--b2);color:var(--text);padding:7px 10px;font-family:'EB Garamond',serif;font-size:14px;border-radius:2px;outline:none;}
+.fi-2col{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:0;}
+.fi-hint{font-size:10px;color:var(--muted);margin-top:3px;font-style:italic;}
+.ma-save{padding:8px 20px;background:var(--gold-d);border:1px solid var(--gold);color:#050505;font-family:'Playfair Display',serif;font-size:12px;font-weight:700;letter-spacing:1px;cursor:pointer;border-radius:2px;transition:all .15s;}
+.ma-save:hover:not(:disabled){background:var(--gold);}
+.ma-save:disabled{opacity:.5;cursor:default;}
+.ma-cancel{padding:8px 16px;background:transparent;border:1px solid var(--b2);color:var(--muted);font-family:'EB Garamond',serif;font-size:13px;cursor:pointer;border-radius:2px;transition:all .15s;}
+.ma-cancel:hover{border-color:var(--gold-d);color:var(--text);}
+.modal-acts{display:flex;gap:8px;margin-top:14px;}
+.m-msg{display:none;padding:8px 10px;border-radius:2px;font-size:12px;margin-top:10px;line-height:1.5;}
+.m-msg.ok{display:block;background:#0a1a08;border:1px solid #3a6030;color:#80c070;}
+.m-msg.err{display:block;background:var(--red-bg);border:1px solid var(--red-br);color:var(--red);}
+.change-pill{display:none;align-items:center;gap:4px;background:var(--amber-bg);border:1px solid var(--amber-br);border-radius:10px;padding:2px 8px;font-size:10px;color:var(--amber);margin-left:auto;}
+.change-pill.on{display:flex;}
+.vis-toggle{display:flex;border:1px solid var(--b2);border-radius:3px;overflow:hidden;margin-top:4px;}
+.vt-opt{flex:1;padding:7px 6px;text-align:center;font-size:11px;cursor:pointer;color:var(--muted);transition:all .15s;border-right:1px solid var(--b2);}
+.vt-opt:last-child{border-right:none;}
+.vt-opt.on.public{background:#0a1a08;color:var(--green);}
+.vt-opt.on.family{background:#0a1020;color:#6a90c8;}
+.vt-opt.on.private{background:var(--red-bg);color:var(--red);}
+.hist-row{font-size:12px;color:var(--muted);padding:7px 0;border-bottom:1px solid var(--b1);line-height:1.5;}
+.hist-row:last-child{border-bottom:none;}
 
 /* ── PHOTOS ── */
 .photos-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;}
@@ -655,7 +698,13 @@ function loadFamilyData() {
         birth_year: m.birth_year || null,
         death_year: m.death_year || null,
         profession: m.profession || '',
-        location: m.location || ''
+        location: m.location || '',
+        biography: m.biography || '',
+        story: m.story || '',
+        visibility: m.visibility || 'public',
+        is_living: m.is_living != null ? m.is_living : !m.is_deceased,
+        confidence: m.confidence != null ? m.confidence : 100,
+        photo_url: m.photo_url || null
       };
     });
 
@@ -729,8 +778,11 @@ function renderMembers() {
         + 'onmouseover="this.style.borderColor=\'#c04040\'" onmouseout="this.style.borderColor=\'#6a2020\'">✕ Sterge</button>'
         + '</div>'
       : '';
+    var avInner = m.photo_url
+      ? '<img src="' + escH(m.photo_url) + '" alt="" style="width:100%;height:100%;object-fit:cover;border-radius:50%;display:block;">'
+      : escH(m.initial);
     return '<div class="member-card' + (m.deceased ? ' deceased' : '') + '">'
-      + '<div class="mem-avatar">' + escH(m.initial) + '</div>'
+      + '<div class="mem-avatar">' + avInner + '</div>'
       + '<div class="mem-name">' + escH(m.name) + '</div>'
       + (showRole ? '<div class="mem-role">' + escH(showRole) + '</div>' : '')
       + '<div class="mem-years">' + escH(m.years) + '</div>'
@@ -929,39 +981,83 @@ if (ham && mobileMenu) {
 </script>
 
 <!-- ── MEMBER EDIT MODAL ── -->
-<div id="memEditOverlay" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,.72);z-index:9000;align-items:center;justify-content:center;">
-  <div style="background:#111;border:1px solid #b08030;border-radius:3px;width:100%;max-width:420px;margin:16px;max-height:90vh;overflow-y:auto;">
-    <div style="background:#0a0a0a;border-bottom:1px solid #2a2a2a;padding:14px 18px;display:flex;align-items:center;justify-content:space-between;">
-      <span id="memEditTitle" style="font-family:'Playfair Display',serif;font-size:15px;color:#d4a84a;"></span>
-      <button onclick="closeMemberEdit()" style="background:none;border:none;color:#a09070;font-size:22px;cursor:pointer;line-height:1;">&times;</button>
-    </div>
-    <div style="padding:18px 20px;">
-      <div style="margin-bottom:12px;">
-        <label style="display:block;font-size:11px;letter-spacing:1px;color:#a09070;margin-bottom:4px;">NUME</label>
-        <input id="me-name" style="width:100%;background:#161616;border:1px solid #383838;color:#f0e8d0;padding:7px 10px;font-family:'EB Garamond',serif;font-size:14px;border-radius:2px;outline:none;" />
+<div class="modal-overlay" id="memEditOverlay">
+  <div class="modal-box">
+    <div class="modal-top"></div>
+    <div class="modal-body">
+      <div style="display:flex;align-items:center;gap:10px;margin-bottom:14px;padding-bottom:10px;border-bottom:1px solid #2a2010;">
+        <div style="font-family:'Playfair Display',serif;font-size:15px;color:var(--gold);flex:1;" id="memEditTitle"></div>
+        <span class="change-pill" id="fmeChangePill">&#9679; Modificari nesalvate</span>
+        <button onclick="closeMemberEdit()" style="background:none;border:none;color:var(--muted);font-size:22px;cursor:pointer;line-height:1;padding:0 0 0 8px;">&times;</button>
       </div>
-      <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:12px;">
-        <div>
-          <label style="display:block;font-size:11px;letter-spacing:1px;color:#a09070;margin-bottom:4px;">AN NASTERE</label>
-          <input id="me-birth" type="number" style="width:100%;background:#161616;border:1px solid #383838;color:#f0e8d0;padding:7px 10px;font-family:'EB Garamond',serif;font-size:14px;border-radius:2px;outline:none;" />
+      <div class="modal-tabs">
+        <div class="fme-tab on" id="fme-t0">Date</div>
+        <div class="fme-tab" id="fme-t1">Poza</div>
+        <div class="fme-tab" id="fme-t2">Vizibilitate</div>
+        <div class="fme-tab" id="fme-t3">Istoric</div>
+      </div>
+
+      <!-- TAB 0: DATE -->
+      <div class="fme-body on" id="fme-b0">
+        <div class="fi-wrap"><label class="fi-label">NUME COMPLET *</label><input class="fi-input" id="fme-name" type="text" placeholder="ex. Ion Popescu" autocomplete="off"/></div>
+        <div class="fi-2col">
+          <div class="fi-wrap"><label class="fi-label">AN NASTERE</label><input class="fi-input" id="fme-birth" type="text" placeholder="ex. 1920 sau ~1920"/><div class="fi-hint">Aproximativ? Scrie ~1920</div></div>
+          <div class="fi-wrap"><label class="fi-label">AN DECES (gol=in viata)</label><input class="fi-input" id="fme-death" type="text" placeholder="1995 sau gol"/></div>
         </div>
-        <div>
-          <label style="display:block;font-size:11px;letter-spacing:1px;color:#a09070;margin-bottom:4px;">AN DECES</label>
-          <input id="me-death" type="number" style="width:100%;background:#161616;border:1px solid #383838;color:#f0e8d0;padding:7px 10px;font-family:'EB Garamond',serif;font-size:14px;border-radius:2px;outline:none;" />
+        <div class="fi-2col">
+          <div class="fi-wrap"><label class="fi-label">LOCALITATE</label><input class="fi-input" id="fme-loc" type="text" placeholder="ex. Calnic"/></div>
+          <div class="fi-wrap"><label class="fi-label">PROFESIE</label><input class="fi-input" id="fme-prof" type="text" placeholder="ex. Agricultor"/></div>
+        </div>
+        <div class="fi-wrap"><label class="fi-label">BIOGRAFIE SCURTA</label><textarea class="fi-textarea" id="fme-bio" rows="3" placeholder="Cateva cuvinte despre aceasta persoana..."></textarea></div>
+        <div class="fi-wrap"><label class="fi-label">AMINTIRE DE FAMILIE</label><textarea class="fi-textarea" id="fme-story" rows="2" placeholder="O poveste, o vorba, un moment memorabil..."></textarea><div class="fi-hint">Ramane in familie — nu este publica</div></div>
+        <div id="fme-msg0" class="m-msg"></div>
+        <div class="modal-acts">
+          <button class="ma-save" id="fme-save-btn">Salveaza modificarile</button>
+          <button class="ma-cancel" id="fme-discard-btn">Renunta la modificari</button>
         </div>
       </div>
-      <div style="margin-bottom:12px;">
-        <label style="display:block;font-size:11px;letter-spacing:1px;color:#a09070;margin-bottom:4px;">PROFESIE</label>
-        <input id="me-prof" style="width:100%;background:#161616;border:1px solid #383838;color:#f0e8d0;padding:7px 10px;font-family:'EB Garamond',serif;font-size:14px;border-radius:2px;outline:none;" />
+
+      <!-- TAB 1: POZA -->
+      <div class="fme-body" id="fme-b1">
+        <div style="text-align:center;margin-bottom:12px;">
+          <div id="fmePhotoPreview" style="width:90px;height:90px;border-radius:50%;border:2.5px solid var(--gold-d);margin:0 auto 8px;display:flex;align-items:center;justify-content:center;background:#1a1208;font-family:'Playfair Display',serif;font-size:36px;color:var(--gold);overflow:hidden;"></div>
+        </div>
+        <label style="display:block;background:#1a1208;border:2px dashed #3a2810;border-radius:6px;padding:16px;text-align:center;cursor:pointer;transition:border-color .15s;" id="fmePhotoLabel">
+          <input type="file" accept="image/jpeg,image/png,image/webp" id="fmePhotoInput" style="display:none;"/>
+          <div style="font-family:'Playfair Display',serif;font-size:13px;color:var(--gold);margin-bottom:4px;">Trage poza aici sau click</div>
+          <div style="font-size:11px;color:var(--muted);">JPG, PNG, WEBP &middot; max 5MB</div>
+        </label>
+        <div id="fme-msg1" class="m-msg"></div>
+        <div style="display:flex;gap:8px;margin-top:10px;">
+          <button class="ma-save" id="fme-photo-save" style="font-size:12px;padding:7px;">Salveaza poza</button>
+          <button class="ma-cancel" id="fme-photo-del" style="font-size:12px;padding:7px;color:var(--red);border-color:var(--red-br);">Sterge poza</button>
+        </div>
       </div>
-      <div style="margin-bottom:16px;">
-        <label style="display:block;font-size:11px;letter-spacing:1px;color:#a09070;margin-bottom:4px;">LOCALITATE</label>
-        <input id="me-loc" style="width:100%;background:#161616;border:1px solid #383838;color:#f0e8d0;padding:7px 10px;font-family:'EB Garamond',serif;font-size:14px;border-radius:2px;outline:none;" />
+
+      <!-- TAB 2: VIZIBILITATE -->
+      <div class="fme-body" id="fme-b2">
+        <div style="font-size:12px;color:var(--muted);margin-bottom:12px;line-height:1.7;">Alege cine poate vedea aceasta persoana. Poti schimba oricand.</div>
+        <div class="fi-wrap"><label class="fi-label">VIZIBILITATE</label>
+          <div class="vis-toggle" id="fmeVisToggle">
+            <div class="vt-opt on public" id="fvt-pub">Public</div>
+            <div class="vt-opt family" id="fvt-fam">Familia</div>
+            <div class="vt-opt private" id="fvt-prv">Privat</div>
+          </div>
+        </div>
+        <div id="fmeVisDesc" style="background:var(--s2);border:1px solid var(--b1);border-radius:4px;padding:10px 12px;font-size:12px;color:var(--muted);line-height:1.65;margin-bottom:12px;"></div>
+        <div class="fi-wrap"><label class="fi-label">PERSOANA IN VIATA?</label><select class="fi-select" id="fme-living"><option value="yes">Da, in viata</option><option value="no">Nu, decedata</option></select></div>
+        <div class="fi-wrap"><label class="fi-label">CERTITUDINE DATE (%)</label>
+          <div style="display:flex;align-items:center;gap:10px;"><input type="range" id="fme-conf" min="10" max="100" value="100" style="flex:1;"/><span id="fme-conf-val" style="font-size:12px;color:var(--gold);min-width:36px;text-align:right;">100%</span></div>
+          <div class="fi-hint">100%=document oficial · 50%=traditie orala · 20%=supozitie</div>
+        </div>
+        <div id="fme-msg2" class="m-msg"></div>
+        <button class="ma-save" id="fme-vis-save">Salveaza vizibilitate</button>
       </div>
-      <div id="me-msg" style="display:none;padding:8px 10px;border-radius:2px;font-size:13px;margin-bottom:12px;"></div>
-      <div style="display:flex;gap:8px;justify-content:flex-end;">
-        <button id="me-save" onclick="saveMemberEdit()" style="padding:7px 20px;background:#b08030;border:1px solid #d4a84a;color:#050505;font-family:'Playfair Display',serif;font-size:13px;font-weight:700;letter-spacing:1px;cursor:pointer;border-radius:2px;">Salveaza</button>
-        <button onclick="closeMemberEdit()" style="padding:7px 16px;background:transparent;border:1px solid #383838;color:#a09070;font-family:'EB Garamond',serif;font-size:13px;cursor:pointer;border-radius:2px;">Anuleaza</button>
+
+      <!-- TAB 3: ISTORIC -->
+      <div class="fme-body" id="fme-b3">
+        <div style="font-size:12px;color:var(--muted);margin-bottom:10px;">Toate modificarile acestei persoane.</div>
+        <div id="fmeHistList"></div>
       </div>
     </div>
   </div>
@@ -989,57 +1085,272 @@ if (ham && mobileMenu) {
 <script>
 var _memEditId = null;
 var _memDelId = null;
+var _fmeVis = 'public';
+var _fmePhotoFile = null;
+var _fmeOrigVals = {};
+
+var FME_VIS_DESC = {
+  public: '<strong style="color:var(--green)">Public:</strong> Toti vizitatorii pot vedea numele, locatia si profesia.',
+  family: '<strong style="color:#6a90c8">Familia:</strong> Doar membrii autentificati ai familiei pot vedea aceasta persoana.',
+  private: '<strong style="color:var(--red)">Privat:</strong> Nimeni altcineva nu vede aceasta persoana.'
+};
+
+function fmeShowMsg(n, type, txt) {
+  var el = document.getElementById('fme-msg' + n);
+  if (!el) return;
+  el.className = 'm-msg ' + (type === 'ok' ? 'ok' : 'err');
+  el.innerHTML = txt;
+}
+function fmeHideMsg(n) {
+  var el = document.getElementById('fme-msg' + n);
+  if (el) { el.className = 'm-msg'; el.textContent = ''; }
+}
+
+function switchMemTab(n) {
+  [0,1,2,3].forEach(function(i) {
+    document.getElementById('fme-t' + i).classList.toggle('on', i === n);
+    document.getElementById('fme-b' + i).classList.toggle('on', i === n);
+  });
+}
+
+function fmeSetVis(v) {
+  _fmeVis = v;
+  ['pub','fam','prv'].forEach(function(k) {
+    var el = document.getElementById('fvt-' + k);
+    if (!el) return;
+    el.classList.remove('on','public','family','private');
+  });
+  var map = {public:'pub', family:'fam', private:'prv'};
+  var el = document.getElementById('fvt-' + (map[v] || 'pub'));
+  if (el) el.classList.add('on', v);
+  var desc = document.getElementById('fmeVisDesc');
+  if (desc) desc.innerHTML = FME_VIS_DESC[v] || '';
+}
 
 function openMemberEdit(id) {
   var m = MEMBERS.find(function(x){ return x.id === id; });
   if (!m) return;
   _memEditId = id;
+  _fmePhotoFile = null;
+
   document.getElementById('memEditTitle').textContent = 'Editeaza: ' + m.name;
-  document.getElementById('me-name').value = m.name || '';
-  document.getElementById('me-birth').value = m.birth_year || '';
-  document.getElementById('me-death').value = m.death_year || '';
-  document.getElementById('me-prof').value = m.profession || '';
-  document.getElementById('me-loc').value = m.location || '';
-  var msg = document.getElementById('me-msg'); msg.style.display='none'; msg.textContent='';
-  document.getElementById('memEditOverlay').style.display = 'flex';
+
+  // Tab 0 — Date
+  var flds = {
+    'fme-name': m.name || '',
+    'fme-birth': m.birth_year || '',
+    'fme-death': m.death_year || '',
+    'fme-loc': m.location || '',
+    'fme-prof': m.profession || '',
+    'fme-bio': m.biography || '',
+    'fme-story': m.story || ''
+  };
+  _fmeOrigVals = {};
+  Object.keys(flds).forEach(function(fid) {
+    var el = document.getElementById(fid);
+    if (el) { el.value = flds[fid]; el.classList.remove('changed'); }
+    _fmeOrigVals[fid] = flds[fid];
+  });
+  document.getElementById('fmeChangePill').classList.remove('on');
+  [0,1,2].forEach(function(n){ fmeHideMsg(n); });
+
+  // Tab 1 — Poza
+  var pp = document.getElementById('fmePhotoPreview');
+  pp.innerHTML = '';
+  if (m.photo_url) {
+    var img = document.createElement('img');
+    img.src = m.photo_url;
+    img.style.cssText = 'width:100%;height:100%;object-fit:cover;border-radius:50%;';
+    pp.appendChild(img);
+  } else {
+    pp.textContent = (m.initial || (m.name ? m.name.charAt(0) : '?')).toUpperCase();
+  }
+
+  // Tab 2 — Vizibilitate
+  fmeSetVis(m.visibility || 'public');
+  document.getElementById('fme-living').value = m.is_living ? 'yes' : 'no';
+  var conf = m.confidence != null ? m.confidence : 100;
+  document.getElementById('fme-conf').value = conf;
+  document.getElementById('fme-conf-val').textContent = conf + '%';
+
+  // Tab 3 — Istoric
+  fmeRenderHistory(id);
+
+  switchMemTab(0);
+  document.getElementById('memEditOverlay').classList.add('open');
   document.body.style.overflow = 'hidden';
 }
 
 function closeMemberEdit() {
-  document.getElementById('memEditOverlay').style.display = 'none';
+  document.getElementById('memEditOverlay').classList.remove('open');
   document.body.style.overflow = '';
   _memEditId = null;
+  _fmePhotoFile = null;
 }
 
-function saveMemberEdit() {
-  if (!_memEditId || !window.supabase) return;
-  var btn = document.getElementById('me-save');
-  var msg = document.getElementById('me-msg');
-  var name = document.getElementById('me-name').value.trim();
-  if (!name) { msg.style.cssText='display:block;background:#2a0808;border:1px solid #6a2020;color:#e08080;'; msg.textContent='Numele este obligatoriu.'; return; }
-  btn.disabled = true; btn.textContent = 'Se salveaza...';
-  var updates = {
-    name: name,
-    birth_year: document.getElementById('me-birth').value ? parseInt(document.getElementById('me-birth').value) : null,
-    death_year: document.getElementById('me-death').value ? parseInt(document.getElementById('me-death').value) : null,
-    profession: document.getElementById('me-prof').value.trim() || null,
-    location: document.getElementById('me-loc').value.trim() || null
-  };
-  window.supabase.from('members').update(updates).eq('id', _memEditId).then(function(r) {
-    btn.disabled = false; btn.textContent = 'Salveaza';
-    if (r.error) { msg.style.cssText='display:block;background:#2a0808;border:1px solid #6a2020;color:#e08080;'; msg.textContent=r.error.message; return; }
-    // Update local MEMBERS array
-    MEMBERS = MEMBERS.map(function(m) {
-      if (m.id !== _memEditId) return m;
-      var by = updates.birth_year, dy = updates.death_year;
-      var years = (by?String(by):'') + (dy?' — '+dy:(by?' —':''));
-      return Object.assign({}, m, updates, {years: years, birth_year: by, death_year: dy});
+function fmeRenderHistory(id) {
+  var el = document.getElementById('fmeHistList');
+  if (!el || !window.supabase) return;
+  el.innerHTML = '<div style="font-size:12px;color:var(--muted);font-style:italic;">Se incarca...</div>';
+  window.supabase.from('member_history').select('*').eq('member_id', id).order('created_at', {ascending:false}).limit(30)
+    .then(function(r) {
+      if (r.error || !r.data || !r.data.length) {
+        el.innerHTML = '<div style="font-size:12px;color:var(--muted);font-style:italic;">Nicio modificare inregistrata.</div>';
+        return;
+      }
+      el.innerHTML = r.data.map(function(h) {
+        var d = h.created_at ? h.created_at.slice(0,10) : '';
+        return '<div class="hist-row"><span style="color:var(--gold);margin-right:6px;">' + d + '</span>' + (h.description || h.action || JSON.stringify(h.changes||{})) + '</div>';
+      }).join('');
+    }).catch(function() {
+      el.innerHTML = '<div style="font-size:12px;color:var(--muted);font-style:italic;">Nicio modificare inregistrata.</div>';
     });
-    closeMemberEdit();
-    renderMembers();
-  }).catch(function(e) { btn.disabled=false; btn.textContent='Salveaza'; msg.style.cssText='display:block;background:#2a0808;border:1px solid #6a2020;color:#e08080;'; msg.textContent=e.message; });
 }
 
+// Tab switching
+[0,1,2,3].forEach(function(i) {
+  var el = document.getElementById('fme-t' + i);
+  if (el) el.addEventListener('click', function(){ switchMemTab(i); });
+});
+
+// Field change tracking
+['fme-name','fme-birth','fme-death','fme-loc','fme-prof','fme-bio','fme-story'].forEach(function(fid) {
+  var el = document.getElementById(fid);
+  if (!el) return;
+  el.addEventListener('input', function() {
+    var changed = String(el.value) !== String(_fmeOrigVals[fid] || '');
+    el.classList.toggle('changed', changed);
+    var any = document.querySelectorAll('#fme-b0 .changed').length > 0;
+    document.getElementById('fmeChangePill').classList.toggle('on', any);
+  });
+});
+
+// Discard
+document.getElementById('fme-discard-btn').addEventListener('click', function() {
+  Object.keys(_fmeOrigVals).forEach(function(fid) {
+    var el = document.getElementById(fid);
+    if (el) { el.value = _fmeOrigVals[fid]; el.classList.remove('changed'); }
+  });
+  document.getElementById('fmeChangePill').classList.remove('on');
+});
+
+// Save dates
+document.getElementById('fme-save-btn').addEventListener('click', function() {
+  var id = _memEditId; if (!id || !window.supabase) return;
+  var name = document.getElementById('fme-name').value.trim();
+  if (!name || name.length < 2) { fmeShowMsg(0, 'err', 'Numele este obligatoriu (min 2 caractere).'); return; }
+  var bv = document.getElementById('fme-birth').value.trim();
+  var dv = document.getElementById('fme-death').value.trim();
+  var by = bv ? (parseInt(bv.replace('~',''),10)||null) : null;
+  var dy = dv ? (parseInt(dv,10)||null) : null;
+  if (by && dy && dy <= by) { fmeShowMsg(0, 'err', 'Decesul nu poate fi inainte de nastere.'); return; }
+  var btn = this; btn.disabled = true; btn.textContent = 'Se salveaza...';
+  var upd = {
+    name: name,
+    birth_year: by || null,
+    death_year: dy || null,
+    is_deceased: !!dy,
+    location: document.getElementById('fme-loc').value.trim() || null,
+    profession: document.getElementById('fme-prof').value.trim() || null,
+    biography: document.getElementById('fme-bio').value.trim() || null,
+    story: document.getElementById('fme-story').value.trim() || null,
+    initial: name.charAt(0).toUpperCase()
+  };
+  window.supabase.from('members').update(upd).eq('id', id).then(function(r) {
+    btn.disabled = false; btn.textContent = 'Salveaza modificarile';
+    if (r.error) { fmeShowMsg(0, 'err', r.error.message); return; }
+    var years = (upd.birth_year||'') + (upd.death_year?' — '+upd.death_year:(upd.birth_year?' —':''));
+    MEMBERS = MEMBERS.map(function(m){ return m.id===id ? Object.assign({},m,upd,{years:years}) : m; });
+    document.querySelectorAll('#fme-b0 .changed').forEach(function(f){ f.classList.remove('changed'); });
+    document.getElementById('fmeChangePill').classList.remove('on');
+    Object.keys(_fmeOrigVals).forEach(function(k){ var e=document.getElementById(k); if(e) _fmeOrigVals[k]=e.value; });
+    fmeShowMsg(0, 'ok', 'Salvat!');
+    renderMembers();
+  }).catch(function(e){ btn.disabled=false; btn.textContent='Salveaza modificarile'; fmeShowMsg(0,'err',e.message); });
+});
+
+// Visibility toggle
+['pub','fam','prv'].forEach(function(k) {
+  var el = document.getElementById('fvt-' + k);
+  if (!el) return;
+  var vm = {pub:'public', fam:'family', prv:'private'};
+  el.addEventListener('click', function(){ fmeSetVis(vm[k]); });
+});
+
+document.getElementById('fme-conf').addEventListener('input', function(){
+  document.getElementById('fme-conf-val').textContent = this.value + '%';
+});
+
+// Save visibility
+document.getElementById('fme-vis-save').addEventListener('click', function() {
+  var id = _memEditId; if (!id || !window.supabase) return;
+  var btn = this; btn.disabled = true;
+  var isLiving = document.getElementById('fme-living').value === 'yes';
+  var conf = parseInt(document.getElementById('fme-conf').value, 10) || 100;
+  window.supabase.from('members').update({visibility: _fmeVis, is_living: isLiving, confidence: conf}).eq('id', id)
+    .then(function(r) {
+      btn.disabled = false;
+      if (r.error) { fmeShowMsg(2, 'err', r.error.message); return; }
+      MEMBERS = MEMBERS.map(function(m){ return m.id===id ? Object.assign({},m,{visibility:_fmeVis,is_living:isLiving,confidence:conf}) : m; });
+      fmeShowMsg(2, 'ok', 'Salvat!');
+    }).catch(function(e){ btn.disabled=false; fmeShowMsg(2,'err',e.message); });
+});
+
+// Photo upload
+document.getElementById('fmePhotoInput').addEventListener('change', function() {
+  var file = this.files && this.files[0];
+  if (!file) return;
+  if (file.size > 5 * 1024 * 1024) { fmeShowMsg(1, 'err', 'Poza depaseste 5MB.'); return; }
+  _fmePhotoFile = file;
+  var reader = new FileReader();
+  reader.onload = function(ev) {
+    var pp = document.getElementById('fmePhotoPreview');
+    pp.innerHTML = '';
+    var img = document.createElement('img');
+    img.src = ev.target.result;
+    img.style.cssText = 'width:100%;height:100%;object-fit:cover;border-radius:50%;';
+    pp.appendChild(img);
+  };
+  reader.readAsDataURL(file);
+});
+
+document.getElementById('fme-photo-save').addEventListener('click', function() {
+  var id = _memEditId; if (!id || !window.supabase || !_fmePhotoFile) { fmeShowMsg(1,'err','Selecteaza o poza mai intai.'); return; }
+  var btn = this; btn.disabled = true; btn.textContent = 'Se incarca...';
+  var ext = _fmePhotoFile.name.split('.').pop() || 'jpg';
+  var path = 'members/' + id + '.' + ext;
+  window.supabase.storage.from('photos').upload(path, _fmePhotoFile, {upsert:true})
+    .then(function(r) {
+      if (r.error) { btn.disabled=false; btn.textContent='Salveaza poza'; fmeShowMsg(1,'err',r.error.message); return; }
+      var pub = window.supabase.storage.from('photos').getPublicUrl(path);
+      var url = pub.data && pub.data.publicUrl;
+      return window.supabase.from('members').update({photo_url: url}).eq('id', id).then(function(ur) {
+        btn.disabled = false; btn.textContent = 'Salveaza poza';
+        if (ur.error) { fmeShowMsg(1,'err',ur.error.message); return; }
+        MEMBERS = MEMBERS.map(function(m){ return m.id===id ? Object.assign({},m,{photo_url:url}) : m; });
+        _fmePhotoFile = null;
+        fmeShowMsg(1,'ok','Poza salvata!');
+        renderMembers();
+      });
+    }).catch(function(e){ btn.disabled=false; btn.textContent='Salveaza poza'; fmeShowMsg(1,'err',e.message); });
+});
+
+document.getElementById('fme-photo-del').addEventListener('click', function() {
+  var id = _memEditId; if (!id || !window.supabase) return;
+  if (!confirm('Stergi poza acestei persoane?')) return;
+  window.supabase.from('members').update({photo_url: null}).eq('id', id).then(function(r) {
+    if (r.error) { fmeShowMsg(1,'err',r.error.message); return; }
+    MEMBERS = MEMBERS.map(function(m){ return m.id===id ? Object.assign({},m,{photo_url:null}) : m; });
+    var pp = document.getElementById('fmePhotoPreview');
+    var m2 = MEMBERS.find(function(x){ return x.id===id; });
+    pp.innerHTML = '';
+    pp.textContent = (m2 && m2.initial) || '?';
+    fmeShowMsg(1,'ok','Poza stearsa.');
+    renderMembers();
+  });
+});
+
+// Delete member modal
 function openMemberDel(id) {
   var m = MEMBERS.find(function(x){ return x.id === id; });
   if (!m) return;
@@ -1063,17 +1374,17 @@ function execMemberDel() {
   btn.disabled = true; btn.textContent = 'Se sterge...';
   window.supabase.from('members').delete().eq('id', _memDelId).then(function(r) {
     btn.disabled = false; btn.textContent = 'Sterge definitiv';
-    if (r.error) { msg.style.cssText='display:block;background:#2a0808;border:1px solid #6a2020;color:#e08080;'; msg.textContent=r.error.message; msg.style.display='block'; return; }
+    if (r.error) { msg.style.cssText='display:block;background:var(--red-bg);border:1px solid var(--red-br);color:var(--red);'; msg.textContent=r.error.message; return; }
     MEMBERS = MEMBERS.filter(function(m){ return m.id !== _memDelId; });
     closeMemberDel();
     renderMembers();
-  }).catch(function(e) { btn.disabled=false; btn.textContent='Sterge definitiv'; msg.style.cssText='display:block;background:#2a0808;border:1px solid #6a2020;color:#e08080;'; msg.style.display='block'; msg.textContent=e.message; });
+  }).catch(function(e){ btn.disabled=false; btn.textContent='Sterge definitiv'; msg.style.cssText='display:block;background:var(--red-bg);border:1px solid var(--red-br);color:var(--red);'; msg.textContent=e.message; });
 }
 
 document.addEventListener('keydown', function(e) {
   if (e.key === 'Escape') {
     if (document.getElementById('memDelOverlay').style.display === 'flex') closeMemberDel();
-    else if (document.getElementById('memEditOverlay').style.display === 'flex') closeMemberEdit();
+    else if (document.getElementById('memEditOverlay').classList.contains('open')) closeMemberEdit();
   }
 });
 document.getElementById('memEditOverlay').addEventListener('click', function(e){ if(e.target===this) closeMemberEdit(); });
