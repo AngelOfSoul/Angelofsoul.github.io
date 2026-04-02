@@ -616,12 +616,36 @@ function _getParentsOf(memberId){
   return res;
 }
 function inferRelations(fromId,toId,relType){
+  var proposals=[];
+
+  // ── SIBLING inference: share known parents ────────────────
+  if(relType==='frate'||relType==='sora'){
+    // For each pair (child, sibling): parents of child → suggest as parents of sibling
+    [[fromId,toId],[toId,fromId]].forEach(function(pair){
+      var childId=pair[0], sibId=pair[1];
+      var sibM=S.members.find(function(m){return m.id===sibId;});
+      if(!sibM)return;
+      _getParentsOf(childId).forEach(function(par){
+        if(!_parentChildExists(sibId,par.memberId)){
+          var pm=S.members.find(function(m){return m.id===par.memberId;});
+          if(!pm)return;
+          var pType=par.relType||'tata'; // relType is null when found via fiu/fiica — default tata
+          var lbl=REL_META[pType]?REL_META[pType].l:pType;
+          proposals.push({from:sibId,to:par.memberId,type:pType,bio:true,text:pm.name+' este '+lbl+' lui '+sibM.name});
+        }
+      });
+    });
+    if(!proposals.length)return;
+    _showInferModal(proposals);
+    return;
+  }
+
+  // ── PARENT/CHILD inference: other-parent + grandparents ──
   var BIO=['tata','mama','fiu','fiica'];
   if(BIO.indexOf(relType)===-1)return;
   var parentId,childId;
   if(relType==='tata'||relType==='mama'){parentId=toId;childId=fromId;}
   else{parentId=fromId;childId=toId;}
-  var proposals=[];
   _getSpousesOf(parentId).forEach(function(sp){
     if(!_parentChildExists(childId,sp.memberId)){
       var sm=S.members.find(function(m){return m.id===sp.memberId;});
@@ -638,6 +662,10 @@ function inferRelations(fromId,toId,relType){
     }
   });
   if(!proposals.length)return;
+  _showInferModal(proposals);
+}
+
+function _showInferModal(proposals){
   _inferProposals=proposals;
   var list=document.getElementById('inferList');list.innerHTML='';
   proposals.forEach(function(p,i){
