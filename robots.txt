@@ -8,6 +8,7 @@ Allow: /genealogie.html
 Allow: /istorie.html
 Allow: /contact.html
 Allow: /intrebari.html
+Allow: /arborele-satului.html
 
 Disallow: /admin.html
 Disallow: /dashboard.html

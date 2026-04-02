@@ -705,7 +705,9 @@ function inferRelations(fromId,toId,relType){
   // 2. Suggest grandparents (parents of parentId) for this child
   _getParentsOf(parentId).forEach(function(gp){
     if(!_parentChildExists(childId,gp.memberId)){
-      var gpType=gp.relType==='mama'?'bunica':'bunic';
+      // relType null means found via inverse fiu/fiica — guess gender from their own relations
+      var effectiveType=gp.relType||_guessParentType(gp.memberId);
+      var gpType=effectiveType==='mama'?'bunica':'bunic';
       var gm=S.members.find(function(m){return m.id===gp.memberId;});
       var cm=S.members.find(function(m){return m.id===childId;});
       if(gm&&cm){var lbl=REL_META[gpType]?REL_META[gpType].l:gpType;proposals.push({from:childId,to:gp.memberId,type:gpType,bio:true,text:gm.name+' este '+lbl+' lui '+cm.name});}
@@ -1366,7 +1368,7 @@ function hideTT(){clearTimeout(S.ttTimer);document.getElementById('htip').classL
 function openDetail(id){
   var m=S.members.find(function(x){return x.id===id;});if(!m)return;
   S.selectedId=id;hideTT();
-  document.querySelectorAll('.pn').forEach(function(n){n.classList.remove('sel','dim','hl');n.classList.toggle('sel',n.getAttribute('data-id')===id);});
+  document.querySelectorAll('.pn').forEach(function(n){n.classList.remove('sel','dim','hl');n.classList.toggle('sel',n.getAttribute('data-id')===id);});S.highlightedId=null;
   var ph=document.getElementById('dpPhoto');ph.innerHTML='';
   var ov=document.createElement('div');ov.className='dp-ph-ov';ov.setAttribute('data-ro','Apasa pentru a schimba poza');ov.setAttribute('data-en','Click to change photo');ov.textContent=t('Apasa pentru a schimba poza','Click to change photo');ph.appendChild(ov);
   if(m.photo_url){var img=document.createElement('img');img.src=m.photo_url;img.alt=escH(m.name);ph.insertBefore(img,ph.firstChild);}
@@ -1412,13 +1414,20 @@ function openDetail(id){
 }
 
 
-function closeDetail(){document.getElementById('detailPanel').classList.remove('open');document.querySelectorAll('.pn').forEach(function(n){n.classList.remove('sel','dim','hl');});S.selectedId=null;}
+function closeDetail(){document.getElementById('detailPanel').classList.remove('open');document.querySelectorAll('.pn').forEach(function(n){n.classList.remove('sel','dim','hl');});S.selectedId=null;S.highlightedId=null;}
 
+function clearHighlight(){
+  document.querySelectorAll('.pn').forEach(function(n){n.classList.remove('hl','dim');});
+  S.highlightedId=null;
+}
 function highlightFamily(id){
   id=id||S.selectedId;if(!id)return;
+  // Toggle off if already highlighting the same person
+  if(S.highlightedId===id){clearHighlight();return;}
   var vis={};var q=[id];
   while(q.length){var cur=q.shift();if(vis[cur])continue;vis[cur]=true;S.relations.forEach(function(r){if(r.from_member_id===cur&&!vis[r.to_member_id])q.push(r.to_member_id);if(r.to_member_id===cur&&!vis[r.from_member_id])q.push(r.from_member_id);});}
   document.querySelectorAll('.pn').forEach(function(n){var nid=n.getAttribute('data-id');n.classList.toggle('hl',!!vis[nid]);n.classList.toggle('dim',!vis[nid]);});
+  S.highlightedId=id;
 }
 
 // ── EDITOR MODAL ─────────────────────────────────────────
@@ -1949,8 +1958,8 @@ function initZoomPan(){
   // Scroll-wheel zoom toward cursor
   stage.addEventListener('wheel',function(e){
     e.preventDefault();
-    var delta=e.deltaY<0?0.1:-0.1;
-    var newZoom=Math.max(0.12,Math.min(2.5,S.zoom+delta));
+    var delta=e.deltaY<0?0.06:-0.06;
+    var newZoom=Math.max(0.15,Math.min(1.4,S.zoom+delta));
     var rect=stage.getBoundingClientRect();
     var mx=e.clientX-rect.left, my=e.clientY-rect.top;
     // Keep the point under the cursor stationary

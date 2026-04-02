@@ -1,0 +1,812 @@
+<!DOCTYPE html>
+<html lang="ro" style="background:#0a0a0a;">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="description" content="Arborele satului Calnic — toate familiile conectate, Alba, Transilvania.">
+<meta name="keywords" content="Calnic, arbore sat, genealogie, familii, Alba, Transilvania, Romania">
+<meta property="og:title" content="Arborele Satului — Calnic Online">
+<meta property="og:description" content="Toate familiile din Calnic si legaturile dintre ele.">
+<meta property="og:type" content="website">
+<meta property="og:url" content="https://calniconline.ro/arborele-satului.html">
+<meta property="og:image" content="https://calniconline.ro/og-image.png">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="630">
+<meta property="og:locale" content="ro_RO">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="Arborele Satului — Calnic Online">
+<meta name="twitter:image" content="https://calniconline.ro/og-image.png">
+<link rel="canonical" href="https://calniconline.ro/arborele-satului.html">
+<title>Arborele Satului — Calnic Online</title>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,600;0,700;1,400&family=EB+Garamond:ital,wght@0,400;0,500;1,400&display=swap" rel="stylesheet">
+<link rel="icon" type="image/svg+xml" href="favicon.svg">
+<link rel="icon" type="image/x-icon" href="favicon.ico">
+<link rel="stylesheet" href="css/style.css">
+<style>
+:root{--bg:#0a0a0a;--s1:#111;--s2:#161616;--s3:#1c1c1c;--b1:#2a2a2a;--b2:#383838;--gold:#d4a84a;--gold-l:#e0b84a;--gold-d:#b08030;--gold-m:#7a5828;--text:#f0e8d0;--muted:#a09070;--green:#82c46a;--green-bg:#0d1a0d;--green-br:#2a4a2a;--red:#c86a6a;--red-bg:#1a0d0d;--amber:#c8a040;}
+*,*::before,*::after{margin:0;padding:0;box-sizing:border-box;}
+body{background:var(--bg);color:var(--text);font-family:'EB Garamond',Georgia,serif;font-size:17px;line-height:1.75;min-height:100vh;}
+a{color:var(--gold);text-decoration:none;}a:hover{color:var(--gold-l);}img{display:block;max-width:100%;}button{font-family:inherit;cursor:pointer;}
+.lang-bar{background:#050505;border-bottom:1px solid var(--b1);padding:5px 24px;display:flex;justify-content:flex-end;align-items:center;gap:8px;}
+.lang-label{font-size:11px;letter-spacing:2px;color:#c8a870;}
+.lang-btn{background:none;border:1px solid #585040;color:var(--text);padding:2px 11px;font-size:12px;letter-spacing:1px;transition:all .2s;border-radius:1px;}
+.lang-btn.active{background:var(--gold-d);border-color:var(--gold-l);color:#050505;font-weight:700;}
+.lang-btn:hover:not(.active){border-color:var(--gold);}
+.site-header{background:#050505;border-bottom:2px solid var(--gold-d);display:flex;align-items:center;justify-content:center;gap:28px;padding:10px 32px;min-height:110px;}
+.banner-img{height:90px;width:auto;flex-shrink:0;border-radius:2px;border:1px solid var(--b2);}
+.header-divider{width:1px;height:75px;background:linear-gradient(to bottom,transparent,var(--gold-d),transparent);flex-shrink:0;opacity:.5;}
+.header-motto{display:flex;flex-direction:column;align-items:center;gap:6px;flex-shrink:0;}
+.header-sub{font-style:italic;font-size:15px;letter-spacing:3px;}
+nav{background:var(--s1);border-bottom:2px solid var(--gold-d);display:flex;flex-wrap:wrap;align-items:stretch;}
+.nav-link{padding:11px 16px;font-size:14px;letter-spacing:.5px;color:var(--text);border-right:1px solid var(--b1);transition:all .18s;display:flex;align-items:center;gap:6px;}
+.nav-link:hover{background:var(--s2);color:var(--gold-l);}
+.nav-link.active{background:var(--s2);color:var(--gold);border-bottom:2px solid var(--gold);}
+.nav-right{margin-left:auto;display:flex;}
+.nav-login{padding:11px 18px;font-size:14px;color:var(--gold);border-left:1px solid var(--b1);transition:all .18s;display:flex;align-items:center;gap:6px;}
+.nav-login:hover{background:#2a0a0a;color:var(--text);}
+.hamburger{display:none;background:none;border:1px solid var(--b2);color:var(--gold);padding:6px 10px;font-size:20px;margin-left:auto;border-radius:2px;transition:all .2s;}
+.hamburger:hover{border-color:var(--gold-d);background:var(--s2);}
+.nav-mobile-menu{display:none;flex-direction:column;background:var(--s1);border-bottom:2px solid var(--gold-d);width:100%;}
+.nav-mobile-menu.open{display:flex;}
+.nav-mobile-link{padding:13px 20px;font-size:16px;color:var(--text);border-bottom:1px solid var(--b1);display:flex;align-items:center;gap:10px;transition:all .15s;}
+.nav-mobile-link:hover{background:var(--s2);color:var(--gold-l);}
+.nav-mobile-link.active{color:var(--gold);background:var(--s2);border-left:3px solid var(--gold);}
+.nav-mobile-login{padding:13px 20px;font-size:16px;color:var(--gold);border-bottom:1px solid var(--b1);display:flex;align-items:center;gap:10px;}
+.scroll-top{position:fixed;bottom:28px;right:24px;background:#111;border:1px solid #b08030;color:var(--gold);width:40px;height:40px;border-radius:2px;font-size:20px;display:flex;align-items:center;justify-content:center;opacity:0;transition:opacity .3s;z-index:9999;}
+.scroll-top:hover{background:#b08030;color:#0a0a0a;}
+.scroll-bottom{position:fixed;bottom:74px;right:24px;background:#111;border:1px solid var(--b2);color:#c8aa80;width:40px;height:40px;border-radius:2px;font-size:20px;display:flex;align-items:center;justify-content:center;opacity:1;transition:opacity .3s;z-index:9999;}
+.scroll-bottom:hover{border-color:#b08030;color:var(--gold);}
+footer{background:#050505;border-top:2px solid var(--gold-d);padding:16px 24px;text-align:center;font-size:13px;color:var(--muted);letter-spacing:1.5px;font-style:italic;}
+footer .g{color:var(--gold-d);font-style:normal;}
+.page-hero{background:#050505;border-bottom:2px solid var(--gold-d);padding:44px 24px 38px;text-align:center;}
+.page-hero-title{font-family:'Playfair Display',serif;font-size:36px;color:var(--gold-l);letter-spacing:2px;margin-bottom:8px;}
+.page-hero-sub{font-size:16px;color:var(--muted);font-style:italic;}
+.page-hero-orn{color:var(--gold-m);letter-spacing:8px;font-size:12px;margin-top:12px;}
+.section-head{display:flex;align-items:center;gap:14px;margin-bottom:20px;}
+.section-head::before{content:'';width:24px;height:1px;background:var(--gold);flex-shrink:0;}
+.section-head::after{content:'';flex:1;height:1px;background:var(--b2);}
+.section-head-title{font-family:'Playfair Display',serif;font-size:12px;font-weight:600;letter-spacing:3px;text-transform:uppercase;color:var(--gold);white-space:nowrap;}
+.sidebar-box{background:var(--s1);border:1px solid var(--b1);border-radius:4px;padding:18px;margin-bottom:18px;}
+.sb-title{font-family:'Playfair Display',serif;font-size:13px;color:var(--gold);letter-spacing:1px;margin-bottom:12px;padding-bottom:8px;border-bottom:1px solid var(--b2);}
+.legend-item{display:flex;align-items:center;gap:8px;margin-bottom:8px;font-size:12px;color:var(--muted);}
+.leg-line{width:24px;height:2px;flex-shrink:0;}
+.leg-line.blood{background:#c87050;}
+.leg-line.marriage{background:#d4a84a;height:3px;}
+.leg-line.distant{background:#4a4a4a;height:2px;border-top:1px dashed #6a6a6a;}
+.leg-dot-iso{width:11px;height:11px;border-radius:50%;border:1.5px dashed #6a6060;flex-shrink:0;}
+@keyframes spin{to{transform:rotate(360deg);}}
+.calnic-spinner{display:inline-block;width:22px;height:22px;border:2px solid var(--b2);border-top-color:var(--gold);border-radius:50%;animation:spin .8s linear infinite;vertical-align:middle;}
+.calnic-loading{display:flex;align-items:center;justify-content:center;gap:12px;padding:48px 24px;color:var(--muted);font-style:italic;font-size:15px;}
+.calnic-error{text-align:center;padding:48px 24px;}
+.calnic-error-icon{font-size:36px;color:var(--b2);margin-bottom:12px;}
+.calnic-error-title{font-family:'Playfair Display',serif;font-size:20px;color:var(--red);margin-bottom:8px;}
+.calnic-error-sub{font-size:14px;color:var(--muted);line-height:1.7;margin-bottom:20px;max-width:380px;margin-left:auto;margin-right:auto;}
+.calnic-error-btn{display:inline-block;padding:9px 22px;background:var(--red-bg);border:1px solid #3a1a1a;color:var(--red);border-radius:4px;font-size:13px;cursor:pointer;transition:all .15s;}
+.calnic-error-btn:hover{background:var(--red);color:#0a0a0a;}
+.stats-bar{display:flex;flex-wrap:wrap;gap:16px;padding:14px 18px;background:var(--s1);border:1px solid var(--b1);border-left:3px solid var(--gold-d);border-radius:2px;margin-bottom:24px;}
+.sb-stat{display:flex;flex-direction:column;align-items:center;}
+.sb-n{font-family:'Playfair Display',serif;font-size:18px;color:var(--gold);}
+.sb-l{font-size:9px;color:var(--muted);text-transform:uppercase;letter-spacing:1px;}
+.main-wrap{max-width:1100px;margin:0 auto;padding:36px 24px;display:grid;grid-template-columns:1fr 260px;gap:32px;align-items:start;}
+@media(max-width:760px){.main-wrap{grid-template-columns:1fr;}}
+.view-toggle-bar{display:flex;gap:8px;margin-bottom:20px;flex-wrap:wrap;}
+.vt-btn{background:none;border:1px solid var(--b2);color:var(--muted);padding:7px 18px;font-size:13px;letter-spacing:.5px;border-radius:2px;transition:all .15s;font-family:'EB Garamond',serif;}
+.vt-btn:hover{border-color:var(--gold-d);color:var(--text);}
+.vt-btn.active{background:var(--s2);border-color:var(--gold-d);color:var(--gold);border-left:3px solid var(--gold);}
+/* LIST VIEW — FIX P13: overflow:hidden numai pe containerul interior */
+.list-view{display:flex;border:1px solid var(--b1);border-radius:4px;overflow:hidden;height:520px;}
+.fam-list-panel{width:180px;flex-shrink:0;border-right:1px solid var(--b1);display:flex;flex-direction:column;background:var(--s1);}
+.fam-list-search{padding:8px;border-bottom:1px solid var(--b1);}
+.fam-list-search input{width:100%;background:var(--s2);border:1px solid var(--b1);color:var(--text);font-family:'EB Garamond',serif;font-size:13px;padding:6px 10px;border-radius:2px;outline:none;transition:border-color .2s;}
+.fam-list-search input:focus{border-color:var(--gold-d);}
+.fam-list-search input::placeholder{color:#786040;}
+.fam-list-items{flex:1;overflow-y:auto;}
+.fam-item{padding:8px 12px;cursor:pointer;border-left:2px solid transparent;display:flex;justify-content:space-between;align-items:center;transition:all .12s;border-bottom:1px solid var(--b1);}
+.fam-item:hover{background:var(--s2);}
+.fam-item.active{border-left-color:var(--gold);background:#1a1208;}
+.fam-item.active .fi-name{color:var(--gold);}
+.fi-name{font-size:13px;color:var(--text);font-family:'Playfair Display',serif;}
+.fi-count{font-size:11px;color:var(--muted);}
+/* TREE PANEL — FIX P5: overflow numai pe inner wrapper */
+.tree-panel{flex:1;background:var(--bg);overflow:hidden;position:relative;display:flex;flex-direction:column;}
+.tree-panel-inner{flex:1;overflow:auto;position:relative;}
+.tree-svg-wrap{min-width:440px;padding:12px 8px 24px;position:relative;}
+.t-node{background:var(--s2);border:1px solid var(--gold-m);border-radius:4px;padding:8px 10px;min-width:96px;max-width:124px;text-align:center;cursor:pointer;transition:all .18s;display:inline-flex;flex-direction:column;align-items:center;gap:3px;}
+.t-node:hover{border-color:var(--gold);transform:scale(1.04);}
+.t-node.deceased{opacity:.7;border-style:dashed;}
+.t-node.unknown{border-style:dashed;border-color:var(--b2);background:transparent;}
+.t-node.low-conf{border-style:dotted;border-color:var(--gold-m);}
+.t-node-avatar{width:34px;height:34px;border-radius:50%;background:var(--gold-m);border:1.5px solid var(--gold-d);display:flex;align-items:center;justify-content:center;font-family:'Playfair Display',serif;font-size:15px;color:#050505;font-weight:700;flex-shrink:0;}
+.t-node-name{font-family:'Playfair Display',serif;font-size:11px;color:var(--gold);line-height:1.3;}
+.t-node-years{font-size:10px;color:var(--muted);}
+.t-node-conf{font-size:9px;background:#1a1208;border:1px solid #3a2810;color:var(--amber);border-radius:2px;padding:1px 5px;}
+.gen-row{display:flex;justify-content:center;align-items:flex-start;gap:14px;flex-wrap:wrap;margin-bottom:10px;padding:0 8px;}
+.tree-empty{display:flex;flex-direction:column;align-items:center;justify-content:center;height:200px;gap:12px;color:var(--muted);font-style:italic;font-size:14px;}
+/* MAP VIEW — FIX P5 & P13 */
+.map-view{border:1px solid var(--b1);border-radius:4px;height:520px;position:relative;overflow:hidden;background:var(--bg);}
+.map-hint{position:absolute;top:10px;left:50%;transform:translateX(-50%);font-size:11px;color:var(--muted);background:var(--s1);border:1px solid var(--b1);padding:3px 12px;border-radius:20px;pointer-events:none;white-space:nowrap;z-index:10;letter-spacing:.5px;}
+.map-canvas{width:100%;height:100%;cursor:grab;display:block;}
+.map-canvas:active{cursor:grabbing;}
+/* FIX P6: tooltip față de container */
+.map-tooltip{position:absolute;background:var(--s1);border:1px solid var(--gold-d);border-radius:3px;padding:6px 12px;font-size:12px;color:var(--text);pointer-events:none;opacity:0;transition:opacity .15s;z-index:20;font-family:'EB Garamond',serif;max-width:200px;line-height:1.5;}
+.status-bar{display:flex;align-items:center;justify-content:space-between;padding:5px 12px;background:var(--s1);border:1px solid var(--b1);border-top:none;border-radius:0 0 4px 4px;font-size:11px;color:var(--muted);letter-spacing:.5px;}
+@media(max-width:740px){
+  .site-header{padding:10px 16px;gap:14px;min-height:80px;}
+  .banner-img{height:65px;}
+  .header-sub{font-size:12px;letter-spacing:1.5px;}
+  .nav-link .nl,.nav-login .nl{display:none;}
+  nav{flex-wrap:nowrap;overflow:hidden;}
+  .nav-link{display:none!important;}
+  .nav-right{display:none!important;}
+  .hamburger{display:flex;align-items:center;justify-content:center;flex-shrink:0;}
+  .list-view,.map-view{height:380px;}
+  .fam-list-panel{width:130px;}
+}
+@media(min-width:741px){.hamburger{display:none!important;}.nav-mobile-menu{display:none!important;}}
+</style>
+</head>
+<body>
+
+<div class="lang-bar">
+  <span class="lang-label">LIMB&#258; / LANGUAGE</span>
+  <button class="lang-btn active" id="btn-ro" aria-label="Romana">RO</button>
+  <button class="lang-btn" id="btn-en" aria-label="English">EN</button>
+</div>
+
+<header class="site-header">
+  <img src="og-image.png" alt="Calnic Online" class="banner-img" onerror="this.style.display='none'"/>
+  <div class="header-divider"></div>
+  <div class="header-motto">
+    <div class="header-sub" id="header-sub" data-ro="Satul nostru &#8212; Amintirile noastre" data-en="Our village &#8212; Our memories">Satul nostru &#8212; Amintirile noastre</div>
+    <svg viewBox="0 0 320 56" xmlns="http://www.w3.org/2000/svg" width="300" height="52"></svg>
+  </div>
+</header>
+
+<nav>
+  <a class="nav-link" href="index.html">&#8962; <span class="nl" data-ro="Acasa" data-en="Homepage">Acasa</span></a>
+  <a class="nav-link" href="istorie.html">&#128506; <span class="nl" data-ro="Istoria Satului" data-en="Village History">Istoria Satului</span></a>
+  <a class="nav-link" href="familiile.html">&#128106; <span class="nl" data-ro="Familiile" data-en="Families">Familiile</span></a>
+  <a class="nav-link active" href="genealogie.html">&#127803; <span class="nl" data-ro="Genealogie" data-en="Genealogy">Genealogie</span></a>
+  <a class="nav-link" href="galerie.html">&#128248; <span class="nl" data-ro="Galerie" data-en="Gallery">Galerie</span></a>
+  <a class="nav-link" href="contact.html">&#9993; <span class="nl" data-ro="Contact" data-en="Contact">Contact</span></a>
+  <a class="nav-link" href="intrebari.html">&#10067; <span class="nl" data-ro="Intrebari" data-en="FAQ">Intrebari</span></a>
+  <div class="nav-right">
+    <a class="nav-login" href="login.html">&#128274; <span class="nl" data-ro="Contul Familiei" data-en="Family Login">Contul Familiei</span></a>
+  </div>
+  <button class="hamburger" id="hamburgerBtn" aria-label="Meniu">&#9776;</button>
+</nav>
+<div class="nav-mobile-menu" id="navMobileMenu">
+  <a class="nav-mobile-link" href="index.html">&#8962; Acasa</a>
+  <a class="nav-mobile-link" href="istorie.html">&#128506; Istoria Satului</a>
+  <a class="nav-mobile-link" href="familiile.html">&#128106; Familiile</a>
+  <a class="nav-mobile-link active" href="genealogie.html">&#127803; Genealogie</a>
+  <a class="nav-mobile-link" href="galerie.html">&#128248; Galerie</a>
+  <a class="nav-mobile-link" href="contact.html">&#9993; Contact</a>
+  <a class="nav-mobile-link" href="intrebari.html">&#10067; Intrebari</a>
+  <a class="nav-mobile-login" href="login.html">&#128274; Contul Familiei</a>
+</div>
+
+<div class="page-hero">
+  <div class="page-hero-title" data-ro="Arborele Satului" data-en="Village Tree">Arborele Satului</div>
+  <div class="page-hero-sub" data-ro="Familiile din Calnic si legaturile dintre ele" data-en="Calnic families and their connections">Familiile din Calnic si legaturile dintre ele</div>
+  <div class="page-hero-orn">&#10041; &nbsp; &#10041; &nbsp; &#10041;</div>
+</div>
+
+<a class="scroll-top" id="scrollTop" role="button" aria-label="Inapoi sus">&#8679;</a>
+<a class="scroll-bottom" id="scrollBottom" role="button" aria-label="Jos">&#8681;</a>
+
+<div class="main-wrap">
+  <main>
+    <div style="font-size:12px;color:var(--muted);margin-bottom:18px;letter-spacing:.5px;">
+      <a href="genealogie.html" style="color:var(--gold-m);">&#8592; <span data-ro="Inapoi la Genealogie" data-en="Back to Genealogy">Inapoi la Genealogie</span></a>
+    </div>
+
+    <div class="stats-bar" id="statsBar" style="display:none;">
+      <div class="sb-stat"><div class="sb-n" id="sb-fam">&#8212;</div><div class="sb-l" data-ro="Familii" data-en="Families">Familii</div></div>
+      <div class="sb-stat"><div class="sb-n" id="sb-mem">&#8212;</div><div class="sb-l" data-ro="Persoane" data-en="People">Persoane</div></div>
+      <div class="sb-stat"><div class="sb-n" id="sb-links">&#8212;</div><div class="sb-l" data-ro="Legaturi" data-en="Links">Legaturi</div></div>
+      <div class="sb-stat"><div class="sb-n" id="sb-iso">&#8212;</div><div class="sb-l" data-ro="Fara legaturi" data-en="Isolated">Fara legaturi</div></div>
+    </div>
+
+    <div class="section-head">
+      <span class="section-head-title" data-ro="Vizualizare" data-en="View">Vizualizare</span>
+    </div>
+    <div class="view-toggle-bar">
+      <button class="vt-btn active" id="btn-view-list" onclick="switchView('list')">
+        &#128100; <span data-ro="Lista + Arbore" data-en="List + Tree">Lista + Arbore</span>
+      </button>
+      <button class="vt-btn" id="btn-view-map" onclick="switchView('map')">
+        &#127774; <span data-ro="Harta Satului" data-en="Village Map">Harta Satului</span>
+      </button>
+    </div>
+
+    <!-- VIEW LISTA + ARBORE -->
+    <div id="view-list">
+      <div class="list-view">
+        <div class="fam-list-panel">
+          <div class="fam-list-search">
+            <input type="text" id="famSearch" placeholder="Cauta..." autocomplete="off" oninput="filterFamList(this.value)"/>
+          </div>
+          <div class="fam-list-items" id="famListItems">
+            <div class="calnic-loading"><div class="calnic-spinner"></div></div>
+          </div>
+        </div>
+        <div class="tree-panel" id="treePanel">
+          <div class="calnic-loading" id="treeLoading">
+            <div class="calnic-spinner"></div>
+            <span data-ro="Selecteaza o familie" data-en="Select a family">Selecteaza o familie</span>
+          </div>
+          <div class="tree-panel-inner" id="treePanelInner" style="display:none;">
+            <div class="tree-svg-wrap" id="treeSvgWrap"></div>
+          </div>
+        </div>
+      </div>
+      <div class="status-bar">
+        <span id="statusText" data-ro="Selecteaza o familie din lista" data-en="Select a family from the list">Selecteaza o familie din lista</span>
+        <span id="statusCount"></span>
+      </div>
+    </div>
+
+    <!-- VIEW HARTA SATULUI -->
+    <div id="view-map" style="display:none;">
+      <div class="map-view" id="mapView">
+        <div class="map-hint" data-ro="scroll zoom &middot; drag pan &middot; click pe familie" data-en="scroll zoom &middot; drag pan &middot; click family">scroll zoom &middot; drag pan &middot; click pe familie</div>
+        <svg class="map-canvas" id="mapSvg" viewBox="0 0 700 480" xmlns="http://www.w3.org/2000/svg">
+          <g id="mapG"></g>
+        </svg>
+        <div class="map-tooltip" id="mapTooltip"></div>
+      </div>
+      <div class="status-bar">
+        <span id="mapStatusText" data-ro="Harta relatiilor inter-familii" data-en="Inter-family relations map">Harta relatiilor inter-familii</span>
+        <span id="mapStatusCount"></span>
+      </div>
+    </div>
+  </main>
+
+  <aside>
+    <div class="sidebar-box">
+      <div class="sb-title" data-ro="Legenda" data-en="Legend">Legenda</div>
+      <div class="legend-item"><div class="leg-line blood"></div><span data-ro="Legatura de sange" data-en="Blood relation">Legatura de sange</span></div>
+      <div class="legend-item"><div class="leg-line marriage"></div><span data-ro="Legatura prin casatorie" data-en="By marriage">Legatura prin casatorie</span></div>
+      <div class="legend-item"><div class="leg-line distant"></div><span data-ro="Legatura indepartata" data-en="Distant relation">Legatura indepartata</span></div>
+      <div class="legend-item"><div class="leg-dot-iso"></div><span data-ro="Fara legaturi documentate" data-en="No documented links">Fara legaturi documentate</span></div>
+    </div>
+
+    <div class="sidebar-box">
+      <div class="sb-title" data-ro="Vizibilitate date" data-en="Data visibility">Vizibilitate date</div>
+      <div style="font-size:12px;color:var(--muted);line-height:1.7;" data-ro="Sunt afisate doar persoanele decedate cu vizibilitate public. Persoanele in viata si datele private sunt ascunse pentru vizitatori." data-en="Only deceased persons with public visibility are shown. Living persons and private data are hidden for visitors.">Sunt afisate doar persoanele decedate cu vizibilitate public. Persoanele in viata si datele private sunt ascunse pentru vizitatori.</div>
+    </div>
+
+    <div class="sidebar-box" style="text-align:center;">
+      <div style="font-size:24px;margin-bottom:8px;">&#127807;</div>
+      <div style="font-family:'Playfair Display',serif;font-size:13px;color:var(--gold);margin-bottom:8px;" data-ro="Familia ta nu apare?" data-en="Your family missing?">Familia ta nu apare?</div>
+      <div style="font-size:12px;color:var(--muted);line-height:1.6;margin-bottom:12px;" data-ro="Creeaza un cont si adauga arborele familiei tale." data-en="Create an account and add your family tree.">Creeaza un cont si adauga arborele familiei tale.</div>
+      <a href="login.html" style="display:inline-block;padding:8px 18px;background:#1a1208;border:1px solid var(--gold-d);color:var(--gold);border-radius:3px;font-size:12px;font-family:'EB Garamond',serif;transition:all .15s;" data-ro="&#43; Adauga familia mea" data-en="&#43; Add my family">&#43; Adauga familia mea</a>
+    </div>
+  </aside>
+</div>
+
+<footer>
+  <div style="max-width:960px;margin:0 auto;display:flex;flex-wrap:wrap;align-items:center;justify-content:center;gap:6px 16px;">
+    <span><span class="g">Calnic</span> &nbsp;&#183;&nbsp; Alba &nbsp;&#183;&nbsp; Romania &nbsp;&#183;&nbsp; <span id="yr"></span></span>
+    <span style="color:#2a2a2a;">&#183;</span>
+    <span data-ro="Sat cu suflet, memorie vie" data-en="A village with soul, a living memory" style="font-style:italic;">Sat cu suflet, memorie vie</span>
+    <span style="color:#2a2a2a;">&#183;</span>
+    <a href="intrebari.html" style="color:#7a5828;font-size:13px;font-style:normal;letter-spacing:1px;" data-ro="Intrebari frecvente" data-en="FAQ">Intrebari frecvente</a>
+    <span style="color:#2a2a2a;">&#183;</span>
+    <a href="contact.html" style="color:#7a5828;font-size:13px;font-style:normal;letter-spacing:1px;" data-ro="Contact" data-en="Contact">Contact</a>
+  </div>
+</footer>
+
+<script src="js/config.js"></script>
+<script src="js/supabase.js"></script>
+<script src="js/utils.js"></script>
+<script src="js/admin-nav.js"></script>
+<script>
+'use strict';
+
+/* FIX P15: helpers definiti local */
+function escH(s){return String(s==null?'':s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;').replace(/'/g,'&#39;');}
+function lang(){return localStorage.getItem('calnic-lang')||'ro';}
+function t(ro,en){return lang()==='en'?en:ro;}
+
+/* STARE */
+var families    = [];
+var familyLinks = [];
+var currentFamId = null;
+
+/* INIT */
+document.getElementById('yr').textContent = new Date().getFullYear();
+applyLang(lang());
+initLang();
+initScrollBtns();   /* FIX P12 */
+initHamburger();
+
+/* FIX P4: race condition Supabase */
+if (window.supabase && window.supabase.from) {
+  loadAll();
+} else {
+  document.addEventListener('supabase:ready', loadAll);
+}
+
+/* ─── INCARCARE DATE ─────────────────────────────────────────────────────── */
+function loadAll() {
+  /* FIX P1 + P2: cerem TOATE linkurile confirmate dintr-o singura cerere */
+  Promise.all([
+    window.supabase
+      .from('families')
+      .select('id,name,village,since,members_count,generations_count,connected_to_village')
+      .order('name'),
+    window.supabase
+      .from('family_links')
+      .select('family_a_id,family_b_id,link_type,confirmed')
+      .eq('confirmed', true)
+  ]).then(function(res) {
+    var famRes   = res[0];
+    var linksRes = res[1];
+    if (famRes.error) { showGlobalError(famRes.error.message); return; }
+    families    = famRes.data || [];
+    /* FIX P1: fallback graceful daca RLS blocheaza sau nu exista linkuri */
+    familyLinks = (linksRes.error ? [] : linksRes.data) || [];
+    buildFamList();
+    updateStats();
+    document.getElementById('statsBar').style.display = 'flex';
+    if (families.length) selectFamily(families[0].id);
+  }).catch(function(err) { showGlobalError(err.message); });
+}
+
+/* ─── STATS ──────────────────────────────────────────────────────────────── */
+function updateStats() {
+  var totalMem = 0;
+  families.forEach(function(f){ totalMem += (f.members_count||0); });
+  var connIds = new Set();
+  familyLinks.forEach(function(l){ connIds.add(l.family_a_id); connIds.add(l.family_b_id); });
+  var iso = families.filter(function(f){ return !connIds.has(f.id); }).length;
+  document.getElementById('sb-fam').textContent   = families.length;
+  document.getElementById('sb-mem').textContent   = totalMem || '—';
+  document.getElementById('sb-links').textContent = familyLinks.length;
+  document.getElementById('sb-iso').textContent   = iso;
+  document.getElementById('mapStatusCount').textContent =
+    families.length + ' ' + t('familii','families') + ' · ' + familyLinks.length + ' ' + t('legaturi','links');
+}
+
+/* ─── LISTA FAMILII ──────────────────────────────────────────────────────── */
+function buildFamList() { renderFamList(families); }
+
+function filterFamList(q) {
+  renderFamList(q ? families.filter(function(f){
+    return f.name.toLowerCase().includes(q.toLowerCase());
+  }) : families);
+}
+
+function renderFamList(fams) {
+  var el = document.getElementById('famListItems');
+  el.innerHTML = '';
+  if (!fams.length) {
+    el.innerHTML = '<div style="padding:14px;font-size:12px;color:var(--muted);font-style:italic;">'
+      + escH(t('Niciun rezultat.','No results.')) + '</div>';
+    return;
+  }
+  fams.forEach(function(f) {
+    var item = document.createElement('div');
+    item.className = 'fam-item' + (f.id === currentFamId ? ' active' : '');
+    item.innerHTML = '<span class="fi-name">' + escH(f.name) + '</span>'
+      + '<span class="fi-count">' + (f.members_count||0) + '</span>';
+    item.addEventListener('click', function(){ selectFamily(f.id); });
+    el.appendChild(item);
+  });
+}
+
+/* ─── SELECTARE FAMILIE ──────────────────────────────────────────────────── */
+function selectFamily(id) {
+  currentFamId = id;
+  renderFamList(
+    document.getElementById('famSearch').value
+      ? families.filter(function(f){ return f.name.toLowerCase().includes(document.getElementById('famSearch').value.toLowerCase()); })
+      : families
+  );
+  var fam = families.find(function(f){ return f.id === id; });
+  if (!fam) return;
+  document.getElementById('statusText').textContent =
+    t('Familia ','Family ') + fam.name + ' · ' + (fam.members_count||0) + ' ' + t('membri','members');
+  loadFamilyTree(id, fam);
+}
+
+/* ─── ARBORE FAMILIE ─────────────────────────────────────────────────────── */
+function loadFamilyTree(famId, fam) {
+  document.getElementById('treeLoading').style.display    = 'flex';
+  document.getElementById('treePanelInner').style.display = 'none';
+  document.getElementById('treeLoading').querySelector('span').textContent = t('Se incarca...','Loading...');
+
+  /* FIX P3: cerem NUMAI membri decedați cu visibility=public (accesibili anonim conform RLS) */
+  window.supabase
+    .from('members')
+    .select('id,name,birth_year,death_year,visibility,is_deceased,profession,generation,confidence')
+    .eq('family_id', famId)
+    .eq('visibility', 'public')
+    .eq('is_deceased', true)
+    .order('birth_year')
+    .then(function(r) {
+      var members = (r.error ? [] : r.data) || [];
+      if (!members.length) {
+        drawFamilyTree(fam, [], []);
+        return;
+      }
+      var ids = members.map(function(m){ return m.id; }).join(',');
+      window.supabase
+        .from('member_relations')
+        .select('from_member_id,to_member_id,relation_type,confidence')
+        .or('from_member_id.in.(' + ids + '),to_member_id.in.(' + ids + ')')
+        .then(function(rr) {
+          drawFamilyTree(fam, members, (rr.error ? [] : rr.data) || []);
+        })
+        .catch(function(){ drawFamilyTree(fam, members, []); });
+    })
+    .catch(function(){ drawFamilyTree(fam, [], []); });
+}
+
+function drawFamilyTree(fam, members, rels) {
+  var wrap = document.getElementById('treeSvgWrap');
+  wrap.innerHTML = '';
+  document.getElementById('treeLoading').style.display    = 'none';
+  document.getElementById('treePanelInner').style.display = 'block';
+
+  /* Titlu */
+  var title = document.createElement('div');
+  title.style.cssText = 'font-family:"Playfair Display",serif;font-size:13px;color:var(--gold);'
+    + 'text-align:center;padding:6px 0 4px;letter-spacing:1px;border-bottom:1px solid var(--b2);margin-bottom:10px;';
+  title.textContent = t('Familia ','Family ') + fam.name + (fam.village ? ' · ' + fam.village : '');
+  wrap.appendChild(title);
+
+  if (!members.length) {
+    var empty = document.createElement('div');
+    empty.className = 'tree-empty';
+    empty.innerHTML = '<div style="font-size:30px;color:var(--b2);">&#128100;</div>'
+      + '<div>' + escH(t('Niciun membru public inregistrat.','No public members recorded.')) + '</div>'
+      + '<a href="genealogie-familie.html?family=' + encodeURIComponent(fam.id) + '" '
+      + 'style="font-size:12px;color:var(--gold-d);border:1px solid var(--b2);padding:5px 14px;border-radius:2px;">'
+      + t('&#127807; Deschide arborele complet','&#127807; Open full tree') + '</a>';
+    wrap.appendChild(empty);
+    return;
+  }
+
+  /* Grupare pe generatii */
+  var byGen = {};
+  members.forEach(function(m) {
+    var g = (m.generation != null) ? m.generation : 0;
+    if (!byGen[g]) byGen[g] = [];
+    byGen[g].push(m);
+  });
+  var genKeys = Object.keys(byGen).map(Number).sort(function(a,b){return a-b;});
+
+  /* Container pozitionat pentru SVG linii */
+  var nodesWrap = document.createElement('div');
+  nodesWrap.style.cssText = 'position:relative;';
+
+  genKeys.forEach(function(g) {
+    var row = document.createElement('div');
+    row.className = 'gen-row';
+    byGen[g].forEach(function(m) { row.appendChild(buildMemberNode(m, fam.id)); });
+    nodesWrap.appendChild(row);
+  });
+
+  /* SVG conexiuni — DEASUPRA nodurilor (z-index) */
+  var svgEl = document.createElementNS('http://www.w3.org/2000/svg','svg');
+  svgEl.style.cssText = 'position:absolute;top:0;left:0;pointer-events:none;';
+  nodesWrap.appendChild(svgEl);
+  wrap.appendChild(nodesWrap);
+
+  /* FIX P7 + P9: desenam DUPA layout, cu timeout */
+  setTimeout(function() { drawMemberConnections(svgEl, rels, nodesWrap); }, 80);
+
+  /* Link arbore complet */
+  var lnk = document.createElement('div');
+  lnk.style.cssText = 'text-align:center;margin-top:14px;padding-top:10px;border-top:1px solid var(--b2);';
+  lnk.innerHTML = '<a href="genealogie-familie.html?family=' + encodeURIComponent(fam.id) + '" '
+    + 'style="font-size:12px;color:var(--gold-d);border:1px solid var(--b2);padding:5px 14px;border-radius:2px;">'
+    + t('&#127807; Arbore complet cu toti membrii','&#127807; Full tree with all members') + '</a>';
+  wrap.appendChild(lnk);
+}
+
+function buildMemberNode(m, famId) {
+  var cls = 't-node'
+    + (m.is_deceased || m.death_year ? ' deceased' : '')
+    + (!m.name || m.name === '?' ? ' unknown' : '')
+    + (m.confidence != null && m.confidence < 70 ? ' low-conf' : '');
+  var node = document.createElement('div');
+  node.className = cls;
+  node.setAttribute('data-member-id', m.id);
+  var init = (m.name && m.name.length) ? m.name.charAt(0).toUpperCase() : '?';
+  var yrs = (m.birth_year||'?') + ' \u2013 ' + (m.death_year||'?');
+  node.innerHTML =
+    '<div class="t-node-avatar">' + escH(init) + '</div>'
+    + '<div class="t-node-name">' + escH(m.name || t('Necunoscut','Unknown')) + '</div>'
+    + '<div class="t-node-years">' + escH(yrs) + '</div>'
+    + (m.profession ? '<div style="font-size:9px;color:var(--muted);">' + escH(m.profession) + '</div>' : '')
+    + (m.confidence != null && m.confidence < 70 ? '<div class="t-node-conf">' + m.confidence + '%</div>' : '');
+  node.addEventListener('click', function(){
+    window.location.href = 'genealogie-familie.html?family=' + encodeURIComponent(famId);
+  });
+  return node;
+}
+
+/* FIX P6 + P7: conexiuni calculate față de containerul SVG */
+function drawMemberConnections(svgEl, rels, container) {
+  svgEl.innerHTML = '';
+  svgEl.setAttribute('width',  container.offsetWidth);
+  svgEl.setAttribute('height', container.offsetHeight);
+  svgEl.style.width  = container.offsetWidth  + 'px';
+  svgEl.style.height = container.offsetHeight + 'px';
+  if (!rels.length) return;
+
+  var svgNS = 'http://www.w3.org/2000/svg';
+  var cr    = container.getBoundingClientRect();
+  var COLORS = {parent:'#d4a84a',spouse:'#82c46a',sibling:'#c8a040',step:'#a07050',adopted:'#c86a6a',in_law:'#7a5828'};
+  var DASHES = {parent:'',spouse:'5,3',sibling:'3,3',step:'4,2',adopted:'2,2',in_law:'6,2'};
+
+  rels.forEach(function(rel) {
+    var fe = container.querySelector('[data-member-id="' + rel.from_member_id + '"]');
+    var te = container.querySelector('[data-member-id="' + rel.to_member_id   + '"]');
+    if (!fe || !te) return;
+    var fr = fe.getBoundingClientRect(), tr = te.getBoundingClientRect();
+    var sameRow = Math.abs(fr.top - tr.top) < 20;
+    var x1,y1,x2,y2;
+    if (sameRow) {
+      x1 = fr.right  - cr.left; y1 = fr.top + fr.height/2 - cr.top;
+      x2 = tr.left   - cr.left; y2 = tr.top + tr.height/2 - cr.top;
+    } else {
+      x1 = fr.left + fr.width/2 - cr.left; y1 = fr.bottom - cr.top;
+      x2 = tr.left + tr.width/2 - cr.left; y2 = tr.top    - cr.top;
+    }
+    var line = document.createElementNS(svgNS,'line');
+    line.setAttribute('x1', Math.round(x1)); line.setAttribute('y1', Math.round(y1));
+    line.setAttribute('x2', Math.round(x2)); line.setAttribute('y2', Math.round(y2));
+    line.setAttribute('stroke', COLORS[rel.relation_type]||'#7a5828');
+    line.setAttribute('stroke-width','1.5');
+    line.setAttribute('opacity','0.6');
+    if (DASHES[rel.relation_type]) line.setAttribute('stroke-dasharray', DASHES[rel.relation_type]);
+    svgEl.appendChild(line);
+  });
+}
+
+/* ─── HARTA SATULUI ──────────────────────────────────────────────────────── */
+
+/* FIX P8: raza minima garantata */
+function famRadius(f) {
+  return Math.max(24, Math.min(46, 20 + (f.members_count||0) * 1.5));
+}
+
+function calcMapPositions() {
+  var W=700, H=460, cx=W/2, cy=H/2, n=families.length;
+  var pos = {};
+  if (!n) return pos;
+  if (n===1) { pos[families[0].id]={x:cx,y:cy}; return pos; }
+  var inner = Math.ceil(n*0.45);
+  var outer = n - inner;
+  var r1 = Math.min(110, W*0.16);
+  var r2 = Math.min(200, W*0.29);
+  for (var i=0; i<inner; i++) {
+    var a = 2*Math.PI*i/inner - Math.PI/2;
+    pos[families[i].id] = {x: cx + r1*Math.cos(a), y: cy + r1*Math.sin(a)};
+  }
+  for (var j=0; j<outer; j++) {
+    var a2 = 2*Math.PI*j/outer - Math.PI/2;
+    pos[families[inner+j].id] = {x: cx + r2*Math.cos(a2), y: cy + r2*Math.sin(a2)};
+  }
+  return pos;
+}
+
+function drawMap() {
+  var g = document.getElementById('mapG');
+  g.innerHTML = '';
+  var ns  = 'http://www.w3.org/2000/svg';
+  var pos = calcMapPositions();
+  var connIds = new Set();
+  familyLinks.forEach(function(l){ connIds.add(l.family_a_id); connIds.add(l.family_b_id); });
+
+  /* Linii */
+  familyLinks.forEach(function(lk) {
+    var pa = pos[lk.family_a_id], pb = pos[lk.family_b_id];
+    if (!pa||!pb) return;
+    var isM = lk.link_type==='marriage'||lk.link_type==='alliance';
+    var ln = document.createElementNS(ns,'line');
+    ln.setAttribute('x1',pa.x); ln.setAttribute('y1',pa.y);
+    ln.setAttribute('x2',pb.x); ln.setAttribute('y2',pb.y);
+    ln.setAttribute('stroke', isM ? '#d4a84a' : '#c87050');
+    ln.setAttribute('stroke-width', isM ? '1.5' : '2');
+    ln.setAttribute('opacity','0.45');
+    if (isM) ln.setAttribute('stroke-dasharray','5,3');
+    g.appendChild(ln);
+  });
+
+  /* Noduri */
+  families.forEach(function(f) {
+    var p = pos[f.id]; if (!p) return;
+    var r = famRadius(f);
+    var iso = !connIds.has(f.id);
+    var isCalnic = !(f.village||'').toLowerCase().includes('deal');
+    var grp = document.createElementNS(ns,'g');
+    grp.style.cursor = 'pointer';
+
+    var circ = document.createElementNS(ns,'circle');
+    circ.setAttribute('cx',p.x); circ.setAttribute('cy',p.y); circ.setAttribute('r',r);
+    circ.setAttribute('fill',   iso ? '#111' : (isCalnic ? '#1a1208' : '#0d1520'));
+    circ.setAttribute('stroke', iso ? '#5a4040' : (isCalnic ? '#b08030' : '#3060a0'));
+    circ.setAttribute('stroke-width','1');
+    if (iso) circ.setAttribute('stroke-dasharray','4,3');
+
+    var nt = document.createElementNS(ns,'text');
+    nt.setAttribute('x',p.x); nt.setAttribute('y',p.y-3);
+    nt.setAttribute('text-anchor','middle'); nt.setAttribute('dominant-baseline','central');
+    nt.setAttribute('font-size', Math.max(9,Math.min(12,r*0.32)));
+    nt.setAttribute('font-family','"Playfair Display",serif');
+    nt.setAttribute('font-weight','600');
+    nt.setAttribute('fill', iso ? '#7a6060' : '#d4a84a');
+    nt.setAttribute('pointer-events','none');
+    nt.textContent = f.name;
+
+    var nc = document.createElementNS(ns,'text');
+    nc.setAttribute('x',p.x); nc.setAttribute('y',p.y+10);
+    nc.setAttribute('text-anchor','middle');
+    nc.setAttribute('font-size','9');
+    nc.setAttribute('font-family','"EB Garamond",serif');
+    nc.setAttribute('fill','#7a5828');
+    nc.setAttribute('pointer-events','none');
+    nc.textContent = (f.members_count||0) + ' ' + t('m.','m.');
+
+    if (iso) {
+      var bc = document.createElementNS(ns,'circle');
+      bc.setAttribute('cx', p.x+r*0.65); bc.setAttribute('cy', p.y-r*0.65); bc.setAttribute('r',7);
+      bc.setAttribute('fill','#1a1208'); bc.setAttribute('stroke','#5a4040'); bc.setAttribute('stroke-width','0.75');
+      var bt = document.createElementNS(ns,'text');
+      bt.setAttribute('x', p.x+r*0.65); bt.setAttribute('y', p.y-r*0.65+1);
+      bt.setAttribute('text-anchor','middle'); bt.setAttribute('dominant-baseline','central');
+      bt.setAttribute('font-size','9'); bt.setAttribute('fill','#7a6060');
+      bt.setAttribute('pointer-events','none'); bt.textContent='?';
+      grp.appendChild(bc); grp.appendChild(bt);
+    }
+
+    grp.appendChild(circ); grp.appendChild(nt); grp.appendChild(nc);
+
+    grp.addEventListener('mouseenter', function(e) {
+      circ.setAttribute('stroke-width','2');
+      /* FIX P8: r garantat >= 24 */
+      circ.setAttribute('r', r+3);
+      showMapTooltip(e, f, iso);
+    });
+    grp.addEventListener('mouseleave', function() {
+      circ.setAttribute('stroke-width','1');
+      circ.setAttribute('r', r);
+      hideMapTooltip();
+    });
+    /* FIX P9: setTimeout pentru ca view-ul lista sa fie vizibil inainte de drawTree */
+    grp.addEventListener('click', function() {
+      switchView('list');
+      setTimeout(function(){ selectFamily(f.id); }, 50);
+    });
+    g.appendChild(grp);
+  });
+
+  /* Legenda */
+  [['#c87050','','sange / blood'],['#d4a84a','5,3','casatorie / marriage'],['#5a4040','4,3','fara legaturi / no links']]
+    .forEach(function(l,i){
+      var lx=20+i*110;
+      var ll=document.createElementNS(ns,'line');
+      ll.setAttribute('x1',lx);ll.setAttribute('y1',448);ll.setAttribute('x2',lx+20);ll.setAttribute('y2',448);
+      ll.setAttribute('stroke',l[0]);ll.setAttribute('stroke-width','1.5');
+      if(l[1])ll.setAttribute('stroke-dasharray',l[1]);
+      var lt=document.createElementNS(ns,'text');
+      lt.setAttribute('x',lx+24);lt.setAttribute('y',452);
+      lt.setAttribute('font-size','9');lt.setAttribute('font-family','"EB Garamond",serif');
+      lt.setAttribute('fill','#7a5828');lt.textContent=l[2];
+      g.appendChild(ll);g.appendChild(lt);
+    });
+}
+
+/* FIX P6: tooltip față de container, nu viewport */
+function showMapTooltip(e, f, iso) {
+  var tt = document.getElementById('mapTooltip');
+  var mr = document.getElementById('mapView').getBoundingClientRect();
+  var tx = e.clientX - mr.left + 14;
+  var ty = e.clientY - mr.top  - 40;
+  if (tx + 170 > mr.width)  tx = e.clientX - mr.left - 170;
+  if (ty < 4)               ty = 4;
+  tt.style.left = tx+'px'; tt.style.top = ty+'px';
+  tt.innerHTML = '<strong style="font-family:\'Playfair Display\',serif;color:var(--gold);">' + escH(f.name) + '</strong><br>'
+    + escH(f.village||'Calnic') + ' &middot; ' + (f.members_count||0) + ' ' + t('membri','members')
+    + (iso ? '<br><span style="font-size:10px;color:#7a6060;">' + t('fara legaturi confirmate','no confirmed links') + '</span>' : '');
+  tt.style.opacity = '1';
+}
+function hideMapTooltip() { document.getElementById('mapTooltip').style.opacity='0'; }
+
+/* Pan + Zoom — FIX P5: transform pe <g> intern */
+var mapTr={scale:1,tx:0,ty:0}, mapDrag=false, mapDs={x:0,y:0};
+function applyMapTr() {
+  document.getElementById('mapG').setAttribute('transform',
+    'translate('+mapTr.tx+','+mapTr.ty+') scale('+mapTr.scale+')');
+}
+var ms = document.getElementById('mapSvg');
+ms.addEventListener('wheel', function(e){
+  e.preventDefault();
+  mapTr.scale = Math.min(3, Math.max(0.3, mapTr.scale * (e.deltaY>0?0.9:1.1)));
+  applyMapTr();
+},{passive:false});
+ms.addEventListener('mousedown', function(e){ mapDrag=true; mapDs={x:e.clientX-mapTr.tx,y:e.clientY-mapTr.ty}; });
+window.addEventListener('mouseup',   function(){ mapDrag=false; });
+window.addEventListener('mousemove', function(e){
+  if(!mapDrag) return;
+  mapTr.tx=e.clientX-mapDs.x; mapTr.ty=e.clientY-mapDs.y;
+  applyMapTr();
+});
+
+/* ─── SWITCH VIEW ────────────────────────────────────────────────────────── */
+function switchView(v) {
+  document.getElementById('view-list').style.display = v==='list' ? 'block' : 'none';
+  document.getElementById('view-map').style.display  = v==='map'  ? 'block' : 'none';
+  document.getElementById('btn-view-list').classList.toggle('active', v==='list');
+  document.getElementById('btn-view-map').classList.toggle('active',  v==='map');
+  if (v==='map') drawMap();
+}
+
+/* ─── EROARE GLOBALA ─────────────────────────────────────────────────────── */
+function showGlobalError(msg) {
+  document.getElementById('famListItems').innerHTML =
+    '<div class="calnic-error">'
+    +'<div class="calnic-error-icon">&#9888;&#65039;</div>'
+    +'<div class="calnic-error-title">'+escH(t('Eroare la incarcare','Load error'))+'</div>'
+    +'<div class="calnic-error-sub">'+escH(msg)+'</div>'
+    +'<button class="calnic-error-btn" onclick="location.reload()">'+escH(t('Incearca din nou','Try again'))+'</button>'
+    +'</div>';
+}
+
+/* ─── LIMBA — FIX P10: innerHTML pt entitati, textContent pt rest ────────── */
+function applyLang(l) {
+  document.getElementById('btn-ro').classList.toggle('active', l==='ro');
+  document.getElementById('btn-en').classList.toggle('active', l==='en');
+  document.querySelectorAll('[data-ro]').forEach(function(el) {
+    var v = el.getAttribute('data-'+l);
+    if (v===null) return;
+    if (v.indexOf('&')!==-1 || v.indexOf('<')!==-1) { el.innerHTML=v; }
+    else { el.textContent=v; }
+  });
+}
+function initLang() {
+  document.getElementById('btn-ro').addEventListener('click',function(){ localStorage.setItem('calnic-lang','ro'); applyLang('ro'); });
+  document.getElementById('btn-en').addEventListener('click',function(){ localStorage.setItem('calnic-lang','en'); applyLang('en'); });
+}
+
+/* ─── SCROLL — FIX P12: null-check ──────────────────────────────────────── */
+function initScrollBtns() {
+  var st=document.getElementById('scrollTop'), sb=document.getElementById('scrollBottom');
+  function upd(){
+    var sc=window.scrollY>300, at=(window.innerHeight+window.scrollY)>=document.body.scrollHeight-100;
+    if(st){st.style.opacity=sc?'1':'0';st.style.pointerEvents=sc?'auto':'none';}
+    if(sb){sb.style.opacity=at?'0':'1';sb.style.pointerEvents=at?'none':'auto';}
+  }
+  window.addEventListener('scroll',upd); window.addEventListener('load',upd); setTimeout(upd,100);
+  if(st) st.addEventListener('click',function(){window.scrollTo({top:0,behavior:'smooth'});});
+  if(sb) sb.addEventListener('click',function(){window.scrollTo({top:document.body.scrollHeight,behavior:'smooth'});});
+}
+
+/* ─── HAMBURGER ──────────────────────────────────────────────────────────── */
+function initHamburger(){
+  var h=document.getElementById('hamburgerBtn'),m=document.getElementById('navMobileMenu');
+  if(!h||!m) return;
+  h.addEventListener('click',function(){ var o=m.classList.toggle('open'); h.textContent=o?'\u2715':'\u2630'; });
+}
+</script>
+
+<!--
+  ════════════════════════════════════════════════════════════════════
+  ACTIUNE NECESARA IN genealogie.html (1 linie):
+  Linia ~221 — schimba href="#" in href="arborele-satului.html":
+
+  INAINTE:
+    <a class="village-banner" id="villageBanner" href="#" style="display:none;">
+
+  DUPA:
+    <a class="village-banner" id="villageBanner" href="arborele-satului.html" style="display:none;">
+  ════════════════════════════════════════════════════════════════════
+-->
+</body>
+</html>
