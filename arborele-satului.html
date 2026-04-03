@@ -856,6 +856,20 @@ function initHamburger(){
   if(!h||!m) return;
   h.addEventListener('click',function(){ var o=m.classList.toggle('open'); h.textContent=o?'\u2715':'\u2630'; });
 }
+
+/* ─── POPUP ──────────────────────────────────────────────────────────────── */
+function closePopup() {
+  var p = document.getElementById('popup');
+  if (p) p.classList.add('hidden');
+}
+function showPopup(msg) {
+  var p = document.getElementById('popup');
+  if (!p) return;
+  var txt = p.querySelector('.popup-content p');
+  if (txt && msg) txt.textContent = msg;
+  p.classList.remove('hidden');
+}
+</script>
 <script src="js/script-arbore.js"></script>
 
 <!--

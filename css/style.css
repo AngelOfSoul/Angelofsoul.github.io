@@ -1001,9 +1001,11 @@ p  { margin-bottom: 1rem; }
   display: flex;
   justify-content: center;
   align-items: center;
+  z-index: 10000;
 }
 
-.hidden {
+.hidden,
+#popup.hidden {
   display: none;
 }
 
