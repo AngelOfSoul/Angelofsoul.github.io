@@ -281,7 +281,25 @@ footer .g{color:var(--gold-d);font-style:normal;}
         <span id="statusCount"></span>
       </div>
     </div>
+<div class="arbore-wrapper">
 
+  <input type="text" id="search" placeholder="🔍 Caută familie..." />
+
+  <div id="container">
+    <div id="arbore">
+      <svg id="linii"></svg>
+      <div id="noduri"></div>
+    </div>
+  </div>
+
+</div>
+
+<div id="popup" class="hidden">
+  <div class="popup-content">
+    <p>Această familie este privată</p>
+    <button onclick="closePopup()">OK</button>
+  </div>
+</div>
     <!-- VIEW HARTA SATULUI -->
     <div id="view-map">
       <div class="map-view" id="mapView">
