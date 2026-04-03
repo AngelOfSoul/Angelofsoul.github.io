@@ -1,6 +1,7 @@
 // script-arbore.js — Arborele Satului local tree renderer
-// Loads data.json, renders family nodes inside #noduri, draws SVG lines in #linii,
-// handles search filtering and private-family popup.
+// Uses window.families (populated by Supabase in arborele-satului.html) to render
+// family nodes inside #noduri and SVG lines in #linii.
+// Falls back to an empty view if no families are available.
 (function () {
   'use strict';
 
@@ -13,7 +14,7 @@
   // Guard: exit silently if the arbore-wrapper elements are missing
   if (!noduri || !liniiSvg) return;
 
-  var famData   = [];  // loaded from data.json
+  var famData   = [];  // mapped from window.families
   var relData   = [];
   var famEls    = [];  // rendered DOM nodes (for search filtering)
 
@@ -24,29 +25,38 @@
       .replace(/>/g, '&gt;').replace(/"/g, '&quot;');
   }
 
-  /* ── load data.json ──────────────────────────────────────────────────── */
-  fetch('data.json')
-    .then(function (r) {
-      if (!r.ok) throw new Error('data.json HTTP ' + r.status);
-      return r.json();
-    })
-    .then(function (data) {
-      famData = data.familii || [];
-      relData = data.relatii || [];
-      render();
-    })
-    .catch(function (err) {
-      console.warn('[arbore] Nu s-a putut incarca data.json:', err.message);
+  /* ── map Supabase families to local format ───────────────────────────── */
+  function mapSupabaseFamilies(supabaseFamilies) {
+    return (supabaseFamilies || []).map(function (f) {
+      return {
+        nume: f.name || '?',
+        link: 'genealogie-familie.html?family=' + encodeURIComponent(f.id),
+        privat: false  // Supabase RLS already filters to public families only
+      };
     });
+  }
+
+  /* ── initialise with data ────────────────────────────────────────────── */
+  function initWithSupabase(supabaseFamilies) {
+    famData = mapSupabaseFamilies(supabaseFamilies);
+    relData = [];
+    render();
+  }
+
+  /* ── load: use window.families if ready, else wait for event ────────── */
+  if (window.families && window.families.length) {
+    initWithSupabase(window.families);
+  } else {
+    document.addEventListener('families:loaded', function () {
+      initWithSupabase(window.families || []);
+    }, { once: true });
+  }
 
   /* ── render families ─────────────────────────────────────────────────── */
   function render() {
     noduri.innerHTML = '';
     famEls = [];
-    if (!famData.length) {
-      noduri.innerHTML = '<p style="color:var(--muted);font-style:italic;padding:24px;text-align:center;">Nicio familie in data.json</p>';
-      return;
-    }
+    if (!famData.length) return;  // show nothing when no data
 
     var cols   = Math.max(1, Math.ceil(Math.sqrt(famData.length)));
     var spacX  = 200;
