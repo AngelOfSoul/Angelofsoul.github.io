@@ -1,7 +1,6 @@
 User-agent: *
 Allow: /
 Allow: /index.html
-Allow: /familie.html
 Allow: /familiile.html
 Allow: /galerie.html
 Allow: /genealogie.html
@@ -16,7 +15,7 @@ Disallow: /login.html
 Disallow: /404.html
 Disallow: /familiile-familie.html
 Disallow: /genealogie-familie.html
-Disallow: /supabase.js
-Disallow: /admin-nav.js
+Disallow: /js/supabase.js
+Disallow: /js/admin-nav.js
 
 Sitemap: https://calniconline.ro/sitemap.xml

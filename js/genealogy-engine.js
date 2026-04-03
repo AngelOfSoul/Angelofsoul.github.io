@@ -171,10 +171,13 @@ Assumes:
 
     function showError(message) {
         const container = $('.container') || document.body;
+        const safeMsg = String(message == null ? '' : message)
+            .replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;')
+            .replace(/"/g, '&quot;').replace(/'/g, '&#39;');
         container.innerHTML = `
             <div class="card" style="text-align:center; background:#1a0808; border:2px solid #c04040;">
                 <h3 style="color:#c04040;">⚠️ Eroare</h3>
-                <p>${message}</p>
+                <p>${safeMsg}</p>
                 <a href="familiile.html" class="btn">← Înapoi la familiile</a>
             </div>
         `;
@@ -200,7 +203,8 @@ Assumes:
         }
 
         // Group by generation (simplified: min birth_year = gen 0)
-        const minBirth = Math.min(...state.members.filter(m => m.birth_year).map(m => m.birth_year));
+        const birthYears = state.members.filter(m => m.birth_year).map(m => m.birth_year);
+        const minBirth = birthYears.length > 0 ? Math.min(...birthYears) : new Date().getFullYear();
         const generations = {};
         state.members.forEach(m => {
             const gen = m.birth_year ? Math.floor((m.birth_year - minBirth) / 25) : 0;
@@ -342,6 +346,8 @@ Assumes:
         const container = $('#tree-container');
         if (!container) return;
 
+        const svgNS = 'http://www.w3.org/2000/svg';
+
         state.relations.forEach(rel => {
             const fromEl = $(`.tree-node[data-person-id="${rel.from}"]`);
             const toEl = $(`.tree-node[data-person-id="${rel.to}"]`);
@@ -356,26 +362,19 @@ Assumes:
             const toX = toRect.left + toRect.width / 2 - containerRect.left;
             const toY = toRect.top - containerRect.top;
 
-            const style = getRelationStyle(rel.relation_type);
-            const svg = createElement('svg', {
-                style: `
-                    position: absolute;
-                    top: 0;
-                    left: 0;
-                    width: 100%;
-                    height: 100%;
-                    pointer-events: none;
-                `
-            });
-            const line = createElement('line', {
-                x1: fromX,
-                y1: fromY,
-                x2: toX,
-                y2: toY,
-                stroke: style.color,
-                strokeWidth: '2',
-                strokeDash: style.dash
-            });
+            const relStyle = getRelationStyle(rel.relation_type);
+            const svg = document.createElementNS(svgNS, 'svg');
+            svg.style.cssText = 'position:absolute;top:0;left:0;width:100%;height:100%;pointer-events:none;';
+            svg.setAttribute('xmlns', svgNS);
+
+            const line = document.createElementNS(svgNS, 'line');
+            line.setAttribute('x1', fromX);
+            line.setAttribute('y1', fromY);
+            line.setAttribute('x2', toX);
+            line.setAttribute('y2', toY);
+            line.setAttribute('stroke', relStyle.color);
+            line.setAttribute('stroke-width', '2');
+            if (relStyle.dash) line.setAttribute('stroke-dasharray', relStyle.dash);
 
             svg.appendChild(line);
             container.appendChild(svg);
@@ -454,8 +453,8 @@ Assumes:
         if (node) {
             const nameEl = node.querySelector('div:nth-child(2)');
             const datesEl = node.querySelector('div:nth-child(3)');
-            nameEl.textContent = updated.name;
-            datesEl.textContent = `${formatDate(updated.birth_year)} – ${formatDate(updated.death_year)}`;
+            if (nameEl) nameEl.textContent = updated.name;
+            if (datesEl) datesEl.textContent = `${formatDate(updated.birth_year)} – ${formatDate(updated.death_year)}`;
             node.style.borderColor = getVisibilityColor(updated.visibility);
             node.style.background = updated.visibility === 'private' ? '#1a0808' : '#161616';
         }

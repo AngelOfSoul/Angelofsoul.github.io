@@ -213,8 +213,8 @@
     var b = document.getElementById('scrollBottom');
     var scrolled = window.scrollY > 300;
     var atBottom = (window.innerHeight + window.scrollY) >= document.body.scrollHeight - 100;
-    if (t) t.style.opacity = scrolled ? '1' : '0';
-    if (b) b.style.opacity = atBottom ? '0' : '1';
+    if (t) { t.style.opacity = scrolled ? '1' : '0'; t.style.pointerEvents = scrolled ? 'auto' : 'none'; }
+    if (b) { b.style.opacity = atBottom ? '0' : '1'; b.style.pointerEvents = atBottom ? 'none' : 'auto'; }
   }
 
   /**
