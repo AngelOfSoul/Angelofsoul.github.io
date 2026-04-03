@@ -945,3 +945,70 @@ p  { margin-bottom: 1rem; }
   .nav-link { display: none; }
   .hamburger { display: flex; align-items: center; }
 }
+/* ===== ARBORE ===== */
+.arbore-wrapper {
+  padding: 20px;
+}
+
+#container {
+  width: 100%;
+  height: 80vh;
+  overflow: hidden;
+  cursor: grab;
+}
+
+#arbore {
+  position: relative;
+  transform-origin: center;
+}
+
+#noduri {
+  position: absolute;
+}
+
+.familie {
+  position: absolute;
+  padding: 10px 16px;
+  background: #111;
+  border: 1px solid #444;
+  border-radius: 6px;
+  cursor: pointer;
+  transition: 0.2s;
+}
+
+.familie:hover {
+  border-color: #c8a870;
+}
+
+.highlight {
+  box-shadow: 0 0 10px #00ffcc;
+}
+
+.linie {
+  stroke: #555;
+  stroke-width: 2;
+}
+
+.linie.active {
+  stroke: #c8a870;
+  stroke-width: 3;
+}
+
+#popup {
+  position: fixed;
+  inset: 0;
+  background: #000000cc;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.hidden {
+  display: none;
+}
+
+.popup-content {
+  background: #111;
+  padding: 20px;
+  border: 1px solid #c8a870;
+}
