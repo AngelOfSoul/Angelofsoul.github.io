@@ -1,810 +1,481 @@
-(function () {
-  'use strict';
+import supabase from "./supabase-client.js";
 
-  const state = {
-    lang: localStorage.getItem('calnic-lang') || 'ro',
-    data: null,
-    nodesById: new Map(),
-    transform: { x: 0, y: 0, scale: 1 },
-    viewport: { width: 1200, height: 700 },
-    isPanning: false,
-    dragNode: null,
-    selectedNodeId: null,
-    highlightedNodeIds: new Set(),
-    highlightedLinkIds: new Set(),
-    animationFrame: null,
-    simulationRunning: true,
-    searchResults: [],
-    selectedPath: null,
-    hoveredNodeId: null,
-    loadedWithDemo: false,
-    dragMoved: false,
-    suppressClick: false
-  };
+const state = {
+  nodes: [],
+  links: [],
+  adjacency: new Map(),
+  simulation: null,
+  svg: null,
+  gRoot: null,
+  gLinks: null,
+  gNodes: null,
+  zoom: null,
+  width: 0,
+  height: 0,
+  selectedNodeId: null,
+  highlightedNodeIds: new Set(),
+  highlightedLinkKeys: new Set(),
+};
 
-  const labels = {
-    ro: {
-      pageTitle: 'Arborele satului',
-      pageSub: 'Toate familiile din Calnic, intr-un arbore interactiv al legaturilor de sange, casatorie si rudenie.',
-      loading: 'Se incarca arborele satului...',
-      errorTitle: 'Nu s-a putut incarca arborele satului',
-      retry: 'Incearca din nou',
-      searchPlaceholder: 'Cauta o familie...',
-      reset: 'Reset view',
-      center: 'Centreaza arborele',
-      fit: 'Incadreaza tot',
-      zoomIn: 'Plus',
-      zoomOut: 'Minus',
-      relationTitle: 'Cauta relatie intre familii',
-      startFamily: '— Familie de start —',
-      targetFamily: '— Familie destinatie —',
-      findRelation: 'Gaseste relatia',
-      clearRelation: 'Curata',
-      noFamilies: 'Nu exista familii disponibile.',
-      privateFamily: 'Aceasta familie este privata.',
-      openPublicFamily: 'Deschide familia',
-      familyPrivate: 'Privat',
-      familyPublic: 'Public',
-      villageConnected: 'Conectata la arborele satului',
-      isolated: 'Familie izolata',
-      relationNotFound: 'Nu exista nicio relatie documentata intre aceste familii.',
-      relationInvalid: 'Alege doua familii diferite.',
-      relationFoundPrefix: 'Relatie gasita:',
-      relationPathSeparator: ' → ',
-      legendPublic: 'familie publica',
-      legendPrivate: 'familie privata',
-      legendHighlighted: 'traseu evidentiat',
-      statsFamilies: 'Familii',
-      statsLinks: 'Legaturi',
-      statsIsolated: 'Izolate',
-      statusCentered: 'Arborele a fost centrat.',
-      statusOpened: 'Familia publica a fost deschisa.',
-      statusFocused: 'Familia a fost centrata in arbore.',
-      statusPrivate: 'Familia selectata este privata.',
-      statusPathFound: 'Traseul dintre familii a fost evidentiat.',
-      statusPathMissing: 'Nu exista un traseu documentat intre familiile selectate.',
-      relationTypes: {
-        blood: 'sange',
-        marriage: 'casatorie',
-        alliance: 'rudenie',
-        distant: 'legatura indepartata'
-      },
-      tooltipMembers: 'membri',
-      tooltipGenerations: 'generatii',
-      tooltipPhotos: 'fotografii',
-      tooltipOpenHint: 'Click pentru a deschide familia',
-      tooltipPrivateHint: 'Click pentru mesajul Privat',
-      sourceInfo: 'Sursa: genealogia site-ului (Supabase)',
-      noResults: 'Nicio familie gasita.'
-    },
-    en: {
-      pageTitle: 'Village tree',
-      pageSub: 'All families in Calnic shown in an interactive map of blood, marriage, and kinship links.',
-      loading: 'Loading village tree...',
-      errorTitle: 'Could not load the village tree',
-      retry: 'Try again',
-      searchPlaceholder: 'Search a family...',
-      reset: 'Reset view',
-      center: 'Center tree',
-      fit: 'Fit all',
-      zoomIn: 'Zoom in',
-      zoomOut: 'Zoom out',
-      relationTitle: 'Find relation between families',
-      startFamily: '— Start family —',
-      targetFamily: '— Destination family —',
-      findRelation: 'Find relation',
-      clearRelation: 'Clear',
-      noFamilies: 'No families available.',
-      privateFamily: 'This family is private.',
-      openPublicFamily: 'Open family',
-      familyPrivate: 'Private',
-      familyPublic: 'Public',
-      villageConnected: 'Connected to village tree',
-      isolated: 'Isolated family',
-      relationNotFound: 'There is no documented relation between these families.',
-      relationInvalid: 'Choose two different families.',
-      relationFoundPrefix: 'Relation found:',
-      relationPathSeparator: ' → ',
-      legendPublic: 'public family',
-      legendPrivate: 'private family',
-      legendHighlighted: 'highlighted path',
-      statsFamilies: 'Families',
-      statsLinks: 'Links',
-      statsIsolated: 'Isolated',
-      statusCentered: 'Tree has been centered.',
-      statusOpened: 'Public family was opened.',
-      statusFocused: 'Family was centered in the tree.',
-      statusPrivate: 'Selected family is private.',
-      statusPathFound: 'The path between families was highlighted.',
-      statusPathMissing: 'No documented path exists between the selected families.',
-      relationTypes: {
-        blood: 'blood',
-        marriage: 'marriage',
-        alliance: 'kinship',
-        distant: 'distant link'
-      },
-      tooltipMembers: 'members',
-      tooltipGenerations: 'generations',
-      tooltipPhotos: 'photos',
-      tooltipOpenHint: 'Click to open family',
-      tooltipPrivateHint: 'Click for Private message',
-      sourceInfo: 'Source: site genealogy (Supabase)',
-      noResults: 'No family found.'
-    }
-  };
+const els = {
+  svg: document.getElementById("village-tree"),
+  treeContainer: document.getElementById("tree-container"),
+  status: document.getElementById("status"),
+  familySearch: document.getElementById("family-search"),
+  familyList: document.getElementById("family-list"),
+  relationFrom: document.getElementById("relation-from"),
+  relationTo: document.getElementById("relation-to"),
+  findRelation: document.getElementById("find-relation"),
+  fitView: document.getElementById("fit-view"),
+  clearSelection: document.getElementById("clear-selection"),
+  tooltip: document.getElementById("tooltip"),
+  modal: document.getElementById("family-modal"),
+  modalTitle: document.getElementById("modal-title"),
+  modalText: document.getElementById("modal-text"),
+};
 
-  function t(key) {
-    const dict = labels[state.lang] || labels.ro;
-    const parts = key.split('.');
-    let value = dict;
-    for (const part of parts) value = value && value[part];
-    return value == null ? key : value;
-  }
+function setStatus(message, kind = "normal") {
+  els.status.textContent = message;
+  els.status.className = kind === "ok" ? "message-ok" : kind === "warn" ? "message-warn" : "";
+}
 
-  function $(id) { return document.getElementById(id); }
-  function clamp(v, min, max) { return Math.max(min, Math.min(max, v)); }
-  function esc(s) { return String(s == null ? '' : s).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c])); }
-  function distance(a, b) { const dx = a.x - b.x; const dy = a.y - b.y; return Math.sqrt(dx * dx + dy * dy) || 1; }
-  function relationLabel(type) { return t('relationTypes.' + (type || 'distant')); }
+function normalizeName(value) {
+  return (value || "")
+    .toLowerCase()
+    .trim()
+    .normalize("NFD")
+    .replace(/[\u0300-\u036f]/g, "");
+}
 
-  function setStatus(message) {
-    const el = $('statusLine');
-    if (el) el.textContent = message || '';
-  }
+function linkKey(a, b) {
+  return [a, b].sort().join("__");
+}
 
-  function getSvgPoint(clientX, clientY) {
-    const svg = $('villageTreeSvg');
-    const rect = svg.getBoundingClientRect();
-    const x = (clientX - rect.left - state.transform.x) / state.transform.scale;
-    const y = (clientY - rect.top - state.transform.y) / state.transform.scale;
-    return { x, y };
-  }
+async function loadVillageGraph() {
+  const [familiesRes, linksRes, pagesRes] = await Promise.all([
+    supabase
+      .from("families")
+      .select("id, slug, display_name, visibility")
+      .order("display_name", { ascending: true }),
+    supabase
+      .from("v_family_connections")
+      .select("source_family_id, target_family_id, relationship_type"),
+    supabase
+      .from("family_pages")
+      .select("family_id, page_slug, is_public"),
+  ]);
 
-  function nodeFill(node) {
-    if (state.highlightedNodeIds.size && !state.highlightedNodeIds.has(node.id)) return 'rgba(80,80,80,0.28)';
-    return node.visibility === 'private' ? '#3b2222' : '#1a160d';
-  }
+  if (familiesRes.error) throw familiesRes.error;
+  if (linksRes.error) throw linksRes.error;
+  if (pagesRes.error) throw pagesRes.error;
 
-  function nodeStroke(node) {
-    if (state.highlightedNodeIds.has(node.id)) return '#f2d17e';
-    return node.visibility === 'private' ? '#c86a6a' : '#d4a84a';
-  }
+  const pageMap = new Map((pagesRes.data || []).map(row => [row.family_id, row]));
 
-  function linkStroke(link) {
-    if (state.highlightedLinkIds.has(link.id)) return '#f2d17e';
-    if (state.highlightedLinkIds.size) return 'rgba(120,120,120,0.25)';
-    const map = { blood: '#d4a84a', marriage: '#6bb874', alliance: '#7aa8d8', distant: '#8d7c5b' };
-    return map[link.type] || '#8d7c5b';
-  }
+  const nodes = (familiesRes.data || []).map(f => ({
+    id: f.id,
+    slug: f.slug,
+    name: f.display_name,
+    visibility: f.visibility,
+    pageSlug: pageMap.get(f.id)?.page_slug || null,
+    pagePublic: pageMap.get(f.id)?.is_public || false,
+  }));
 
-  function linkOpacity(link) {
-    if (state.highlightedLinkIds.has(link.id)) return '1';
-    if (state.highlightedLinkIds.size) return '0.16';
-    return '0.65';
-  }
-
-  function ensureLang() {
-    document.documentElement.lang = state.lang;
-    document.querySelectorAll('[data-ro]').forEach(function (el) {
-      const text = el.getAttribute('data-' + state.lang);
-      if (text == null) return;
-      if (el.matches('input, textarea')) el.placeholder = text;
-      else el.innerHTML = text;
-    });
-    $('searchInput').placeholder = t('searchPlaceholder');
-    $('relationFrom').options[0].textContent = t('startFamily');
-    $('relationTo').options[0].textContent = t('targetFamily');
-    $('sourceInfo').textContent = t('sourceInfo');
-    renderSearchResults([]);
-  }
-
-  function populateSelectors() {
-    const from = $('relationFrom');
-    const to = $('relationTo');
-    from.innerHTML = '<option value="">' + esc(t('startFamily')) + '</option>';
-    to.innerHTML = '<option value="">' + esc(t('targetFamily')) + '</option>';
-
-    (state.data.graph.nodes || []).slice().sort(function (a, b) {
-      return a.familyName.localeCompare(b.familyName, 'ro');
-    }).forEach(function (node) {
-      const label = node.familyName + (node.village ? ' (' + node.village + ')' : '');
-      const optionA = document.createElement('option');
-      optionA.value = node.id;
-      optionA.textContent = label;
-      from.appendChild(optionA);
-      const optionB = optionA.cloneNode(true);
-      to.appendChild(optionB);
+  const seen = new Set();
+  const links = [];
+  for (const row of linksRes.data || []) {
+    const dedupeKey = linkKey(row.source_family_id, row.target_family_id) + "::" + row.relationship_type;
+    if (seen.has(dedupeKey)) continue;
+    seen.add(dedupeKey);
+    links.push({
+      source: row.source_family_id,
+      target: row.target_family_id,
+      type: row.relationship_type,
     });
   }
 
-  function updateStats() {
-    const nodes = state.data.graph.nodes || [];
-    const links = state.data.graph.links || [];
-    const adjacency = state.data.graph.adjacency || new Map();
-    let isolated = 0;
-    nodes.forEach(function (node) {
-      if (!(adjacency.get(node.id) || []).length) isolated += 1;
-    });
-    $('statFamilies').textContent = String(nodes.length);
-    $('statLinks').textContent = String(links.length);
-    $('statIsolated').textContent = String(isolated);
+  return { nodes, links };
+}
+
+function buildAdjacency(nodes, links) {
+  const adjacency = new Map(nodes.map(node => [node.id, []]));
+  for (const link of links) {
+    adjacency.get(link.source)?.push({ nodeId: link.target, type: link.type });
+    adjacency.get(link.target)?.push({ nodeId: link.source, type: link.type });
+  }
+  return adjacency;
+}
+
+function findNodeByName(inputName) {
+  const normalized = normalizeName(inputName);
+  return state.nodes.find(n => normalizeName(n.name) === normalized) || null;
+}
+
+function populateControls(nodes) {
+  els.familyList.innerHTML = "";
+  els.relationFrom.innerHTML = '<option value="">Alege familia</option>';
+  els.relationTo.innerHTML = '<option value="">Alege familia</option>';
+
+  for (const node of nodes) {
+    const option = document.createElement("option");
+    option.value = node.name;
+    els.familyList.appendChild(option);
+
+    const opt1 = document.createElement("option");
+    opt1.value = node.id;
+    opt1.textContent = node.name;
+    els.relationFrom.appendChild(opt1);
+
+    const opt2 = document.createElement("option");
+    opt2.value = node.id;
+    opt2.textContent = node.name;
+    els.relationTo.appendChild(opt2);
+  }
+}
+
+function showModal(title, text) {
+  els.modalTitle.textContent = title;
+  els.modalText.textContent = text;
+  els.modal.classList.remove("hidden");
+}
+
+function hideModal() {
+  els.modal.classList.add("hidden");
+}
+
+function familyOpenUrl(node) {
+  if (node.pagePublic && node.pageSlug) {
+    return `${node.pageSlug}.html`;
+  }
+  return `genealogie-familie.html?family=${encodeURIComponent(node.slug || node.name)}`;
+}
+
+function handleNodeClick(event, node) {
+  event.stopPropagation();
+  state.selectedNodeId = node.id;
+  centerOnNode(node, 1.35);
+
+  if (node.visibility === "private") {
+    showModal(node.name, "Privat");
+    setStatus(`Familia "${node.name}" este privată.`, "warn");
+    updateStyles();
+    return;
   }
 
-  function seededRandom(seed) {
-    let x = Math.sin(seed) * 10000;
-    return x - Math.floor(x);
-  }
+  hideModal();
+  setStatus(`Se deschide familia "${node.name}"...`, "ok");
+  updateStyles();
+  window.location.href = familyOpenUrl(node);
+}
 
-  function setupInitialPositions() {
-    const nodes = state.data.graph.nodes;
-    const adjacency = state.data.graph.adjacency;
-    const visited = new Set();
-    const components = [];
+function renderTooltip(event, node) {
+  const visibilityText = node.visibility === "public" ? "Publică" : "Privată";
+  els.tooltip.innerHTML = `<strong>${node.name}</strong><br>Status: ${visibilityText}`;
+  els.tooltip.style.display = "block";
+  els.tooltip.style.left = `${event.offsetX + 18}px`;
+  els.tooltip.style.top = `${event.offsetY + 18}px`;
+}
 
-    for (const node of nodes) {
-      if (visited.has(node.id)) continue;
-      const queue = [node.id];
-      visited.add(node.id);
-      const component = [];
-      while (queue.length) {
-        const currentId = queue.shift();
-        component.push(currentId);
-        (adjacency.get(currentId) || []).forEach(function (edge) {
-          if (!visited.has(edge.nodeId)) {
-            visited.add(edge.nodeId);
-            queue.push(edge.nodeId);
-          }
-        });
-      }
-      components.push(component);
-    }
+function hideTooltip() {
+  els.tooltip.style.display = "none";
+}
 
-    const cols = Math.max(1, Math.ceil(Math.sqrt(components.length)));
-    const spacingX = 420;
-    const spacingY = 320;
-    components.forEach(function (component, idx) {
-      const col = idx % cols;
-      const row = Math.floor(idx / cols);
-      const centerX = (col - (cols - 1) / 2) * spacingX;
-      const centerY = (row - (Math.ceil(components.length / cols) - 1) / 2) * spacingY;
-      component.forEach(function (nodeId, localIndex) {
-        const node = state.nodesById.get(nodeId);
-        const angle = (Math.PI * 2 * localIndex) / Math.max(1, component.length);
-        const ring = component.length === 1 ? 0 : 40 + (localIndex % 3) * 24;
-        node.x = centerX + Math.cos(angle) * ring + (seededRandom(localIndex + idx + 1) - 0.5) * 20;
-        node.y = centerY + Math.sin(angle) * ring + (seededRandom(localIndex + idx + 21) - 0.5) * 20;
-      });
-    });
-  }
+function resetHighlight() {
+  state.highlightedNodeIds.clear();
+  state.highlightedLinkKeys.clear();
+  state.selectedNodeId = null;
+  hideModal();
+  updateStyles();
+  setStatus("Vizualizare resetată.");
+}
 
-  function runSimulationStep() {
-    if (!state.simulationRunning || !state.data) return;
-    const nodes = state.data.graph.nodes;
-    const links = state.data.graph.links;
-    const centerPull = 0.0014;
-    const repulsion = 22000;
-    const spring = 0.009;
-    const idealLength = 160;
-    const damping = 0.88;
+function updateStyles() {
+  state.gNodes.selectAll("g.node").each(function(d) {
+    const isSelected = state.selectedNodeId === d.id;
+    const dimNode = state.highlightedNodeIds.size > 0 && !state.highlightedNodeIds.has(d.id);
 
-    for (let i = 0; i < nodes.length; i += 1) {
-      const a = nodes[i];
-      if (state.dragNode && state.dragNode.id === a.id) continue;
-      for (let j = i + 1; j < nodes.length; j += 1) {
-        const b = nodes[j];
-        const dx = a.x - b.x;
-        const dy = a.y - b.y;
-        const distSq = Math.max(dx * dx + dy * dy, 0.01);
-        const force = repulsion / distSq;
-        const dist = Math.sqrt(distSq);
-        const fx = (dx / dist) * force;
-        const fy = (dy / dist) * force;
-        a.vx += fx;
-        a.vy += fy;
-        b.vx -= fx;
-        b.vy -= fy;
-      }
-    }
+    d3.select(this).select("circle")
+      .attr("fill", d.visibility === "public" ? "#d4a84a" : "#6f7884")
+      .attr("stroke", isSelected ? "#fff4c2" : state.highlightedNodeIds.has(d.id) ? "#f4d88a" : "#243244")
+      .attr("r", isSelected ? 28 : 22)
+      .attr("opacity", dimNode ? 0.22 : 1);
 
-    links.forEach(function (link) {
-      const a = state.nodesById.get(link.source);
-      const b = state.nodesById.get(link.target);
-      if (!a || !b) return;
-      const dx = b.x - a.x;
-      const dy = b.y - a.y;
-      const dist = Math.sqrt(dx * dx + dy * dy) || 1;
-      const desired = link.type === 'blood' ? idealLength : link.type === 'marriage' ? 150 : 175;
-      const force = (dist - desired) * spring;
-      const fx = (dx / dist) * force;
-      const fy = (dy / dist) * force;
-      a.vx += fx;
-      a.vy += fy;
-      b.vx -= fx;
-      b.vy -= fy;
-    });
+    d3.select(this).select("text")
+      .attr("opacity", dimNode ? 0.25 : 1)
+      .attr("font-weight", isSelected || state.highlightedNodeIds.has(d.id) ? 700 : 500);
+  });
 
-    nodes.forEach(function (node) {
-      if (state.dragNode && state.dragNode.id === node.id) return;
-      node.vx += -node.x * centerPull;
-      node.vy += -node.y * centerPull;
-      node.vx *= damping;
-      node.vy *= damping;
-      node.x += clamp(node.vx, -16, 16);
-      node.y += clamp(node.vy, -16, 16);
-    });
-  }
+  state.gLinks.selectAll("line").each(function(d) {
+    const sourceId = typeof d.source === "object" ? d.source.id : d.source;
+    const targetId = typeof d.target === "object" ? d.target.id : d.target;
+    const key = linkKey(sourceId, targetId);
+    const dimLink = state.highlightedLinkKeys.size > 0 && !state.highlightedLinkKeys.has(key);
 
-  function boundsOfNodes(nodeIds) {
-    const selected = nodeIds && nodeIds.length ? nodeIds.map(id => state.nodesById.get(id)).filter(Boolean) : (state.data.graph.nodes || []);
-    if (!selected.length) return { minX: -100, minY: -100, maxX: 100, maxY: 100 };
-    let minX = Infinity, minY = Infinity, maxX = -Infinity, maxY = -Infinity;
-    selected.forEach(function (node) {
-      const r = node.radius + 12;
-      minX = Math.min(minX, node.x - r);
-      minY = Math.min(minY, node.y - r);
-      maxX = Math.max(maxX, node.x + r);
-      maxY = Math.max(maxY, node.y + r);
-    });
-    return { minX, minY, maxX, maxY };
-  }
+    d3.select(this)
+      .attr("stroke", state.highlightedLinkKeys.has(key) ? "#f4d88a" : "#4f5d73")
+      .attr("stroke-width", state.highlightedLinkKeys.has(key) ? 3.8 : 2)
+      .attr("opacity", dimLink ? 0.16 : 0.9);
+  });
+}
 
-  function fitToNodes(nodeIds, animate) {
-    const box = boundsOfNodes(nodeIds);
-    const width = Math.max(120, box.maxX - box.minX);
-    const height = Math.max(120, box.maxY - box.minY);
-    const pad = Math.max(92, Math.min(state.viewport.width, state.viewport.height) * 0.08);
-    const scale = clamp(Math.min((state.viewport.width - pad * 2) / width, (state.viewport.height - pad * 2) / height), 0.22, 1.18);
-    const x = state.viewport.width / 2 - ((box.minX + box.maxX) / 2) * scale;
-    const y = state.viewport.height / 2 - ((box.minY + box.maxY) / 2) * scale;
-    setTransform({ x, y, scale }, animate);
-  }
+function fitGraph(duration = 650) {
+  if (!state.nodes.length) return;
 
-  function settleLayout(iterations) {
-    for (let i = 0; i < iterations; i += 1) {
-      runSimulationStep();
+  const xs = state.nodes.map(n => n.x || 0);
+  const ys = state.nodes.map(n => n.y || 0);
+
+  const minX = Math.min(...xs) - 80;
+  const maxX = Math.max(...xs) + 80;
+  const minY = Math.min(...ys) - 80;
+  const maxY = Math.max(...ys) + 80;
+
+  const graphWidth = Math.max(1, maxX - minX);
+  const graphHeight = Math.max(1, maxY - minY);
+
+  const scale = Math.min(2.1, 0.9 / Math.max(graphWidth / state.width, graphHeight / state.height));
+  const translateX = state.width / 2 - scale * (minX + graphWidth / 2);
+  const translateY = state.height / 2 - scale * (minY + graphHeight / 2);
+
+  state.svg.transition()
+    .duration(duration)
+    .call(state.zoom.transform, d3.zoomIdentity.translate(translateX, translateY).scale(scale));
+}
+
+function centerOnNode(node, zoomLevel = 1.5, duration = 650) {
+  if (!node) return;
+  const tx = state.width / 2 - zoomLevel * node.x;
+  const ty = state.height / 2 - zoomLevel * node.y;
+
+  state.svg.transition()
+    .duration(duration)
+    .call(state.zoom.transform, d3.zoomIdentity.translate(tx, ty).scale(zoomLevel));
+}
+
+function bfsFamilyPath(startId, endId) {
+  if (!startId || !endId) return null;
+  if (startId === endId) return [startId];
+
+  const queue = [[startId]];
+  const visited = new Set([startId]);
+
+  while (queue.length) {
+    const path = queue.shift();
+    const current = path[path.length - 1];
+    const neighbors = state.adjacency.get(current) || [];
+
+    for (const neighbor of neighbors) {
+      if (visited.has(neighbor.nodeId)) continue;
+      const nextPath = [...path, neighbor.nodeId];
+      if (neighbor.nodeId === endId) return nextPath;
+      visited.add(neighbor.nodeId);
+      queue.push(nextPath);
     }
   }
 
-  function centerOnNode(nodeId, animate) {
-    const node = state.nodesById.get(nodeId);
-    if (!node) return;
-    const target = {
-      scale: clamp(Math.max(state.transform.scale, 1.08), 0.3, 2.4),
-      x: state.viewport.width / 2 - node.x * Math.max(state.transform.scale, 1.08),
-      y: state.viewport.height / 2 - node.y * Math.max(state.transform.scale, 1.08)
-    };
-    setTransform(target, animate);
+  return null;
+}
+
+function highlightPath(pathIds) {
+  state.highlightedNodeIds = new Set(pathIds);
+  state.highlightedLinkKeys = new Set();
+
+  for (let i = 0; i < pathIds.length - 1; i += 1) {
+    state.highlightedLinkKeys.add(linkKey(pathIds[i], pathIds[i + 1]));
   }
 
-  function setTransform(next, animate) {
-    const from = { ...state.transform };
-    const to = {
-      x: next.x,
-      y: next.y,
-      scale: clamp(next.scale, 0.22, 2.8)
-    };
-    if (!animate) {
-      state.transform = to;
+  state.selectedNodeId = pathIds[0] || null;
+  updateStyles();
+
+  const firstNode = state.nodes.find(n => n.id === pathIds[0]);
+  if (firstNode) centerOnNode(firstNode, 1.2, 500);
+}
+
+function attachEvents() {
+  els.findRelation.addEventListener("click", () => {
+    const fromId = els.relationFrom.value;
+    const toId = els.relationTo.value;
+
+    if (!fromId || !toId) {
+      setStatus("Alege ambele familii pentru a verifica relația.", "warn");
       return;
     }
-    const start = performance.now();
-    const duration = 260;
-    function frame(now) {
-      const p = clamp((now - start) / duration, 0, 1);
-      const ease = 1 - Math.pow(1 - p, 3);
-      state.transform = {
-        x: from.x + (to.x - from.x) * ease,
-        y: from.y + (to.y - from.y) * ease,
-        scale: from.scale + (to.scale - from.scale) * ease
-      };
-      if (p < 1) requestAnimationFrame(frame);
-    }
-    requestAnimationFrame(frame);
-  }
 
-  function screenPos(node) {
-    return {
-      x: node.x * state.transform.scale + state.transform.x,
-      y: node.y * state.transform.scale + state.transform.y
-    };
-  }
-
-  function renderTooltip() {
-    const tooltip = $('treeTooltip');
-    if (!state.hoveredNodeId) {
-      tooltip.style.display = 'none';
+    const path = bfsFamilyPath(fromId, toId);
+    if (!path) {
+      state.highlightedNodeIds.clear();
+      state.highlightedLinkKeys.clear();
+      updateStyles();
+      setStatus("Nu există relație între familiile selectate.", "warn");
+      showModal("Fără relație", "Nu a fost găsit niciun traseu între familiile selectate.");
       return;
     }
-    const node = state.nodesById.get(state.hoveredNodeId);
+
+    highlightPath(path);
+    const pathNames = path.map(id => state.nodes.find(n => n.id === id)?.name).filter(Boolean).join(" → ");
+    setStatus(`Relație găsită: ${pathNames}`, "ok");
+    showModal("Relație găsită", pathNames);
+  });
+
+  els.fitView.addEventListener("click", () => {
+    fitGraph();
+    setStatus("Arborele a fost recentrat.");
+  });
+
+  els.clearSelection.addEventListener("click", () => {
+    resetHighlight();
+    fitGraph(450);
+  });
+
+  els.familySearch.addEventListener("change", () => {
+    const node = findNodeByName(els.familySearch.value);
     if (!node) {
-      tooltip.style.display = 'none';
+      setStatus("Familia căutată nu a fost găsită.", "warn");
       return;
     }
-    const pos = screenPos(node);
-    tooltip.style.display = 'block';
-    tooltip.style.left = Math.round(pos.x + 16) + 'px';
-    tooltip.style.top = Math.round(pos.y - 12) + 'px';
-    const badges = [
-      '<span class="tt-badge ' + (node.visibility === 'private' ? 'private' : 'public') + '">' + esc(node.visibility === 'private' ? t('familyPrivate') : t('familyPublic')) + '</span>'
-    ];
-    if (node.connectedToVillage) badges.push('<span class="tt-badge connected">' + esc(t('villageConnected')) + '</span>');
-    if (!(state.data.graph.adjacency.get(node.id) || []).length) badges.push('<span class="tt-badge isolated">' + esc(t('isolated')) + '</span>');
-    tooltip.innerHTML = '<div class="tt-title">' + esc(node.familyName) + '</div>'
-      + '<div class="tt-sub">' + esc(node.village || 'Calnic') + '</div>'
-      + '<div class="tt-badges">' + badges.join('') + '</div>'
-      + '<div class="tt-meta">' + esc(node.membersCount) + ' ' + esc(t('tooltipMembers')) + ' · ' + esc(node.generationsCount || 0) + ' ' + esc(t('tooltipGenerations')) + '</div>'
-      + '<div class="tt-hint">' + esc(node.visibility === 'private' ? t('tooltipPrivateHint') : t('tooltipOpenHint')) + '</div>';
-  }
-
-  function renderGraph() {
-    const linksLayer = $('linksLayer');
-    const nodesLayer = $('nodesLayer');
-    const labelsLayer = $('labelsLayer');
-    if (!state.data) return;
-
-    const nodeOpacity = function (node) {
-      if (!state.highlightedNodeIds.size) return 1;
-      return state.highlightedNodeIds.has(node.id) ? 1 : 0.28;
-    };
-
-    linksLayer.innerHTML = state.data.graph.links.map(function (link) {
-      const a = state.nodesById.get(link.source);
-      const b = state.nodesById.get(link.target);
-      if (!a || !b) return '';
-      const dash = link.type === 'marriage' ? '7 7' : link.type === 'alliance' ? '4 6' : link.type === 'distant' ? '3 7' : '';
-      return '<line x1="' + a.x.toFixed(2) + '" y1="' + a.y.toFixed(2) + '" x2="' + b.x.toFixed(2) + '" y2="' + b.y.toFixed(2) + '" '
-        + 'stroke="' + linkStroke(link) + '" stroke-width="' + (state.highlightedLinkIds.has(link.id) ? 3.2 : 1.7) + '" '
-        + 'stroke-opacity="' + linkOpacity(link) + '" '
-        + (dash ? 'stroke-dasharray="' + dash + '" ' : '') + '/>';
-    }).join('');
-
-    nodesLayer.innerHTML = state.data.graph.nodes.map(function (node) {
-      const glow = state.highlightedNodeIds.has(node.id) ? '<circle cx="' + node.x.toFixed(2) + '" cy="' + node.y.toFixed(2) + '" r="' + (node.radius + 11) + '" fill="rgba(242,209,126,0.10)" stroke="rgba(242,209,126,0.45)" stroke-width="1.2"></circle>' : '';
-      return '<g class="tree-node-g" data-node-id="' + esc(node.id) + '" opacity="' + nodeOpacity(node) + '">'
-        + glow
-        + '<circle cx="' + node.x.toFixed(2) + '" cy="' + node.y.toFixed(2) + '" r="' + node.radius + '" fill="' + nodeFill(node) + '" stroke="' + nodeStroke(node) + '" stroke-width="2"></circle>'
-        + '<text x="' + node.x.toFixed(2) + '" y="' + (node.y + 5).toFixed(2) + '" text-anchor="middle" class="tree-node-initial">' + esc((node.familyName || '?').charAt(0).toUpperCase()) + '</text>'
-        + '</g>';
-    }).join('');
-
-    labelsLayer.innerHTML = state.data.graph.nodes.map(function (node) {
-      const posY = node.y + node.radius + 18;
-      const faded = state.highlightedNodeIds.size && !state.highlightedNodeIds.has(node.id);
-      return '<text x="' + node.x.toFixed(2) + '" y="' + posY.toFixed(2) + '" text-anchor="middle" class="tree-node-label" opacity="' + (faded ? '0.25' : '0.95') + '">' + esc(node.familyName) + '</text>';
-    }).join('');
-
-    $('scene').setAttribute('transform', 'translate(' + state.transform.x.toFixed(2) + ',' + state.transform.y.toFixed(2) + ') scale(' + state.transform.scale.toFixed(4) + ')');
-    renderTooltip();
-  }
-
-  function renderSearchResults(results) {
-    const panel = $('searchResults');
-    if (!results || !results.length) {
-      panel.innerHTML = $('searchInput').value.trim() ? '<div class="search-empty">' + esc(t('noResults')) + '</div>' : '';
-      panel.classList.toggle('open', !!$('searchInput').value.trim());
-      return;
-    }
-    panel.innerHTML = results.map(function (node) {
-      return '<button class="search-item" data-node-id="' + esc(node.id) + '">'
-        + '<span class="search-name">' + esc(node.familyName) + '</span>'
-        + '<span class="search-meta">' + esc(node.visibility === 'private' ? t('familyPrivate') : t('familyPublic')) + ' · ' + esc(node.village || 'Calnic') + '</span>'
-        + '</button>';
-    }).join('');
-    panel.classList.add('open');
-  }
-
-  function updateLegend() {
-    $('legendPublicLabel').textContent = t('legendPublic');
-    $('legendPrivateLabel').textContent = t('legendPrivate');
-    $('legendHighlightedLabel').textContent = t('legendHighlighted');
-    $('statsFamiliesLabel').textContent = t('statsFamilies');
-    $('statsLinksLabel').textContent = t('statsLinks');
-    $('statsIsolatedLabel').textContent = t('statsIsolated');
-  }
-
-  function clearHighlights() {
-    state.highlightedNodeIds.clear();
-    state.highlightedLinkIds.clear();
-    state.selectedPath = null;
-    $('relationResult').innerHTML = '';
-  }
-
-  function findPath(startId, targetId) {
-    const adjacency = state.data.graph.adjacency;
-    const queue = [startId];
-    const visited = new Set([startId]);
-    const prevNode = new Map();
-    const prevLink = new Map();
-
-    while (queue.length) {
-      const current = queue.shift();
-      if (current === targetId) break;
-      (adjacency.get(current) || []).forEach(function (edge) {
-        if (visited.has(edge.nodeId)) return;
-        visited.add(edge.nodeId);
-        prevNode.set(edge.nodeId, current);
-        prevLink.set(edge.nodeId, edge.link);
-        queue.push(edge.nodeId);
-      });
-    }
-
-    if (!visited.has(targetId)) return null;
-
-    const nodeIds = [targetId];
-    const links = [];
-    let cursor = targetId;
-    while (cursor !== startId) {
-      links.push(prevLink.get(cursor));
-      cursor = prevNode.get(cursor);
-      nodeIds.push(cursor);
-    }
-    nodeIds.reverse();
-    links.reverse();
-    return { nodeIds, links };
-  }
-
-  function describePath(path) {
-    const segments = [];
-    for (let i = 0; i < path.nodeIds.length; i += 1) {
-      const node = state.nodesById.get(path.nodeIds[i]);
-      if (!node) continue;
-      segments.push(esc(node.familyName));
-      if (i < path.links.length) {
-        segments.push('<span class="relation-sep">' + esc(relationLabel(path.links[i].type)) + '</span>');
-      }
-    }
-    return segments.join(' ' + esc(t('relationPathSeparator')) + ' ');
-  }
-
-  function highlightPath(path) {
-    clearHighlights();
-    path.nodeIds.forEach(id => state.highlightedNodeIds.add(id));
-    path.links.forEach(link => state.highlightedLinkIds.add(link.id));
-    state.selectedPath = path;
-    $('relationResult').innerHTML = '<strong>' + esc(t('relationFoundPrefix')) + '</strong> ' + describePath(path);
-    fitToNodes(path.nodeIds, true);
-    setStatus(t('statusPathFound'));
-  }
-
-  function onFamilyActivate(nodeId) {
-    const node = state.nodesById.get(nodeId);
-    if (!node) return;
     state.selectedNodeId = node.id;
     state.highlightedNodeIds = new Set([node.id]);
-    state.highlightedLinkIds.clear();
-    centerOnNode(node.id, true);
-    if (node.visibility === 'private') {
-      $('privateModalText').textContent = t('privateFamily');
-      $('privateModal').classList.add('open');
-      setStatus(t('statusPrivate'));
-    } else {
-      window.location.href = node.publicUrl;
-      setStatus(t('statusOpened'));
-    }
-  }
-
-  function setupEvents() {
-    $('closePrivateModal').addEventListener('click', function () {
-      $('privateModal').classList.remove('open');
-    });
-    $('privateModal').addEventListener('click', function (e) {
-      if (e.target === $('privateModal')) $('privateModal').classList.remove('open');
-    });
-    $('retryBtn').addEventListener('click', load);
-
-    $('searchInput').addEventListener('input', function () {
-      const q = this.value.trim().toLowerCase();
-      if (!q) {
-        renderSearchResults([]);
-        return;
-      }
-      const results = state.data.graph.nodes
-        .filter(node => node.familyName.toLowerCase().includes(q))
-        .sort((a, b) => a.familyName.localeCompare(b.familyName, 'ro'))
-        .slice(0, 8);
-      renderSearchResults(results);
-    });
-
-    $('searchResults').addEventListener('click', function (e) {
-      const btn = e.target.closest('.search-item');
-      if (!btn) return;
-      const nodeId = btn.getAttribute('data-node-id');
-      const node = state.nodesById.get(nodeId);
-      if (!node) return;
-      state.highlightedNodeIds = new Set([node.id]);
-      state.highlightedLinkIds.clear();
-      centerOnNode(node.id, true);
-      $('searchInput').value = node.familyName;
-      $('searchResults').classList.remove('open');
-      setStatus(t('statusFocused'));
-    });
-
-    document.addEventListener('click', function (e) {
-      if (!e.target.closest('.search-wrap')) $('searchResults').classList.remove('open');
-    });
-
-    $('relationFindBtn').addEventListener('click', function () {
-      const from = $('relationFrom').value;
-      const to = $('relationTo').value;
-      if (!from || !to || from === to) {
-        $('relationResult').textContent = t('relationInvalid');
-        setStatus(t('relationInvalid'));
-        return;
-      }
-      const path = findPath(from, to);
-      if (!path) {
-        clearHighlights();
-        $('relationResult').textContent = t('relationNotFound');
-        setStatus(t('statusPathMissing'));
-        return;
-      }
-      highlightPath(path);
-    });
-
-    $('relationClearBtn').addEventListener('click', function () {
-      clearHighlights();
-      renderGraph();
-      setStatus('');
-    });
-
-    $('resetBtn').addEventListener('click', function () {
-      clearHighlights();
-      fitToNodes(null, true);
-      setStatus(t('statusCentered'));
-    });
-    $('centerBtn').addEventListener('click', function () {
-      fitToNodes(null, true);
-      setStatus(t('statusCentered'));
-    });
-    $('fitBtn').addEventListener('click', function () {
-      fitToNodes(null, true);
-      setStatus(t('statusCentered'));
-    });
-    $('zoomInBtn').addEventListener('click', function () {
-      setTransform({ x: state.transform.x, y: state.transform.y, scale: state.transform.scale * 1.15 }, true);
-    });
-    $('zoomOutBtn').addEventListener('click', function () {
-      setTransform({ x: state.transform.x, y: state.transform.y, scale: state.transform.scale / 1.15 }, true);
-    });
-
-    $('btn-ro').addEventListener('click', function () {
-      state.lang = 'ro';
-      localStorage.setItem('calnic-lang', 'ro');
-      ensureLang();
-      updateLegend();
-      populateSelectors();
-    });
-    $('btn-en').addEventListener('click', function () {
-      state.lang = 'en';
-      localStorage.setItem('calnic-lang', 'en');
-      ensureLang();
-      updateLegend();
-      populateSelectors();
-    });
-
-    const svg = $('villageTreeSvg');
-    svg.addEventListener('wheel', function (e) {
-      e.preventDefault();
-      const factor = e.deltaY < 0 ? 1.08 : 0.92;
-      const newScale = clamp(state.transform.scale * factor, 0.22, 2.8);
-      const cx = state.viewport.width / 2;
-      const cy = state.viewport.height / 2;
-      const worldX = (cx - state.transform.x) / state.transform.scale;
-      const worldY = (cy - state.transform.y) / state.transform.scale;
-      state.transform.scale = newScale;
-      state.transform.x = cx - worldX * newScale;
-      state.transform.y = cy - worldY * newScale;
-    }, { passive: false });
-
-    svg.addEventListener('mousedown', function (e) {
-      const nodeEl = e.target.closest('.tree-node-g');
-      if (nodeEl) {
-        const node = state.nodesById.get(nodeEl.getAttribute('data-node-id'));
-        if (node) {
-          state.dragNode = node;
-          const pt = getSvgPoint(e.clientX, e.clientY);
-          node.x = pt.x;
-          node.y = pt.y;
-          node.vx = 0;
-          node.vy = 0;
-        }
-      } else {
-        state.isPanning = true;
-      }
-      state.panStart = { x: e.clientX, y: e.clientY, tx: state.transform.x, ty: state.transform.y };
-      state.dragMoved = false;
-    });
-
-    window.addEventListener('mousemove', function (e) {
-      if (state.dragNode) {
-        const pt = getSvgPoint(e.clientX, e.clientY);
-        state.dragNode.x = pt.x;
-        state.dragNode.y = pt.y;
-        state.dragNode.vx = 0;
-        state.dragNode.vy = 0;
-        if (state.panStart && (Math.abs(e.clientX - state.panStart.x) > 6 || Math.abs(e.clientY - state.panStart.y) > 6)) state.dragMoved = true;
-        return;
-      }
-      if (state.isPanning && state.panStart) {
-        state.transform.x = state.panStart.tx + (e.clientX - state.panStart.x);
-        state.transform.y = state.panStart.ty + (e.clientY - state.panStart.y);
-        if (Math.abs(e.clientX - state.panStart.x) > 4 || Math.abs(e.clientY - state.panStart.y) > 4) state.dragMoved = true;
-        return;
-      }
-      const nodeEl = e.target.closest('.tree-node-g');
-      state.hoveredNodeId = nodeEl ? nodeEl.getAttribute('data-node-id') : null;
-    });
-
-    window.addEventListener('mouseup', function (e) {
-      const wasDraggingNode = !!state.dragNode;
-      const node = state.dragNode;
-      state.isPanning = false;
-      state.dragNode = null;
-      if (state.dragMoved) state.suppressClick = true;
-      if (!wasDraggingNode) return;
-      const nodeEl = e.target.closest('.tree-node-g');
-      if (!state.dragMoved && node && nodeEl && nodeEl.getAttribute('data-node-id') === node.id) {
-        onFamilyActivate(node.id);
-      }
-    });
-
-    svg.addEventListener('click', function (e) {
-      if (state.suppressClick) {
-        state.suppressClick = false;
-        return;
-      }
-      const nodeEl = e.target.closest('.tree-node-g');
-      if (!nodeEl || state.dragNode) return;
-      onFamilyActivate(nodeEl.getAttribute('data-node-id'));
-    });
-
-    window.addEventListener('resize', function () {
-      const wrap = $('treeViewport');
-      state.viewport.width = wrap.clientWidth;
-      state.viewport.height = wrap.clientHeight;
-      $('villageTreeSvg').setAttribute('viewBox', '0 0 ' + state.viewport.width + ' ' + state.viewport.height);
-    });
-  }
-
-  function animate() {
-    runSimulationStep();
-    renderGraph();
-    state.animationFrame = requestAnimationFrame(animate);
-  }
-
-  async function load() {
-    $('loadingState').style.display = 'flex';
-    $('errorState').style.display = 'none';
-    $('treeShell').style.display = 'none';
-    try {
-      if (!window.VillageTreeAdapter) throw new Error('Adaptorul pentru date nu este disponibil.');
-      state.data = await window.VillageTreeAdapter.fetchVillageTreeData();
-      state.nodesById = new Map((state.data.graph.nodes || []).map(node => [node.id, node]));
-      setupInitialPositions();
-      populateSelectors();
-      updateStats();
-      updateLegend();
-      ensureLang();
-      const wrap = $('treeViewport');
-      state.viewport.width = wrap.clientWidth;
-      state.viewport.height = wrap.clientHeight;
-      $('villageTreeSvg').setAttribute('viewBox', '0 0 ' + state.viewport.width + ' ' + state.viewport.height);
-      settleLayout(180);
-      fitToNodes(null, false);
-      $('loadingState').style.display = 'none';
-      $('treeShell').style.display = 'grid';
-      if (!state.animationFrame) animate();
-    } catch (err) {
-      console.error('[VillageTree] load failed', err);
-      $('loadingState').style.display = 'none';
-      $('errorState').style.display = 'flex';
-      $('errorText').textContent = err && err.message ? err.message : 'Unknown error';
-    }
-  }
-
-  document.addEventListener('DOMContentLoaded', function () {
-    setupEvents();
-    ensureLang();
-    load();
+    state.highlightedLinkKeys.clear();
+    updateStyles();
+    centerOnNode(node, 1.5);
+    setStatus(`Familia "${node.name}" a fost găsită.`, "ok");
   });
-})();
+
+  els.treeContainer.addEventListener("click", (event) => {
+    if (event.target === els.treeContainer || event.target === els.svg) {
+      hideModal();
+    }
+  });
+}
+
+function initSvg() {
+  const rect = els.treeContainer.getBoundingClientRect();
+  state.width = Math.max(300, rect.width);
+  state.height = Math.max(500, rect.height);
+
+  state.svg = d3.select(els.svg)
+    .attr("viewBox", [0, 0, state.width, state.height]);
+
+  state.gRoot = state.svg.append("g");
+  state.gLinks = state.gRoot.append("g").attr("class", "links");
+  state.gNodes = state.gRoot.append("g").attr("class", "nodes");
+
+  state.zoom = d3.zoom()
+    .scaleExtent([0.25, 3.5])
+    .on("zoom", (event) => {
+      state.gRoot.attr("transform", event.transform);
+    });
+
+  state.svg.call(state.zoom);
+}
+
+function drawGraph() {
+  state.simulation = d3.forceSimulation(state.nodes)
+    .force("link", d3.forceLink(state.links).id(d => d.id).distance(d => {
+      const sourceId = typeof d.source === "object" ? d.source.id : d.source;
+      const targetId = typeof d.target === "object" ? d.target.id : d.target;
+      const sourceDegree = state.adjacency.get(sourceId)?.length || 0;
+      const targetDegree = state.adjacency.get(targetId)?.length || 0;
+      return (sourceDegree === 0 || targetDegree === 0) ? 240 : 145;
+    }).strength(0.65))
+    .force("charge", d3.forceManyBody().strength(d => ((state.adjacency.get(d.id)?.length || 0) === 0 ? -520 : -680)))
+    .force("center", d3.forceCenter(state.width / 2, state.height / 2))
+    .force("collision", d3.forceCollide().radius(d => ((state.adjacency.get(d.id)?.length || 0) === 0 ? 54 : 42)));
+
+  const linkSelection = state.gLinks.selectAll("line")
+    .data(state.links)
+    .join("line")
+    .attr("stroke", "#4f5d73")
+    .attr("stroke-width", 2)
+    .attr("stroke-linecap", "round");
+
+  const nodeSelection = state.gNodes.selectAll("g.node")
+    .data(state.nodes)
+    .join("g")
+    .attr("class", "node")
+    .call(
+      d3.drag()
+        .on("start", (event, d) => {
+          if (!event.active) state.simulation.alphaTarget(0.3).restart();
+          d.fx = d.x;
+          d.fy = d.y;
+        })
+        .on("drag", (event, d) => {
+          d.fx = event.x;
+          d.fy = event.y;
+        })
+        .on("end", (event, d) => {
+          if (!event.active) state.simulation.alphaTarget(0);
+          d.fx = null;
+          d.fy = null;
+        })
+    );
+
+  nodeSelection.append("circle")
+    .attr("r", 22)
+    .attr("fill", d => d.visibility === "public" ? "#d4a84a" : "#6f7884")
+    .attr("stroke", "#243244");
+
+  nodeSelection.append("text")
+    .attr("dy", 40)
+    .text(d => d.name);
+
+  nodeSelection
+    .on("mouseover", (event, d) => renderTooltip(event, d))
+    .on("mousemove", (event, d) => renderTooltip(event, d))
+    .on("mouseout", hideTooltip)
+    .on("click", handleNodeClick);
+
+  state.simulation.on("tick", () => {
+    linkSelection
+      .attr("x1", d => d.source.x)
+      .attr("y1", d => d.source.y)
+      .attr("x2", d => d.target.x)
+      .attr("y2", d => d.target.y);
+
+    nodeSelection.attr("transform", d => `translate(${d.x},${d.y})`);
+  });
+
+  state.simulation.on("end", () => {
+    fitGraph();
+    setStatus(`Arbore încărcat: ${state.nodes.length} familii, ${state.links.length} conexiuni.`, "ok");
+  });
+
+  updateStyles();
+}
+
+async function init() {
+  try {
+    setStatus("Se încarcă familiile și relațiile...");
+    initSvg();
+
+    const { nodes, links } = await loadVillageGraph();
+
+    if (!nodes.length) {
+      setStatus("Nu există familii în baza de date.", "warn");
+      return;
+    }
+
+    state.nodes = nodes;
+    state.links = links;
+    state.adjacency = buildAdjacency(nodes, links);
+
+    populateControls(nodes);
+    attachEvents();
+    drawGraph();
+
+    window.addEventListener("resize", () => {
+      const rect = els.treeContainer.getBoundingClientRect();
+      state.width = Math.max(300, rect.width);
+      state.height = Math.max(500, rect.height);
+      state.svg.attr("viewBox", [0, 0, state.width, state.height]);
+      state.simulation?.force("center", d3.forceCenter(state.width / 2, state.height / 2));
+      state.simulation?.alpha(0.25).restart();
+      setTimeout(() => fitGraph(350), 220);
+    });
+  } catch (error) {
+    console.error(error);
+    setStatus("Eroare la încărcarea datelor din Supabase.", "warn");
+    showModal("Eroare", `${error.message || error}`);
+  }
+}
+
+init();
