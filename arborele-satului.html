@@ -1,149 +1,240 @@
 <!DOCTYPE html>
-<html lang="ro" style="background:#0a0a0a;">
+<html lang="ro">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<meta name="description" content="Arborele satului Calnic — toate familiile intr-un tree interactiv, cu zoom, cautare si detectare relatii.">
-<meta property="og:title" content="Arborele Satului — Calnic Online">
-<meta property="og:description" content="Tree interactiv cu familiile din Calnic, legaturi de sange, casatorie si rudenie.">
-<meta property="og:type" content="website">
-<meta property="og:url" content="https://calniconline.ro/arborele-satului.html">
-<meta property="og:image" content="https://calniconline.ro/og-image.png">
-<link rel="canonical" href="https://calniconline.ro/arborele-satului.html">
-<title>Arborele Satului — Calnic Online</title>
-<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,600;0,700;1,400&family=EB+Garamond:ital,wght@0,400;0,500;1,400&display=swap" rel="stylesheet">
-<link rel="icon" type="image/svg+xml" href="favicon.svg">
-<link rel="icon" type="image/x-icon" href="favicon.ico">
-<link rel="stylesheet" href="css/style.css">
-<style>
-:root{--bg:#0a0a0a;--s1:#111;--s2:#161616;--s3:#1c1c1c;--b1:#2a2a2a;--b2:#383838;--gold:#d4a84a;--gold-l:#e0b84a;--gold-d:#b08030;--gold-m:#7a5828;--text:#f0e8d0;--muted:#a09070;--green:#82c46a;--green-bg:#0d1a0d;--green-br:#2a4a2a;--red:#c86a6a;--red-bg:#1a0d0d;}
-*,*::before,*::after{box-sizing:border-box}body{margin:0;background:var(--bg);color:var(--text);font-family:'EB Garamond',Georgia,serif;font-size:17px;line-height:1.75;min-height:100vh}a{color:var(--gold);text-decoration:none}a:hover{color:var(--gold-l)}button,input,select{font-family:inherit}
-.lang-bar{background:#050505;border-bottom:1px solid var(--b1);padding:5px 24px;display:flex;justify-content:flex-end;align-items:center;gap:8px}.lang-label{font-size:11px;letter-spacing:2px;color:#c8a870}.lang-btn{background:none;border:1px solid #585040;color:var(--text);padding:2px 11px;font-size:12px;letter-spacing:1px;transition:all .2s;border-radius:1px;cursor:pointer}.lang-btn.active{background:var(--gold-d);border-color:var(--gold-l);color:#050505;font-weight:700}
-.site-header{background:#050505;border-bottom:2px solid var(--gold-d);padding:14px 24px;text-align:center}.site-title{font-family:'Playfair Display',serif;font-size:32px;color:var(--gold-l);letter-spacing:1px}.site-sub{font-style:italic;color:var(--muted);font-size:15px;margin-top:4px}
-nav{background:var(--s1);border-bottom:2px solid var(--gold-d);display:flex;flex-wrap:wrap;align-items:stretch}.nav-link{padding:11px 16px;font-size:14px;color:var(--text);border-right:1px solid var(--b1);transition:all .18s;display:flex;align-items:center;gap:6px}.nav-link:hover{background:var(--s2);color:var(--gold-l)}.nav-link.active{background:var(--s2);color:var(--gold);border-bottom:2px solid var(--gold)}.nav-right{margin-left:auto;display:flex}.nav-login{padding:11px 18px;font-size:14px;color:var(--gold);border-left:1px solid var(--b1);display:flex;align-items:center;gap:6px}.page-hero{background:#050505;border-bottom:2px solid var(--gold-d);padding:38px 20px 32px;text-align:center}.page-hero-title{font-family:'Playfair Display',serif;font-size:36px;color:var(--gold-l);letter-spacing:2px;margin-bottom:8px}.page-hero-sub{font-size:16px;color:var(--muted);font-style:italic;max-width:860px;margin:0 auto}.page-hero-orn{color:var(--gold-m);letter-spacing:8px;font-size:12px;margin-top:12px}
-.wrap{max-width:1380px;margin:0 auto;padding:28px 22px 40px}.topbar{display:flex;gap:14px;align-items:flex-start;justify-content:flex-start;flex-wrap:wrap;margin-bottom:18px}.search-wrap{position:relative;flex:1 1 380px;max-width:440px}.search-input{width:100%;background:var(--s1);border:1px solid var(--b1);border-left:3px solid var(--gold-d);color:var(--text);font-size:15px;padding:12px 14px;border-radius:3px;outline:none}.search-results{position:absolute;top:100%;left:0;right:0;background:#111;border:1px solid #c8983a;border-top:none;display:none;z-index:20;max-height:280px;overflow:auto;border-radius:0 0 4px 4px}.search-results.open{display:block}.search-item,.search-empty{display:block;width:100%;background:none;border:none;color:var(--text);text-align:left;padding:10px 14px;cursor:pointer;border-bottom:1px solid var(--s2)}.search-item:hover{background:var(--s2)}.search-name{display:block;font-family:'Playfair Display',serif;color:var(--gold-l)}.search-meta{display:block;font-size:12px;color:var(--muted)}
-.action-group{display:flex;gap:8px;flex-wrap:wrap;align-items:center;flex:1 1 100%;order:-1;padding:10px 12px;background:rgba(18,16,10,.92);border:1px solid var(--b1);border-radius:4px;position:sticky;top:12px;z-index:15}.tool-btn{background:#12100a;border:1px solid var(--gold-d);color:var(--gold);padding:10px 14px;border-radius:3px;font-size:14px;cursor:pointer;transition:.18s}.tool-btn:hover{background:#19140a;border-color:var(--gold-l);color:var(--gold-l)}
-.tree-shell{display:grid;grid-template-columns:minmax(0,1fr) 320px;gap:18px}.tree-panel,.side-panel{background:var(--s1);border:1px solid var(--b1);border-radius:4px;overflow:hidden}.tree-head{padding:12px 14px;border-bottom:1px solid var(--b1);display:flex;align-items:center;justify-content:space-between;gap:12px}.tree-title{font-family:'Playfair Display',serif;color:var(--gold);font-size:20px}.status-line{color:var(--muted);font-size:13px}.tree-viewport{position:relative;height:78vh;min-height:620px;background:radial-gradient(circle at center,#16130c 0%,#0d0d0d 58%,#080808 100%);overflow:hidden}.tree-svg{width:100%;height:100%;display:block;cursor:grab;touch-action:none}.tree-svg:active{cursor:grabbing}.tree-node-initial{fill:#f0e8d0;font-size:14px;font-family:'Playfair Display',serif;pointer-events:none}.tree-node-label{fill:#f0e8d0;font-size:13px;font-family:'Playfair Display',serif;pointer-events:none}.tree-tooltip{position:absolute;display:none;min-width:200px;max-width:260px;background:#100d08;border:1px solid var(--gold-d);border-radius:6px;padding:10px 12px;pointer-events:none;box-shadow:0 14px 40px rgba(0,0,0,.45);z-index:10}.tt-title{font-family:'Playfair Display',serif;color:var(--gold-l);font-size:16px}.tt-sub{font-size:12px;color:var(--muted)}.tt-badges{display:flex;gap:6px;flex-wrap:wrap;margin:7px 0}.tt-badge{display:inline-flex;padding:2px 7px;font-size:10px;border-radius:999px;border:1px solid var(--b2)}.tt-badge.public{border-color:#806020;color:var(--gold)}.tt-badge.private{border-color:#7a3030;color:var(--red)}.tt-badge.connected{border-color:var(--green-br);color:var(--green)}.tt-badge.isolated{border-color:#5b5550;color:#bdb2a0}.tt-meta,.tt-hint{font-size:12px;color:var(--muted)}
-.side-panel{padding:16px}.side-title{font-family:'Playfair Display',serif;font-size:18px;color:var(--gold);margin-bottom:8px}.mini-stats{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-bottom:18px}.mini-stat{background:#18140c;border:1px solid var(--b1);padding:10px 8px;text-align:center;border-radius:4px}.mini-stat-n{font-family:'Playfair Display',serif;color:var(--gold-l);font-size:22px;line-height:1}.mini-stat-l{font-size:11px;color:var(--muted);margin-top:6px;text-transform:uppercase;letter-spacing:1px}.legend{display:grid;gap:8px;margin:14px 0 18px}.legend-item{display:flex;align-items:center;gap:10px;color:var(--muted);font-size:13px}.legend-dot{width:14px;height:14px;border-radius:50%;border:1px solid}.legend-dot.public{background:#1a160d;border-color:#d4a84a}.legend-dot.private{background:#3b2222;border-color:#c86a6a}.legend-dot.highlight{background:#362d16;border-color:#f2d17e}.source-info{font-size:12px;color:var(--muted);border-top:1px solid var(--b1);padding-top:12px}
-.relation-box{margin-top:8px;padding:14px;background:#18140c;border:1px solid var(--b1);border-radius:4px}.relation-select{width:100%;background:#1a1208;border:1px solid #3a2810;color:var(--text);font-size:14px;padding:9px 10px;border-radius:3px;outline:none;margin-bottom:8px}.relation-actions{display:flex;gap:8px;flex-wrap:wrap}.relation-result{margin-top:10px;font-size:13px;color:var(--text);line-height:1.65}.relation-sep{color:var(--gold)}
-.loading-state,.error-state{display:flex;align-items:center;justify-content:center;flex-direction:column;min-height:420px;background:var(--s1);border:1px solid var(--b1);border-radius:4px;text-align:center;padding:24px}.spinner{width:42px;height:42px;border-radius:50%;border:3px solid #3c2c14;border-top-color:var(--gold);animation:spin 1s linear infinite;margin-bottom:14px}@keyframes spin{to{transform:rotate(360deg)}}
-.modal{position:fixed;inset:0;background:rgba(0,0,0,.72);display:none;align-items:center;justify-content:center;z-index:60;padding:20px}.modal.open{display:flex}.modal-card{max-width:420px;width:100%;background:#0f0d08;border:1px solid var(--gold-d);border-radius:6px;padding:22px;text-align:center}.modal-title{font-family:'Playfair Display',serif;color:var(--gold-l);font-size:24px}.modal-text{color:var(--muted);margin:10px 0 16px}.footer{background:#050505;border-top:2px solid var(--gold-d);padding:16px 24px;text-align:center;font-size:13px;color:var(--muted);letter-spacing:1.5px;font-style:italic;margin-top:30px}
-@media(max-width:1080px){.tree-shell{grid-template-columns:1fr}.tree-viewport{height:68vh;min-height:520px}}@media(max-width:760px){.wrap{padding:20px 14px 30px}.page-hero-title{font-size:28px}.tree-viewport{height:62vh;min-height:460px}.topbar{align-items:stretch}.search-wrap{max-width:none;flex-basis:100%}.action-group{top:8px;padding:8px}.mini-stats{grid-template-columns:repeat(3,1fr)}}
-</style>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Arborele satului</title>
+  <style>
+    :root{
+      --bg:#0b0f14;
+      --panel:#121922;
+      --panel-2:#182230;
+      --text:#e8edf3;
+      --muted:#9fb0c3;
+      --accent:#d4a84a;
+      --highlight:#f4d88a;
+      --ok:#7bc67b;
+      --line:#4f5d73;
+      --private:#6f7884;
+    }
+    *{box-sizing:border-box}
+    body{
+      margin:0;
+      font-family:Arial, Helvetica, sans-serif;
+      background:var(--bg);
+      color:var(--text);
+    }
+    .page{
+      min-height:100vh;
+      display:flex;
+      flex-direction:column;
+    }
+    .topbar{
+      padding:16px 18px;
+      border-bottom:1px solid rgba(255,255,255,.08);
+      background:rgba(0,0,0,.18);
+    }
+    .title{
+      margin:0;
+      font-size:28px;
+      color:var(--accent);
+    }
+    .subtitle{
+      margin:6px 0 0;
+      color:var(--muted);
+      font-size:14px;
+    }
+    .toolbar{
+      display:grid;
+      grid-template-columns:minmax(220px,1.2fr) minmax(220px,1fr) minmax(220px,1fr) auto auto auto;
+      gap:10px;
+      padding:14px 18px;
+      background:var(--panel);
+      border-bottom:1px solid rgba(255,255,255,.08);
+    }
+    .field{
+      display:flex;
+      flex-direction:column;
+      gap:6px;
+      min-width:0;
+    }
+    .field label{
+      font-size:12px;
+      color:var(--muted);
+    }
+    .field input,.field select,.toolbar > button{
+      width:100%;
+      min-height:42px;
+      border-radius:10px;
+      border:1px solid rgba(255,255,255,.08);
+      background:var(--panel-2);
+      color:var(--text);
+      padding:10px 12px;
+      outline:none;
+    }
+    .toolbar > button{
+      cursor:pointer;
+      align-self:end;
+    }
+    .primary{
+      background:linear-gradient(180deg, rgba(212,168,74,.18), rgba(212,168,74,.08));
+      border-color:rgba(212,168,74,.45)!important;
+    }
+    .info{
+      display:flex;
+      gap:12px;
+      flex-wrap:wrap;
+      align-items:center;
+      padding:10px 18px;
+      font-size:14px;
+      color:var(--muted);
+      border-bottom:1px solid rgba(255,255,255,.06);
+    }
+    .badge{
+      display:inline-flex;
+      align-items:center;
+      gap:6px;
+      padding:6px 10px;
+      border-radius:999px;
+      background:rgba(255,255,255,.05);
+    }
+    .dot{
+      width:10px;
+      height:10px;
+      border-radius:50%;
+      display:inline-block;
+    }
+    .dot.public{background:var(--accent)}
+    .dot.private{background:var(--private)}
+    .dot.path{background:var(--highlight)}
+    #status{
+      margin-left:auto;
+      color:var(--text);
+    }
+    #tree-container{
+      position:relative;
+      flex:1;
+      min-height:72vh;
+      overflow:hidden;
+    }
+    svg{
+      width:100%;
+      height:100%;
+      display:block;
+      background:
+        radial-gradient(circle at center, rgba(255,255,255,.03), transparent 45%),
+        linear-gradient(180deg, rgba(255,255,255,.02), rgba(255,255,255,0));
+    }
+    .node circle{
+      stroke-width:2px;
+      cursor:pointer;
+    }
+    .node text{
+      fill:var(--text);
+      font-size:13px;
+      pointer-events:none;
+      text-anchor:middle;
+    }
+    .tooltip{
+      position:absolute;
+      pointer-events:none;
+      background:#0f141c;
+      border:1px solid rgba(255,255,255,.1);
+      color:var(--text);
+      border-radius:10px;
+      padding:8px 10px;
+      font-size:13px;
+      display:none;
+      box-shadow:0 12px 30px rgba(0,0,0,.35);
+      z-index:4;
+    }
+    .overlay-card{
+      position:absolute;
+      right:18px;
+      bottom:18px;
+      width:min(360px, calc(100vw - 36px));
+      background:rgba(16,22,31,.94);
+      border:1px solid rgba(255,255,255,.08);
+      border-radius:14px;
+      padding:14px;
+      box-shadow:0 16px 40px rgba(0,0,0,.35);
+      z-index:3;
+    }
+    .overlay-card h3{
+      margin:0 0 8px;
+      color:var(--accent);
+      font-size:18px;
+    }
+    .overlay-card p{
+      margin:0;
+      color:var(--muted);
+      line-height:1.5;
+      font-size:14px;
+    }
+    .overlay-card.hidden{display:none}
+    .message-ok{color:var(--ok)}
+    .message-warn{color:var(--highlight)}
+    @media (max-width:1100px){
+      .toolbar{grid-template-columns:1fr 1fr}
+    }
+    @media (max-width:700px){
+      .toolbar{grid-template-columns:1fr}
+      #status{width:100%;margin-left:0}
+    }
+  </style>
 </head>
 <body>
-<div class="lang-bar">
-  <span class="lang-label">LIMBA / LANGUAGE</span>
-  <button class="lang-btn" id="btn-ro">RO</button>
-  <button class="lang-btn" id="btn-en">EN</button>
-</div>
-<header class="site-header">
-  <div class="site-title">Calnic Online</div>
-  <div class="site-sub">Satul nostru — Amintirile noastre</div>
-</header>
-<nav>
-  <a class="nav-link" href="index.html">⌂ <span>Acasa</span></a>
-  <a class="nav-link" href="istorie.html">🗺️ <span>Istoria Satului</span></a>
-  <a class="nav-link" href="familiile.html">👪 <span>Familiile</span></a>
-  <a class="nav-link active" href="genealogie.html">🌳 <span>Genealogie</span></a>
-  <a class="nav-link" href="galerie.html">📷 <span>Galerie</span></a>
-  <a class="nav-link" href="contact.html">✉️ <span>Contact</span></a>
-  <a class="nav-link" href="intrebari.html">❓ <span>Intrebari</span></a>
-  <div class="nav-right"><a class="nav-login" href="login.html">🔒 <span>Contul Familiei</span></a></div>
-</nav>
-<section class="page-hero">
-  <div class="page-hero-title" data-ro="Arborele Satului" data-en="Village Tree">Arborele Satului</div>
-  <div class="page-hero-sub" data-ro="Toate familiile din Calnic, intr-un tree interactiv cu zoom, cautare si detectare de relatii." data-en="All Calnic families in an interactive tree with zoom, search and relation detection.">Toate familiile din Calnic, intr-un tree interactiv cu zoom, cautare si detectare de relatii.</div>
-  <div class="page-hero-orn">✦ ✦ ✦</div>
-</section>
-<div class="wrap">
-  <div class="topbar">
-    <div class="search-wrap">
-      <input id="searchInput" class="search-input" type="text" autocomplete="off" data-ro="Cauta o familie..." data-en="Search a family..." placeholder="Cauta o familie...">
-      <div id="searchResults" class="search-results"></div>
+  <div class="page">
+    <div class="topbar">
+      <h1 class="title">Arborele satului</h1>
+      <p class="subtitle">Familii publice și private, relații între familii, căutare, zoom și centrare automată.</p>
     </div>
-    <div class="action-group">
-      <button id="resetBtn" class="tool-btn" data-ro="Reset view" data-en="Reset view">Reset view</button>
-      <button id="centerBtn" class="tool-btn" data-ro="Centreaza arborele" data-en="Center tree">Centreaza arborele</button>
-      <button id="fitBtn" class="tool-btn" data-ro="Incadreaza tot" data-en="Fit all">Incadreaza tot</button>
-      <button id="zoomOutBtn" class="tool-btn">−</button>
-      <button id="zoomInBtn" class="tool-btn">+</button>
+
+    <div class="toolbar">
+      <div class="field">
+        <label for="family-search">Caută familie</label>
+        <input id="family-search" list="family-list" placeholder="Scrie numele familiei..." />
+        <datalist id="family-list"></datalist>
+      </div>
+
+      <div class="field">
+        <label for="relation-from">Familia 1</label>
+        <select id="relation-from">
+          <option value="">Alege familia</option>
+        </select>
+      </div>
+
+      <div class="field">
+        <label for="relation-to">Familia 2</label>
+        <select id="relation-to">
+          <option value="">Alege familia</option>
+        </select>
+      </div>
+
+      <button id="find-relation" class="primary">Vezi relația</button>
+      <button id="fit-view">Re-centrare</button>
+      <button id="clear-selection">Reset</button>
+    </div>
+
+    <div class="info">
+      <span class="badge"><span class="dot public"></span> Familie publică</span>
+      <span class="badge"><span class="dot private"></span> Familie privată</span>
+      <span class="badge"><span class="dot path"></span> Traseu relație</span>
+      <span id="status">Se încarcă datele...</span>
+    </div>
+
+    <div id="tree-container">
+      <svg id="village-tree" aria-label="Arborele satului"></svg>
+      <div id="tooltip" class="tooltip"></div>
+      <div id="family-modal" class="overlay-card hidden">
+        <h3 id="modal-title">Detalii familie</h3>
+        <p id="modal-text"></p>
+      </div>
     </div>
   </div>
 
-  <div id="loadingState" class="loading-state">
-    <div class="spinner"></div>
-    <div data-ro="Se incarca arborele satului..." data-en="Loading village tree...">Se incarca arborele satului...</div>
-  </div>
-
-  <div id="errorState" class="error-state" style="display:none;">
-    <div class="site-title" style="font-size:24px;">Nu s-a putut incarca arborele satului</div>
-    <div id="errorText" style="margin:8px 0 16px;color:var(--muted);"></div>
-    <button id="retryBtn" class="tool-btn" data-ro="Incearca din nou" data-en="Try again">Incearca din nou</button>
-  </div>
-
-  <div id="treeShell" class="tree-shell" style="display:none;">
-    <section class="tree-panel">
-      <div class="tree-head">
-        <div>
-          <div class="tree-title" data-ro="Harta legaturilor dintre familii" data-en="Map of family connections">Harta legaturilor dintre familii</div>
-          <div id="statusLine" class="status-line"></div>
-        </div>
-        <div class="status-line" id="sourceInfo">Sursa: genealogia site-ului (Supabase)</div>
-      </div>
-      <div id="treeViewport" class="tree-viewport">
-        <svg id="villageTreeSvg" class="tree-svg" viewBox="0 0 1200 700" aria-label="Village tree">
-          <g id="scene">
-            <g id="linksLayer"></g>
-            <g id="nodesLayer"></g>
-            <g id="labelsLayer"></g>
-          </g>
-        </svg>
-        <div id="treeTooltip" class="tree-tooltip"></div>
-      </div>
-    </section>
-
-    <aside class="side-panel">
-      <div class="side-title" data-ro="Panou rapid" data-en="Quick panel">Panou rapid</div>
-      <div class="mini-stats">
-        <div class="mini-stat"><div id="statFamilies" class="mini-stat-n">0</div><div id="statsFamiliesLabel" class="mini-stat-l">Familii</div></div>
-        <div class="mini-stat"><div id="statLinks" class="mini-stat-n">0</div><div id="statsLinksLabel" class="mini-stat-l">Legaturi</div></div>
-        <div class="mini-stat"><div id="statIsolated" class="mini-stat-n">0</div><div id="statsIsolatedLabel" class="mini-stat-l">Izolate</div></div>
-      </div>
-
-      <div class="side-title" data-ro="Legenda" data-en="Legend">Legenda</div>
-      <div class="legend">
-        <div class="legend-item"><span class="legend-dot public"></span> <span id="legendPublicLabel">familie publica</span></div>
-        <div class="legend-item"><span class="legend-dot private"></span> <span id="legendPrivateLabel">familie privata</span></div>
-        <div class="legend-item"><span class="legend-dot highlight"></span> <span id="legendHighlightedLabel">traseu evidentiat</span></div>
-      </div>
-
-      <div class="side-title" data-ro="Cauta relatie intre familii" data-en="Find relation between families">Cauta relatie intre familii</div>
-      <div class="relation-box">
-        <select id="relationFrom" class="relation-select"><option value="">— Familie de start —</option></select>
-        <select id="relationTo" class="relation-select"><option value="">— Familie destinatie —</option></select>
-        <div class="relation-actions">
-          <button id="relationFindBtn" class="tool-btn" data-ro="Gaseste relatia" data-en="Find relation">Gaseste relatia</button>
-          <button id="relationClearBtn" class="tool-btn" data-ro="Curata" data-en="Clear">Curata</button>
-        </div>
-        <div id="relationResult" class="relation-result"></div>
-      </div>
-    </aside>
-  </div>
-</div>
-
-<div id="privateModal" class="modal">
-  <div class="modal-card">
-    <div class="modal-title" data-ro="Privat" data-en="Private">Privat</div>
-    <div id="privateModalText" class="modal-text">Aceasta familie este privata.</div>
-    <button id="closePrivateModal" class="tool-btn" data-ro="Inchide" data-en="Close">Inchide</button>
-  </div>
-</div>
-
-<footer class="footer">Calnic Online <span style="color:var(--gold-d);">—</span> Arborele satului</footer>
-<script src="js/config.js"></script>
-<script src="js/supabase.js"></script>
-<script src="js/data-adapter.js"></script>
-<script src="js/sat-tree.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script src="https://cdn.jsdelivr.net/npm/d3@7"></script>
+  <script type="module" src="js/sat-tree.js"></script>
 </body>
 </html>
