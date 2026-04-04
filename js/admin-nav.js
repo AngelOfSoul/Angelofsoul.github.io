@@ -222,6 +222,17 @@ function showAdminLink() {
   document.querySelectorAll('.calnic-admin-mobile-link').forEach(function(el){ el.classList.add('show'); });
 }
 
+async function isAdminUser(userId) {
+  var client = window.supabaseClient || window.appSupabase || window.supabase;
+  if (!client || !userId) return false;
+  try {
+    var res = await client.from('profiles').select('is_admin').eq('id', userId).maybeSingle();
+    return !!(res && !res.error && res.data && res.data.is_admin);
+  } catch (err) {
+    return false;
+  }
+}
+
 function checkNotifications(familyId) {
   if (!window.supabase || !familyId) return Promise.resolve(false);
   var now = new Date().toISOString();
@@ -246,6 +257,7 @@ async function getCurrentFamilyForUser(userId) {
 }
 
 function initAdminNav() {
+  injectAdminLink();
   mergeLangIntoNav();
   var client = window.supabaseClient || window.appSupabase || window.supabase;
   if (!client || !client.auth || typeof client.auth.getUser !== 'function') {
@@ -262,12 +274,19 @@ function initAdminNav() {
 
     var fakeSession = session || { user: user };
 
-    getCurrentFamilyForUser(user.id)
-      .then(function(familyData) {
+    Promise.all([
+      getCurrentFamilyForUser(user.id),
+      isAdminUser(user.id)
+    ])
+      .then(function(values) {
+        var familyData = values[0];
+        var admin = !!values[1];
         var familyName = familyData ? (familyData.display_name || familyData.name || 'Profilul meu') : 'Profilul meu';
         var familyId = familyData ? familyData.id : null;
         return checkNotifications(familyId).then(function(hasNotif) {
           buildProfileButton(fakeSession, familyName, hasNotif);
+          injectAdminLink();
+          if (admin) showAdminLink();
         });
       })
       .catch(function() {

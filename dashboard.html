@@ -493,8 +493,24 @@ footer .g { color:var(--gold-d); font-style:normal; }
       </div>
     </div>
 
-  </div><!-- end dashMain -->
+</div><!-- end dashMain -->
 </div><!-- end dashWrap -->
+
+<div class="family-modal-backdrop" id="familyModalBackdrop" aria-hidden="true">
+  <div class="family-modal" role="dialog" aria-modal="true" aria-labelledby="familyModalTitle">
+    <div class="family-modal-title" id="familyModalTitle" data-ro="Creeaza profilul familiei" data-en="Create family profile">Creeaza profilul familiei</div>
+    <div class="family-modal-sub" data-ro="Introdu numele familiei. Dupa creare vei fi redirectionat catre arbore." data-en="Enter your family name. After create, you will be redirected to the tree.">Introdu numele familiei. Dupa creare vei fi redirectionat catre arbore.</div>
+    <div class="df-group">
+      <label class="df-label" for="familyModalName" data-ro="Numele familiei" data-en="Family name">Numele familiei</label>
+      <input class="df-input" id="familyModalName" type="text" maxlength="120" placeholder="Familia Popescu" />
+    </div>
+    <div id="familyModalMsg" class="df-msg"></div>
+    <div class="family-modal-actions">
+      <button type="button" class="dash-btn-sec" id="familyModalCancel" data-ro="Anuleaza" data-en="Cancel">Anuleaza</button>
+      <button type="button" class="dash-btn" id="familyModalSave" data-ro="Creeaza" data-en="Create">Creeaza</button>
+    </div>
+  </div>
+</div>
 
 <a class="scroll-top" id="scrollTop" onclick="window.scrollTo({top:0,behavior:'smooth'})" title="Sus">&#8679;</a>
 <a class="scroll-bottom" id="scrollBottom" onclick="window.scrollTo({top:document.body.scrollHeight,behavior:'smooth'})" title="Jos">&#8681;</a>
