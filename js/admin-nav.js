@@ -69,10 +69,30 @@ if (window.location.pathname.indexOf('login') !== -1) {
   }
 }
 
+function getActiveNavRights() {
+  function isVisible(el) {
+    if (!el) return false;
+    var cs = window.getComputedStyle ? window.getComputedStyle(el) : null;
+    return !cs || cs.display !== 'none';
+  }
+  var roots = [];
+  var guest = document.getElementById('guest-view');
+  var member = document.getElementById('member-view');
+  if (isVisible(guest)) roots.push(guest);
+  if (isVisible(member)) roots.push(member);
+  if (!roots.length) roots = [document];
+  var out = [];
+  roots.forEach(function(root) {
+    root.querySelectorAll('.nav-right').forEach(function(el) { out.push(el); });
+  });
+  return out;
+}
+
 function mergeLangIntoNav() {
   var langBar = document.querySelector('.lang-bar');
-  var navRight = document.querySelector('.nav-right');
+  var navRight = getActiveNavRights()[0] || null;
   if (!langBar || !navRight) return;
+  if (navRight.querySelector('.nav-lang')) return;
   var btnRo = document.getElementById('btn-ro') || document.getElementById('btn-ro-li');
   var btnEn = document.getElementById('btn-en') || document.getElementById('btn-en-li');
   if (!btnRo || !btnEn) return;
@@ -93,26 +113,28 @@ function mergeLangIntoNav() {
 }
 
 function buildProfileButton(session, familyName, hasNotif) {
-  var navRight = document.querySelector('#nav-right-main, .nav-right');
-  if (!navRight) return;
-  var existing = navRight.querySelector('.prf-btn-out, .prf-btn-in, .prf-btn-wrap');
-  if (existing) existing.remove();
-  var oldLogin = navRight.querySelector('.nav-login:not(.calnic-admin-link)');
-  if (oldLogin) oldLogin.remove();
-  var divExist = navRight.querySelector('.nav-prf-divider');
-  if (!divExist) {
-    var div = document.createElement('div');
-    div.className = 'nav-prf-divider';
-    navRight.insertBefore(div, navRight.firstChild);
-  }
-  if (!session) {
-    var btn = document.createElement('a');
-    btn.className = 'prf-btn-out';
-    btn.href = 'login.html';
-    btn.innerHTML = '🔒 Profilul Meu';
-    navRight.appendChild(btn);
-    buildMobileFloat(null, false);
-  } else {
+  var navRights = getActiveNavRights();
+  if (!navRights.length) return;
+
+  navRights.forEach(function(navRight) {
+    navRight.querySelectorAll('.prf-btn-out, .prf-btn-in, .prf-btn-wrap').forEach(function(el){ el.remove(); });
+    navRight.querySelectorAll('.nav-login:not(.calnic-admin-link)').forEach(function(el){ el.remove(); });
+
+    if (!navRight.querySelector('.nav-prf-divider')) {
+      var div = document.createElement('div');
+      div.className = 'nav-prf-divider';
+      navRight.insertBefore(div, navRight.firstChild);
+    }
+
+    if (!session) {
+      var outBtn = document.createElement('a');
+      outBtn.className = 'prf-btn-out';
+      outBtn.href = 'login.html';
+      outBtn.innerHTML = 'Profilul meu';
+      navRight.appendChild(outBtn);
+      return;
+    }
+
     var initial = familyName ? familyName.charAt(0).toUpperCase() : '?';
     var wrap = document.createElement('div');
     wrap.className = 'prf-btn-wrap';
@@ -125,9 +147,10 @@ function buildProfileButton(session, familyName, hasNotif) {
         ' <div class="prf-notif-dot' + (hasNotif ? ' show' : '') + '" id="prf-notif-dot"> </div>' +
       ' </div>' +
       ' <div class="prf-text">' +
-        ' <div class="prf-name">' + _escH(familyName || 'Profilul Meu') + ' </div>' +
+        ' <div class="prf-name">' + _escH(familyName || 'Profilul meu') + ' </div>' +
         ' <div class="prf-sub">PROFILUL MEU </div>' +
       ' </div>';
+
     var dd = document.createElement('div');
     dd.className = 'prf-dropdown';
     dd.id = 'prf-dropdown';
@@ -137,6 +160,7 @@ function buildProfileButton(session, familyName, hasNotif) {
       ' <a class="prf-dd-item" href="dashboard.html#members"> &#127803; Membrii familiei </a>' +
       ' <div class="prf-dd-sep"> </div>' +
       ' <a class="prf-dd-item logout" href="#" onclick="window.supabase && window.supabase.auth.signOut().then(function(){window.location.href=\'index.html\'});return false;"> &#128275; Deconectare </a>';
+
     btn.addEventListener('click', function(e) {
       e.preventDefault();
       dd.classList.toggle('show');
@@ -147,10 +171,15 @@ function buildProfileButton(session, familyName, hasNotif) {
     wrap.appendChild(btn);
     wrap.appendChild(dd);
     navRight.appendChild(wrap);
+  });
+
+  if (session) {
+    var initial = familyName ? familyName.charAt(0).toUpperCase() : '?';
     buildMobileFloat(initial, hasNotif);
+  } else {
+    buildMobileFloat(null, false);
   }
 }
-
 function buildMobileFloat(initial, hasNotif) {
   var existing = document.querySelector('.mobile-prf-float');
   if (existing) existing.remove();
@@ -161,32 +190,33 @@ function buildMobileFloat(initial, hasNotif) {
     fb.innerHTML = '<span class="mobile-prf-float-av">' + _escH(initial) + '</span>' +
       '<span class="mobile-prf-float-notif' + (hasNotif ? ' show' : '') + '"></span>';
   } else {
-    fb.innerHTML = '🔒';
+    fb.innerHTML = '&#128274;';
   }
   document.body.appendChild(fb);
 }
 
 function injectAdminLink() {
-  var navRight = document.querySelector('.nav-right');
-  if (!navRight) return;
-  if (navRight.querySelector('.calnic-admin-link')) return;
-  var link = document.createElement('a');
-  link.className = 'nav-login calnic-admin-link';
-  link.href = 'admin.html';
-  link.title = 'Panou Admin';
-  link.innerHTML = '◆ Admin';
-  navRight.insertBefore(link, navRight.firstChild);
+  var navRights = getActiveNavRights();
+  navRights.forEach(function(navRight) {
+    if (navRight.querySelector('.calnic-admin-link')) return;
+    var link = document.createElement('a');
+    link.className = 'nav-login calnic-admin-link';
+    link.href = 'admin.html';
+    link.title = 'Panou Admin';
+    link.innerHTML = '&#9670; Admin';
+    navRight.insertBefore(link, navRight.firstChild);
+  });
+
   var menus = document.querySelectorAll('.nav-mobile-menu, #navMobileMenu, #navMobileMenu2');
   menus.forEach(function(menu) {
     if (menu.querySelector('.calnic-admin-mobile-link')) return;
     var ml = document.createElement('a');
     ml.className = 'nav-mobile-link calnic-admin-mobile-link';
     ml.href = 'admin.html';
-    ml.innerHTML = '◆ Admin';
+    ml.innerHTML = '&#9670; Admin';
     menu.insertBefore(ml, menu.firstChild);
   });
 }
-
 function showAdminLink() {
   document.querySelectorAll('.calnic-admin-link').forEach(function(el){ el.classList.add('show'); });
   document.querySelectorAll('.calnic-admin-mobile-link').forEach(function(el){ el.classList.add('show'); });
@@ -234,14 +264,14 @@ function initAdminNav() {
 
     getCurrentFamilyForUser(user.id)
       .then(function(familyData) {
-        var familyName = familyData ? (familyData.display_name || familyData.name || 'Profilul Meu') : 'Profilul Meu';
+        var familyName = familyData ? (familyData.display_name || familyData.name || 'Profilul meu') : 'Profilul meu';
         var familyId = familyData ? familyData.id : null;
         return checkNotifications(familyId).then(function(hasNotif) {
           buildProfileButton(fakeSession, familyName, hasNotif);
         });
       })
       .catch(function() {
-        buildProfileButton(fakeSession, 'Profilul Meu', false);
+        buildProfileButton(fakeSession, 'Profilul meu', false);
       });
   }).catch(function() {
     buildProfileButton(null, null, false);
@@ -255,3 +285,5 @@ if ((window.supabaseClient || window.appSupabase || window.supabase) && ((window
 }
 
 })();
+
+

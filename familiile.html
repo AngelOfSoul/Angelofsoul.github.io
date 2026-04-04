@@ -803,14 +803,14 @@ function checkFamiliiNavSession() {
     var navLogin = document.querySelector('a.nav-login');
     var mobileLogin = document.querySelector('a.nav-mobile-login');
     if (navLogin) {
-      navLogin.href = 'login.html';
+      navLogin.href = 'dashboard.html';
       var span = navLogin.querySelector('.nl');
-      if (span) { span.setAttribute('data-ro', 'Contul meu'); span.setAttribute('data-en', 'My account'); span.textContent = 'Contul meu'; }
-      else navLogin.textContent = '\ud83d\udc64 Contul meu';
+      if (span) { span.setAttribute('data-ro', 'Profilul meu'); span.setAttribute('data-en', 'My profile'); span.textContent = 'Profilul meu'; }
+      else navLogin.textContent = '\ud83d\udc64 Profilul meu';
     }
     if (mobileLogin) {
-      mobileLogin.href = 'login.html';
-      mobileLogin.textContent = '\ud83d\udc64 Contul meu';
+      mobileLogin.href = 'dashboard.html';
+      mobileLogin.textContent = '\ud83d\udc64 Profilul meu';
     }
   });
 }
