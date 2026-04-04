@@ -865,7 +865,7 @@ applyPageLang(window.CalnicUtils ? window.CalnicUtils.lang() : currentLang);
 /* ── ADMIN NAV LINK — visible only to admin account ── */
 function checkAdminNavLink() {
   if (!window.supabase) return;
-  window.supabase.auth.getSession().then(function(res) {
+  window.supabase.auth.getUser().then(function(res) {
     var session = res.data && res.data.session;
     if (!session) return;
     window.supabase
@@ -1068,7 +1068,7 @@ if (window.supabase) { checkAdminNavLink(); } else { document.addEventListener('
     (async function(){
       async function findFamilyForUser(userId) {
         try {
-          var res = await window.supabase.from('families').select('*').limit(100);
+          var res = await supabase.from('families').select('*').limit(100);
           if (res && !res.error && Array.isArray(res.data)) {
             return res.data.find(function(row){ return row && (row.created_by === userId || row.created_by === userId); }) || null;
           }
@@ -1118,9 +1118,9 @@ if (window.supabase) { checkAdminNavLink(); } else { document.addEventListener('
 
     /* ── milestone counters ── */
     Promise.all([
-      window.supabase.from('families').select('id', { count:'exact', head:true }),
-      window.supabase.from('members').select('id',  { count:'exact', head:true }),
-      window.supabase.from('photos').select('id',   { count:'exact', head:true })
+      supabase.from('families').select('id', { count:'exact', head:true }),
+      supabase.from('members').select('id',  { count:'exact', head:true }),
+      supabase.from('photos').select('id',   { count:'exact', head:true })
     ]).then(function(results) {
       var fCount = results[0].count || 0;
       var mCount = results[1].count || 0;
@@ -1152,7 +1152,7 @@ if (window.supabase) { checkAdminNavLink(); } else { document.addEventListener('
   /* ── boot: wait for supabase, then check session ── */
   function boot() {
     if (!window.supabase) return; /* no Supabase configured — stay on guest view */
-    window.supabase.auth.getSession().then(function(res) {
+    window.supabase.auth.getUser().then(function(res) {
       var session = res.data && res.data.session;
       if (session) {
         showMemberView(session);

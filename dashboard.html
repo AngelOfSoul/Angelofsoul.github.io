@@ -621,7 +621,7 @@ async function saveStory() {
     notes: document.getElementById('storyDescRo').value.trim(),
     slug: slug
   };
-  var res = await window.supabase.from('families').update(updates).eq('id', familyId);
+  var res = await supabase.from('families').update(updates).eq('id', familyId);
   if (res.error) {
     showMsg('storyMsg', res.error.message, 'error');
   } else {
@@ -676,14 +676,14 @@ var membersCache = [];
 
 async function syncMembersCount() {
   if (!familyId || !window.supabase) return;
-  var res = await window.supabase.from('members').select('id', { count: 'exact', head: true }).eq('family_id', familyId);
+  var res = await supabase.from('members').select('id', { count: 'exact', head: true }).eq('family_id', familyId);
   if (res.error) { console.warn('[Calnic] syncMembersCount count query failed:', res.error.message); return; }
-  var upd = await window.supabase.from('families').update({ members_count: res.count }).eq('id', familyId);
+  var upd = await supabase.from('families').update({ members_count: res.count }).eq('id', familyId);
   if (upd.error) console.warn('[Calnic] syncMembersCount update failed:', upd.error.message);
 }
 
 async function loadMembers() {
-  var res = await window.supabase.from('members').select('*').eq('family_id', familyId);
+  var res = await supabase.from('members').select('*').eq('family_id', familyId);
   if (!res.error && res.data) {
     membersCache = res.data;
     renderMembers(res.data);
@@ -720,7 +720,7 @@ async function addMember() {
     visibility: document.getElementById('newMemberVisibility') ? document.getElementById('newMemberVisibility').value : 'public',
     confidence: 100
   };
-  var res = await window.supabase.from('members').insert([newMember]);
+  var res = await supabase.from('members').insert([newMember]);
   if (res.error) {
     var errMsg = res.error.message || 'Eroare la adaugarea membrului.';
     if (/row-level security/i.test(errMsg)) {
@@ -746,7 +746,7 @@ async function addMember() {
 async function deleteMember(memberId) {
   var ok = confirm(currentLang === 'ro' ? 'Stergi acest membru?' : 'Delete this member?');
   if (!ok) return;
-  var res = await window.supabase.from('members').delete().eq('id', memberId);
+  var res = await supabase.from('members').delete().eq('id', memberId);
   if (!res.error) {
     await loadMembers();
     await syncMembersCount();
@@ -754,7 +754,7 @@ async function deleteMember(memberId) {
 }
 
 async function toggleDeceased(memberId, isDeceased) {
-  var res = await window.supabase.from('members').update({ is_deceased: isDeceased }).eq('id', memberId);
+  var res = await supabase.from('members').update({ is_deceased: isDeceased }).eq('id', memberId);
   if (!res.error) {
     await loadMembers();
   }
@@ -780,7 +780,7 @@ function renderTimeline(entries) {
 }
 
 async function loadTimeline() {
-  var res = await window.supabase.from('timeline').select('*').eq('family_id', familyId).order('year');
+  var res = await supabase.from('timeline').select('*').eq('family_id', familyId).order('year');
   if (!res.error && res.data) {
     timelineCache = res.data;
     renderTimeline(res.data);
@@ -799,7 +799,7 @@ async function addTimeline() {
     text_ro:   tx,
     text_en:   document.getElementById('newTlTextEn').value.trim() || null
   };
-  var res = await window.supabase.from('timeline').insert([newEntry]);
+  var res = await supabase.from('timeline').insert([newEntry]);
   if (res.error) {
     showMsg('timelineMsg', res.error.message, 'error');
   } else {
@@ -815,7 +815,7 @@ async function addTimeline() {
 async function deleteTimeline(entryId) {
   var ok = confirm(currentLang === 'ro' ? 'Stergi acest eveniment?' : 'Delete this event?');
   if (!ok) return;
-  var res = await window.supabase.from('timeline').delete().eq('id', entryId);
+  var res = await supabase.from('timeline').delete().eq('id', entryId);
   if (!res.error) {
     await loadTimeline();
   }
@@ -886,7 +886,7 @@ async function deletePhoto(photoId, photoPath) {
       if (sr.error) storageErr = sr.error.message;
     }
   }
-  var dr = await window.supabase.from('photos').delete().eq('id', photoId);
+  var dr = await supabase.from('photos').delete().eq('id', photoId);
   if (dr.error) {
     showMsg('photosMsg', dr.error.message, 'error');
   } else {
@@ -903,7 +903,7 @@ async function savePrivacy() {
   var updates = {
     visibility: document.getElementById('privShowMembers').checked ? 'public' : 'private'
   };
-  var res = await window.supabase.from('families').update(updates).eq('id', familyId);
+  var res = await supabase.from('families').update(updates).eq('id', familyId);
   if (res.error) {
     showMsg('privacyMsg', res.error.message, 'error');
   } else {
@@ -927,7 +927,7 @@ document.getElementById('logoutBtn').addEventListener('click', async function() 
 async function fetchCurrentFamily(userId) {
   if (!window.supabase || !userId) return { data: null, error: null };
   try {
-    var res = await window.supabase.from('families').select('*').limit(100);
+    var res = await supabase.from('families').select('*').limit(100);
     if (res && !res.error && Array.isArray(res.data)) {
       var data = res.data.find(function(row){ return row && (row.created_by === userId || row.created_by === userId); }) || null;
       if (data) {
@@ -947,7 +947,7 @@ function initDashboard() {
     window.location.href = 'login.html';
     return;
   }
-  window.supabase.auth.getSession().then(async function(sesRes) {
+  window.supabase.auth.getUser().then(async function(sesRes) {
     var session = sesRes.data && sesRes.data.session;
     if (!session) {
       window.location.href = 'login.html';
@@ -1038,7 +1038,7 @@ function escHtml(s) {
     var msg = document.getElementById('familyModalMsg');
     var input = document.getElementById('familyModalName');
     if (msg) msg.textContent = '';
-    const sesRes = await window.supabase.auth.getSession();
+    const sesRes = await window.supabase.auth.getUser();
     const session = sesRes.data && sesRes.data.session;
     if (!session) { window.location.href = 'login.html'; return; }
     const user = session.user;
@@ -1060,7 +1060,7 @@ function escHtml(s) {
     let baseSlug = slugify(name) || 'familie';
     let slug = baseSlug;
     for (let i = 0; i < 25; i++) {
-      const checkRes = await window.supabase.from('families').select('id').eq('slug', slug).maybeSingle();
+      const checkRes = await supabase.from('families').select('id').eq('slug', slug).maybeSingle();
       if (!checkRes.error && !checkRes.data) break;
       slug = baseSlug + '-' + Math.floor(1000 + Math.random() * 9000);
     }

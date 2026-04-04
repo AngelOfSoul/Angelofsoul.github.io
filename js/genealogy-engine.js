@@ -136,8 +136,8 @@ Assumes:
         if (window.supabase) {
             try {
                 const [familyRes, membersRes] = await Promise.all([
-                    window.supabase.from('families').select('*').eq('id', state.familyId).single(),
-                    window.supabase.from('members').select('*').eq('family_id', state.familyId)
+                    supabase.from('families').select('*').eq('id', state.familyId).single(),
+                    supabase.from('members').select('*').eq('family_id', state.familyId)
                 ]);
 
                 if (familyRes.error) throw familyRes.error;

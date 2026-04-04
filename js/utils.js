@@ -284,9 +284,9 @@
    * Returneaza null daca supabase nu e configurat sau nu e logat.
    * @returns {Promise<object|null>}
    */
-  function getSession() {
+  function getUser() {
     if (!window.supabase) return Promise.resolve(null);
-    return window.supabase.auth.getSession().then(function (r) {
+    return window.supabase.auth.getUser().then(function (r) {
       return (r.data && r.data.session) ? r.data.session : null;
     }).catch(function () { return null; });
   }

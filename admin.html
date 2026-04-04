@@ -717,7 +717,7 @@ function initAdminAuth() {
   if (!window.supabase) {
     showScreen('denied'); return;
   }
-  window.supabase.auth.getSession().then(function(res) {
+  window.supabase.auth.getUser().then(function(res) {
     var session = res.data && res.data.session;
     if (!session) { window.location.href = 'login.html'; return; }
     ADMIN_EMAIL = session.user.email;
@@ -800,7 +800,7 @@ function doLogout() {
 /* ── ADMIN LOG ── */
 function logAccess() {
   if (!window.supabase) return;
-  window.supabase.from('admin_logs').insert({
+  supabase.from('admin_logs').insert({
     admin_email: ADMIN_EMAIL,
     action: 'access',
     details: 'Acces panou admin',
@@ -810,7 +810,7 @@ function logAccess() {
 
 function logAction(action, details) {
   if (!window.supabase) return;
-  window.supabase.from('admin_logs').insert({
+  supabase.from('admin_logs').insert({
     admin_email: ADMIN_EMAIL,
     action: action,
     details: details,
@@ -838,10 +838,10 @@ function daysAgo(iso) {
 function loadDashboard() {
   if (!window.supabase) return;
   Promise.all([
-    window.supabase.from('families').select('id', {count:'exact', head:true}),
-    window.supabase.from('members').select('id',  {count:'exact', head:true}),
-    window.supabase.from('photos').select('id',   {count:'exact', head:true}),
-    window.supabase.from('families').select('name, members_count, photos_count, generations_count, created_at')
+    supabase.from('families').select('id', {count:'exact', head:true}),
+    supabase.from('members').select('id',  {count:'exact', head:true}),
+    supabase.from('photos').select('id',   {count:'exact', head:true}),
+    supabase.from('families').select('name, members_count, photos_count, generations_count, created_at')
   ]).then(function(results) {
     document.getElementById('dash-families').textContent = results[0].count || 0;
     document.getElementById('dash-members').textContent  = results[1].count || 0;
@@ -897,8 +897,8 @@ function loadUsers() {
   if (!el) return;
   // Join profiles + families to get email-equivalent (owner) info
   Promise.all([
-    window.supabase.from('profiles').select('id, is_admin, created_at').order('created_at', {ascending: false}),
-    window.supabase.from('families').select('created_by, name, village, created_at')
+    supabase.from('profiles').select('id, is_admin, created_at').order('created_at', {ascending: false}),
+    supabase.from('families').select('created_by, name, village, created_at')
   ]).then(function(results) {
     var profiles = results[0].data || [];
     var families = results[1].data || [];
@@ -965,7 +965,7 @@ function doBackup() {
   btn.style.borderColor = 'var(--amber)';
 
   var promises = tableNames.map(function(t, i) {
-    return window.supabase.from(t).select('*').then(function(res) {
+    return supabase.from(t).select('*').then(function(res) {
       btn.textContent = 'Se incarca datele... (' + (i+1) + '/' + tableNames.length + ')';
       return res;
     }).catch(function(){ return {data:[]}; });
@@ -1079,7 +1079,7 @@ function setRepStatus(id, text, cls) {
 function runRLS() {
   setRepStatus('rls-status', 'Se verifica...', 'warn');
   if (!window.supabase) { setRepStatus('rls-status', 'Supabase offline', 'crit'); return; }
-  window.supabase.from('families').select('id', {count:'exact', head:true}).then(function(r){
+  supabase.from('families').select('id', {count:'exact', head:true}).then(function(r){
     if (r.error) { setRepStatus('rls-status', 'Eroare: ' + r.error.message, 'crit'); }
     else { setRepStatus('rls-status', 'Politicile RLS sunt active', 'ok'); }
   });
@@ -1093,7 +1093,7 @@ function runStorageClean() {
 function runOrphans() {
   setRepStatus('orphan-status', 'Se verifica...', 'warn');
   if (!window.supabase) { setRepStatus('orphan-status', 'Supabase offline', 'crit'); return; }
-  window.supabase.from('members').select('id, family_id').then(function(r){
+  supabase.from('members').select('id, family_id').then(function(r){
     if (r.error) { setRepStatus('orphan-status', 'Eroare verificare', 'crit'); return; }
     setRepStatus('orphan-status', '0 membri orfani gasiti', 'ok');
   });
@@ -1102,7 +1102,7 @@ function runOrphans() {
 function runDates() {
   setRepStatus('dates-status', 'Se verifica...', 'warn');
   if (!window.supabase) { setRepStatus('dates-status', 'Supabase offline', 'crit'); return; }
-  window.supabase.from('members')
+  supabase.from('members')
     .select('id, name, birth_year, death_year')
     .not('birth_year', 'is', null)
     .not('death_year', 'is', null)
@@ -1118,7 +1118,7 @@ function runDates() {
 function runOwners() {
   setRepStatus('owner-status', 'Se verifica...', 'warn');
   if (!window.supabase) { setRepStatus('owner-status', 'Supabase offline', 'crit'); return; }
-  window.supabase.from('families').select('id, name, created_by').is('created_by', null).then(function(r){
+  supabase.from('families').select('id, name, created_by').is('created_by', null).then(function(r){
     var n = (r.data || []).length;
     if (n === 0) { setRepStatus('owner-status', '0 familii fara cont', 'ok'); }
     else { setRepStatus('owner-status', n + ' familii fara cont', 'crit'); }
@@ -1128,14 +1128,14 @@ function runOwners() {
 function runSync() {
   if (!window.supabase) { alert('Supabase nu este disponibil.'); return; }
   if (!confirm('Sincronizezi contoarele pentru toate familiile? Operatiunea dureaza cateva secunde.')) return;
-  window.supabase.from('families').select('id').then(function(r){
+  supabase.from('families').select('id').then(function(r){
     var fams = r.data || [];
     var updates = fams.map(function(f){
       return Promise.all([
-        window.supabase.from('members').select('id', {count:'exact', head:true}).eq('family_id', f.id),
-        window.supabase.from('photos').select('id',  {count:'exact', head:true}).eq('family_id', f.id)
+        supabase.from('members').select('id', {count:'exact', head:true}).eq('family_id', f.id),
+        supabase.from('photos').select('id',  {count:'exact', head:true}).eq('family_id', f.id)
       ]).then(function(res){
-        return window.supabase.from('families').update({
+        return supabase.from('families').update({
           members_count: res[0].count || 0,
           photos_count:  res[1].count || 0
         }).eq('id', f.id);
@@ -1164,8 +1164,8 @@ function runDuplicates() {
 function doExportCSV() {
   if (!window.supabase) { alert('Supabase nu este disponibil.'); return; }
   Promise.all([
-    window.supabase.from('families').select('*'),
-    window.supabase.from('members').select('*')
+    supabase.from('families').select('*'),
+    supabase.from('members').select('*')
   ]).then(function(results) {
     var fams = results[0].data || [];
     var mems = results[1].data || [];
@@ -1199,7 +1199,7 @@ function toggleMaint() {
   sw.classList.toggle('on', maintMode);
   sb.textContent = maintMode ? 'Activat — banner mentenanta vizibil pe site' : 'Dezactivat — site-ul functioneaza normal';
   if (window.supabase) {
-    window.supabase.from('site_settings').upsert({key:'maintenance', value: maintMode ? 'true' : 'false'}).then(function(){}).catch(function(){});
+    supabase.from('site_settings').upsert({key:'maintenance', value: maintMode ? 'true' : 'false'}).then(function(){}).catch(function(){});
   }
   logAction('maintenance', 'Mod mentenanta: ' + (maintMode ? 'activat' : 'dezactivat'));
 }
@@ -1230,7 +1230,7 @@ function runSQL() {
 /* ── ANNOUNCEMENTS ── */
 function loadAnnouncements() {
   if (!window.supabase) return;
-  window.supabase.from('announcements').select('*').order('created_at', {ascending:false}).then(function(r){
+  supabase.from('announcements').select('*').order('created_at', {ascending:false}).then(function(r){
     var anns = r.data || [];
     var el = document.getElementById('ann-list');
     if (anns.length === 0) {
@@ -1283,7 +1283,7 @@ function doPublishAnn(testOnly) {
     published_at: pubAt ? new Date(pubAt).toISOString() : new Date().toISOString(),
     expires_at:   new Date(expAt).toISOString()
   };
-  window.supabase.from('announcements').insert(row).then(function(r){
+  supabase.from('announcements').insert(row).then(function(r){
     if (r.error) { showMsg('ann-msg', 'Eroare: ' + r.error.message, 'error'); return; }
     showMsg('ann-msg', '&#10003; Anunt publicat cu succes!', 'success');
     logAction('ann-publish', 'Anunt publicat: "' + title + '"');
@@ -1295,7 +1295,7 @@ function doPublishAnn(testOnly) {
 
 function deleteAnn(id) {
   if (!confirm('Stergi acest anunt? Actiunea este permanenta.')) return;
-  window.supabase.from('announcements').delete().eq('id', id).then(function(){
+  supabase.from('announcements').delete().eq('id', id).then(function(){
     logAction('ann-delete', 'Anunt sters: ' + id);
     loadAnnouncements();
   });
@@ -1304,7 +1304,7 @@ function deleteAnn(id) {
 /* ── FAMILIES ── */
 function loadFamilies() {
   if (!window.supabase) return;
-  window.supabase.from('families').select('*').order('name').then(function(r){
+  supabase.from('families').select('*').order('name').then(function(r){
     var fams = r.data || [];
     var el = document.getElementById('families-list');
     if (fams.length === 0) {
@@ -1340,7 +1340,7 @@ function deleteFamily(id, name) {
   if (!confirm1) return;
   var typed = prompt('Pentru confirmare, tasteaza exact numele familiei:\n' + name);
   if (typed !== name) { alert('Numele nu se potriveste. Stergerea a fost anulata.'); return; }
-  window.supabase.from('families').delete().eq('id', id).then(function(){
+  supabase.from('families').delete().eq('id', id).then(function(){
     logAction('family-delete', 'Familie stearsa: ' + name);
     loadFamilies();
     loadDashboard();
@@ -1351,7 +1351,7 @@ function deleteFamily(id, name) {
 /* ── CONTACT ── */
 function loadContactMessages() {
   if (!window.supabase) return;
-  window.supabase.from('contact_messages').select('*').order('created_at', {ascending:false}).limit(20)
+  supabase.from('contact_messages').select('*').order('created_at', {ascending:false}).limit(20)
     .then(function(r){
       var msgs = r.data || [];
       var el = document.getElementById('contact-list');
@@ -1375,7 +1375,7 @@ function loadContactMessages() {
 }
 
 function resolveContact(id) {
-  window.supabase.from('contact_messages').update({resolved:true}).eq('id',id).then(function(){
+  supabase.from('contact_messages').update({resolved:true}).eq('id',id).then(function(){
     loadContactMessages();
     logAction('contact-resolve', 'Mesaj contact rezolvat: ' + id);
   });
@@ -1388,7 +1388,7 @@ function doSendMsg() {
   if (!subj || !body) { showMsg('msg-result','Te rog completeaza subiectul si mesajul.','err'); return; }
   if (!confirm('Trimiti acest mesaj pe email tuturor familiilor inregistrate?\n\nSubiect: ' + subj)) return;
   showMsg('msg-result', 'Se trimite...', 'info');
-  window.supabase.auth.getSession().then(function(res) {
+  window.supabase.auth.getUser().then(function(res) {
     var token = res.data && res.data.session ? res.data.session.access_token : null;
     if (!token) { showMsg('msg-result', 'Nu esti autentificat.', 'err'); return; }
     fetch('https://qjgvhirmnxpqqcllzukp.supabase.co/functions/v1/hyper-endpoint', {
@@ -1421,7 +1421,7 @@ function doPreviewMsg() {
 /* ── LOGS ── */
 function loadLogs() {
   if (!window.supabase) return;
-  window.supabase.from('admin_logs').select('*').order('created_at', {ascending:false}).limit(20)
+  supabase.from('admin_logs').select('*').order('created_at', {ascending:false}).limit(20)
     .then(function(r){
       var logs = r.data || [];
       var actions = logs.filter(function(l){ return l.action !== 'access'; });
@@ -1453,7 +1453,7 @@ function loadPhotos() {
   if (!window.supabase) return;
   var familyId = document.getElementById('photo-filter-family') ? document.getElementById('photo-filter-family').value : '';
   var status   = document.getElementById('photo-filter-status') ? document.getElementById('photo-filter-status').value : '';
-  var query    = window.supabase.from('photos').select('*').limit(20);
+  var query    = supabase.from('photos').select('*').limit(20);
   if (familyId) query = query.eq('family_id', familyId);
   query.then(function(r){
     var photos = r.data || [];
@@ -1476,7 +1476,7 @@ function loadPhotos() {
 
 function deletePhoto(id) {
   if (!confirm('Stergi aceasta fotografie? Actiunea este permanenta.')) return;
-  window.supabase.from('photos').delete().eq('id', id).then(function(){
+  supabase.from('photos').delete().eq('id', id).then(function(){
     logAction('photo-delete', 'Fotografie stearsa: ' + id);
     loadPhotos();
   });

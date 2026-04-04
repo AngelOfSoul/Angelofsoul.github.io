@@ -765,7 +765,7 @@ function setLoading(btnId, loading) {
 async function findFamilyForUser(userId) {
   if (!window.supabase || !userId) return null;
   try {
-    var res = await window.supabase.from('families').select('*').limit(100);
+    var res = await supabase.from('families').select('*').limit(100);
     if (res && !res.error && Array.isArray(res.data)) {
       return res.data.find(function(row){ return row && (row.created_by === userId || row.created_by === userId); }) || null;
     }
@@ -789,7 +789,7 @@ async function routeAuthenticatedUser(user) {
 /* Check session on page load */
 function initLoginAuth() {
   if (!window.supabase) return;
-  window.supabase.auth.getSession().then(function(res) {
+  window.supabase.auth.getUser().then(function(res) {
     var session = res.data && res.data.session;
     if (session && session.user) {
       routeAuthenticatedUser(session.user);
@@ -989,13 +989,13 @@ async function doFamilyProfile(e) {
     if (since) famData.since = since;
     if (descRo) famData.desc_ro = descRo;
     if (descEn) famData.desc_en = descEn;
-    var insRes = await window.supabase.from('families').insert([famData]);
+    var insRes = await supabase.from('families').insert([famData]);
     if (insRes.error && /column .*created_by.*does not exist|Could not find.*created_by/i.test(insRes.error.message || '')) {
       famData = { name: name, village: 'Calnic', created_by: userId, pin_hash: btoa(pin) };
       if (since) famData.since = since;
       if (descRo) famData.desc_ro = descRo;
       if (descEn) famData.desc_en = descEn;
-      insRes = await window.supabase.from('families').insert([famData]);
+      insRes = await supabase.from('families').insert([famData]);
     }
     if (insRes.error) {
       showMsg('step2Msg', insRes.error.message, 'error');

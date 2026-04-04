@@ -363,12 +363,12 @@ var connectionAdj={};
 document.getElementById('yr').textContent=new Date().getFullYear();
 applyLang(lang());initLang();
 
-if(window.supabase&&window.supabase.from){bootstrapGenealogy();}else{document.addEventListener('supabase:ready',bootstrapGenealogy);}
+if(window.supabase&&supabase.from){bootstrapGenealogy();}else{document.addEventListener('supabase:ready',bootstrapGenealogy);}
 
 async function safeLoadFamilyConnections(){
   var tries=[
-    function(){ return window.supabase.from('families').select('*'); },
-    function(){ return window.supabase.from('family_links').select('*'); }
+    function(){ return supabase.from('families').select('*'); },
+    function(){ return supabase.from('family_links').select('*'); }
   ];
   for(var i=0;i<tries.length;i++){
     try{
@@ -389,9 +389,9 @@ function normalizeConnRow(r){
 
 function bootstrapGenealogy(){
   Promise.all([
-    window.supabase.from('families').select('*').order('display_name',{ascending:true}),
+    supabase.from('families').select('*').order('display_name',{ascending:true}),
     safeLoadFamilyConnections(),
-    window.supabase.from('family_pages').select('family_id,page_slug,is_public')
+    supabase.from('family_pages').select('family_id,page_slug,is_public')
   ]).then(function(res){
     var famRes=res[0], connRows=res[1]||[], pageRes=res[2];
     if(famRes.error||!famRes.data){showError(famRes.error?famRes.error.message:t('Nu s-au putut incarca familiile.','Could not load families.'));return;}
@@ -552,7 +552,7 @@ function doSearch(q){
   var fFams=families.filter(function(f){return norm(f.name).indexOf(nq)!==-1;});
   var results=fFams.map(function(f){return {type:'family',name:f.name,meta:(f.village||'Calnic')+' · '+(f.is_public?t('publica','public'):t('privata','private')),id:f.id};});
   if(!window.supabase){renderSearchResults(results,q,res);return;}
-  window.supabase.from('members').select('id,name,birth_year,death_year,family_id,location').ilike('name','%'+q+'%').limit(8).then(function(r){
+  supabase.from('members').select('id,name,birth_year,death_year,family_id,location').ilike('name','%'+q+'%').limit(8).then(function(r){
     if(!r.error&&r.data){
       r.data.forEach(function(m){
         var fam=families.find(function(f){return f.id===m.family_id;});

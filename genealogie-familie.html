@@ -787,7 +787,7 @@ document.addEventListener('DOMContentLoaded',function(){
     var btn=this;btn.disabled=true;btn.textContent=t('Se salveaza...','Saving...');
     var rows=toAdd.map(function(p){return{from_member_id:p.from,to_member_id:p.to,relation_type:p.type,is_biological:p.bio,confidence:100};});
     var capturedEditing=S.editingId;
-    window.supabase.from('member_relations').insert(rows).select().then(function(r){
+    supabase.from('member_relations').insert(rows).select().then(function(r){
       btn.disabled=false;btn.textContent=t('Adauga selectate','Add selected');
       if(r.error){return;}
       // Add new relations to memory immediately
@@ -809,10 +809,10 @@ document.getElementById('yr').textContent=new Date().getFullYear();
 (function(){var params=new URLSearchParams(window.location.search);S.familyId=params.get('family')||params.get('id')||localStorage.getItem('calnic-familyId');if(S.familyId)localStorage.setItem('calnic-familyId',S.familyId);})();
 applyLang(lang());initLang();initGuide();initKeyboard();initZoomPan();initUI();
 
-if(window.supabase&&window.supabase.from){boot();}else{document.addEventListener('supabase:ready',boot);}
+if(window.supabase&&supabase.from){boot();}else{document.addEventListener('supabase:ready',boot);}
 
 function boot(){
-  window.supabase.auth.getSession().then(function(r){
+  window.supabase.auth.getUser().then(function(r){
     if(r.data&&r.data.session)S.sessionUid=r.data.session.user.id;
     if(!S.familyId){showErr(t('Familie negasita','Family not found'),t('Niciun ID de familie in URL. Intoarce-te la lista de familii si selecteaza o familie.','No family ID in URL. Go back to the families list and select a family.'));return;}
     loadFamily();subscribeRT();
@@ -825,8 +825,8 @@ function loadFamily(){
   showLoading();
   var memberIds=S.members.map(function(m){return m.id;});
   Promise.all([
-    window.supabase.from('families').select('id,name,village,created_by,connected_to_village,since').eq('id',S.familyId).single(),
-    window.supabase.from('members').select('*').eq('family_id',S.familyId).order('birth_year')
+    supabase.from('families').select('id,name,village,created_by,connected_to_village,since').eq('id',S.familyId).single(),
+    supabase.from('members').select('*').eq('family_id',S.familyId).order('birth_year')
   ]).then(function(rs){
     if(rid!==S.reqId)return;
     var fr=rs[0],mr=rs[1];
@@ -842,8 +842,8 @@ function loadRelations(rid){
   if(!ids.length){afterLoad(rid);return;}
   // Fetch relations where this family's members appear on EITHER side
   Promise.all([
-    window.supabase.from('member_relations').select('*').in('from_member_id',ids),
-    window.supabase.from('member_relations').select('*').in('to_member_id',ids)
+    supabase.from('member_relations').select('*').in('from_member_id',ids),
+    supabase.from('member_relations').select('*').in('to_member_id',ids)
   ]).then(function(results){
     if(rid!==S.reqId)return;
     var fromRels = results[0].data||[];
@@ -891,9 +891,9 @@ function reload(){loadFamily();}
 // ── SYNC MEMBERS COUNT ───────────────────────────────────
 function syncMembersCount(){
   if(!S.familyId||!window.supabase)return;
-  window.supabase.from('members').select('id',{count:'exact',head:true}).eq('family_id',S.familyId).then(function(r){
+  supabase.from('members').select('id',{count:'exact',head:true}).eq('family_id',S.familyId).then(function(r){
     if(r.error){console.warn('[Calnic] syncMembersCount count query failed:',r.error.message);return;}
-    window.supabase.from('families').update({members_count:r.count}).eq('id',S.familyId).then(function(ur){
+    supabase.from('families').update({members_count:r.count}).eq('id',S.familyId).then(function(ur){
       if(ur.error)console.warn('[Calnic] syncMembersCount update failed:',ur.error.message);
     });
   });
@@ -1521,7 +1521,7 @@ document.getElementById('ef-save-btn').addEventListener('click',function(){
   if(by&&dy&&dy<=by){showMsg('ef-msg-dates','error',t('Decesul nu poate fi inainte de nastere.','Death cannot be before birth.'));return;}
   var btn=this;btn.disabled=true;btn.textContent=t('Se salveaza...','Saving...');
   var upd={name:nv,birth_year:by||null,death_year:dy||null,is_deceased:!!dy,location:document.getElementById('ef-loc').value.trim()||null,profession:document.getElementById('ef-prof').value.trim()||null,biography:document.getElementById('ef-bio').value.trim()||null,story:document.getElementById('ef-story').value.trim()||null,initial:nv.charAt(0).toUpperCase()};
-  window.supabase.from('members').update(upd).eq('id',id)
+  supabase.from('members').update(upd).eq('id',id)
     .then(function(r){btn.disabled=false;btn.setAttribute('data-ro','Salveaza modificarile');btn.textContent=t('Salveaza modificarile','Save changes');
       if(r.error){showMsg('ef-msg-dates','error',r.error.message);return;}
       S.members=S.members.map(function(m){return m.id===id?Object.assign({},m,upd):m;});
@@ -1568,7 +1568,7 @@ document.getElementById('ef-save-vis-btn').addEventListener('click',function(){
   var id=S.editingId;if(!id)return;var btn=this;btn.disabled=true;
   var isLiving=document.getElementById('ef-living').value==='yes';
   var conf=parseInt(document.getElementById('ef-conf').value,10)||100;
-  window.supabase.from('members').update({visibility:S.editVis,is_living:isLiving,confidence:conf}).eq('id',id)
+  supabase.from('members').update({visibility:S.editVis,is_living:isLiving,confidence:conf}).eq('id',id)
     .then(function(r){btn.disabled=false;if(r.error){showMsg('ef-msg-vis','error',r.error.message);return;}
       S.members=S.members.map(function(m){return m.id===id?Object.assign({},m,{visibility:S.editVis,is_living:isLiving,confidence:conf}):m;});
       showMsg('ef-msg-vis','success',t('Vizibilitate salvata!','Visibility saved!'));render();
@@ -1596,7 +1596,7 @@ document.getElementById('photoSaveBtn').addEventListener('click',function(){
   window.supabase.storage.from('photos').upload(path,pendingFile,{upsert:true}).then(function(r){
     if(r.error){btn.disabled=false;btn.textContent=t('Salveaza poza','Save photo');showMsg('ef-msg-photo','error',r.error.message);return;}
     var url=window.supabase.storage.from('photos').getPublicUrl(path).data.publicUrl;
-    return window.supabase.from('members').update({photo_url:url}).eq('id',id).then(function(ur){
+    return supabase.from('members').update({photo_url:url}).eq('id',id).then(function(ur){
       btn.disabled=false;btn.textContent=t('Salveaza poza','Save photo');
       if(ur.error){showMsg('ef-msg-photo','error',ur.error.message);return;}
       S.members=S.members.map(function(m){return m.id===id?Object.assign({},m,{photo_url:url}):m;});
@@ -1608,7 +1608,7 @@ document.getElementById('photoSaveBtn').addEventListener('click',function(){
 document.getElementById('photoDeleteBtn').addEventListener('click',function(){
   var id=S.editingId;if(!id)return;
   showConfirm(t('Stergi poza acestei persoane?','Delete this person\'s photo?'),function(){
-  window.supabase.from('members').update({photo_url:null}).eq('id',id).then(function(r){
+  supabase.from('members').update({photo_url:null}).eq('id',id).then(function(r){
     if(r.error){showMsg('ef-msg-photo','error',r.error.message);return;}
     S.members=S.members.map(function(m){return m.id===id?Object.assign({},m,{photo_url:null}):m;});
     var pp=document.getElementById('photoPreviewCircle');pp.innerHTML='';var m=S.members.find(function(x){return x.id===id;});if(m)pp.textContent=(m.initial||(m.name?m.name.charAt(0):'?')).toUpperCase();
@@ -1643,7 +1643,7 @@ function renderRelList(id){
 function removeRel(relId,item){
   showConfirm(t('Stergi aceasta legatura? Persoana ramane in arbore.','Remove this connection? The person stays in the tree.'),function(){doRemoveRel(relId,item);});return;}
 function doRemoveRel(relId,item){
-  window.supabase.from('member_relations').delete().eq('id',relId).then(function(r){
+  supabase.from('member_relations').delete().eq('id',relId).then(function(r){
     if(r.error){showMsg('ef-msg','error',r.error.message);return;}
     S.relations=S.relations.filter(function(x){return x.id!==relId;});
     item.style.opacity='.3';setTimeout(function(){item.remove();},300);render();
@@ -1777,8 +1777,8 @@ function doRemoveRel(relId,item){
     var capturedFrom=S.editingId,capturedTo=targetId,capturedType=selRelType;
     var wasInsert=!editingRelId;
     var promise=editingRelId
-      ?window.supabase.from('member_relations').update({relation_type:selRelType,is_biological:bio}).eq('id',editingRelId).select()
-      :window.supabase.from('member_relations').insert({from_member_id:capturedFrom,to_member_id:capturedTo,relation_type:capturedType,is_biological:bio,confidence:100}).select();
+      ?supabase.from('member_relations').update({relation_type:selRelType,is_biological:bio}).eq('id',editingRelId).select()
+      :supabase.from('member_relations').insert({from_member_id:capturedFrom,to_member_id:capturedTo,relation_type:capturedType,is_biological:bio,confidence:100}).select();
     promise.then(function(r){
         btn.disabled=false;btn.textContent=t('Salveaza','Save');
         if(r.error){err.textContent=r.error.message;err.style.display='block';return;}
@@ -1802,7 +1802,7 @@ function doRemoveRel(relId,item){
 // History tab
 function renderHistory(id){
   var list=document.getElementById('histList');list.innerHTML='<div style="font-size:12px;color:var(--muted);">'+escH(t('Se incarca istoricul...','Loading history...'))+'</div>';
-  window.supabase.from('audit_log').select('*').eq('table_name','members').eq('record_id',id).order('created_at',{ascending:false}).limit(20)
+  supabase.from('audit_log').select('*').eq('table_name','members').eq('record_id',id).order('created_at',{ascending:false}).limit(20)
     .then(function(r){
       if(r.error||!r.data||!r.data.length){list.innerHTML='<div style="font-size:12px;color:var(--muted);">'+escH(t('Nicio modificare inregistrata inca.','No changes recorded yet.'))+'</div>';return;}
       list.innerHTML='';
@@ -1850,7 +1850,7 @@ document.getElementById('delCancelBtn').addEventListener('click',closeDeleteModa
 document.getElementById('delExecuteBtn').addEventListener('click',function(){
   var id=S.editingId;if(!id)return;var m=S.members.find(function(x){return x.id===id;});if(!m)return;
   var btn=this;btn.disabled=true;btn.textContent=t('Se sterge...','Deleting...');
-  window.supabase.from('members').delete().eq('id',id).then(function(r){
+  supabase.from('members').delete().eq('id',id).then(function(r){
     if(r.error){btn.disabled=false;btn.textContent=t('Sterge definitiv','Delete permanently');var dmsg=document.getElementById('del-msg');if(dmsg){dmsg.className='m-msg error';dmsg.textContent=r.error.message;dmsg.style.display='block';}return;}
     S.members=S.members.filter(function(x){return x.id!==id;});S.relations=S.relations.filter(function(r){return r.from_member_id!==id&&r.to_member_id!==id;});
     closeDeleteModal();closeDetail();syncMembersCount();showUndo(t(m.name+' a fost sters.',''+m.name+' was deleted.'),null);render();
@@ -1870,7 +1870,7 @@ function closeAddModal(){document.getElementById('addOverlay').classList.remove(
 
 document.getElementById('af-save-btn').addEventListener('click',function(){
   if(!S.familyId){showMsg('af-msg','error',t('Niciun ID de familie in URL.','No family ID in URL.'));return;}
-  if(!window.supabase||!window.supabase.from){showMsg('af-msg','error',t('Baza de date nu este configurata.','Database is not configured.'));return;}
+  if(!window.supabase||!supabase.from){showMsg('af-msg','error',t('Baza de date nu este configurata.','Database is not configured.'));return;}
   var nv=document.getElementById('af-name').value.trim();if(!nv||nv.length<2){showMsg('af-msg','error',t('Numele este obligatoriu (min 2 caractere).','Name is required (min 2 characters).'));return;}
   var bv=document.getElementById('af-birth').value,dv=document.getElementById('af-death').value;
   var by=bv.trim()?parseYear(bv):null;if(bv.trim()&&!by){showMsg('af-msg','error',t('An nastere invalid.','Invalid birth year.'));return;}
@@ -1878,7 +1878,7 @@ document.getElementById('af-save-btn').addEventListener('click',function(){
   if(by&&dy&&dy<=by){showMsg('af-msg','error',t('Decesul nu poate fi inainte de nastere.','Death cannot be before birth.'));return;}
   var btn=document.getElementById('af-save-btn');btn.disabled=true;btn.textContent=t('Se salveaza...','Saving...');
   var nm={family_id:S.familyId,name:nv,initial:nv.charAt(0).toUpperCase(),birth_year:by||null,death_year:dy||null,is_deceased:!!dy,is_living:!dy,location:document.getElementById('af-loc').value||null,profession:document.getElementById('af-prof').value.trim()||null,role:document.getElementById('af-rel').value,biography:document.getElementById('af-bio').value.trim()||null,visibility:S.addVis,confidence:100};
-  window.supabase.from('members').insert([nm]).select().then(function(r){
+  supabase.from('members').insert([nm]).select().then(function(r){
     btn.disabled=false;btn.setAttribute('data-ro','Adauga in arbore');btn.textContent=t('Adauga in arbore','Add to tree');
     if(r.error){showMsg('af-msg','error',r.error.message);return;}
     if(r.data&&r.data[0])S.members.push(r.data[0]);
@@ -1902,7 +1902,7 @@ function showUndo(msg,action){
 // ── CONNECT TO VILLAGE ───────────────────────────────────
 document.getElementById('connectVillageBtn').addEventListener('click',function(){
   if(!S.familyId||!window.supabase)return;
-  window.supabase.from('families').update({connected_to_village:true}).eq('id',S.familyId).then(function(r){
+  supabase.from('families').update({connected_to_village:true}).eq('id',S.familyId).then(function(r){
     if(r.error){alert(r.error.message);return;}
     if(S.family)S.family.connected_to_village=true;showExportToast(t('Familie conectata la arborele satului!','Family connected to the village tree!'));
   }).catch(function(err){alert(err.message);});

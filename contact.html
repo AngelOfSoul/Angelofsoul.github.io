@@ -810,7 +810,7 @@ applyPageLang(window.CalnicUtils ? window.CalnicUtils.lang() : currentLang);
 /* ── NAV SESSION CHECK ── */
 function checkNavSession() {
   if (!window.supabase) return;
-  window.supabase.auth.getSession().then(function(res) {
+  window.supabase.auth.getUser().then(function(res) {
     var session = res.data && res.data.session;
     if (!session || !session.user) return;
     var navLogin = document.querySelector('a.nav-login');

@@ -56,7 +56,7 @@ document.head.appendChild(stickyStyle);
 if (window.location.pathname.indexOf('login') !== -1) {
   function checkLoginRedirect() {
     if (!window.supabase) return;
-    window.supabase.auth.getSession().then(function(res) {
+    window.supabase.auth.getUser().then(function(res) {
       if (res.data && res.data.session) {
         window.location.href = 'dashboard.html';
       }
@@ -207,7 +207,7 @@ function checkNotifications(familyId) {
 async function getCurrentFamilyForUser(userId) {
   if (!window.supabase || !userId) return null;
   try {
-    var res = await window.supabase.from('families').select('*').limit(100);
+    var res = await supabase.from('families').select('*').limit(100);
     if (res && !res.error && Array.isArray(res.data)) {
       return res.data.find(function(row){ return row && (row.created_by === userId || row.created_by === userId); }) || null;
     }
@@ -221,7 +221,7 @@ function initAdminNav() {
     buildProfileButton(null, null, false);
     return;
   }
-  window.supabase.auth.getSession().then(function(res) {
+  window.supabase.auth.getUser().then(function(res) {
     var session = res.data && res.data.session;
     if (!session) {
       buildProfileButton(null, null, false);

@@ -883,7 +883,7 @@ function savePhoto() {
     return;
   }
   var fileInput = document.getElementById('fileInput');
-  if (!window.supabase || !window.isSupabaseConfigured() || !fileInput.files || !fileInput.files[0]) {
+  if (!window.supabase || !window.true || !fileInput.files || !fileInput.files[0]) {
     alert(currentLang === 'ro' ? 'Fotografia a fost salvata! (Demo \u2014 conecteaza Supabase pentru stocare reala)' : 'Photo saved! (Demo \u2014 connect Supabase for real storage)');
     closeUploadBtn();
     return;
@@ -916,7 +916,7 @@ function savePhoto() {
             year: year, category: cat, is_private: isPrivate
           };
           if (userId) meta.uploader_id = userId;
-          window.supabase.from('photos').insert(meta).then(function(insRes) {
+          supabase.from('photos').insert(meta).then(function(insRes) {
             saveBtn.disabled = false;
             saveBtn.textContent = currentLang === 'ro' ? 'Salveaza fotografia' : 'Save photo';
             if (insRes.error) {
@@ -978,8 +978,8 @@ applyPageLang(window.CalnicUtils ? window.CalnicUtils.lang() : currentLang);
 
 /* ── Load real photos from Supabase on ready ── */
 function loadPhotosFromSupabase() {
-  if (!window.supabase || !window.isSupabaseConfigured()) return;
-  window.supabase.from('photos')
+  if (!window.supabase || !window.true) return;
+  supabase.from('photos')
     .select('*')
     .eq('is_private', false)
     .order('uploaded_at', { ascending: false })

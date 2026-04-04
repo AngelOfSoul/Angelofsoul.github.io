@@ -148,22 +148,22 @@
   }
 
   async function fetchVillageTreeData() {
-    if (!window.supabase || !window.supabase.from) {
+    if (!window.supabase || !supabase.from) {
       throw new Error('Supabase nu este disponibil.');
     }
 
-    const familiesRes = await window.supabase.from('families').select('*').order('name');
+    const familiesRes = await supabase.from('families').select('*').order('name');
     if (familiesRes.error) throw familiesRes.error;
 
     const families = familiesRes.data || [];
     const familyLinks = await safeQuery(function () {
-      return window.supabase.from('family_links').select('*').order('created_at', { ascending: true });
+      return supabase.from('family_links').select('*').order('created_at', { ascending: true });
     });
     const members = await safeQuery(function () {
-      return window.supabase.from('members').select('id,family_id,visibility,name').limit(5000);
+      return supabase.from('members').select('id,family_id,visibility,name').limit(5000);
     });
     const memberRelations = await safeQuery(function () {
-      return window.supabase.from('member_relations').select('*').limit(5000);
+      return supabase.from('member_relations').select('*').limit(5000);
     });
 
     const nodes = buildNodes(families);

@@ -651,9 +651,9 @@ function loadFamilyData() {
     return;
   }
   Promise.all([
-    window.supabase.from('families').select('*').eq('id', familyId).single(),
-    window.supabase.from('members').select('*').eq('family_id', familyId).order('birth_year'),
-    window.supabase.from('timeline').select('*').eq('family_id', familyId).order('year')
+    supabase.from('families').select('*').eq('id', familyId).single(),
+    supabase.from('members').select('*').eq('family_id', familyId).order('birth_year'),
+    supabase.from('timeline').select('*').eq('family_id', familyId).order('year')
   ]).then(function(results) {
     var famRes     = results[0];
     var membersRes = results[1];
@@ -939,7 +939,7 @@ applyPageLang(window.CalnicUtils ? window.CalnicUtils.lang() : currentLang);
 /* ── NAV SESSION CHECK ── */
 function checkFamilieFamilieNavSession() {
   if (!window.supabase) return;
-  window.supabase.auth.getSession().then(function(res) {
+  window.supabase.auth.getUser().then(function(res) {
     var session = res.data && res.data.session;
     if (!session || !session.user) return;
     var navLogin = document.querySelector('a.nav-login');
@@ -1129,7 +1129,7 @@ function saveAddMember() {
     visibility: 'public',
     confidence: 100
   };
-  window.supabase.from('members').insert([nm]).select().then(function(r){
+  supabase.from('members').insert([nm]).select().then(function(r){
     btn.disabled=false; btn.textContent='Adauga in arbore';
     if(r.error){var msg=document.getElementById('am-msg');msg.className='m-msg err';msg.textContent=r.error.message;return;}
     var inserted=r.data&&r.data[0];
@@ -1270,7 +1270,7 @@ function fmeRenderHistory(id) {
   var el = document.getElementById('fmeHistList');
   if (!el || !window.supabase) return;
   el.innerHTML = '<div style="font-size:12px;color:var(--muted);font-style:italic;">Se incarca...</div>';
-  window.supabase.from('member_history').select('*').eq('member_id', id).order('created_at', {ascending:false}).limit(30)
+  supabase.from('member_history').select('*').eq('member_id', id).order('created_at', {ascending:false}).limit(30)
     .then(function(r) {
       if (r.error || !r.data || !r.data.length) {
         el.innerHTML = '<div style="font-size:12px;color:var(--muted);font-style:italic;">Nicio modificare inregistrata.</div>';
@@ -1334,7 +1334,7 @@ document.getElementById('fme-save-btn').addEventListener('click', function() {
     story: document.getElementById('fme-story').value.trim() || null,
     initial: name.charAt(0).toUpperCase()
   };
-  window.supabase.from('members').update(upd).eq('id', id).then(function(r) {
+  supabase.from('members').update(upd).eq('id', id).then(function(r) {
     btn.disabled = false; btn.textContent = 'Salveaza modificarile';
     if (r.error) { fmeShowMsg(0, 'err', r.error.message); return; }
     var years = (upd.birth_year||'') + (upd.death_year?' — '+upd.death_year:(upd.birth_year?' —':''));
@@ -1365,7 +1365,7 @@ document.getElementById('fme-vis-save').addEventListener('click', function() {
   var btn = this; btn.disabled = true;
   var isLiving = document.getElementById('fme-living').value === 'yes';
   var conf = parseInt(document.getElementById('fme-conf').value, 10) || 100;
-  window.supabase.from('members').update({visibility: _fmeVis, is_living: isLiving, confidence: conf}).eq('id', id)
+  supabase.from('members').update({visibility: _fmeVis, is_living: isLiving, confidence: conf}).eq('id', id)
     .then(function(r) {
       btn.disabled = false;
       if (r.error) { fmeShowMsg(2, 'err', r.error.message); return; }
@@ -1402,7 +1402,7 @@ document.getElementById('fme-photo-save').addEventListener('click', function() {
       if (r.error) { btn.disabled=false; btn.textContent='Salveaza poza'; fmeShowMsg(1,'err',r.error.message); return; }
       var pub = window.supabase.storage.from('photos').getPublicUrl(path);
       var url = pub.data && pub.data.publicUrl;
-      return window.supabase.from('members').update({photo_url: url}).eq('id', id).then(function(ur) {
+      return supabase.from('members').update({photo_url: url}).eq('id', id).then(function(ur) {
         btn.disabled = false; btn.textContent = 'Salveaza poza';
         if (ur.error) { fmeShowMsg(1,'err',ur.error.message); return; }
         MEMBERS = MEMBERS.map(function(m){ return m.id===id ? Object.assign({},m,{photo_url:url}) : m; });
@@ -1416,7 +1416,7 @@ document.getElementById('fme-photo-save').addEventListener('click', function() {
 document.getElementById('fme-photo-del').addEventListener('click', function() {
   var id = _memEditId; if (!id || !window.supabase) return;
   if (!confirm('Stergi poza acestei persoane?')) return;
-  window.supabase.from('members').update({photo_url: null}).eq('id', id).then(function(r) {
+  supabase.from('members').update({photo_url: null}).eq('id', id).then(function(r) {
     if (r.error) { fmeShowMsg(1,'err',r.error.message); return; }
     MEMBERS = MEMBERS.map(function(m){ return m.id===id ? Object.assign({},m,{photo_url:null}) : m; });
     var pp = document.getElementById('fmePhotoPreview');
@@ -1450,7 +1450,7 @@ function execMemberDel() {
   var btn = document.getElementById('me-del-confirm');
   var msg = document.getElementById('me-del-msg');
   btn.disabled = true; btn.textContent = 'Se sterge...';
-  window.supabase.from('members').delete().eq('id', _memDelId).then(function(r) {
+  supabase.from('members').delete().eq('id', _memDelId).then(function(r) {
     btn.disabled = false; btn.textContent = 'Sterge definitiv';
     if (r.error) { msg.style.cssText='display:block;background:var(--red-bg);border:1px solid var(--red-br);color:var(--red);'; msg.textContent=r.error.message; return; }
     MEMBERS = MEMBERS.filter(function(m){ return m.id !== _memDelId; });
