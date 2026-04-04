@@ -67,8 +67,8 @@ nav { background:var(--s1); border-bottom:2px solid var(--gold-d); display:flex;
 
 .section-head { display:flex; align-items:center; gap:14px; margin-bottom:20px; margin-top:40px; }
 .section-head:first-child { margin-top:0; }
-.section-head::before { content:'; width:24px; height:1px; background:var(--gold); flex-shrink:0; }
-.section-head::after  { content:'; flex:1; height:1px; background:var(--b2); }
+.section-head::before { content:''; width:24px; height:1px; background:var(--gold); flex-shrink:0; }
+.section-head::after  { content:''; flex:1; height:1px; background:var(--b2); }
 .section-head-title { font-family:'Playfair Display',serif; font-size:13px; font-weight:600; letter-spacing:3px; text-transform:uppercase; color:var(--gold); white-space:nowrap; }
 
 .scroll-top { position:fixed; bottom:28px; right:24px; background:#111111; border:1px solid #b08030; color:#d4a84a; width:40px; height:40px; border-radius:2px; cursor:pointer; font-size:20px; display:flex; align-items:center; justify-content:center; opacity:0; transition:opacity 0.3s; z-index:9999; text-decoration:none; }
@@ -559,7 +559,7 @@ function loadFamiliiFromSupabase() {
 
   function mapFamilyRows(rows) {
     return (rows || []).map(function(r, idx) {
-      var safeName = (r && r.name && String(r.name).trim()) ? String(r.name).trim() : (currentLang === 'en' ? 'Family' : 'Familie');
+      var safeName = (r.name && String(r.name).trim()) || (localStorage.getItem('calnic-lang') === 'en' ? 'Family' : 'Familie');
       return {
         id:              r.id,
         name:            safeName,
@@ -599,8 +599,12 @@ function loadFamiliiFromSupabase() {
   }
 
   function fetchFamiliesWithFallback() {
-    // Start with a schema-safe select to avoid 400 noise on optional columns.
-    var variants = ['id, name, village, since'];
+    var variants = [
+      'id, name, village, since, desc_ro, desc_en',
+      'id, name, village, since, members_count, generations_count, photos_count, desc_ro, desc_en',
+      'id, name, village, since, members_count, generations_count, photos_count, show_members, show_generations, show_photos, show_since, has_public_photos, has_private_photos, desc_ro, desc_en',
+      'id, name, village, since'
+    ];
     function tryVariant(idx) {
       return window.supabase
         .from('families')
