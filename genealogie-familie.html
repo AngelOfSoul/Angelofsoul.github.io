@@ -873,30 +873,20 @@ function loadFamily(){
 function loadRelations(rid){
   var ids=S.members.map(function(m){return m.id;});
   if(!ids.length){afterLoad(rid);return;}
-  // Schema-safe strategy:
-  // 1) Try family_id if available (zero noisy 400s on that schema)
-  // 2) Fallback to legacy pair of from_member_id / to_member_id filters
-  supabase.from('member_relations').select('*').eq('family_id',S.familyId).then(function(fr){
+  // Legacy-compatible query path only, avoids 400 on schemas without family_id here.
+  Promise.all([
+    supabase.from('member_relations').select('*').in('from_member_id',ids),
+    supabase.from('member_relations').select('*').in('to_member_id',ids)
+  ]).then(function(results){
     if(rid!==S.reqId)return;
-    if(!fr.error){
-      S.relations=fr.data||[];
-      afterLoad(rid);
-      return;
-    }
-    Promise.all([
-      supabase.from('member_relations').select('*').in('from_member_id',ids),
-      supabase.from('member_relations').select('*').in('to_member_id',ids)
-    ]).then(function(results){
-      if(rid!==S.reqId)return;
-      var fromRels = results[0].data||[];
-      var toRels   = results[1].data||[];
-      var seen={}, all=[];
-      fromRels.concat(toRels).forEach(function(r){
-        if(!seen[r.id]){seen[r.id]=true;all.push(r);}
-      });
-      S.relations=all;
-      afterLoad(rid);
-    }).catch(function(){if(rid!==S.reqId)return;S.relations=[];afterLoad(rid);});
+    var fromRels = results[0].data||[];
+    var toRels   = results[1].data||[];
+    var seen={}, all=[];
+    fromRels.concat(toRels).forEach(function(r){
+      if(!seen[r.id]){seen[r.id]=true;all.push(r);}
+    });
+    S.relations=all;
+    afterLoad(rid);
   }).catch(function(){if(rid!==S.reqId)return;S.relations=[];afterLoad(rid);});
 }
 
@@ -1956,11 +1946,10 @@ function showUndo(msg,action){
 
 // ── CONNECT TO VILLAGE ───────────────────────────────────
 document.getElementById('connectVillageBtn').addEventListener('click',function(){
-  if(!S.familyId||!window.supabase)return;
-  supabase.from('families').update({connected_to_village:true}).eq('id',S.familyId).then(function(r){
-    if(r.error){alert(r.error.message);return;}
-    if(S.family)S.family.connected_to_village=true;showExportToast(t('Familie conectata la arborele satului!','Family connected to the village tree!'));
-  }).catch(function(err){alert(err.message);});
+  if(!S.familyId)return;
+  if(S.family)S.family.connected_to_village=true;
+  try{localStorage.setItem('calnic-connected-'+S.familyId,'1');}catch(e){}
+  showExportToast(t('Familie marcata local ca fiind conectata la sat.','Family marked locally as connected to village.'));
 });
 
 // ── EXPORT ───────────────────────────────────────────────
@@ -1969,7 +1958,17 @@ document.getElementById('exportBtn').addEventListener('click',function(){
   if(typeof html2canvas==='undefined'){var sc=document.createElement('script');sc.src='https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js';sc.onload=function(){doExport(btn);};sc.onerror=function(){btn.disabled=false;btn.innerHTML='&#8659; '+t('Salveaza ca imagine','Save as image');alert(t('Export esuat.','Export failed.'));};document.head.appendChild(sc);}else{doExport(btn);}
 });
 function doExport(btn){
-  html2canvas(document.getElementById('treeCanvas'),{backgroundColor:'#0a0a0a',scale:2,useCORS:true,logging:false}).then(function(c){
+  html2canvas(document.getElementById('treeCanvas'),{
+    backgroundColor:'#0a0a0a',
+    scale:2,
+    useCORS:true,
+    logging:false,
+    onclone:function(doc){
+      var root=doc.getElementById('treeCanvas');
+      if(!root)return;
+      root.querySelectorAll('img').forEach(function(img){img.remove();});
+    }
+  }).then(function(c){
     var l=document.createElement('a');l.download=(S.family?S.family.name.replace(/[^a-zA-Z0-9]/g,'-'):'arbore')+'.png';l.href=c.toDataURL('image/png');l.click();
     btn.disabled=false;btn.innerHTML='&#8659; '+t('Salveaza ca imagine','Save as image');showExportToast(t('Export salvat!','Export saved!'));
   }).catch(function(){btn.disabled=false;btn.innerHTML='&#8659; '+t('Salveaza ca imagine','Save as image');alert(t('Export esuat. Incercati din nou.','Export failed. Please try again.'));});
@@ -2126,7 +2125,12 @@ function initLang(){
   });
 }
 
-function updateTitle(){if(!S.family)return;document.title=S.family.name+' \u2014 Calnic Online';document.getElementById('treeTitle').textContent='\u{1F337} '+S.family.name;}
+function updateTitle(){
+  if(!S.family)return;
+  var famName=S.family.name||S.family.display_name||'Familie';
+  document.title=famName+' \u2014 Calnic Online';
+  document.getElementById('treeTitle').textContent='\u{1F337} '+famName;
+}
 
 // ── SCROLL BUTTONS ───────────────────────────────────────
 function initScrollBtns(){
