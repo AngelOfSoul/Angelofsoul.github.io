@@ -430,8 +430,8 @@ footer .g { color:var(--gold-d); font-style:normal; }
 
 </div>
 
-<a class="scroll-top" id="scrollTop" onclick="window.scrollTo({top:0,behavior:'smooth'})" title="Sus">&#8679;</a>
-<a class="scroll-bottom" id="scrollBottom" onclick="window.scrollTo({top:document.body.scrollHeight,behavior:'smooth'})" title="Jos">&#8681;</a>
+<a class="scroll-top" id="scrollTop" role="button" aria-label="Inapoi sus" title="Sus">&#8679;</a>
+<a class="scroll-bottom" id="scrollBottom" role="button" aria-label="Jos" title="Jos">&#8681;</a>
 
 <footer>
   <div style="max-width:960px;margin:0 auto;display:flex;flex-wrap:wrap;align-items:center;justify-content:center;gap:6px 16px;">
@@ -815,6 +815,46 @@ function checkFamiliiNavSession() {
   });
 }
 if (window.supabase) { checkFamiliiNavSession(); } else { document.addEventListener('supabase:ready', checkFamiliiNavSession); }
+
+/* Scroll buttons: avoid inline onclick dependency and keep visibility in sync */
+(function initScrollButtons() {
+  var st = document.getElementById('scrollTop');
+  var sb = document.getElementById('scrollBottom');
+  if (!st && !sb) return;
+
+  function scrollTopSmooth() { window.scrollTo({ top: 0, behavior: 'smooth' }); }
+  function scrollBottomSmooth() {
+    var maxTop = Math.max(document.body.scrollHeight, document.documentElement.scrollHeight);
+    window.scrollTo({ top: maxTop, behavior: 'smooth' });
+  }
+  function onKeyActivate(e, fn) {
+    if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); fn(); }
+  }
+  function upd() {
+    var sc = window.scrollY > 300;
+    var atBottom = (window.innerHeight + window.scrollY) >= (Math.max(document.body.scrollHeight, document.documentElement.scrollHeight) - 100);
+    if (st) { st.style.opacity = sc ? '1' : '0'; st.style.pointerEvents = sc ? 'auto' : 'none'; }
+    if (sb) { sb.style.opacity = atBottom ? '0' : '1'; sb.style.pointerEvents = atBottom ? 'none' : 'auto'; }
+  }
+
+  if (st) {
+    st.removeAttribute('onclick');
+    st.tabIndex = 0;
+    st.addEventListener('click', function(e) { e.preventDefault(); scrollTopSmooth(); });
+    st.addEventListener('keydown', function(e) { onKeyActivate(e, scrollTopSmooth); });
+  }
+  if (sb) {
+    sb.removeAttribute('onclick');
+    sb.tabIndex = 0;
+    sb.addEventListener('click', function(e) { e.preventDefault(); scrollBottomSmooth(); });
+    sb.addEventListener('keydown', function(e) { onKeyActivate(e, scrollBottomSmooth); });
+  }
+
+  window.addEventListener('scroll', upd, { passive: true });
+  window.addEventListener('resize', upd);
+  window.addEventListener('load', upd);
+  setTimeout(upd, 100);
+})();
 
 </script>
 
