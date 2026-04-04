@@ -1,0 +1,16 @@
+<svg width="256" height="256" viewBox="0 0 256 256" xmlns="http://www.w3.org/2000/svg">
+    <defs>
+        <linearGradient id="g" x1="0%" y1="0%" x2="100%" y2="100%">
+            <stop stop-color="#FFD700" offset="0%"/>
+            <stop stop-color="#C58E1A" offset="100%"/>
+        </linearGradient>
+    </defs>
+    <!-- Black filled shield (full shape) -->
+    <path d="M128,15 C170,33 225,48 243,52 L243,124 C243,178 178,232 128,246 C78,232 13,178 13,124 L13,52 C31,48 86,33 128,15 Z" fill="#111111"/>
+    <!-- Gold border shield (stroke only) -->
+    <path d="M128,15 C170,33 225,48 243,52 L243,124 C243,178 178,232 128,246 C78,232 13,178 13,124 L13,52 C31,48 86,33 128,15 Z" fill="none" stroke="url(#g)" stroke-width="10"/>
+    <!-- Inner gold border -->
+    <path d="M128,34 C163,48 211,61 226,64 L226,124 C226,169 166,216 128,228 C90,216 30,169 30,124 L30,64 C45,61 93,48 128,34 Z" fill="none" stroke="url(#g)" stroke-width="4"/>
+    <!-- Gold C -->
+    <text x="50%" y="62%" dominant-baseline="middle" text-anchor="middle" font-family="Arial, sans-serif" font-size="110" font-weight="bold" fill="url(#g)">C</text>
+</svg>

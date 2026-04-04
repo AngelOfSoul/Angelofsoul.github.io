@@ -1,0 +1,117 @@
+<!DOCTYPE html>
+<html lang="ro" style="background:#0a0a0a;">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="description" content="Arborele satului Calnic — relatiile dintre familii.">
+<title>Arborele satului — Calnic Online</title>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,600;0,700;1,400&family=EB+Garamond:ital,wght@0,400;0,500;1,400&display=swap" rel="stylesheet">
+<link rel="icon" type="image/svg+xml" href="favicon.svg">
+<link rel="icon" type="image/x-icon" href="favicon.ico">
+<link rel="stylesheet" href="css/style.css">
+<style>
+:root{--bg:#0a0a0a;--s1:#111;--s2:#161616;--s3:#1c1c1c;--b1:#2a2a2a;--b2:#383838;--gold:#d4a84a;--gold-l:#e0b84a;--gold-d:#b08030;--gold-m:#7a5828;--text:#f0e8d0;--muted:#a09070;--green:#82c46a;--green-bg:#0d1a0d;--green-br:#2a4a2a;--amber:#c8a040;--private:#6f7884;}
+*,*::before,*::after{margin:0;padding:0;box-sizing:border-box} body{background:var(--bg);color:var(--text);font-family:'EB Garamond',Georgia,serif;font-size:17px;line-height:1.75;min-height:100vh;} a{color:var(--gold);text-decoration:none;} a:hover{color:var(--gold-l)} button,input,select{font-family:inherit}
+.lang-bar{background:#050505;border-bottom:1px solid var(--b1);padding:5px 24px;display:flex;justify-content:flex-end;align-items:center;gap:8px}.lang-label{font-size:11px;letter-spacing:2px;color:#c8a870}.lang-btn{background:none;border:1px solid #585040;color:var(--text);padding:2px 11px;font-size:12px;letter-spacing:1px;transition:all .2s;border-radius:1px}.lang-btn.active{background:var(--gold-d);border-color:var(--gold-l);color:#050505;font-weight:700}.lang-btn:hover:not(.active){border-color:var(--gold)}
+.site-header{background:#050505;border-bottom:2px solid var(--gold-d);display:flex;align-items:center;justify-content:center;gap:28px;padding:10px 32px;min-height:110px}.banner-img{height:90px;width:auto;display:block;flex-shrink:0;border-radius:2px;border:1px solid var(--b2)}.header-divider{width:1px;height:75px;background:linear-gradient(to bottom,transparent,var(--gold-d),transparent);flex-shrink:0;opacity:.5}.header-motto{display:flex;flex-direction:column;align-items:center;gap:6px;flex-shrink:0}.header-sub{font-style:italic;font-size:15px;letter-spacing:3px}
+nav{background:var(--s1);border-bottom:2px solid var(--gold-d);display:flex;flex-wrap:wrap;align-items:stretch}.nav-link{padding:11px 16px;font-size:14px;letter-spacing:.5px;color:var(--text);border-right:1px solid var(--b1);transition:all .18s;display:flex;align-items:center;gap:6px}.nav-link:hover{background:var(--s2);color:var(--gold-l)}.nav-link.active{background:var(--s2);color:var(--gold);border-bottom:2px solid var(--gold)}.nav-right{margin-left:auto;display:flex}.nav-login{padding:11px 18px;font-size:14px;color:var(--gold);border-left:1px solid var(--b1);transition:all .18s;display:flex;align-items:center;gap:6px}.nav-login:hover{background:#2a0a0a;color:var(--text)}.hamburger{display:none;background:none;border:1px solid var(--b2);color:var(--gold);padding:6px 10px;font-size:20px;margin-left:auto;border-radius:2px}.nav-mobile-menu{display:none;flex-direction:column;background:var(--s1);border-bottom:2px solid var(--gold-d);width:100%}.nav-mobile-menu.open{display:flex}.nav-mobile-link,.nav-mobile-login{padding:13px 20px;font-size:16px;color:var(--text);border-bottom:1px solid var(--b1);display:flex;align-items:center;gap:10px}.nav-mobile-link.active{color:var(--gold);background:var(--s2);border-left:3px solid var(--gold)}
+.scroll-top{position:fixed;bottom:28px;right:24px;background:#111;border:1px solid #b08030;color:var(--gold);width:40px;height:40px;border-radius:2px;font-size:20px;display:flex;align-items:center;justify-content:center;opacity:0;transition:opacity .3s;z-index:9999}.scroll-bottom{position:fixed;bottom:74px;right:24px;background:#111;border:1px solid var(--b2);color:#c8aa80;width:40px;height:40px;border-radius:2px;font-size:20px;display:flex;align-items:center;justify-content:center;opacity:1;transition:opacity .3s;z-index:9999}
+.page-hero{background:#050505;border-bottom:2px solid var(--gold-d);padding:44px 24px 38px;text-align:center}.page-hero-title{font-family:'Playfair Display',serif;font-size:36px;color:var(--gold-l);letter-spacing:2px;margin-bottom:8px}.page-hero-sub{font-size:16px;color:var(--muted);font-style:italic}.page-hero-orn{color:var(--gold-m);letter-spacing:8px;font-size:12px;margin-top:12px}
+.main-wrap{max-width:1260px;margin:0 auto;padding:36px 24px;display:grid;grid-template-columns:minmax(0,1fr) 320px;gap:32px;align-items:start}@media(max-width:960px){.main-wrap{grid-template-columns:1fr}}
+.panel{background:var(--s1);border:1px solid var(--b1);border-radius:4px}.section-head{display:flex;align-items:center;gap:14px;margin-bottom:20px}.section-head::before{content:'';width:24px;height:1px;background:var(--gold);flex-shrink:0}.section-head::after{content:'';flex:1;height:1px;background:var(--b2)}.section-head-title{font-family:'Playfair Display',serif;font-size:12px;font-weight:600;letter-spacing:3px;text-transform:uppercase;color:var(--gold);white-space:nowrap}
+.toolbar{display:grid;grid-template-columns:1.1fr 1fr 1fr auto auto;gap:10px;padding:18px;border:1px solid var(--b1);background:linear-gradient(180deg,#121212,#0f0f0f);border-radius:4px;margin-bottom:20px}.toolbar .field{display:flex;flex-direction:column;gap:6px}.toolbar label{font-size:11px;letter-spacing:1.5px;text-transform:uppercase;color:var(--muted)}.toolbar input,.toolbar select,.toolbar button{background:var(--s2);border:1px solid var(--b1);color:var(--text);padding:10px 12px;border-radius:3px;min-height:42px}.toolbar button{cursor:pointer}.toolbar button.primary{background:#1a1208;border-color:var(--gold-d);color:var(--gold)}.toolbar button:hover{border-color:var(--gold-d)}@media(max-width:1100px){.toolbar{grid-template-columns:1fr 1fr}}@media(max-width:700px){.toolbar{grid-template-columns:1fr}}
+.info-strip{display:flex;flex-wrap:wrap;gap:10px;align-items:center;margin-bottom:18px}.pill{display:inline-flex;align-items:center;gap:7px;padding:4px 10px;background:#0e0e0e;border:1px solid var(--b1);border-radius:999px;font-size:12px;color:var(--muted)}.dot{width:10px;height:10px;border-radius:50%;display:inline-block}.dot.public{background:var(--gold)}.dot.private{background:var(--private)}.dot.path{background:#f4d88a}.status{margin-left:auto;color:var(--muted);font-size:13px}
+.tree-shell{position:relative;min-height:760px;border:1px solid var(--b1);background:radial-gradient(circle at center, rgba(255,255,255,.03), transparent 45%),linear-gradient(180deg, rgba(255,255,255,.02), rgba(255,255,255,0));border-radius:4px;overflow:hidden}.tree-shell svg{width:100%;height:760px;display:block}.tree-sidebox{padding:18px}.sb-title{font-family:'Playfair Display',serif;font-size:18px;color:var(--gold);margin-bottom:10px}.muted{color:var(--muted);font-size:13px;line-height:1.65}.legend-item{display:flex;align-items:center;gap:10px;padding:6px 0;color:var(--text);font-size:13px}.leg-line{width:26px;height:2px;background:#4f5d73}.leg-line.path{background:#f4d88a}.btn-link{display:inline-block;padding:9px 14px;background:#1a1208;border:1px solid var(--gold-d);color:var(--gold);border-radius:3px;font-size:13px}
+.tooltip{position:absolute;pointer-events:none;background:#0f141c;border:1px solid rgba(255,255,255,.1);color:var(--text);border-radius:10px;padding:8px 10px;font-size:13px;display:none;box-shadow:0 12px 30px rgba(0,0,0,.35);z-index:4}.overlay-card{position:absolute;right:18px;bottom:18px;width:min(360px, calc(100vw - 36px));background:rgba(16,22,31,.94);border:1px solid rgba(255,255,255,.08);border-radius:14px;padding:14px;box-shadow:0 16px 40px rgba(0,0,0,.35);z-index:3}.overlay-card.hidden{display:none}.overlay-card h3{margin:0 0 8px;color:var(--gold);font-size:18px}.overlay-card p{margin:0;color:var(--muted);line-height:1.5;font-size:14px}.overlay-actions{margin-top:12px;display:flex;gap:8px;flex-wrap:wrap}
+.node text{fill:var(--text);font-size:13px;pointer-events:none;text-anchor:middle}.node circle{stroke-width:2px;cursor:pointer}
+footer{background:#050505;border-top:2px solid var(--gold-d);padding:16px 24px;text-align:center;font-size:13px;color:var(--muted);letter-spacing:1.5px;font-style:italic}footer .g{color:var(--gold-d);font-style:normal}
+</style>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
+<script src="js/config.js"></script>
+<script src="js/supabase.js"></script>
+<script src="js/utils.js"></script>
+<script src="js/admin-nav.js"></script>
+
+</head>
+<body>
+<div class="lang-bar"><span class="lang-label">LIMBA</span><button class="lang-btn active" id="btn-ro">RO</button><button class="lang-btn" id="btn-en">EN</button></div>
+<header class="site-header">
+  <img src="banner-calnic.png" alt="Calnic Online" class="banner-img"/>
+  <div class="header-divider"></div>
+  <div class="header-motto"><div class="header-sub" id="header-sub" data-ro="Satul nostru — Amintirile noastre" data-en="Our village — Our memories">Satul nostru — Amintirile noastre</div></div>
+</header>
+<nav>
+  <a class="nav-link" href="index.html">🏠 Acasa</a>
+  <a class="nav-link" href="istorie.html">🏰 Istorie</a>
+  <a class="nav-link active" href="genealogie.html">🌳 Genealogie</a>
+  <a class="nav-link" href="galerie.html">📷 Galerie</a>
+  <a class="nav-link" href="contact.html">✉️ Contact</a>
+  <a class="nav-link" href="intrebari.html">❓ Intrebari</a>
+  <div class="nav-right"><a class="nav-login" href="login.html">🔒 Contul Familiei</a></div>
+  <button class="hamburger" id="hamburgerBtn">☰</button>
+</nav>
+<div class="nav-mobile-menu" id="navMobileMenu">
+  <a class="nav-mobile-link" href="index.html">🏠 Acasa</a>
+  <a class="nav-mobile-link" href="istorie.html">🏰 Istorie</a>
+  <a class="nav-mobile-link active" href="genealogie.html">🌳 Genealogie</a>
+  <a class="nav-mobile-link" href="galerie.html">📷 Galerie</a>
+  <a class="nav-mobile-link" href="contact.html">✉️ Contact</a>
+  <a class="nav-mobile-link" href="intrebari.html">❓ Intrebari</a>
+  <a class="nav-mobile-login" href="login.html">🔒 Contul Familiei</a>
+</div>
+<div class="page-hero">
+  <div class="page-hero-title" data-ro="Arborele satului" data-en="Village tree">Arborele satului</div>
+  <div class="page-hero-sub" data-ro="Toate familiile, toate legaturile — intr-o singura vedere" data-en="All families, all connections — in one view">Toate familiile, toate legaturile — intr-o singura vedere</div>
+  <div class="page-hero-orn">✩ &nbsp; ✩ &nbsp; ✩</div>
+</div>
+<a class="scroll-top" id="scrollTop" role="button" aria-label="Inapoi sus">⇧</a>
+<a class="scroll-bottom" id="scrollBottom" role="button" aria-label="Jos">⇩</a>
+<div class="main-wrap">
+  <main>
+    <div class="toolbar">
+      <div class="field"><label for="family-search" data-ro="Cauta familie" data-en="Search family">Cauta familie</label><input id="family-search" list="family-list" placeholder="Scrie numele familiei..." /><datalist id="family-list"></datalist></div>
+      <div class="field"><label for="relation-from" data-ro="Familia 1" data-en="Family 1">Familia 1</label><select id="relation-from"><option value="">Alege familia</option></select></div>
+      <div class="field"><label for="relation-to" data-ro="Familia 2" data-en="Family 2">Familia 2</label><select id="relation-to"><option value="">Alege familia</option></select></div>
+      <button id="find-relation" class="primary" data-ro="Vezi relatia" data-en="See relation">Vezi relatia</button>
+      <button id="fit-view" data-ro="Re-centrare" data-en="Re-center">Re-centrare</button>
+    </div>
+    <div class="info-strip">
+      <span class="pill"><span class="dot public"></span> <span data-ro="Familie publica" data-en="Public family">Familie publica</span></span>
+      <span class="pill"><span class="dot private"></span> <span data-ro="Familie privata" data-en="Private family">Familie privata</span></span>
+      <span class="pill"><span class="dot path"></span> <span data-ro="Traseu relatie" data-en="Relation path">Traseu relatie</span></span>
+      <span class="status" id="status">Se incarca datele...</span>
+    </div>
+    <div class="tree-shell" id="tree-container">
+      <svg id="village-tree" aria-label="Arborele satului"></svg>
+      <div id="tooltip" class="tooltip"></div>
+      <div id="family-modal" class="overlay-card hidden">
+        <h3 id="modal-title">Detalii familie</h3>
+        <p id="modal-text"></p>
+        <div class="overlay-actions">
+          <a id="modal-family-link" class="btn-link" href="genealogie.html">Deschide pagina familiei</a>
+          <a id="modal-genealogy-link" class="btn-link" href="genealogie.html">Vezi in Genealogie</a>
+        </div>
+      </div>
+    </div>
+  </main>
+  <aside>
+    <div class="panel tree-sidebox" style="margin-bottom:18px;">
+      <div class="sb-title" data-ro="Sincronizare" data-en="Sync">Sincronizare</div>
+      <p class="muted" data-ro="Din pagina Genealogie poti deschide direct o familie in arborele satului. Din aceasta pagina poti deschide pagina familiei sau lista generala de genealogie." data-en="From the Genealogy page you can open a family directly in the village tree. From here you can open the family page or the general genealogy list.">Din pagina Genealogie poti deschide direct o familie in arborele satului. Din aceasta pagina poti deschide pagina familiei sau lista generala de genealogie.</p>
+      <div style="margin-top:12px;display:flex;gap:8px;flex-wrap:wrap;"><a class="btn-link" href="genealogie.html" data-ro="Inapoi la Genealogie" data-en="Back to Genealogy">Inapoi la Genealogie</a><button id="clear-selection" class="btn-link" style="background:#111;color:var(--text);">Reset</button></div>
+    </div>
+    <div class="panel tree-sidebox">
+      <div class="sb-title" data-ro="Legenda" data-en="Legend">Legenda</div>
+      <div class="legend-item"><span class="dot public"></span><span data-ro="Familie publica — click pentru a deschide pagina" data-en="Public family — click to open page">Familie publica — click pentru a deschide pagina</span></div>
+      <div class="legend-item"><span class="dot private"></span><span data-ro="Familie privata — numele apare, dar detaliile raman ascunse" data-en="Private family — the name appears, but details stay hidden">Familie privata — numele apare, dar detaliile raman ascunse</span></div>
+      <div class="legend-item"><span class="leg-line"></span><span data-ro="Legatura documentata intre familii" data-en="Documented connection between families">Legatura documentata intre familii</span></div>
+      <div class="legend-item"><span class="leg-line path"></span><span data-ro="Traseu evidentiat intre doua familii" data-en="Highlighted path between two families">Traseu evidentiat intre doua familii</span></div>
+    </div>
+  </aside>
+</div>
+<footer><div style="max-width:960px;margin:0 auto;display:flex;flex-wrap:wrap;align-items:center;justify-content:center;gap:6px 16px;"><span><span class="g">Calnic</span> · Alba · Romania · <span id="yr"></span></span><span style="color:#2a2a2a;">·</span><span data-ro="Sat cu suflet, memorie vie" data-en="A village with soul, a living memory">Sat cu suflet, memorie vie</span></div></footer>
+<script src="https://cdn.jsdelivr.net/npm/d3@7"></script>
+<script src="js/data-adapter.js"></script>
+<script src="js/sat-tree.js"></script>
+</body>
+</html>
