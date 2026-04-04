@@ -1,7 +1,6 @@
 <!DOCTYPE html>
 <html lang="ro" style="background:#0a0a0a;">
 <head>
-
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <meta name="description" content="Arborii genealogici ai familiilor din Calnic, Alba, Transilvania.">
@@ -164,35 +163,9 @@ footer .g{color:var(--gold-d);font-style:normal;}
   .vb-stats{display:none;}
 }
 @media(min-width:741px){.hamburger{display:none!important;}.nav-mobile-menu{display:none!important;}}
-
-
-/* TREE PAGE */
-.toolbar{display:grid;grid-template-columns:1.15fr 1fr 1fr auto auto auto;gap:10px;padding:14px 18px;background:var(--s1);border:1px solid var(--b1);border-left:3px solid var(--gold-d);border-radius:2px;margin-bottom:24px;}
-.tool-field{display:flex;flex-direction:column;gap:6px;min-width:0;}
-.tool-label{font-size:12px;color:var(--muted);}
-.tool-input,.tool-select{width:100%;background:#1a1208;border:1px solid #3a2810;color:var(--text);font-family:'EB Garamond',serif;font-size:14px;padding:10px 12px;border-radius:3px;outline:none;}
-.tool-input:focus,.tool-select:focus{border-color:var(--gold-d);}
-.tool-btn{padding:10px 16px;background:#1a1208;border:1px solid var(--gold-d);color:var(--gold);font-family:'EB Garamond',serif;font-size:14px;border-radius:3px;cursor:pointer;transition:all .15s;align-self:end;white-space:nowrap;}
-.tool-btn:hover{background:var(--gold);color:#0a0a0a;}
-.tree-stage{position:relative;background:radial-gradient(circle at center, rgba(212,168,74,.05), transparent 40%), #050505;border:1px solid var(--b1);border-radius:4px;min-height:620px;overflow:hidden;}
-.tree-svg{width:100%;height:620px;display:block;}
-.legend-chip{display:inline-flex;align-items:center;gap:8px;padding:4px 10px;background:#141414;border:1px solid var(--b1);border-radius:999px;color:var(--text);font-size:13px;}
-.legend-row{display:flex;gap:10px;flex-wrap:wrap;margin-bottom:14px;}
-.tree-tooltip{position:absolute;pointer-events:none;background:#111;border:1px solid var(--gold-d);padding:8px 10px;border-radius:4px;color:var(--text);font-size:13px;display:none;z-index:4;max-width:260px;box-shadow:0 8px 24px rgba(0,0,0,.55);}
-.tree-overlay{position:absolute;right:18px;bottom:18px;max-width:360px;background:#111;border:1px solid var(--b1);border-left:3px solid var(--gold-d);padding:16px;border-radius:4px;display:none;z-index:3;}
-.tree-overlay.show{display:block;}
-.tree-overlay-title{font-family:'Playfair Display',serif;font-size:18px;color:var(--gold);margin-bottom:6px;}
-.tree-overlay-text{font-size:14px;color:var(--muted);line-height:1.65;}
-.tree-node-label{fill:var(--text);font-family:'Playfair Display',serif;font-size:13px;text-anchor:middle;pointer-events:none;}
-.tree-empty{padding:46px 24px;text-align:center;color:var(--muted);font-style:italic;}
-@media(max-width:960px){.toolbar{grid-template-columns:1fr 1fr;}}
-@media(max-width:640px){.toolbar{grid-template-columns:1fr;}.tool-btn{width:100%;}}
-
 </style>
-<script src="https://cdn.jsdelivr.net/npm/d3@7"></script>
 </head>
 <body>
-
 
 <div class="lang-bar">
   <span class="lang-label">LIMB&#258; / LANGUAGE</span>
@@ -272,89 +245,81 @@ footer .g{color:var(--gold-d);font-style:normal;}
 </div>
 
 <div class="page-hero">
-  <div class="page-hero-title" data-ro="Genealogie" data-en="Genealogy">Genealogie</div>
-  <div class="page-hero-sub" data-ro="Arborii familiilor din Calnic, Alba, Transilvania" data-en="Family trees from Calnic, Alba, Transylvania">Arborii familiilor din Calnic, Alba, Transilvania</div>
+  <div class="page-hero-title" data-ro="Arborele satului" data-en="Village Tree">Arborele satului</div>
+  <div class="page-hero-sub" data-ro="Familii publice si private, relatii intre familii, cautare si trasee de rudenie" data-en="Public and private families, family connections, search and kinship paths">Familii publice si private, relatii intre familii, cautare si trasee de rudenie</div>
   <div class="page-hero-orn">&#10041; &nbsp; &#10041; &nbsp; &#10041;</div>
 </div>
 
 <a class="scroll-top" id="scrollTop" role="button" aria-label="Inapoi sus">&#8679;</a>
 <a class="scroll-bottom" id="scrollBottom" role="button" aria-label="Jos">&#8681;</a>
 
-
 <div class="main-wrap">
   <main>
-    <div class="section-head"><div class="section-head-title" data-ro="Arborele satului" data-en="Village tree">Arborele satului</div></div>
-
-    <div class="stats-bar" id="treeStatsBar">
-      <div class="sb-stat"><div class="sb-n" id="ts-fam">0</div><div class="sb-l" data-ro="Familii" data-en="Families">Familii</div></div>
-      <div class="sb-stat"><div class="sb-n" id="ts-rel">0</div><div class="sb-l" data-ro="Legaturi" data-en="Connections">Legaturi</div></div>
-      <div class="sb-stat"><div class="sb-n" id="ts-pub">0</div><div class="sb-l" data-ro="Publice" data-en="Public">Publice</div></div>
-      <div class="sb-stat"><div class="sb-n" id="ts-pri">0</div><div class="sb-l" data-ro="Private" data-en="Private">Private</div></div>
-      <div class="sb-stat"><div class="sb-n" id="ts-iso">0</div><div class="sb-l" data-ro="Izolate" data-en="Isolated">Izolate</div></div>
+    <div class="search-bar" style="margin-bottom:18px;">
+      <input class="search-input" id="family-search" list="family-list" placeholder="Scrie numele familiei..." data-ro="Scrie numele familiei..." data-en="Type the family name...">
+      <span class="search-icon">&#128269;</span>
+      <datalist id="family-list"></datalist>
     </div>
 
-    <div class="toolbar">
-      <div class="tool-field">
-        <label class="tool-label" for="familySearch" data-ro="Cauta familie" data-en="Search family">Cauta familie</label>
-        <input class="tool-input" id="familySearch" list="familyNames" placeholder="Scrie numele familiei...">
-        <datalist id="familyNames"></datalist>
-      </div>
-      <div class="tool-field">
-        <label class="tool-label" for="pathFrom" data-ro="Familia 1" data-en="Family 1">Familia 1</label>
-        <select class="tool-select" id="pathFrom"><option value="" data-ro="Alege familia" data-en="Choose family">Alege familia</option></select>
-      </div>
-      <div class="tool-field">
-        <label class="tool-label" for="pathTo" data-ro="Familia 2" data-en="Family 2">Familia 2</label>
-        <select class="tool-select" id="pathTo"><option value="" data-ro="Alege familia" data-en="Choose family">Alege familia</option></select>
-      </div>
-      <button class="tool-btn" id="pathBtn" data-ro="Vezi relatia" data-en="See relation">Vezi relatia</button>
-      <button class="tool-btn" id="fitBtn" data-ro="Re-centrare" data-en="Re-center">Re-centrare</button>
-      <button class="tool-btn" id="resetBtn" data-ro="Reset" data-en="Reset">Reset</button>
+    <div class="section-head"><div class="section-head-title" data-ro="Arborele satului" data-en="Village Tree">Arborele satului</div></div>
+
+    <div class="stats-bar" id="treeStatsBar" style="display:flex;margin-bottom:18px;">
+      <div class="sb-item"><div class="sb-n" id="tree-fam">0</div><div class="sb-l" data-ro="Familii" data-en="Families">Familii</div></div>
+      <div class="sb-item"><div class="sb-n" id="tree-con">0</div><div class="sb-l" data-ro="Conexiuni" data-en="Connections">Conexiuni</div></div>
+      <div class="sb-item"><div class="sb-n" id="tree-pub">0</div><div class="sb-l" data-ro="Publice" data-en="Public">Publice</div></div>
+      <div class="sb-item"><div class="sb-n" id="tree-pri">0</div><div class="sb-l" data-ro="Private" data-en="Private">Private</div></div>
     </div>
 
-    <div class="legend-row">
-      <span class="legend-chip"><span class="leg-dot calnic"></span><span data-ro="Familie publica" data-en="Public family">Familie publica</span></span>
-      <span class="legend-chip"><span class="leg-dot deal" style="background:#7d8491"></span><span data-ro="Familie privata" data-en="Private family">Familie privata</span></span>
-      <span class="legend-chip"><span class="leg-line marriage"></span><span data-ro="Traseu relatie" data-en="Relation path">Traseu relatie</span></span>
-      <span style="margin-left:auto;color:var(--muted);font-size:14px;" id="treeStatus">Se incarca arborele...</span>
+    <div class="fc" style="padding:16px 18px;margin-bottom:18px;cursor:default;">
+      <div style="display:grid;grid-template-columns:1.2fr 1fr 1fr auto auto auto;gap:10px;align-items:end;">
+        <div>
+          <div class="fc-village" data-ro="Cauta familie" data-en="Search family">Cauta familie</div>
+          <input class="search-input" id="family-search-2" list="family-list" placeholder="Scrie numele familiei..." data-ro="Scrie numele familiei..." data-en="Type the family name...">
+        </div>
+        <div>
+          <div class="fc-village">Familia 1</div>
+          <select class="pf-select" id="relation-from"><option value="">Alege familia</option></select>
+        </div>
+        <div>
+          <div class="fc-village">Familia 2</div>
+          <select class="pf-select" id="relation-to"><option value="">Alege familia</option></select>
+        </div>
+        <button class="pf-btn" id="find-relation">Vezi relatia</button>
+        <button class="pf-btn" id="fit-view">Re-centrare</button>
+        <button class="pf-btn" id="clear-selection">Reset</button>
+      </div>
     </div>
 
-    <div class="tree-stage" id="treeStage">
-      <svg id="treeSvg" class="tree-svg" aria-label="Arborele satului"></svg>
-      <div class="tree-tooltip" id="treeTooltip"></div>
-      <div class="tree-overlay" id="treeOverlay">
-        <div class="tree-overlay-title" id="treeOverlayTitle">Detalii familie</div>
-        <div class="tree-overlay-text" id="treeOverlayText"></div>
+    <div class="fc" style="cursor:default;">
+      <div class="fc-body" style="padding:0;position:relative;">
+        <svg id="village-tree" aria-label="Arborele satului" style="width:100%;height:72vh;display:block;background:radial-gradient(circle at center, rgba(255,255,255,.03), transparent 45%), linear-gradient(180deg, rgba(255,255,255,.02), rgba(255,255,255,0));"></svg>
+        <div id="tooltip" style="position:absolute;pointer-events:none;background:#0f141c;border:1px solid rgba(255,255,255,.1);color:var(--text);border-radius:10px;padding:8px 10px;font-size:13px;display:none;box-shadow:0 12px 30px rgba(0,0,0,.35);z-index:4"></div>
+        <div id="family-modal" class="fc" style="display:none;position:absolute;right:18px;bottom:18px;width:min(360px, calc(100vw - 36px));background:rgba(16,22,31,.94);z-index:3;cursor:default;">
+          <div class="fc-body">
+            <div class="fc-name" id="modal-title">Detalii familie</div>
+            <div class="fc-desc" id="modal-text" style="margin-top:6px;"></div>
+          </div>
+        </div>
       </div>
     </div>
   </main>
 
-  <aside class="sidebar">
-    <div class="sidebar-box">
-      <div class="sb-title" data-ro="Legenda" data-en="Legend">Legenda</div>
-      <div class="legend-item"><div class="leg-dot calnic" style="background:var(--gold);"></div><span data-ro="Familie publica" data-en="Public family">Familie publica</span></div>
-      <div class="legend-item"><div class="leg-dot deal" style="background:#7d8491"></div><span data-ro="Familie privata" data-en="Private family">Familie privata</span></div>
-      <div class="legend-item"><div class="leg-line marriage"></div><span data-ro="Legatura dintre familii" data-en="Connection between families">Legatura dintre familii</span></div>
-      <div class="legend-item"><span style="font-size:9px;color:var(--gold);background:#1a1208;border:1px solid var(--gold-d);border-radius:3px;padding:1px 5px;">&#127795;</span><span data-ro="Click pe o familie publica pentru a deschide pagina ei" data-en="Click a public family to open its page">Click pe o familie publica pentru a deschide pagina ei</span></div>
-      <div class="legend-item"><span style="font-size:9px;color:#b8b8b8;background:#181818;border:1px solid #444;border-radius:3px;padding:1px 5px;">&#128274;</span><span data-ro="Familiile private apar in arbore, dar nu se deschid" data-en="Private families appear in the tree but do not open">Familiile private apar in arbore, dar nu se deschid</span></div>
+  <aside>
+    <div class="aside-box">
+      <div class="aside-title" data-ro="Legenda" data-en="Legend">Legenda</div>
+      <div class="legend-item"><span class="legend-dot calnic"></span><span data-ro="Familie publica" data-en="Public family">Familie publica</span></div>
+      <div class="legend-item"><span class="legend-dot deal"></span><span data-ro="Familie privata" data-en="Private family">Familie privata</span></div>
+      <div class="legend-item"><span class="legend-line blood"></span><span data-ro="Traseu evidențiat" data-en="Highlighted path">Traseu evidențiat</span></div>
+      <div class="legend-item"><span class="legend-badge sat" style="display:inline-flex;">🌿 sat</span><span data-ro="Click pe public = deschide familia" data-en="Click public = open family">Click pe public = deschide familia</span></div>
+      <div class="legend-item"><span class="legend-badge sat" style="display:inline-flex;opacity:.8;">🔒</span><span data-ro="Click pe privat = mesaj" data-en="Click private = message">Click pe privat = mesaj</span></div>
     </div>
 
-    <div class="sidebar-box">
-      <div class="sb-title" data-ro="Gaseste o legatura" data-en="Find a connection">Gaseste o legatura</div>
-      <div style="font-size:12px;color:var(--muted);line-height:1.7;" data-ro="Alege doua familii si arborele va evidentia traseul dintre ele, daca exista o relatie documentata." data-en="Choose two families and the tree will highlight the path between them, if a documented relationship exists.">Alege doua familii si arborele va evidentia traseul dintre ele, daca exista o relatie documentata.</div>
-      <div class="pf-wrap" id="pathResultWrap" style="margin-top:12px;">
-        <div class="pf-result" id="pathResult"></div>
-      </div>
-    </div>
-
-    <div class="sidebar-box">
-      <div class="sb-title" data-ro="Navigare" data-en="Navigation">Navigare</div>
-      <a href="genealogie.html" style="display:block;padding:8px 0;color:var(--gold);" data-ro="&larr; Inapoi la familii" data-en="&larr; Back to families">&larr; Inapoi la familii</a>
-      <a href="familiile.html" style="display:block;padding:8px 0;color:var(--gold);" data-ro="Vezi toate familiile" data-en="See all families">Vezi toate familiile</a>
+    <div class="aside-box">
+      <div class="aside-title" data-ro="Rezultat" data-en="Result">Rezultat</div>
+      <div class="aside-text" id="status" data-ro="Se incarca datele..." data-en="Loading data...">Se incarca datele...</div>
     </div>
   </aside>
 </div>
-
 <footer>
   <div style="max-width:960px;margin:0 auto;display:flex;flex-wrap:wrap;align-items:center;justify-content:center;gap:6px 16px;">
     <span><span class="g">Calnic</span> &nbsp;&#183;&nbsp; Alba &nbsp;&#183;&nbsp; Romania &nbsp;&#183;&nbsp; <span id="yr"></span></span>
@@ -371,39 +336,178 @@ footer .g{color:var(--gold-d);font-style:normal;}
 <script src="js/supabase.js"></script>
 <script src="js/utils.js"></script>
 <script src="js/admin-nav.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/d3@7"></script>
 <script src="js/sat-tree.js"></script>
 <script>
 'use strict';
+function escH(s){return String(s==null?'':s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;').replace(/'/g,'&#39;');}
+function lang(){return localStorage.getItem('calnic-lang')||'ro';}
+function t(ro,en){return lang()==='en'?en:ro;}
+
+var families=[];
 document.getElementById('yr').textContent=new Date().getFullYear();
-(function(){
-  function lang(){return localStorage.getItem('calnic-lang')||'ro';}
-  function applyLang(l){
-    var roBtn=document.getElementById('btn-ro'), enBtn=document.getElementById('btn-en');
-    if(roBtn) roBtn.classList.toggle('active', l==='ro');
-    if(enBtn) enBtn.classList.toggle('active', l==='en');
-    document.querySelectorAll('[data-ro]').forEach(function(el){
-      var v=el.getAttribute('data-'+l); if(v==null) return;
-      var tag=el.tagName;
-      if(tag==='INPUT'||tag==='TEXTAREA') el.placeholder=v;
-      else if(tag==='OPTION') el.textContent=v;
-      else el.textContent=v;
-    });
-  }
-  function initLang(){
-    var ro=document.getElementById('btn-ro'), en=document.getElementById('btn-en');
-    if(ro) ro.addEventListener('click', function(){localStorage.setItem('calnic-lang','ro'); applyLang('ro');});
-    if(en) en.addEventListener('click', function(){localStorage.setItem('calnic-lang','en'); applyLang('en');});
-  }
-  function initScrollBtns(){
-    var st=document.getElementById('scrollTop'), sb=document.getElementById('scrollBottom');
-    function upd(){var sc=window.scrollY>300,at=(window.innerHeight+window.scrollY)>=document.body.scrollHeight-100;if(st){st.style.opacity=sc?'1':'0';st.style.pointerEvents=sc?'auto':'none';}if(sb){sb.style.opacity=at?'0':'1';sb.style.pointerEvents=at?'none':'auto';}}
-    window.addEventListener('scroll',upd);window.addEventListener('load',upd);setTimeout(upd,100);
-    if(st)st.addEventListener('click',function(){window.scrollTo({top:0,behavior:'smooth'});});
-    if(sb)sb.addEventListener('click',function(){window.scrollTo({top:document.body.scrollHeight,behavior:'smooth'});});
-  }
-  function initHamburger(){var h=document.getElementById('hamburgerBtn'),m=document.getElementById('navMobileMenu');if(!h||!m)return;h.addEventListener('click',function(){var o=m.classList.toggle('open');h.textContent=o?'✕':'☰';});}
-  applyLang(lang()); initLang(); initScrollBtns(); initHamburger();
-})();
+applyLang(lang());initLang();initScrollBtns();initHamburger();
+
+if(window.supabase&&window.supabase.from){loadFamilies();}else{document.addEventListener('supabase:ready',loadFamilies);}
+
+function loadFamilies(){
+  window.supabase.from('families').select('id,name,village,since,desc_ro,desc_en,members_count,generations_count,photos_count,show_members,show_generations,show_photos,show_since,connected_to_village').order('name')
+    .then(function(r){
+      if(r.error||!r.data){showError(r.error?r.error.message:t('Nu s-au putut incarca familiile.','Could not load families.'));return;}
+      families=r.data;
+      renderFamilies(families);
+      updateStats(families);
+      populatePathFinder(families);
+      document.getElementById('statsBar').style.display='flex';
+      if(families.length){var b=document.getElementById('villageBanner');b.style.display='flex';}
+    }).catch(function(err){showError(err.message);});
+}
+
+function renderFamilies(fams){
+  var list=document.getElementById('familiesList');
+  if(!fams.length){list.innerHTML='<div style="padding:32px 0;text-align:center;color:var(--muted);font-style:italic;font-size:15px;">'+escH(t('Nicio familie inregistrata inca.','No families registered yet.'))+'</div>';return;}
+  list.innerHTML='';
+  fams.forEach(function(f){list.appendChild(buildCard(f));});
+}
+
+function buildCard(f){
+  if(!f||!f.id)return document.createDocumentFragment();
+  var div=document.createElement('div');
+  var isCalnic=(f.village||'').toLowerCase().includes('deal')?false:true;
+  div.className='fc'+(f.connected_to_village?' connected':'');
+  var desc=lang()==='en'?(f.desc_en||f.desc_ro||''):( f.desc_ro||f.desc_en||'');
+  div.innerHTML='<div class="fc-top '+( isCalnic?'calnic':'deal')+'"></div>'
+    +'<div class="fc-body">'
+    +'<div class="fc-header">'
+    +'<div><div class="fc-name">'+escH(f.name)+'</div><div class="fc-village">'+escH(f.village||'Calnic')+(f.since&&f.show_since!==false?' &middot; din '+f.since:'')+'</div></div>'
+    +'<div class="fc-badge '+(isCalnic?'calnic':'deal')+'">'+(isCalnic?'&#127807; Calnic':'&#128207; Deal')+'</div>'
+    +'</div>'
+    +(desc?'<div class="fc-desc">'+escH(desc.substring(0,140))+(desc.length>140?'..':'')+'</div>':'')
+    +'<div class="fc-stats">'
+    +(f.show_members!==false&&f.members_count?'<div class="fcs"><div class="fcs-n">'+f.members_count+'</div><div class="fcs-l" data-ro="Membri" data-en="Members">'+t('Membri','Members')+'</div></div>':'')
+    +(f.show_generations!==false&&f.generations_count?'<div class="fcs"><div class="fcs-n">'+f.generations_count+'</div><div class="fcs-l" data-ro="Generatii" data-en="Generations">'+t('Generatii','Generations')+'</div></div>':'')
+    +(f.show_photos!==false&&f.photos_count?'<div class="fcs"><div class="fcs-n">'+f.photos_count+'</div><div class="fcs-l" data-ro="Fotografii" data-en="Photos">'+t('Fotografii','Photos')+'</div></div>':'')
+    +'</div>'
+    +'<a class="fc-link" href="genealogie-familie.html?family='+encodeURIComponent(f.id)+'">&#127807; '+escH(t('Deschide arborele familiei','Open family tree'))+'</a>'
+    +(f.connected_to_village?'<span style="margin-left:8px;font-size:9px;color:var(--green);background:var(--green-bg);border:1px solid var(--green-br);border-radius:3px;padding:2px 6px;">'+t('Conectat la arborele satului','Connected to village tree')+'</span>':'')
+    +'</div>';
+  div.addEventListener('click',function(e){if(!e.target.closest('.fc-link'))window.location.href='genealogie-familie.html?family='+encodeURIComponent(f.id);});
+  return div;
+}
+
+function updateStats(fams){
+  var totalMem=0,totalGen=0,connected=0,withPhotos=0;
+  fams.forEach(function(f){totalMem+=(f.members_count||0);totalGen=Math.max(totalGen,f.generations_count||0);if(f.connected_to_village)connected++;if(f.photos_count)withPhotos++;});
+  document.getElementById('sb-fam').textContent=fams.length;
+  document.getElementById('sb-mem').textContent=totalMem;
+  document.getElementById('sb-gen').textContent=totalGen||'—';
+  document.getElementById('sb-con').textContent=connected;
+  document.getElementById('sb-pho').textContent=withPhotos;
+  document.getElementById('vb-fam').textContent=fams.length;
+  document.getElementById('vb-mem').textContent=totalMem||'—';
+  document.getElementById('vb-gen').textContent=totalGen||'—';
+}
+
+function populatePathFinder(fams){
+  var pf=document.getElementById('pfFrom'),pt=document.getElementById('pfTo');
+  fams.forEach(function(f){
+    var o1=document.createElement('option');o1.value=f.id;o1.textContent=f.name+(f.village?' ('+f.village+')':'');pf.appendChild(o1);
+    var o2=document.createElement('option');o2.value=f.id;o2.textContent=f.name+(f.village?' ('+f.village+')':'');pt.appendChild(o2);
+  });
+}
+
+document.getElementById('pfBtn').addEventListener('click',function(){
+  var from=document.getElementById('pfFrom').value,to=document.getElementById('pfTo').value;
+  var result=document.getElementById('pfResult');
+  if(!from||!to){result.classList.add('on');result.textContent=t('Selecteaza doua familii diferite.','Select two different families.');return;}
+  if(from===to){result.classList.add('on');result.textContent=t('Selecteaza doua familii diferite.','Select two different families.');return;}
+  result.classList.add('on');result.textContent=t('Se cauta legatura...','Finding connection...');
+  if(!window.supabase){result.textContent=t('Serviciul nu este disponibil momentan.','Service not available right now.');return;}
+  window.supabase.from('family_links').select('*').or('family_a_id.eq.'+from+',family_b_id.eq.'+from)
+    .then(function(r){
+      if(r.error||!r.data){result.textContent=t('Nu s-au putut verifica legaturile.','Could not check connections.');return;}
+      var found=r.data.find(function(l){return(l.family_a_id===from&&l.family_b_id===to)||(l.family_a_id===to&&l.family_b_id===from);});
+      var fA=families.find(function(f){return f.id===from;});var fB=families.find(function(f){return f.id===to;});
+      if(found){
+        var types={blood:t('sange','blood'),marriage:t('casatorie','marriage'),alliance:t('alianta','alliance'),distant:t('indepartata','distant')};
+        result.innerHTML=t('Exista o legatura directa de tip &laquo;'+escH(types[found.link_type]||found.link_type)+'&raquo; intre familiile '+escH(fA?fA.name:'A')+' si '+escH(fB?fB.name:'B')+'.',
+          'There is a direct &laquo;'+escH(types[found.link_type]||found.link_type)+'&raquo; connection between '+escH(fA?fA.name:'A')+' and '+escH(fB?fB.name:'B')+'.');
+      } else {
+        result.textContent=t('Nu exista o legatura directa inregistrata intre aceste familii. Aceasta nu inseamna ca nu exista o legatura — doar ca nu a fost documentata inca.',
+          'No direct connection is recorded between these families. This does not mean there is none — it may not have been documented yet.');
+      }
+    }).catch(function(err){result.textContent=t('Eroare: ','Error: ')+err.message;});
+});
+
+// Search
+var searchDebounce=null;
+document.getElementById('searchInput').addEventListener('input',function(){
+  clearTimeout(searchDebounce);var q=this.value.trim();
+  if(!q){document.getElementById('searchResults').classList.remove('open');document.getElementById('searchResults').innerHTML='';return;}
+  searchDebounce=setTimeout(function(){doSearch(q);},280);
+});
+document.addEventListener('click',function(e){if(!e.target.closest('.search-bar'))document.getElementById('searchResults').classList.remove('open');});
+
+function doSearch(q){
+  var res=document.getElementById('searchResults');
+  // First search family names
+  var fFams=families.filter(function(f){return f.name&&f.name.toLowerCase().includes(q.toLowerCase());});
+  var results=fFams.map(function(f){return {type:'family',name:f.name,meta:f.village||'Calnic',id:f.id};});
+  // Also search members via Supabase
+  if(!window.supabase){renderSearchResults(results,q,res);return;}
+  var p=window.supabase.from('members').select('id,name,birth_year,death_year,family_id,location').ilike('name','%'+q+'%').limit(8);
+  p.then(function(r){
+    if(!r.error&&r.data){
+      r.data.forEach(function(m){
+        var fam=families.find(function(f){return f.id===m.family_id;});
+        var meta=(fam?fam.name+' &middot; ':'')+(m.birth_year||'?')+' — '+(m.death_year||t('viu','living'));
+        results.push({type:'member',name:m.name,meta:meta,id:m.family_id,memberId:m.id});
+      });
+    }
+    renderSearchResults(results,q,res);
+  }).catch(function(){renderSearchResults(results,q,res);});
+}
+
+function renderSearchResults(results,q,res){
+  if(!results.length){res.innerHTML='<div class="sr-item" style="pointer-events:none;">'+(lang()==='en'?'No results for &laquo;':'Niciun rezultat pentru &laquo;')+escH(q)+'&raquo;.</div>';res.classList.add('open');return;}
+  res.innerHTML='';
+  results.forEach(function(r){
+    var item=document.createElement('div');item.className='sr-item';
+    item.innerHTML='<div class="sr-name">'+(r.type==='member'?'&#128100; ':'&#127807; ')+escH(r.name)+'</div><div class="sr-meta">'+escH(r.meta)+'</div>';
+    item.addEventListener('click',function(){window.location.href='genealogie-familie.html?family='+encodeURIComponent(r.id);});
+    res.appendChild(item);
+  });
+  res.classList.add('open');
+}
+
+function showError(msg){
+  document.getElementById('familiesList').innerHTML='<div class="calnic-error"><div class="calnic-error-icon">&#9888;&#65039;</div><div class="calnic-error-title">'+escH(t('Nu s-au putut incarca familiile','Could not load families'))+'</div><div class="calnic-error-sub">'+escH(msg)+'</div><button class="calnic-error-btn" onclick="location.reload()">'+escH(t('Incearca din nou','Try again'))+'</button></div>';
+}
+
+function applyLang(l){
+  document.getElementById('btn-ro').classList.toggle('active',l==='ro');
+  document.getElementById('btn-en').classList.toggle('active',l==='en');
+  document.querySelectorAll('[data-ro]').forEach(function(el){
+    var v=el.getAttribute('data-'+l);
+    if(v===null)return;
+    var tag=el.tagName;
+    if(tag==='INPUT'||tag==='TEXTAREA'){el.placeholder=v;}
+    else if(tag==='SELECT'){}
+    else{el.textContent=v;}
+  });
+}
+function initLang(){
+  document.getElementById('btn-ro').addEventListener('click',function(){localStorage.setItem('calnic-lang','ro');applyLang('ro');renderFamilies(families);});
+  document.getElementById('btn-en').addEventListener('click',function(){localStorage.setItem('calnic-lang','en');applyLang('en');renderFamilies(families);});
+}
+function initScrollBtns(){
+  var st=document.getElementById('scrollTop'),sb=document.getElementById('scrollBottom');
+  function upd(){var sc=window.scrollY>300,at=(window.innerHeight+window.scrollY)>=document.body.scrollHeight-100;if(st){st.style.opacity=sc?'1':'0';st.style.pointerEvents=sc?'auto':'none';}if(sb){sb.style.opacity=at?'0':'1';sb.style.pointerEvents=at?'none':'auto';}}
+  window.addEventListener('scroll',upd);window.addEventListener('load',upd);setTimeout(upd,100);
+  if(st)st.addEventListener('click',function(){window.scrollTo({top:0,behavior:'smooth'});});
+  if(sb)sb.addEventListener('click',function(){window.scrollTo({top:document.body.scrollHeight,behavior:'smooth'});});
+}
+function initHamburger(){var h=document.getElementById('hamburgerBtn'),m=document.getElementById('navMobileMenu');if(!h||!m)return;h.addEventListener('click',function(){var o=m.classList.toggle('open');h.textContent=o?'\u2715':'\u2630';});}
 </script>
 </body>
 </html>

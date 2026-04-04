@@ -360,11 +360,40 @@ applyLang(lang());initLang();initScrollBtns();initHamburger();
 
 if(window.supabase&&window.supabase.from){loadFamilies();}else{document.addEventListener('supabase:ready',loadFamilies);}
 
+function normalizeFamilyRow(r, connectedIds){
+  var name = r.display_name || r.name || '';
+  var village = r.village_name || r.village || 'Calnic';
+  return {
+    id: r.id,
+    name: name,
+    village: village,
+    since: r.since || '',
+    desc_ro: r.desc_ro || r.notes || '',
+    desc_en: r.desc_en || r.notes || '',
+    members_count: Number(r.members_count || 0),
+    generations_count: Number(r.generations_count || 0),
+    photos_count: Number(r.photos_count || 0),
+    show_members: r.show_members !== false,
+    show_generations: r.show_generations !== false,
+    show_photos: r.show_photos !== false,
+    show_since: r.show_since !== false,
+    connected_to_village: connectedIds ? connectedIds.has(r.id) : !!r.connected_to_village,
+    visibility: r.visibility || (r.is_public ? 'public' : 'private')
+  };
+}
+
 function loadFamilies(){
-  window.supabase.from('families').select('id,name,village,since,desc_ro,desc_en,members_count,generations_count,photos_count,show_members,show_generations,show_photos,show_since,connected_to_village').order('name')
-    .then(function(r){
-      if(r.error||!r.data){showError(r.error?r.error.message:t('Nu s-au putut incarca familiile.','Could not load families.'));return;}
-      families=r.data;
+  Promise.all([
+    window.supabase.from('families').select('id,display_name,village_name,notes,visibility').order('display_name'),
+    window.supabase.from('v_family_connections').select('source_family_id,target_family_id')
+  ]).then(function(res){
+      var famRes = res[0], connRes = res[1];
+      if(famRes.error||!famRes.data){showError(famRes.error?famRes.error.message:t('Nu s-au putut incarca familiile.','Could not load families.'));return;}
+      var connectedIds = new Set();
+      if(connRes && !connRes.error && connRes.data){
+        connRes.data.forEach(function(c){ if(c.source_family_id) connectedIds.add(c.source_family_id); if(c.target_family_id) connectedIds.add(c.target_family_id); });
+      }
+      families=(famRes.data||[]).map(function(row){ return normalizeFamilyRow(row, connectedIds); });
       renderFamilies(families);
       updateStats(families);
       populatePathFinder(families);
@@ -433,15 +462,16 @@ document.getElementById('pfBtn').addEventListener('click',function(){
   if(from===to){result.classList.add('on');result.textContent=t('Selecteaza doua familii diferite.','Select two different families.');return;}
   result.classList.add('on');result.textContent=t('Se cauta legatura...','Finding connection...');
   if(!window.supabase){result.textContent=t('Serviciul nu este disponibil momentan.','Service not available right now.');return;}
-  window.supabase.from('family_links').select('*').or('family_a_id.eq.'+from+',family_b_id.eq.'+from)
+  window.supabase.from('v_family_connections').select('source_family_id,target_family_id,relationship_type')
+    .or('source_family_id.eq.'+from+',target_family_id.eq.'+from)
     .then(function(r){
       if(r.error||!r.data){result.textContent=t('Nu s-au putut verifica legaturile.','Could not check connections.');return;}
-      var found=r.data.find(function(l){return(l.family_a_id===from&&l.family_b_id===to)||(l.family_a_id===to&&l.family_b_id===from);});
+      var found=r.data.find(function(l){return(l.source_family_id===from&&l.target_family_id===to)||(l.source_family_id===to&&l.target_family_id===from);});
       var fA=families.find(function(f){return f.id===from;});var fB=families.find(function(f){return f.id===to;});
       if(found){
-        var types={blood:t('sange','blood'),marriage:t('casatorie','marriage'),alliance:t('alianta','alliance'),distant:t('indepartata','distant')};
-        result.innerHTML=t('Exista o legatura directa de tip &laquo;'+escH(types[found.link_type]||found.link_type)+'&raquo; intre familiile '+escH(fA?fA.name:'A')+' si '+escH(fB?fB.name:'B')+'.',
-          'There is a direct &laquo;'+escH(types[found.link_type]||found.link_type)+'&raquo; connection between '+escH(fA?fA.name:'A')+' and '+escH(fB?fB.name:'B')+'.');
+        var types={blood:t('sange','blood'),marriage:t('casatorie','marriage'),alliance:t('alianta','alliance'),distant:t('indepartata','distant'),parent_child:t('rudenie de sange','blood relation'),kinship_other:t('rudenie','kinship')};
+        result.innerHTML=t('Exista o legatura directa de tip &laquo;'+escH(types[found.relationship_type]||found.relationship_type)+'&raquo; intre familiile '+escH(fA?fA.name:'A')+' si '+escH(fB?fB.name:'B')+'.',
+          'There is a direct &laquo;'+escH(types[found.relationship_type]||found.relationship_type)+'&raquo; connection between '+escH(fA?fA.name:'A')+' and '+escH(fB?fB.name:'B')+'.');
       } else {
         result.textContent=t('Nu exista o legatura directa inregistrata intre aceste familii. Aceasta nu inseamna ca nu exista o legatura — doar ca nu a fost documentata inca.',
           'No direct connection is recorded between these families. This does not mean there is none — it may not have been documented yet.');
