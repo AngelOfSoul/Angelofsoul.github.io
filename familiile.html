@@ -559,9 +559,10 @@ function loadFamiliiFromSupabase() {
 
   function mapFamilyRows(rows) {
     return (rows || []).map(function(r, idx) {
+      var safeName = (r && r.name && String(r.name).trim()) ? String(r.name).trim() : (currentLang === 'en' ? 'Family' : 'Familie');
       return {
         id:              r.id,
-        name:            r.name,
+        name:            safeName,
         village:         r.village || 'Calnic',
         since:           r.since,
         addedOrder:      idx + 1,
@@ -598,11 +599,8 @@ function loadFamiliiFromSupabase() {
   }
 
   function fetchFamiliesWithFallback() {
-    var variants = [
-      'id, name, village, since, members_count, generations_count, photos_count, show_members, show_generations, show_photos, show_since, has_public_photos, has_private_photos, desc_ro, desc_en',
-      'id, name, village, since, members_count, generations_count, photos_count, desc_ro, desc_en',
-      'id, name, village, since, desc_ro, desc_en'
-    ];
+    // Start with a schema-safe select to avoid 400 noise on optional columns.
+    var variants = ['id, name, village, since'];
     function tryVariant(idx) {
       return window.supabase
         .from('families')

@@ -1969,7 +1969,9 @@ function doExport(btn){
       root.querySelectorAll('img').forEach(function(img){img.remove();});
     }
   }).then(function(c){
-    var l=document.createElement('a');l.download=(S.family?S.family.name.replace(/[^a-zA-Z0-9]/g,'-'):'arbore')+'.png';l.href=c.toDataURL('image/png');l.click();
+    var rawName=(S.family&&(S.family.name||S.family.display_name))?String(S.family.name||S.family.display_name):'arbore';
+    var safeName=rawName.replace(/[^a-zA-Z0-9]/g,'-').replace(/-+/g,'-').replace(/^-|-$/g,'')||'arbore';
+    var l=document.createElement('a');l.download=safeName+'.png';l.href=c.toDataURL('image/png');l.click();
     btn.disabled=false;btn.innerHTML='&#8659; '+t('Salveaza ca imagine','Save as image');showExportToast(t('Export salvat!','Export saved!'));
   }).catch(function(){btn.disabled=false;btn.innerHTML='&#8659; '+t('Salveaza ca imagine','Save as image');alert(t('Export esuat. Incercati din nou.','Export failed. Please try again.'));});
 }
