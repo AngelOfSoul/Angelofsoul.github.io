@@ -14,7 +14,6 @@ function _escH(s) {
 var stickyStyle = document.createElement('style');
 stickyStyle.textContent = [
   'nav { position:sticky; top:0; z-index:900; }',
-  '.site-header { position:sticky; top:0; z-index:901; }',
   '.prf-btn-out { display:flex;align-items:center;gap:8px;margin:6px 10px;padding:7px 18px;background:#b08030;border:1px solid #d4a84a;border-radius:2px;font-family:"Playfair Display",serif;font-size:13px;font-weight:700;color:#050505;letter-spacing:1px;cursor:pointer;transition:all 0.2s;white-space:nowrap;text-decoration:none; }',
   '.prf-btn-out:hover { background:#d4a84a;color:#050505;text-decoration:none; }',
   '.prf-btn-in { display:flex;align-items:center;gap:8px;margin:5px 10px;padding:4px 12px 4px 4px;background:#161616;border:1px solid #b08030;border-radius:2px;cursor:pointer;transition:all 0.2s;position:relative;white-space:nowrap;text-decoration:none; }',

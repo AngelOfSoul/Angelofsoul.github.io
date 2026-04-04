@@ -352,11 +352,17 @@
     const box = boundsOfNodes(nodeIds);
     const width = Math.max(120, box.maxX - box.minX);
     const height = Math.max(120, box.maxY - box.minY);
-    const pad = 72;
-    const scale = clamp(Math.min((state.viewport.width - pad * 2) / width, (state.viewport.height - pad * 2) / height), 0.26, 2.3);
+    const pad = Math.max(92, Math.min(state.viewport.width, state.viewport.height) * 0.08);
+    const scale = clamp(Math.min((state.viewport.width - pad * 2) / width, (state.viewport.height - pad * 2) / height), 0.22, 1.18);
     const x = state.viewport.width / 2 - ((box.minX + box.maxX) / 2) * scale;
     const y = state.viewport.height / 2 - ((box.minY + box.maxY) / 2) * scale;
     setTransform({ x, y, scale }, animate);
+  }
+
+  function settleLayout(iterations) {
+    for (let i = 0; i < iterations; i += 1) {
+      runSimulationStep();
+    }
   }
 
   function centerOnNode(nodeId, animate) {
@@ -783,6 +789,7 @@
       state.viewport.width = wrap.clientWidth;
       state.viewport.height = wrap.clientHeight;
       $('villageTreeSvg').setAttribute('viewBox', '0 0 ' + state.viewport.width + ' ' + state.viewport.height);
+      settleLayout(180);
       fitToNodes(null, false);
       $('loadingState').style.display = 'none';
       $('treeShell').style.display = 'grid';

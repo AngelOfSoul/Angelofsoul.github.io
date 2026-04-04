@@ -135,14 +135,33 @@ Assumes:
         // Try Supabase first
         if (window.supabase) {
             try {
-                const [familyRes, membersRes, relationsRes] = await Promise.all([
+                const [familyRes, membersRes] = await Promise.all([
                     window.supabase.from('families').select('*').eq('id', state.familyId).single(),
-                    window.supabase.from('members').select('*').eq('family_id', state.familyId),
-                    window.supabase.from('member_relations').select('*').or(`from_member_id.eq.${state.familyId},to_member_id.eq.${state.familyId}`)
+                    window.supabase.from('members').select('*').eq('family_id', state.familyId)
                 ]);
 
                 if (familyRes.error) throw familyRes.error;
                 if (membersRes.error) throw membersRes.error;
+
+                const memberIds = (membersRes.data || []).map(member => member.id).filter(Boolean);
+                let relationsRes = { data: [], error: null };
+
+                if (memberIds.length) {
+                    const idsCsv = memberIds.join(',');
+                    relationsRes = await window.supabase
+                        .from('member_relations')
+                        .select('*')
+                        .or(`from_member_id.in.(${idsCsv}),to_member_id.in.(${idsCsv})`);
+
+                    // Fallback for schemas that expose relations directly by family_id.
+                    if (relationsRes.error) {
+                        relationsRes = await window.supabase
+                            .from('member_relations')
+                            .select('*')
+                            .eq('family_id', state.familyId);
+                    }
+                }
+
                 if (relationsRes.error) throw relationsRes.error;
 
                 state.family = familyRes.data;

@@ -20,7 +20,17 @@
     localStorage.setItem('calnic-lang', lang);
     document.querySelectorAll('[data-ro]').forEach(function (el) {
       var val = el.getAttribute('data-' + lang);
-      if (val != null) el.innerHTML = val;
+      if (val == null) return;
+      if (el.matches('input, textarea')) {
+        el.placeholder = val;
+        if (el.hasAttribute('title')) el.title = val;
+        return;
+      }
+      if (el.matches('option')) {
+        el.textContent = val;
+        return;
+      }
+      el.innerHTML = val;
     });
     // Actualizeaza butoanele de limba
     var btnRo = document.getElementById('btn-ro');

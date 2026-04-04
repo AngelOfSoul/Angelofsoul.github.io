@@ -1014,3 +1014,47 @@ p  { margin-bottom: 1rem; }
   padding: 20px;
   border: 1px solid #c8a870;
 }
+
+/* Shared header refinement for pages that duplicate the same hero/header block */
+.site-header {
+  overflow: visible !important;
+  padding-top: 14px !important;
+  padding-bottom: 16px !important;
+}
+
+.site-header .header-motto {
+  gap: 10px !important;
+  width: min(340px, 100%);
+  overflow: visible !important;
+}
+
+.site-header .header-sub {
+  font-size: 16px !important;
+  letter-spacing: 3.5px !important;
+  text-align: center;
+  white-space: nowrap;
+}
+
+.site-header .header-motto svg {
+  display: block;
+  width: min(320px, 100%) !important;
+  max-width: 320px;
+  height: auto !important;
+  overflow: visible !important;
+  margin: 0 auto;
+}
+
+@media(max-width:740px) {
+  .site-header .header-motto {
+    width: min(300px, 100%);
+  }
+
+  .site-header .header-sub {
+    font-size: 13px !important;
+    letter-spacing: 2px !important;
+  }
+
+  .site-header .header-motto svg {
+    width: min(280px, 100%) !important;
+  }
+}
