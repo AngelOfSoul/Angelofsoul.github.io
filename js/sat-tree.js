@@ -1,5 +1,3 @@
-import supabase from "./supabase-client.js";
-
 const state = {
   nodes: [],
   links: [],
@@ -39,6 +37,11 @@ function setStatus(message, kind = "normal") {
   els.status.className = kind === "ok" ? "message-ok" : kind === "warn" ? "message-warn" : "";
 }
 
+function getSupabase() {
+  if (!window.supabase) throw new Error("Supabase nu este încă încărcat.");
+  return window.supabase;
+}
+
 function normalizeName(value) {
   return (value || "")
     .toLowerCase()
@@ -52,10 +55,11 @@ function linkKey(a, b) {
 }
 
 async function loadVillageGraph() {
+  const supabase = getSupabase();
   const [familiesRes, linksRes, pagesRes] = await Promise.all([
     supabase
       .from("families")
-      .select("id, slug, display_name, visibility")
+      .select("id, display_name, slug, visibility, connected_to_village")
       .order("display_name", { ascending: true }),
     supabase
       .from("v_family_connections")
@@ -66,16 +70,17 @@ async function loadVillageGraph() {
   ]);
 
   if (familiesRes.error) throw familiesRes.error;
-  if (linksRes.error) throw linksRes.error;
-  if (pagesRes.error) throw pagesRes.error;
+  if (linksRes.error && linksRes.error.code !== '42P01') throw linksRes.error;
+  if (pagesRes.error && pagesRes.error.code !== '42P01') throw pagesRes.error;
 
   const pageMap = new Map((pagesRes.data || []).map(row => [row.family_id, row]));
 
   const nodes = (familiesRes.data || []).map(f => ({
     id: f.id,
     slug: f.slug,
-    name: f.display_name,
-    visibility: f.visibility,
+    name: f.display_name || f.name,
+    visibility: f.visibility || 'public',
+    connectedToVillage: !!f.connected_to_village,
     pageSlug: pageMap.get(f.id)?.page_slug || null,
     pagePublic: pageMap.get(f.id)?.is_public || false,
   }));
@@ -146,7 +151,7 @@ function familyOpenUrl(node) {
   if (node.pagePublic && node.pageSlug) {
     return `${node.pageSlug}.html`;
   }
-  return `genealogie-familie.html?family=${encodeURIComponent(node.slug || node.name)}`;
+  return `genealogie-familie.html?family=${encodeURIComponent(node.id)}`;
 }
 
 function handleNodeClick(event, node) {
@@ -442,7 +447,7 @@ function drawGraph() {
   updateStyles();
 }
 
-async function init() {
+async function boot() {
   try {
     setStatus("Se încarcă familiile și relațiile...");
     initSvg();
@@ -478,4 +483,8 @@ async function init() {
   }
 }
 
-init();
+if (window.supabase) {
+  boot();
+} else {
+  document.addEventListener('supabase:ready', boot, { once: true });
+}
