@@ -364,33 +364,56 @@ applyLang(lang());initLang();
 
 if(window.supabase&&window.supabase.from){bootstrapGenealogy();}else{document.addEventListener('supabase:ready',bootstrapGenealogy);}
 
+async function safeLoadFamilyConnections(){
+  var tries=[
+    function(){ return window.supabase.from('v_family_connections').select('*'); },
+    function(){ return window.supabase.from('family_links').select('*'); }
+  ];
+  for(var i=0;i<tries.length;i++){
+    try{
+      var res=await tries[i]();
+      if(res && !res.error) return res.data||[];
+    }catch(err){}
+  }
+  return [];
+}
+
+function normalizeConnRow(r){
+  return {
+    source_family_id:r.source_family_id||r.family_a_id||r.from_family_id||r.source_id||null,
+    target_family_id:r.target_family_id||r.family_b_id||r.to_family_id||r.target_id||null,
+    relationship_type:r.relationship_type||r.link_type||r.relation_type||'distant'
+  };
+}
+
 function bootstrapGenealogy(){
   Promise.all([
-    window.supabase.from('families').select('id,display_name,village_name,notes,visibility,members_count,generations_count,photos_count').order('display_name'),
-    window.supabase.from('v_family_connections').select('source_family_id,target_family_id,relationship_type'),
+    window.supabase.from('families').select('*').order('display_name',{ascending:true}),
+    safeLoadFamilyConnections(),
     window.supabase.from('family_pages').select('family_id,page_slug,is_public')
   ]).then(function(res){
-    var famRes=res[0], connRes=res[1], pageRes=res[2];
+    var famRes=res[0], connRows=res[1]||[], pageRes=res[2];
     if(famRes.error||!famRes.data){showError(famRes.error?famRes.error.message:t('Nu s-au putut incarca familiile.','Could not load families.'));return;}
-    if(connRes.error){console.warn(connRes.error);}
     var pageMap={};
-    (pageRes.data||[]).forEach(function(p){pageMap[p.family_id]=p;});
+    (((pageRes && !pageRes.error)?pageRes.data:[])||[]).forEach(function(p){pageMap[p.family_id]=p;});
     families=(famRes.data||[]).map(function(f){
+      var displayName=f.display_name||f.name||'Familie';
+      var visibility=f.visibility||(f.show_members===false?'private':'public');
       return {
         id:f.id,
-        name:f.display_name||'Familie',
-        village:f.village_name||'Calnic',
-        desc_ro:f.notes||'',
-        desc_en:f.notes||'',
-        visibility:f.visibility||'private',
-        is_public:f.visibility==='public',
+        name:displayName,
+        village:f.village_name||f.village||'Calnic',
+        desc_ro:f.notes||f.desc_ro||'',
+        desc_en:f.notes||f.desc_en||f.desc_ro||'',
+        visibility:visibility,
+        is_public:visibility==='public',
         members_count:f.members_count||0,
         generations_count:f.generations_count||0,
         photos_count:f.photos_count||0,
         page_slug: pageMap[f.id] && pageMap[f.id].is_public ? pageMap[f.id].page_slug : null
       };
     });
-    villageConnections=dedupeConnections(connRes.data||[]);
+    villageConnections=dedupeConnections((connRows||[]).map(normalizeConnRow));
     buildAdjacency();
     renderFamilies(families);
     updateStats(families);

@@ -204,6 +204,17 @@ function checkNotifications(familyId) {
     .catch(function() { return false; });
 }
 
+async function getCurrentFamilyForUser(userId) {
+  if (!window.supabase || !userId) return null;
+  try {
+    var res = await window.supabase.from('families').select('*').limit(100);
+    if (res && !res.error && Array.isArray(res.data)) {
+      return res.data.find(function(row){ return row && (row.created_by === userId || row.owner_id === userId); }) || null;
+    }
+  } catch (err) {}
+  return null;
+}
+
 function initAdminNav() {
   mergeLangIntoNav();
   if (!window.supabase) {
@@ -217,14 +228,8 @@ function initAdminNav() {
       return;
     }
 
-    window.supabase
-      .from('families')
-      .select('id,name,display_name,owner_id')
-      .eq('owner_id', session.user.id)
-      .limit(1)
-      .maybeSingle()
-      .then(function(familyRes) {
-        var familyData = familyRes && !familyRes.error ? familyRes.data : null;
+    getCurrentFamilyForUser(session.user.id)
+      .then(function(familyData) {
         var familyName = familyData ? (familyData.display_name || familyData.name || 'Profilul Meu') : 'Profilul Meu';
         var familyId = familyData ? familyData.id : null;
         return checkNotifications(familyId).then(function(hasNotif) {

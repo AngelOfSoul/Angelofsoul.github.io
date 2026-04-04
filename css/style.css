@@ -409,7 +409,7 @@ footer .g { color: var(--gold-d); font-style: normal; }
   letter-spacing: 3px;
   text-transform: uppercase;
   color: var(--gold);
-  white-space: nowrap;
+  white-space: normal;
 }
 
 /* ═══════════════════════════════════════════════════════════
@@ -466,7 +466,7 @@ footer .g { color: var(--gold-d); font-style: normal; }
   color: var(--gold);
   border-radius: 3px;
   transition: all .15s;
-  white-space: nowrap;
+  white-space: normal;
 }
 .tree-btn:hover { background: var(--gold); color: #0a0a0a; }
 .tree-btn.green { border-color: var(--green-br); color: var(--green); background: var(--green-bg); }
@@ -684,7 +684,7 @@ footer .g { color: var(--gold-d); font-style: normal; }
   font-size: 12px;
   z-index: 18000;
   display: none;
-  white-space: nowrap;
+  white-space: normal;
   box-shadow: 0 4px 16px rgba(0,0,0,.5);
 }
 .undo-toast.on { display: flex; align-items: center; gap: 10px; }
@@ -712,7 +712,7 @@ footer .g { color: var(--gold-d); font-style: normal; }
   z-index: 99999;
   display: none;
   box-shadow: 0 4px 16px rgba(0,0,0,.6);
-  white-space: nowrap;
+  white-space: normal;
   pointer-events: none;
 }
 
@@ -1024,7 +1024,7 @@ p  { margin-bottom: 1rem; }
 
 .site-header .header-motto {
   gap: 10px !important;
-  width: min(340px, 100%);
+  width: min(560px, 100%);
   overflow: visible !important;
 }
 
@@ -1032,7 +1032,7 @@ p  { margin-bottom: 1rem; }
   font-size: 16px !important;
   letter-spacing: 3.5px !important;
   text-align: center;
-  white-space: nowrap;
+  white-space: normal;
 }
 
 .site-header .header-motto svg {
@@ -1046,7 +1046,7 @@ p  { margin-bottom: 1rem; }
 
 @media(max-width:740px) {
   .site-header .header-motto {
-    width: min(300px, 100%);
+    width: min(420px, 100%);
   }
 
   .site-header .header-sub {

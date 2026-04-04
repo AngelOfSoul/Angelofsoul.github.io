@@ -761,13 +761,24 @@ function setLoading(btnId, loading) {
   document.getElementById(btnId).disabled = loading;
 }
 
+async function findFamilyForUser(userId) {
+  if (!window.supabase || !userId) return null;
+  try {
+    var res = await window.supabase.from('families').select('*').limit(100);
+    if (res && !res.error && Array.isArray(res.data)) {
+      return res.data.find(function(row){ return row && (row.created_by === userId || row.owner_id === userId); }) || null;
+    }
+  } catch (err) {}
+  return null;
+}
+
 /* Route an already-authenticated user: Step 2 if no family, else logged-in box */
 async function routeAuthenticatedUser(user) {
-  var famCheck = await window.supabase.from('families').select('id').eq('owner_id', user.id).maybeSingle();
+  var famCheck = await findFamilyForUser(user.id);
   if (famCheck.error) {
     console.error('[Calnic] families query error:', famCheck.error.message);
   }
-  if (!famCheck.error && famCheck.data && famCheck.data.id) {
+  if (famCheck && famCheck.id) {
     showLoggedIn(user);
   } else {
     showStep2Panel(user.id);
@@ -853,8 +864,8 @@ async function doLogin(e) {
       showMsg('loginMsg', currentLang === 'ro' ? 'Autentificat cu succes! Redirectionare...' : 'Signed in! Redirecting...', 'success');
       var userId = result.data.user && result.data.user.id;
       if (userId) {
-        var famCheck = await window.supabase.from('families').select('id').eq('owner_id', userId).maybeSingle();
-        if (!famCheck.error && famCheck.data && famCheck.data.id) {
+        var famCheck = await findFamilyForUser(userId);
+        if (famCheck && famCheck.id) {
           setTimeout(function() { window.location.href = 'dashboard.html'; }, 1200);
         } else {
           setTimeout(function() { showStep2Panel(userId); }, 500);
@@ -973,11 +984,18 @@ async function doFamilyProfile(e) {
   }
   setLoading('step2Btn', true);
   try {
-    var famData = { name: name, village: 'Calnic', owner_id: userId, pin_hash: btoa(pin) };
+    var famData = { name: name, village: 'Calnic', created_by: userId, pin_hash: btoa(pin) };
     if (since) famData.since = since;
     if (descRo) famData.desc_ro = descRo;
     if (descEn) famData.desc_en = descEn;
     var insRes = await window.supabase.from('families').insert([famData]);
+    if (insRes.error && /column .*created_by.*does not exist|Could not find.*created_by/i.test(insRes.error.message || '')) {
+      famData = { name: name, village: 'Calnic', owner_id: userId, pin_hash: btoa(pin) };
+      if (since) famData.since = since;
+      if (descRo) famData.desc_ro = descRo;
+      if (descEn) famData.desc_en = descEn;
+      insRes = await window.supabase.from('families').insert([famData]);
+    }
     if (insRes.error) {
       showMsg('step2Msg', insRes.error.message, 'error');
     } else {

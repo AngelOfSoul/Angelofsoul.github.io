@@ -724,8 +724,8 @@ async function addMember() {
     var errMsg = res.error.message || 'Eroare la adaugarea membrului.';
     if (/row-level security/i.test(errMsg)) {
       errMsg = currentLang === 'ro'
-        ? 'Baza de date blocheaza adaugarea membrilor pentru aceasta familie. Cel mai probabil familia nu este legata corect prin owner_id in Supabase. Ruleaza fisierul SQL din arhiva: sql/repair-members-rls.sql, apoi incearca din nou.'
-        : 'The database is blocking member creation for this family. Most likely this family is not linked correctly through owner_id in Supabase. Run the SQL file from the archive: sql/repair-members-rls.sql, then try again.';
+        ? 'Baza de date blocheaza adaugarea membrilor pentru aceasta familie. Cel mai probabil familia nu este legata corect de contul tau in Supabase. Ruleaza fisierul SQL din arhiva: sql/repair-members-rls.sql, apoi incearca din nou.'
+        : 'The database is blocking member creation for this family. Most likely this family is not linked correctly to your account in Supabase. Run the SQL file from the archive: sql/repair-members-rls.sql, then try again.';
     }
     showMsg('membersMsg', errMsg, 'error');
   } else {
@@ -926,18 +926,16 @@ document.getElementById('logoutBtn').addEventListener('click', async function() 
 async function fetchCurrentFamily(userId) {
   if (!window.supabase || !userId) return { data: null, error: null };
   try {
-    var res = await window.supabase
-      .from('families')
-      .select('*')
-      .eq('owner_id', userId)
-      .limit(1)
-      .maybeSingle();
-
-    if (res && res.data) {
-      if (!res.data.display_name && res.data.name) res.data.display_name = res.data.name;
-      if (!res.data.name && res.data.display_name) res.data.name = res.data.display_name;
+    var res = await window.supabase.from('families').select('*').limit(100);
+    if (res && !res.error && Array.isArray(res.data)) {
+      var data = res.data.find(function(row){ return row && (row.created_by === userId || row.owner_id === userId); }) || null;
+      if (data) {
+        if (!data.display_name && data.name) data.display_name = data.name;
+        if (!data.name && data.display_name) data.name = data.display_name;
+      }
+      return { data: data, error: null };
     }
-    return res;
+    return { data: null, error: res ? res.error : null };
   } catch (err) {
     return { data: null, error: err };
   }
@@ -965,8 +963,8 @@ function initDashboard() {
     populateForms();
     if (familyData && familyData.owner_id && currentUser && familyData.owner_id !== currentUser.id) {
       showMsg('membersMsg', currentLang === 'ro'
-        ? 'Atentie: aceasta familie nu este setata pe contul curent ca owner_id. Unele actiuni pot fi blocate pana repari baza de date.'
-        : 'Warning: this family is not assigned to the current account as owner_id. Some actions may stay blocked until the database is fixed.', 'error');
+        ? 'Atentie: aceasta familie nu este legata complet de contul curent. Unele actiuni pot fi blocate pana repari configurarea din Supabase.'
+        : 'Warning: this family is not fully linked to the current account. Some actions may stay blocked until the Supabase setup is fixed.', 'error');
     }
     loadMembers();
     loadTimeline();

@@ -223,7 +223,7 @@ footer .g { color:var(--gold-d); font-style:normal; }
 }
 
 
-�� ADMIN NAV LINK��─ MOBILE NAV / HAMBURGER ── */
+ ADMIN NAV LINK─ MOBILE NAV / HAMBURGER ── */
 .hamburger {
   display: none;
   background: none;
@@ -871,7 +871,7 @@ function checkAdminNavLink() {
       .from('profiles')
       .select('is_admin')
       .eq('id', session.user.id)
-      .single()
+      .maybeSingle()
       .then(function(r) {
         if (r.data && r.data.is_admin) {
           var g = document.getElementById('guest-admin-link');
@@ -1064,55 +1064,56 @@ if (window.supabase) { checkAdminNavLink(); } else { document.addEventListener('
     if (!window.supabase) return;
 
     /* ── load family data ── */
-    window.supabase
-      .from('families')
-      .select('*')
-      .eq('owner_id', session.user.id)
-      .single()
-      .then(function(res) {
-        var family = res.data;
-        if (!family) {
-          document.getElementById('li-family-name').textContent = 'Bun venit!';
-          document.getElementById('li-greeting').textContent    = 'Familia ta nu a fost înregistrată încă.';
-          return;
-        }
+    (async function(){
+      async function findFamilyForUser(userId) {
+        try {
+          var res = await window.supabase.from('families').select('*').limit(100);
+          if (res && !res.error && Array.isArray(res.data)) {
+            return res.data.find(function(row){ return row && (row.created_by === userId || row.owner_id === userId); }) || null;
+          }
+        } catch (err) {}
+        return null;
+      }
 
-        /* hero */
-        document.getElementById('li-family-name').textContent    = family.name;
-        document.getElementById('li-nav-family').textContent     = family.name;
-        var tagline = family.desc_ro || family.desc_en || '';
-        if (tagline) document.getElementById('li-family-tagline').textContent = '\u201C' + tagline + '\u201D';
+      var family = await findFamilyForUser(session.user.id);
+      if (!family) {
+        document.getElementById('li-family-name').textContent = 'Bun venit!';
+        document.getElementById('li-greeting').textContent    = 'Familia ta nu a fost înregistrată încă.';
+        return;
+      }
 
-        /* pills */
-        var pills = [];
-        if (family.since)             pills.push('Din <strong>' + escH(family.since) + '</strong>');
-        if (family.members_count)     pills.push('<strong>' + family.members_count + '</strong> membri');
-        if (family.generations_count) pills.push('<strong>' + family.generations_count + '</strong> genera\u021bii');
-        if (family.photos_count)      pills.push('<strong>' + family.photos_count + '</strong> fotografii');
-        document.getElementById('li-hero-meta').innerHTML = pills.map(function(p){
-          return '<div class="li-hero-pill">' + p + '</div>';
-        }).join('');
+      document.getElementById('li-family-name').textContent    = family.name;
+      document.getElementById('li-nav-family').textContent     = family.name;
+      var tagline = family.desc_ro || family.desc_en || '';
+      if (tagline) document.getElementById('li-family-tagline').textContent = '“' + tagline + '”';
 
-        /* completeness */
-        var comp = completenessScore(family);
-        document.getElementById('li-score').textContent         = comp.score + '%';
-        document.getElementById('li-progress-fill').style.width = comp.score + '%';
-        document.getElementById('li-score-label').textContent   =
-          comp.score >= 70 ? 'Profil bine completat' :
-          comp.score >= 40 ? 'Profil parțial completat' : 'Profil la început';
-        document.getElementById('li-complete-items').innerHTML = comp.checks.map(function(c){
-          return '<div class="li-complete-item"><div class="li-ci-dot ' + (c.done?'done':'miss') + '"></div>' + c.label + '</div>';
-        }).join('');
+      var pills = [];
+      if (family.since)             pills.push('Din <strong>' + escH(family.since) + '</strong>');
+      if (family.members_count)     pills.push('<strong>' + family.members_count + '</strong> membri');
+      if (family.generations_count) pills.push('<strong>' + family.generations_count + '</strong> generații');
+      if (family.photos_count)      pills.push('<strong>' + family.photos_count + '</strong> fotografii');
+      document.getElementById('li-hero-meta').innerHTML = pills.map(function(p){
+        return '<div class="li-hero-pill">' + p + '</div>';
+      }).join('');
 
-        /* members — for today banner */
-        window.supabase
-          .from('members')
-          .select('name, role, birth_year, death_year, is_deceased')
-          .eq('family_id', family.id)
-          .then(function(mres) {
-            if (mres.data) renderTodayBanner(mres.data);
-          });
-      });
+      var comp = completenessScore(family);
+      document.getElementById('li-score').textContent         = comp.score + '%';
+      document.getElementById('li-progress-fill').style.width = comp.score + '%';
+      document.getElementById('li-score-label').textContent   =
+        comp.score >= 70 ? 'Profil bine completat' :
+        comp.score >= 40 ? 'Profil parțial completat' : 'Profil la început';
+      document.getElementById('li-complete-items').innerHTML = comp.checks.map(function(c){
+        return '<div class="li-complete-item"><div class="li-ci-dot ' + (c.done?'done':'miss') + '"></div>' + c.label + '</div>';
+      }).join('');
+
+      window.supabase
+        .from('members')
+        .select('name, role, birth_year, death_year, is_deceased')
+        .eq('family_id', family.id)
+        .then(function(mres) {
+          if (mres.data) renderTodayBanner(mres.data);
+        });
+    })();
 
     /* ── milestone counters ── */
     Promise.all([
