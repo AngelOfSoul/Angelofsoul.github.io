@@ -207,9 +207,9 @@ function checkNotifications(familyId) {
 async function getCurrentFamilyForUser(userId) {
   if (!window.supabase || !userId) return null;
   try {
-    var res = await supabase.from('families').select('*').limit(100);
+    var res = await window.supabase.from('families').select('*').limit(100);
     if (res && !res.error && Array.isArray(res.data)) {
-      return res.data.find(function(row){ return row && (row.created_by === userId || row.created_by === userId); }) || null;
+      return res.data.find(function(row){ return row && row.created_by === userId; }) || null;
     }
   } catch (err) {}
   return null;
@@ -222,22 +222,25 @@ function initAdminNav() {
     return;
   }
   window.supabase.auth.getUser().then(function(res) {
-    var session = res.data && res.data.session;
-    if (!session) {
+    var session = res && res.data ? res.data.session : null;
+    var user = res && res.data ? (res.data.user || (session && session.user) || null) : null;
+    if (!user) {
       buildProfileButton(null, null, false);
       return;
     }
 
-    getCurrentFamilyForUser(session.user.id)
+    var fakeSession = session || { user: user };
+
+    getCurrentFamilyForUser(user.id)
       .then(function(familyData) {
         var familyName = familyData ? (familyData.display_name || familyData.name || 'Profilul Meu') : 'Profilul Meu';
         var familyId = familyData ? familyData.id : null;
         return checkNotifications(familyId).then(function(hasNotif) {
-          buildProfileButton(session, familyName, hasNotif);
+          buildProfileButton(fakeSession, familyName, hasNotif);
         });
       })
       .catch(function() {
-        buildProfileButton(session, 'Profilul Meu', false);
+        buildProfileButton(fakeSession, 'Profilul Meu', false);
       });
   }).catch(function() {
     buildProfileButton(null, null, false);

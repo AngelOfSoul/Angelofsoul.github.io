@@ -1,6 +1,5 @@
 /*
- * supabase.js — versiune curată (fără compat layer)
- * Funcționează 100% cu schema ta actuală
+ * supabase.js — client + compat layer pentru Calnic Online
  */
 
 const SUPABASE_URL =
@@ -12,35 +11,76 @@ const SUPABASE_ANON_KEY =
   "YOUR_SUPABASE_ANON_KEY";
 
 (function () {
-  const script = document.createElement("script");
-  script.src =
-    "https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js";
+  function finishReady() {
+    document.dispatchEvent(new Event("supabase:ready"));
+  }
 
-  script.onload = function () {
+  function initClient() {
     try {
       const lib = window.supabase || window.supabaseJs;
+      if (!lib || typeof lib.createClient !== "function") {
+        console.error("[Supabase] Library unavailable");
+        finishReady();
+        return;
+      }
 
-      const client = lib.createClient(
-        SUPABASE_URL,
-        SUPABASE_ANON_KEY
-      );
+      const client = lib.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+
+      // Compat: codul existent asteapta uneori getUser() => { data: { session } }
+      const auth = client.auth;
+      const _origGetUser = auth.getUser.bind(auth);
+      const _origGetSession = auth.getSession.bind(auth);
+
+      auth.getUser = async function () {
+        try {
+          const [userRes, sessionRes] = await Promise.all([
+            _origGetUser(),
+            _origGetSession()
+          ]);
+
+          return {
+            data: {
+              user: (userRes && userRes.data && userRes.data.user) || null,
+              session: (sessionRes && sessionRes.data && sessionRes.data.session) || null
+            },
+            error:
+              (userRes && userRes.error) ||
+              (sessionRes && sessionRes.error) ||
+              null
+          };
+        } catch (e) {
+          return { data: { user: null, session: null }, error: e };
+        }
+      };
+
+      auth.getSessionCompat = _origGetSession;
 
       window.supabase = client;
-
       console.log("[Supabase] Connected ✔");
-
     } catch (e) {
       console.error("[Supabase] Init error:", e);
     }
 
-    document.dispatchEvent(new Event("supabase:ready"));
-  };
+    finishReady();
+  }
 
+  const existing =
+    window.supabaseJs ||
+    (window.supabase && typeof window.supabase.createClient === "function");
+
+  if (existing) {
+    initClient();
+    return;
+  }
+
+  const script = document.createElement("script");
+  script.src =
+    "https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js";
+  script.onload = initClient;
   script.onerror = function () {
     console.error("[Supabase] CDN load failed");
-    document.dispatchEvent(new Event("supabase:ready"));
+    finishReady();
   };
-
   document.head.appendChild(script);
 })();
 
