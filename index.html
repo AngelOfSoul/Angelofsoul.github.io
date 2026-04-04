@@ -765,18 +765,18 @@ footer .g { color:var(--gold-d); font-style:normal; }
     <div class="li-milestone-inner">
       <div class="li-milestone-item">
         <div class="li-milestone-num" id="li-m-families">—</div>
-        <div class="li-milestone-lbl">Familii</div>
-        <div class="li-milestone-sub">înregistrate în sat</div>
+        <div class="li-milestone-lbl" id="li-m-families-lbl">Familii</div>
+        <div class="li-milestone-sub" id="li-m-families-sub">înregistrate în sat</div>
       </div>
       <div class="li-milestone-item">
         <div class="li-milestone-num" id="li-m-members">—</div>
-        <div class="li-milestone-lbl">Membri</div>
-        <div class="li-milestone-sub">în arbori genealogici</div>
+        <div class="li-milestone-lbl" id="li-m-members-lbl">Membri</div>
+        <div class="li-milestone-sub" id="li-m-members-sub">în arbori genealogici</div>
       </div>
       <div class="li-milestone-item">
         <div class="li-milestone-num" id="li-m-photos">—</div>
-        <div class="li-milestone-lbl">Fotografii</div>
-        <div class="li-milestone-sub">păstrate în arhivă</div>
+        <div class="li-milestone-lbl" id="li-m-photos-lbl">Fotografii</div>
+        <div class="li-milestone-sub" id="li-m-photos-sub">păstrate în arhivă</div>
       </div>
     </div>
   </div>
@@ -1068,10 +1068,49 @@ if (window.supabase) { checkAdminNavLink(); } else { document.addEventListener('
     /* ── load family data ── */
     (async function(){
       async function findFamilyForUser(userId) {
+        function ownsFamily(row) {
+          return !!(row && (row.created_by === userId || row.owner_id === userId));
+        }
+        function sortFamilies(rows) {
+          return (rows || []).slice().sort(function(a, b) {
+            var at = new Date((a && a.created_at) || 0).getTime();
+            var bt = new Date((b && b.created_at) || 0).getTime();
+            if (at !== bt) return at - bt;
+            return String((a && a.id) || '').localeCompare(String((b && b.id) || ''));
+          });
+        }
+        function isMissingColumnError(err) {
+          var msg = String((err && err.message) || '');
+          return /column .* does not exist|Could not find/i.test(msg);
+        }
         try {
-          var res = await supabase.from('families').select('*').limit(100);
+          var preferredId = localStorage.getItem('selectedFamily');
+          if (preferredId) {
+            var byPref = await supabase.from('families').select('*').eq('id', preferredId).maybeSingle();
+            if (byPref && !byPref.error && ownsFamily(byPref.data)) return byPref.data;
+          }
+
+          var byOwner = await supabase.from('families').select('*').eq('owner_id', userId).order('created_at', { ascending: true }).limit(1);
+          if (byOwner && !byOwner.error && Array.isArray(byOwner.data) && byOwner.data.length) {
+            localStorage.setItem('selectedFamily', byOwner.data[0].id);
+            return byOwner.data[0];
+          }
+          if (byOwner && byOwner.error && !isMissingColumnError(byOwner.error)) return null;
+
+          var byCreated = await supabase.from('families').select('*').eq('created_by', userId).order('created_at', { ascending: true }).limit(1);
+          if (byCreated && !byCreated.error && Array.isArray(byCreated.data) && byCreated.data.length) {
+            localStorage.setItem('selectedFamily', byCreated.data[0].id);
+            return byCreated.data[0];
+          }
+          if (byCreated && byCreated.error && !isMissingColumnError(byCreated.error)) return null;
+
+          var res = await supabase.from('families').select('*').limit(200);
           if (res && !res.error && Array.isArray(res.data)) {
-            return res.data.find(function(row){ return row && (row.created_by === userId || row.owner_id === userId); }) || null;
+            var owned = sortFamilies(res.data.filter(ownsFamily));
+            if (owned.length) {
+              localStorage.setItem('selectedFamily', owned[0].id);
+              return owned[0];
+            }
           }
         } catch (err) {}
         return null;
@@ -1115,6 +1154,18 @@ if (window.supabase) { checkAdminNavLink(); } else { document.addEventListener('
         .then(function(mres) {
           if (mres.data) renderTodayBanner(mres.data);
         });
+
+      /* personalized counters (family scope, not whole village) */
+      window.__calnicMemberCountersLocked = true;
+      animateCount(document.getElementById('li-m-families'), 1);
+      animateCount(document.getElementById('li-m-members'), Number(family.members_count || 0));
+      animateCount(document.getElementById('li-m-photos'), Number(family.photos_count || 0));
+      var sf = document.getElementById('li-m-families-sub');
+      var sm = document.getElementById('li-m-members-sub');
+      var sp = document.getElementById('li-m-photos-sub');
+      if (sf) sf.textContent = 'în profilul tău';
+      if (sm) sm.textContent = 'în arborele familiei tale';
+      if (sp) sp.textContent = 'în arhiva familiei tale';
     })();
 
     /* ── milestone counters ── */
@@ -1123,6 +1174,7 @@ if (window.supabase) { checkAdminNavLink(); } else { document.addEventListener('
       supabase.from('members').select('id',  { count:'exact', head:true }),
       supabase.from('photos').select('id',   { count:'exact', head:true })
     ]).then(function(results) {
+      if (window.__calnicMemberCountersLocked) return;
       var fCount = results[0].count || 0;
       var mCount = results[1].count || 0;
       var pCount = results[2].count || 0;

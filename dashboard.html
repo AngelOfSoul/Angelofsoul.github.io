@@ -963,23 +963,48 @@ async function fetchCurrentFamily(userId) {
     if (!row.name && row.display_name) row.name = row.display_name;
     return row;
   }
+  function ownsFamily(row) {
+    return !!(row && (row.owner_id === userId || row.created_by === userId));
+  }
+  function sortFamilies(rows) {
+    return (rows || []).slice().sort(function(a, b) {
+      var at = new Date((a && a.created_at) || 0).getTime();
+      var bt = new Date((b && b.created_at) || 0).getTime();
+      if (at !== bt) return at - bt;
+      return String((a && a.id) || '').localeCompare(String((b && b.id) || ''));
+    });
+  }
   function isMissingColumnError(err) {
     var msg = String((err && err.message) || '');
     return /column .* does not exist|Could not find/i.test(msg);
   }
 
   async function tryByColumn(columnName) {
-    var res = await supabase.from('families').select('*').eq(columnName, userId).limit(1);
+    var res = await supabase.from('families').select('*').eq(columnName, userId).order('created_at', { ascending: true }).limit(1);
     if (res && !res.error && Array.isArray(res.data) && res.data.length) return { data: res.data[0], error: null };
     return { data: null, error: res ? res.error : null };
   }
 
   try {
+    var preferredId = localStorage.getItem('selectedFamily');
+    if (preferredId) {
+      var byPref = await supabase.from('families').select('*').eq('id', preferredId).maybeSingle();
+      if (byPref && !byPref.error && ownsFamily(byPref.data)) {
+        return { data: normalizeFamilyRow(byPref.data), error: null };
+      }
+    }
+
     var byOwner = await tryByColumn('owner_id');
-    if (byOwner.data) return { data: normalizeFamilyRow(byOwner.data), error: null };
+    if (byOwner.data) {
+      localStorage.setItem('selectedFamily', byOwner.data.id);
+      return { data: normalizeFamilyRow(byOwner.data), error: null };
+    }
 
     var byCreated = await tryByColumn('created_by');
-    if (byCreated.data) return { data: normalizeFamilyRow(byCreated.data), error: null };
+    if (byCreated.data) {
+      localStorage.setItem('selectedFamily', byCreated.data.id);
+      return { data: normalizeFamilyRow(byCreated.data), error: null };
+    }
 
     var fallbackErr = byCreated.error || byOwner.error;
     if (fallbackErr && !isMissingColumnError(fallbackErr)) {
@@ -988,10 +1013,10 @@ async function fetchCurrentFamily(userId) {
 
     var res = await supabase.from('families').select('*').limit(200);
     if (res && !res.error && Array.isArray(res.data)) {
-      var data = res.data.find(function(row) {
-        return row && (row.owner_id === userId || row.created_by === userId);
-      }) || null;
+      var owned = sortFamilies(res.data.filter(ownsFamily));
+      var data = owned.length ? owned[0] : null;
       if (!data) return { data: null, error: null };
+      localStorage.setItem('selectedFamily', data.id);
       return { data: normalizeFamilyRow(data), error: null };
     }
     return { data: null, error: res ? res.error : null };
