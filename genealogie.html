@@ -353,92 +353,119 @@ footer .g{color:var(--gold-d);font-style:normal;}
 function escH(s){return String(s==null?'':s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;').replace(/'/g,'&#39;');}
 function lang(){return localStorage.getItem('calnic-lang')||'ro';}
 function t(ro,en){return lang()==='en'?en:ro;}
+function norm(s){return String(s||'').toLowerCase().normalize('NFD').replace(/[̀-ͯ]/g,'').trim();}
 
 var families=[];
+var villageConnections=[];
+var connectionAdj={};
+
 document.getElementById('yr').textContent=new Date().getFullYear();
 applyLang(lang());initLang();initScrollBtns();initHamburger();
 
-if(window.supabase&&window.supabase.from){loadFamilies();}else{document.addEventListener('supabase:ready',loadFamilies);}
+if(window.supabase&&window.supabase.from){bootstrapGenealogy();}else{document.addEventListener('supabase:ready',bootstrapGenealogy);}
 
-function normalizeFamilyRow(r, connectedIds){
-  var name = r.display_name || r.name || '';
-  var village = r.village_name || r.village || 'Calnic';
-  return {
-    id: r.id,
-    name: name,
-    village: village,
-    since: r.since || '',
-    desc_ro: r.desc_ro || r.notes || '',
-    desc_en: r.desc_en || r.notes || '',
-    members_count: Number(r.members_count || 0),
-    generations_count: Number(r.generations_count || 0),
-    photos_count: Number(r.photos_count || 0),
-    show_members: r.show_members !== false,
-    show_generations: r.show_generations !== false,
-    show_photos: r.show_photos !== false,
-    show_since: r.show_since !== false,
-    connected_to_village: connectedIds ? connectedIds.has(r.id) : !!r.connected_to_village,
-    visibility: r.visibility || (r.is_public ? 'public' : 'private')
-  };
+function bootstrapGenealogy(){
+  Promise.all([
+    window.supabase.from('families').select('id,display_name,village_name,notes,visibility,members_count,generations_count,photos_count').order('display_name'),
+    window.supabase.from('v_family_connections').select('source_family_id,target_family_id,relationship_type'),
+    window.supabase.from('family_pages').select('family_id,page_slug,is_public')
+  ]).then(function(res){
+    var famRes=res[0], connRes=res[1], pageRes=res[2];
+    if(famRes.error||!famRes.data){showError(famRes.error?famRes.error.message:t('Nu s-au putut incarca familiile.','Could not load families.'));return;}
+    if(connRes.error){console.warn(connRes.error);}
+    var pageMap={};
+    (pageRes.data||[]).forEach(function(p){pageMap[p.family_id]=p;});
+    families=(famRes.data||[]).map(function(f){
+      return {
+        id:f.id,
+        name:f.display_name||'Familie',
+        village:f.village_name||'Calnic',
+        desc_ro:f.notes||'',
+        desc_en:f.notes||'',
+        visibility:f.visibility||'private',
+        is_public:f.visibility==='public',
+        members_count:f.members_count||0,
+        generations_count:f.generations_count||0,
+        photos_count:f.photos_count||0,
+        page_slug: pageMap[f.id] && pageMap[f.id].is_public ? pageMap[f.id].page_slug : null
+      };
+    });
+    villageConnections=dedupeConnections(connRes.data||[]);
+    buildAdjacency();
+    renderFamilies(families);
+    updateStats(families);
+    populatePathFinder(families);
+    document.getElementById('statsBar').style.display='flex';
+    document.getElementById('villageBanner').style.display=families.length?'flex':'none';
+    applyIncomingFocus();
+  }).catch(function(err){showError(err.message);});
 }
 
-function loadFamilies(){
-  Promise.all([
-    window.supabase.from('families').select('id,display_name,village_name,notes,visibility').order('display_name'),
-    window.supabase.from('v_family_connections').select('source_family_id,target_family_id')
-  ]).then(function(res){
-      var famRes = res[0], connRes = res[1];
-      if(famRes.error||!famRes.data){showError(famRes.error?famRes.error.message:t('Nu s-au putut incarca familiile.','Could not load families.'));return;}
-      var connectedIds = new Set();
-      if(connRes && !connRes.error && connRes.data){
-        connRes.data.forEach(function(c){ if(c.source_family_id) connectedIds.add(c.source_family_id); if(c.target_family_id) connectedIds.add(c.target_family_id); });
-      }
-      families=(famRes.data||[]).map(function(row){ return normalizeFamilyRow(row, connectedIds); });
-      renderFamilies(families);
-      updateStats(families);
-      populatePathFinder(families);
-      document.getElementById('statsBar').style.display='flex';
-      if(families.length){var b=document.getElementById('villageBanner');b.style.display='flex';}
-    }).catch(function(err){showError(err.message);});
+function dedupeConnections(rows){
+  var seen={};
+  return rows.filter(function(r){
+    var a=r.source_family_id,b=r.target_family_id; if(!a||!b||a===b) return false;
+    var k=[a,b].sort().join('__')+'__'+(r.relationship_type||'kinship_other');
+    if(seen[k]) return false; seen[k]=1; return true;
+  });
+}
+
+function buildAdjacency(){
+  connectionAdj={};
+  families.forEach(function(f){connectionAdj[f.id]=[];});
+  villageConnections.forEach(function(c){
+    if(connectionAdj[c.source_family_id]) connectionAdj[c.source_family_id].push({id:c.target_family_id,type:c.relationship_type});
+    if(connectionAdj[c.target_family_id]) connectionAdj[c.target_family_id].push({id:c.source_family_id,type:c.relationship_type});
+  });
+}
+
+function hasVillageConnection(familyId){
+  return villageConnections.some(function(c){return c.source_family_id===familyId||c.target_family_id===familyId;});
 }
 
 function renderFamilies(fams){
   var list=document.getElementById('familiesList');
-  if(!fams.length){list.innerHTML='<div style="padding:32px 0;text-align:center;color:var(--muted);font-style:italic;font-size:15px;">'+escH(t('Nicio familie inregistrata inca.','No families registered yet.'))+'</div>';return;}
   list.innerHTML='';
-  fams.forEach(function(f){list.appendChild(buildCard(f));});
+  if(!fams.length){list.innerHTML='<div style="padding:32px 0;text-align:center;color:var(--muted);font-style:italic;font-size:15px;">'+escH(t('Nicio familie gasita.','No families found.'))+'</div>';return;}
+  fams.forEach(function(f){list.appendChild(makeFamilyCard(f));});
 }
 
-function buildCard(f){
-  if(!f||!f.id)return document.createDocumentFragment();
+function makeFamilyCard(f){
   var div=document.createElement('div');
-  var isCalnic=(f.village||'').toLowerCase().includes('deal')?false:true;
-  div.className='fc'+(f.connected_to_village?' connected':'');
-  var desc=lang()==='en'?(f.desc_en||f.desc_ro||''):( f.desc_ro||f.desc_en||'');
+  var isCalnic = norm(f.village||'calnic').indexOf('deal')===-1;
+  var connected = hasVillageConnection(f.id);
+  div.className='fc'+(connected?' connected':'');
+  var desc=lang()==='en'?(f.desc_en||f.desc_ro||''):(f.desc_ro||f.desc_en||'');
+  var villageLabel=escH(f.village||'Calnic');
+  var statusBadge=f.is_public?'<span style="margin-left:8px;font-size:9px;color:var(--green);background:var(--green-bg);border:1px solid var(--green-br);border-radius:3px;padding:2px 6px;">'+t('Public','Public')+'</span>':'<span style="margin-left:8px;font-size:9px;color:#c8aa80;background:#1a140d;border:1px solid #5e4820;border-radius:3px;padding:2px 6px;">'+t('Privat','Private')+'</span>';
   div.innerHTML='<div class="fc-top '+( isCalnic?'calnic':'deal')+'"></div>'
     +'<div class="fc-body">'
     +'<div class="fc-header">'
-    +'<div><div class="fc-name">'+escH(f.name)+'</div><div class="fc-village">'+escH(f.village||'Calnic')+(f.since&&f.show_since!==false?' &middot; din '+f.since:'')+'</div></div>'
+    +'<div><div class="fc-name">'+escH(f.name)+'</div><div class="fc-village">'+villageLabel+'</div></div>'
     +'<div class="fc-badge '+(isCalnic?'calnic':'deal')+'">'+(isCalnic?'&#127807; Calnic':'&#128207; Deal')+'</div>'
     +'</div>'
     +(desc?'<div class="fc-desc">'+escH(desc.substring(0,140))+(desc.length>140?'..':'')+'</div>':'')
     +'<div class="fc-stats">'
-    +(f.show_members!==false&&f.members_count?'<div class="fcs"><div class="fcs-n">'+f.members_count+'</div><div class="fcs-l" data-ro="Membri" data-en="Members">'+t('Membri','Members')+'</div></div>':'')
-    +(f.show_generations!==false&&f.generations_count?'<div class="fcs"><div class="fcs-n">'+f.generations_count+'</div><div class="fcs-l" data-ro="Generatii" data-en="Generations">'+t('Generatii','Generations')+'</div></div>':'')
-    +(f.show_photos!==false&&f.photos_count?'<div class="fcs"><div class="fcs-n">'+f.photos_count+'</div><div class="fcs-l" data-ro="Fotografii" data-en="Photos">'+t('Fotografii','Photos')+'</div></div>':'')
+    +(f.members_count?'<div class="fcs"><div class="fcs-n">'+f.members_count+'</div><div class="fcs-l">'+t('Membri','Members')+'</div></div>':'')
+    +(f.generations_count?'<div class="fcs"><div class="fcs-n">'+f.generations_count+'</div><div class="fcs-l">'+t('Generatii','Generations')+'</div></div>':'')
+    +(f.photos_count?'<div class="fcs"><div class="fcs-n">'+f.photos_count+'</div><div class="fcs-l">'+t('Fotografii','Photos')+'</div></div>':'')
     +'</div>'
-    +'<a class="fc-link" href="genealogie-familie.html?family='+encodeURIComponent(f.id)+'">&#127807; '+escH(t('Deschide arborele familiei','Open family tree'))+'</a>'
-    +(f.connected_to_village?'<span style="margin-left:8px;font-size:9px;color:var(--green);background:var(--green-bg);border:1px solid var(--green-br);border-radius:3px;padding:2px 6px;">'+t('Conectat la arborele satului','Connected to village tree')+'</span>':'')
+    +'<div style="display:flex;flex-wrap:wrap;gap:8px;align-items:center;">'
+    +(f.is_public?'<a class="fc-link" href="genealogie-familie.html?family='+encodeURIComponent(f.id)+'">&#127807; '+escH(t('Deschide arborele familiei','Open family tree'))+'</a>':'<span class="fc-link" style="opacity:.75;cursor:default;">&#128274; '+escH(t('Familie privata','Private family'))+'</span>')
+    +'<a class="fc-link" href="arborele-satului.html?family='+encodeURIComponent(f.id)+'">&#127794; '+escH(t('Vezi in arborele satului','View in village tree'))+'</a>'
+    +statusBadge
+    +(connected?'<span style="font-size:9px;color:var(--green);background:var(--green-bg);border:1px solid var(--green-br);border-radius:3px;padding:2px 6px;">'+t('Conectat la arborele satului','Connected to village tree')+'</span>':'')
+    +'</div>'
     +'</div>';
-  div.addEventListener('click',function(e){if(!e.target.closest('.fc-link'))window.location.href='genealogie-familie.html?family='+encodeURIComponent(f.id);});
+  div.addEventListener('click',function(e){if(!e.target.closest('.fc-link'))window.location.href='arborele-satului.html?family='+encodeURIComponent(f.id);});
   return div;
 }
 
 function updateStats(fams){
   var totalMem=0,totalGen=0,connected=0,withPhotos=0;
-  fams.forEach(function(f){totalMem+=(f.members_count||0);totalGen=Math.max(totalGen,f.generations_count||0);if(f.connected_to_village)connected++;if(f.photos_count)withPhotos++;});
+  fams.forEach(function(f){totalMem+=(f.members_count||0);totalGen=Math.max(totalGen,f.generations_count||0);if(hasVillageConnection(f.id))connected++;if(f.photos_count)withPhotos++;});
   document.getElementById('sb-fam').textContent=fams.length;
-  document.getElementById('sb-mem').textContent=totalMem;
+  document.getElementById('sb-mem').textContent=totalMem||'—';
   document.getElementById('sb-gen').textContent=totalGen||'—';
   document.getElementById('sb-con').textContent=connected;
   document.getElementById('sb-pho').textContent=withPhotos;
@@ -449,59 +476,64 @@ function updateStats(fams){
 
 function populatePathFinder(fams){
   var pf=document.getElementById('pfFrom'),pt=document.getElementById('pfTo');
+  pf.innerHTML='<option value="">'+t('— Familie de start —','— Start family —')+'</option>';
+  pt.innerHTML='<option value="">'+t('— Familie destinatie —','— Destination family —')+'</option>';
   fams.forEach(function(f){
-    var o1=document.createElement('option');o1.value=f.id;o1.textContent=f.name+(f.village?' ('+f.village+')':'');pf.appendChild(o1);
-    var o2=document.createElement('option');o2.value=f.id;o2.textContent=f.name+(f.village?' ('+f.village+')':'');pt.appendChild(o2);
+    var label=f.name+(f.village?' ('+f.village+')':'');
+    var o1=document.createElement('option');o1.value=f.id;o1.textContent=label;pf.appendChild(o1);
+    var o2=document.createElement('option');o2.value=f.id;o2.textContent=label;pt.appendChild(o2);
   });
 }
+
+function bfs(from,to){
+  if(!from||!to) return null; if(from===to) return [from];
+  var q=[[from]], seen={}; seen[from]=1;
+  while(q.length){
+    var path=q.shift(), cur=path[path.length-1], neigh=connectionAdj[cur]||[];
+    for(var i=0;i<neigh.length;i++){
+      var id=neigh[i].id; if(seen[id]) continue; var next=path.concat(id); if(id===to) return next; seen[id]=1; q.push(next);
+    }
+  }
+  return null;
+}
+
+function nameById(id){var f=families.find(function(x){return x.id===id;});return f?f.name:'?';}
 
 document.getElementById('pfBtn').addEventListener('click',function(){
   var from=document.getElementById('pfFrom').value,to=document.getElementById('pfTo').value;
   var result=document.getElementById('pfResult');
-  if(!from||!to){result.classList.add('on');result.textContent=t('Selecteaza doua familii diferite.','Select two different families.');return;}
-  if(from===to){result.classList.add('on');result.textContent=t('Selecteaza doua familii diferite.','Select two different families.');return;}
-  result.classList.add('on');result.textContent=t('Se cauta legatura...','Finding connection...');
-  if(!window.supabase){result.textContent=t('Serviciul nu este disponibil momentan.','Service not available right now.');return;}
-  window.supabase.from('v_family_connections').select('source_family_id,target_family_id,relationship_type')
-    .or('source_family_id.eq.'+from+',target_family_id.eq.'+from)
-    .then(function(r){
-      if(r.error||!r.data){result.textContent=t('Nu s-au putut verifica legaturile.','Could not check connections.');return;}
-      var found=r.data.find(function(l){return(l.source_family_id===from&&l.target_family_id===to)||(l.source_family_id===to&&l.target_family_id===from);});
-      var fA=families.find(function(f){return f.id===from;});var fB=families.find(function(f){return f.id===to;});
-      if(found){
-        var types={blood:t('sange','blood'),marriage:t('casatorie','marriage'),alliance:t('alianta','alliance'),distant:t('indepartata','distant'),parent_child:t('rudenie de sange','blood relation'),kinship_other:t('rudenie','kinship')};
-        result.innerHTML=t('Exista o legatura directa de tip &laquo;'+escH(types[found.relationship_type]||found.relationship_type)+'&raquo; intre familiile '+escH(fA?fA.name:'A')+' si '+escH(fB?fB.name:'B')+'.',
-          'There is a direct &laquo;'+escH(types[found.relationship_type]||found.relationship_type)+'&raquo; connection between '+escH(fA?fA.name:'A')+' and '+escH(fB?fB.name:'B')+'.');
-      } else {
-        result.textContent=t('Nu exista o legatura directa inregistrata intre aceste familii. Aceasta nu inseamna ca nu exista o legatura — doar ca nu a fost documentata inca.',
-          'No direct connection is recorded between these families. This does not mean there is none — it may not have been documented yet.');
-      }
-    }).catch(function(err){result.textContent=t('Eroare: ','Error: ')+err.message;});
+  if(!from||!to||from===to){result.classList.add('on');result.textContent=t('Selecteaza doua familii diferite.','Select two different families.');return;}
+  var path=bfs(from,to);
+  if(path){
+    var names=path.map(nameById).join(' → ');
+    result.classList.add('on');
+    result.innerHTML='<div style="margin-bottom:8px;">'+escH(names)+'</div><a class="fc-link" href="arborele-satului.html?from='+encodeURIComponent(from)+'&to='+encodeURIComponent(to)+'">&#127794; '+escH(t('Deschide traseul in arborele satului','Open path in village tree'))+'</a>';
+  }else{
+    result.classList.add('on');
+    result.textContent=t('Nu exista o legatura documentata intre aceste familii.','No documented connection exists between these families.');
+  }
 });
 
-// Search
 var searchDebounce=null;
 document.getElementById('searchInput').addEventListener('input',function(){
   clearTimeout(searchDebounce);var q=this.value.trim();
   if(!q){document.getElementById('searchResults').classList.remove('open');document.getElementById('searchResults').innerHTML='';return;}
-  searchDebounce=setTimeout(function(){doSearch(q);},280);
+  searchDebounce=setTimeout(function(){doSearch(q);},220);
 });
 document.addEventListener('click',function(e){if(!e.target.closest('.search-bar'))document.getElementById('searchResults').classList.remove('open');});
 
 function doSearch(q){
   var res=document.getElementById('searchResults');
-  // First search family names
-  var fFams=families.filter(function(f){return f.name&&f.name.toLowerCase().includes(q.toLowerCase());});
-  var results=fFams.map(function(f){return {type:'family',name:f.name,meta:f.village||'Calnic',id:f.id};});
-  // Also search members via Supabase
+  var nq=norm(q);
+  var fFams=families.filter(function(f){return norm(f.name).indexOf(nq)!==-1;});
+  var results=fFams.map(function(f){return {type:'family',name:f.name,meta:(f.village||'Calnic')+' · '+(f.is_public?t('publica','public'):t('privata','private')),id:f.id};});
   if(!window.supabase){renderSearchResults(results,q,res);return;}
-  var p=window.supabase.from('members').select('id,name,birth_year,death_year,family_id,location').ilike('name','%'+q+'%').limit(8);
-  p.then(function(r){
+  window.supabase.from('members').select('id,name,birth_year,death_year,family_id,location').ilike('name','%'+q+'%').limit(8).then(function(r){
     if(!r.error&&r.data){
       r.data.forEach(function(m){
         var fam=families.find(function(f){return f.id===m.family_id;});
-        var meta=(fam?fam.name+' &middot; ':'')+(m.birth_year||'?')+' — '+(m.death_year||t('viu','living'));
-        results.push({type:'member',name:m.name,meta:meta,id:m.family_id,memberId:m.id});
+        var meta=(fam?fam.name+' · ':'')+(m.birth_year||'?')+' — '+(m.death_year||t('viu','living'));
+        results.push({type:'member',name:m.name,meta:meta,id:m.family_id});
       });
     }
     renderSearchResults(results,q,res);
@@ -509,15 +541,29 @@ function doSearch(q){
 }
 
 function renderSearchResults(results,q,res){
-  if(!results.length){res.innerHTML='<div class="sr-item" style="pointer-events:none;">'+(lang()==='en'?'No results for &laquo;':'Niciun rezultat pentru &laquo;')+escH(q)+'&raquo;.</div>';res.classList.add('open');return;}
+  if(!results.length){res.innerHTML='<div class="sr-item" style="pointer-events:none;">'+(lang()==='en'?'No results for «':'Niciun rezultat pentru «')+escH(q)+'».</div>';res.classList.add('open');return;}
   res.innerHTML='';
-  results.forEach(function(r){
+  results.slice(0,12).forEach(function(r){
     var item=document.createElement('div');item.className='sr-item';
     item.innerHTML='<div class="sr-name">'+(r.type==='member'?'&#128100; ':'&#127807; ')+escH(r.name)+'</div><div class="sr-meta">'+escH(r.meta)+'</div>';
-    item.addEventListener('click',function(){window.location.href='genealogie-familie.html?family='+encodeURIComponent(r.id);});
+    item.addEventListener('click',function(){window.location.href='arborele-satului.html?family='+encodeURIComponent(r.id);});
     res.appendChild(item);
   });
   res.classList.add('open');
+}
+
+function applyIncomingFocus(){
+  var sp=new URLSearchParams(location.search); var family=sp.get('family'), from=sp.get('from'), to=sp.get('to');
+  if(from&&to){
+    document.getElementById('pfFrom').value=from; document.getElementById('pfTo').value=to; document.getElementById('pfBtn').click(); return;
+  }
+  if(family){
+    var match=families.find(function(f){return f.id===family;});
+    if(match){
+      var cards=[].slice.call(document.querySelectorAll('.fc'));
+      cards.forEach(function(c){ if(c.querySelector('.fc-name') && c.querySelector('.fc-name').textContent===match.name){ c.style.borderColor='var(--gold)'; c.style.boxShadow='0 0 0 1px rgba(212,168,74,.35), 0 8px 28px rgba(0,0,0,.45)'; c.scrollIntoView({behavior:'smooth',block:'center'}); } });
+    }
+  }
 }
 
 function showError(msg){
@@ -528,12 +574,8 @@ function applyLang(l){
   document.getElementById('btn-ro').classList.toggle('active',l==='ro');
   document.getElementById('btn-en').classList.toggle('active',l==='en');
   document.querySelectorAll('[data-ro]').forEach(function(el){
-    var v=el.getAttribute('data-'+l);
-    if(v===null)return;
-    var tag=el.tagName;
-    if(tag==='INPUT'||tag==='TEXTAREA'){el.placeholder=v;}
-    else if(tag==='SELECT'){}
-    else{el.textContent=v;}
+    var v=el.getAttribute('data-'+l); if(v===null)return; var tag=el.tagName;
+    if(tag==='INPUT'||tag==='TEXTAREA') el.placeholder=v; else el.textContent=v;
   });
 }
 function initLang(){
@@ -547,7 +589,7 @@ function initScrollBtns(){
   if(st)st.addEventListener('click',function(){window.scrollTo({top:0,behavior:'smooth'});});
   if(sb)sb.addEventListener('click',function(){window.scrollTo({top:document.body.scrollHeight,behavior:'smooth'});});
 }
-function initHamburger(){var h=document.getElementById('hamburgerBtn'),m=document.getElementById('navMobileMenu');if(!h||!m)return;h.addEventListener('click',function(){var o=m.classList.toggle('open');h.textContent=o?'\u2715':'\u2630';});}
+function initHamburger(){var h=document.getElementById('hamburgerBtn'),m=document.getElementById('navMobileMenu');if(!h||!m)return;h.addEventListener('click',function(){var o=m.classList.toggle('open');h.textContent=o?'✕':'☰';});}
 </script>
 </body>
 </html>
