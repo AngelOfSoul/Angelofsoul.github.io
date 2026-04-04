@@ -979,6 +979,8 @@ applyPageLang(window.CalnicUtils ? window.CalnicUtils.lang() : currentLang);
 /* ── NAV SESSION CHECK ── */
 function checkFamilieFamilieNavSession() {
   if (!window.supabase) return;
+  /* If admin-nav already rendered profile controls, avoid competing nav rewrites. */
+  if (document.querySelector('.prf-btn-out, .prf-btn-in, .prf-btn-wrap')) return;
   window.supabase.auth.getUser().then(function(res) {
     var session = res && res.data ? res.data.session : null;
     var user = res && res.data ? (res.data.user || (session && session.user) || null) : null;
