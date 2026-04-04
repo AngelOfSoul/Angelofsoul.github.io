@@ -722,7 +722,8 @@ function initAdminAuth() {
     showScreen('denied'); return;
   }
   window.supabase.auth.getUser().then(function(res) {
-    var session = res.data && res.data.session;
+    var session = res && res.data ? res.data.session : null;
+    var user = res && res.data ? (res.data.user || (session && session.user) || null) : null;
     if (!session) { window.location.href = 'login.html'; return; }
     ADMIN_EMAIL = session.user.email;
     window.supabase

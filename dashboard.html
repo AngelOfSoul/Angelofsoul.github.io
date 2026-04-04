@@ -953,7 +953,8 @@ function initDashboard() {
       window.location.href = 'login.html';
       return;
     }
-    currentUser = session.user;
+    currentUser = (session && session.user) || (sesRes && sesRes.data && sesRes.data.user) || null;
+    if (!currentUser) { window.location.href = 'login.html'; return; }
     var famRes = await fetchCurrentFamily(currentUser.id);
     if (famRes.error || !famRes.data) {
       showNoFamily();

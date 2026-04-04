@@ -559,14 +559,15 @@ function applyPageLang(lang) {
 }
 
 
-setLang(currentLang);
+if (window.setLang) { window.setLang(currentLang); }
 
 /* ── NAV SESSION CHECK ── */
 function checkNavSession() {
   if (!window.supabase) return;
   window.supabase.auth.getUser().then(function(res) {
-    var session = res.data && res.data.session;
-    if (!session || !session.user) return;
+    var session = res && res.data ? res.data.session : null;
+    var user = res && res.data ? (res.data.user || (session && session.user) || null) : null;
+    if (!user) return;
     var navLogin = document.querySelector('a.nav-login');
     var mobileLogin = document.querySelector('a.nav-mobile-login');
     if (navLogin) {

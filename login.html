@@ -794,7 +794,8 @@ async function routeAuthenticatedUser(user) {
 function initLoginAuth() {
   if (!window.supabase) return;
   window.supabase.auth.getUser().then(function(res) {
-    var session = res.data && res.data.session;
+    var session = res && res.data ? res.data.session : null;
+    var user = res && res.data ? (res.data.user || (session && session.user) || null) : null;
     if (session && session.user) {
       routeAuthenticatedUser(session.user);
     }

@@ -866,7 +866,8 @@ applyPageLang(window.CalnicUtils ? window.CalnicUtils.lang() : currentLang);
 function checkAdminNavLink() {
   if (!window.supabase) return;
   window.supabase.auth.getUser().then(function(res) {
-    var session = res.data && res.data.session;
+    var session = res && res.data ? res.data.session : null;
+    var user = res && res.data ? (res.data.user || (session && session.user) || null) : null;
     if (!session) return;
     window.supabase
       .from('profiles')
@@ -1153,9 +1154,10 @@ if (window.supabase) { checkAdminNavLink(); } else { document.addEventListener('
   function boot() {
     if (!window.supabase) return; /* no Supabase configured — stay on guest view */
     window.supabase.auth.getUser().then(function(res) {
-      var session = res.data && res.data.session;
-      if (session) {
-        showMemberView(session);
+      var session = res && res.data ? res.data.session : null;
+      var user = res && res.data ? (res.data.user || (session && session.user) || null) : null;
+      if (user) {
+        showMemberView(session || { user: user });
       }
       /* no session → guest view stays visible (default) */
     });

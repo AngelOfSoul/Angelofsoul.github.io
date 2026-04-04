@@ -207,7 +207,7 @@ function checkNotifications(familyId) {
 async function getCurrentFamilyForUser(userId) {
   if (!window.supabase || !userId) return null;
   try {
-    var res = await window.supabase.from('families').select('*').limit(100);
+    var res = await (window.supabaseClient || window.appSupabase || window.supabase).from('families').select('*').limit(100);
     if (res && !res.error && Array.isArray(res.data)) {
       return res.data.find(function(row){ return row && row.created_by === userId; }) || null;
     }
@@ -217,11 +217,12 @@ async function getCurrentFamilyForUser(userId) {
 
 function initAdminNav() {
   mergeLangIntoNav();
-  if (!window.supabase) {
+  var client = window.supabaseClient || window.appSupabase || window.supabase;
+  if (!client || !client.auth || typeof client.auth.getUser !== 'function') {
     buildProfileButton(null, null, false);
     return;
   }
-  window.supabase.auth.getUser().then(function(res) {
+  client.auth.getUser().then(function(res) {
     var session = res && res.data ? res.data.session : null;
     var user = res && res.data ? (res.data.user || (session && session.user) || null) : null;
     if (!user) {
@@ -247,7 +248,7 @@ function initAdminNav() {
   });
 }
 
-if (window.supabase) { 
+if ((window.supabaseClient || window.appSupabase || window.supabase) && ((window.supabaseClient || window.appSupabase || window.supabase).auth)) { 
   initAdminNav(); 
 } else { 
   document.addEventListener('supabase:ready', initAdminNav); 

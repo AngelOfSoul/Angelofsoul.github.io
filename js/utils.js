@@ -263,7 +263,7 @@
     var btnEn = document.getElementById('btn-en') || document.getElementById('btn-en-li');
     if (btnRo) btnRo.addEventListener('click', function () { setLang('ro'); });
     if (btnEn) btnEn.addEventListener('click', function () { setLang('en'); });
-    setLang(currentLang); // aplica la incarcare
+    if (window.setLang) { window.setLang(currentLang); } // aplica la incarcare
   }
 
   // ─── URL PARAMS ───────────────────────────────────────────────────────────
@@ -360,6 +360,7 @@
   w.showToast   = showToast;
   w.getParam    = getParam;
   w.getSession  = getSession;
+  w.getUser     = getUser;
   w.onSupabaseReady = onSupabaseReady;
   w.setLang = setLang;
 
