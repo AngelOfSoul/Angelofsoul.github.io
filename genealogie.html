@@ -164,6 +164,7 @@ footer .g{color:var(--gold-d);font-style:normal;}
 }
 @media(min-width:741px){.hamburger{display:none!important;}.nav-mobile-menu{display:none!important;}}
 </style>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js"></script>
 </head>
 <body>
 
@@ -366,7 +367,7 @@ if(window.supabase&&window.supabase.from){bootstrapGenealogy();}else{document.ad
 
 async function safeLoadFamilyConnections(){
   var tries=[
-    function(){ return window.supabase.from('v_family_connections').select('*'); },
+    function(){ return window.supabase.from('families').select('*'); },
     function(){ return window.supabase.from('family_links').select('*'); }
   ];
   for(var i=0;i<tries.length;i++){

@@ -250,6 +250,7 @@ footer .g { color:var(--gold-d); font-style:normal; }
 <link rel="icon" type="image/svg+xml" href="favicon.svg">
 <link rel="icon" type="image/x-icon" href="favicon.ico">
 <meta name="description" content="Panoul de control al familiei tale pe Calnic Online.">
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js"></script>
 </head>
 <body>
 
@@ -928,7 +929,7 @@ async function fetchCurrentFamily(userId) {
   try {
     var res = await window.supabase.from('families').select('*').limit(100);
     if (res && !res.error && Array.isArray(res.data)) {
-      var data = res.data.find(function(row){ return row && (row.created_by === userId || row.owner_id === userId); }) || null;
+      var data = res.data.find(function(row){ return row && (row.created_by === userId || row.created_by === userId); }) || null;
       if (data) {
         if (!data.display_name && data.name) data.display_name = data.name;
         if (!data.name && data.display_name) data.name = data.display_name;
@@ -961,7 +962,7 @@ function initDashboard() {
     familyData = famRes.data;
     familyId   = famRes.data.id;
     populateForms();
-    if (familyData && familyData.owner_id && currentUser && familyData.owner_id !== currentUser.id) {
+    if (familyData && familyData.created_by && currentUser && familyData.created_by !== currentUser.id) {
       showMsg('membersMsg', currentLang === 'ro'
         ? 'Atentie: aceasta familie nu este legata complet de contul curent. Unele actiuni pot fi blocate pana repari configurarea din Supabase.'
         : 'Warning: this family is not fully linked to the current account. Some actions may stay blocked until the Supabase setup is fixed.', 'error');
@@ -1077,7 +1078,7 @@ function escHtml(s) {
         slug: slug,
         name: name,
         display_name: name,
-        owner_id: user.id,
+        created_by: user.id,
         created_by: user.id,
         village: 'Calnic',
         visibility: 'public',
@@ -1087,14 +1088,14 @@ function escHtml(s) {
         slug: slug,
         name: name,
         display_name: name,
-        owner_id: user.id,
+        created_by: user.id,
         village: 'Calnic',
         visibility: 'public'
       },
       {
         slug: slug,
         name: name,
-        owner_id: user.id,
+        created_by: user.id,
         visibility: 'public'
       }
     ];

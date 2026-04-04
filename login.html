@@ -442,6 +442,7 @@ footer .g { color:var(--gold-d); font-style:normal; }
 </style>
 <link rel="icon" type="image/svg+xml" href="favicon.svg">
 <link rel="icon" type="image/x-icon" href="favicon.ico">
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js"></script>
 </head>
 <body>
 
@@ -766,7 +767,7 @@ async function findFamilyForUser(userId) {
   try {
     var res = await window.supabase.from('families').select('*').limit(100);
     if (res && !res.error && Array.isArray(res.data)) {
-      return res.data.find(function(row){ return row && (row.created_by === userId || row.owner_id === userId); }) || null;
+      return res.data.find(function(row){ return row && (row.created_by === userId || row.created_by === userId); }) || null;
     }
   } catch (err) {}
   return null;
@@ -990,7 +991,7 @@ async function doFamilyProfile(e) {
     if (descEn) famData.desc_en = descEn;
     var insRes = await window.supabase.from('families').insert([famData]);
     if (insRes.error && /column .*created_by.*does not exist|Could not find.*created_by/i.test(insRes.error.message || '')) {
-      famData = { name: name, village: 'Calnic', owner_id: userId, pin_hash: btoa(pin) };
+      famData = { name: name, village: 'Calnic', created_by: userId, pin_hash: btoa(pin) };
       if (since) famData.since = since;
       if (descRo) famData.desc_ro = descRo;
       if (descEn) famData.desc_en = descEn;

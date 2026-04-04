@@ -176,6 +176,7 @@
   .nav-mobile-menu{display:none!important;}
 }
 </style>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js"></script>
 </head>
 <body>
 
@@ -824,7 +825,7 @@ function loadFamily(){
   showLoading();
   var memberIds=S.members.map(function(m){return m.id;});
   Promise.all([
-    window.supabase.from('families').select('id,name,village,owner_id,connected_to_village,since').eq('id',S.familyId).single(),
+    window.supabase.from('families').select('id,name,village,created_by,connected_to_village,since').eq('id',S.familyId).single(),
     window.supabase.from('members').select('*').eq('family_id',S.familyId).order('birth_year')
   ]).then(function(rs){
     if(rid!==S.reqId)return;
@@ -1277,7 +1278,7 @@ function addPath(svg,d,s,w,dash){var e=mkSvg('path');e.setAttribute('d',d);e.set
 function mkSvg(tag){return document.createElementNS('http://www.w3.org/2000/svg',tag);}
 
 function buildNode(m,pos){
-  var isOwner=S.sessionUid&&S.family&&S.family.owner_id===S.sessionUid;
+  var isOwner=S.sessionUid&&S.family&&S.family.created_by===S.sessionUid;
   var isLiving=m.is_living||(!m.death_year&&!m.is_deceased);
   var _dn=S.members.length;
   var _base=_dn<=20?68:_dn<=50?58:50;
@@ -1445,7 +1446,7 @@ function openDetail(id){
   document.getElementById('dpRelSec').style.display=rels.length?'':'none';
   var bio=m.biography||m.bio||'';document.getElementById('dpBio').textContent=bio;document.getElementById('dpBioSec').style.display=bio?'':'none';
   var story=m.story||'';document.getElementById('dpStory').textContent=story;document.getElementById('dpStorySec').style.display=story?'':'none';
-  var isOwner=S.sessionUid&&S.family&&S.family.owner_id===S.sessionUid;
+  var isOwner=S.sessionUid&&S.family&&S.family.created_by===S.sessionUid;
   document.getElementById('dpEdit').style.display=isOwner?'':'none';
   document.getElementById('dpPhotoBtn').style.display=isOwner?'':'none';
   document.getElementById('detailPanel').classList.add('open');

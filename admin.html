@@ -255,6 +255,7 @@ a{color:var(--gold);text-decoration:none;}
 <link rel="icon" type="image/svg+xml" href="favicon.svg">
 <link rel="icon" type="image/x-icon" href="favicon.ico">
 <meta name="description" content="Panou de administrare Calnic Online.">
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js"></script>
 </head>
 <body>
 
@@ -897,7 +898,7 @@ function loadUsers() {
   // Join profiles + families to get email-equivalent (owner) info
   Promise.all([
     window.supabase.from('profiles').select('id, is_admin, created_at').order('created_at', {ascending: false}),
-    window.supabase.from('families').select('owner_id, name, village, created_at')
+    window.supabase.from('families').select('created_by, name, village, created_at')
   ]).then(function(results) {
     var profiles = results[0].data || [];
     var families = results[1].data || [];
@@ -907,9 +908,9 @@ function loadUsers() {
       return;
     }
 
-    // Map owner_id -> family info
+    // Map created_by -> family info
     var famByOwner = {};
-    families.forEach(function(f) { famByOwner[f.owner_id] = f; });
+    families.forEach(function(f) { famByOwner[f.created_by] = f; });
 
     el.innerHTML = '<div class="tbl-wrap"><table class="adm-tbl">' +
       '<tr>' +
@@ -946,7 +947,7 @@ function loadUsers() {
 function resetUserPassword(userId) {
   if (!window.supabase) return;
   var fam = document.querySelector('#users-list table');
-  // We can't get email from profiles directly — use families owner_id match
+  // We can't get email from profiles directly — use families created_by match
   // Instead show a confirmation and use admin API if available, else inform
   if (!confirm('Trimiti un email de resetare parola acestui utilizator?')) return;
   // Supabase admin.generateLink requires service key — not available client-side.
@@ -1117,7 +1118,7 @@ function runDates() {
 function runOwners() {
   setRepStatus('owner-status', 'Se verifica...', 'warn');
   if (!window.supabase) { setRepStatus('owner-status', 'Supabase offline', 'crit'); return; }
-  window.supabase.from('families').select('id, name, owner_id').is('owner_id', null).then(function(r){
+  window.supabase.from('families').select('id, name, created_by').is('created_by', null).then(function(r){
     var n = (r.data || []).length;
     if (n === 0) { setRepStatus('owner-status', '0 familii fara cont', 'ok'); }
     else { setRepStatus('owner-status', n + ' familii fara cont', 'crit'); }

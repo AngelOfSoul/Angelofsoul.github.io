@@ -209,7 +209,7 @@ async function getCurrentFamilyForUser(userId) {
   try {
     var res = await window.supabase.from('families').select('*').limit(100);
     if (res && !res.error && Array.isArray(res.data)) {
-      return res.data.find(function(row){ return row && (row.created_by === userId || row.owner_id === userId); }) || null;
+      return res.data.find(function(row){ return row && (row.created_by === userId || row.created_by === userId); }) || null;
     }
   } catch (err) {}
   return null;
