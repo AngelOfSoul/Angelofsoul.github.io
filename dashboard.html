@@ -946,17 +946,37 @@ document.getElementById('logoutBtn').addEventListener('click', async function() 
 /* Auth check + family load */
 async function fetchCurrentFamily(userId) {
   if (!window.supabase || !userId) return { data: null, error: null };
-  var res = await window.supabase
-    .from('families')
-    .select('id, slug, name, display_name, notes, visibility, created_by, owner_id, pin_hash, since, desc_ro, desc_en')
-    .or('owner_id.eq.' + userId + ',created_by.eq.' + userId)
-    .limit(1)
-    .maybeSingle();
-  if (res.data) {
-    if (!res.data.display_name && res.data.name) res.data.display_name = res.data.name;
-    if (!res.data.name && res.data.display_name) res.data.name = res.data.display_name;
+
+  var attempts = [
+    function() {
+      return window.supabase.from('families').select('*').eq('owner_id', userId).limit(1).maybeSingle();
+    },
+    function() {
+      return window.supabase.from('families').select('*').eq('created_by', userId).limit(1).maybeSingle();
+    }
+  ];
+
+  var lastError = null;
+  for (var i = 0; i < attempts.length; i++) {
+    try {
+      var res = await attempts[i]();
+      if (res && !res.error) {
+        if (res.data) {
+          if (!res.data.display_name && res.data.name) res.data.display_name = res.data.name;
+          if (!res.data.name && res.data.display_name) res.data.name = res.data.display_name;
+        }
+        return res;
+      }
+      lastError = res && res.error ? res.error : lastError;
+      if (lastError && /column .* does not exist|Could not find/i.test(lastError.message || '')) {
+        continue;
+      }
+    } catch (err) {
+      lastError = err;
+    }
   }
-  return res;
+
+  return { data: null, error: lastError };
 }
 
 function initDashboard() {
@@ -1073,29 +1093,59 @@ function escHtml(s) {
     let slug = baseSlug;
     for (let i = 0; i < 25; i++) {
       const checkRes = await window.supabase.from('families').select('id').eq('slug', slug).maybeSingle();
-      if (!checkRes.data) break;
+      if (!checkRes.error && !checkRes.data) break;
       slug = baseSlug + '-' + Math.floor(1000 + Math.random() * 9000);
     }
 
-    const insertPayload = {
-      slug: slug,
-      name: name,
-      display_name: name,
-      owner_id: user.id,
-      created_by: user.id,
-      village: 'Calnic',
-      visibility: 'public',
-      connected_to_village: true
-    };
+    async function tryInsert(payload) {
+      return await window.supabase
+        .from('families')
+        .insert([payload])
+        .select('*')
+        .single();
+    }
 
-    const famRes = await window.supabase
-      .from('families')
-      .insert([insertPayload])
-      .select('id, slug, name, display_name')
-      .single();
+    var payloads = [
+      {
+        slug: slug,
+        name: name,
+        display_name: name,
+        owner_id: user.id,
+        created_by: user.id,
+        village: 'Calnic',
+        visibility: 'public',
+        connected_to_village: true
+      },
+      {
+        slug: slug,
+        name: name,
+        display_name: name,
+        owner_id: user.id,
+        village: 'Calnic',
+        visibility: 'public'
+      },
+      {
+        slug: slug,
+        name: name,
+        owner_id: user.id,
+        visibility: 'public'
+      }
+    ];
 
-    if (famRes.error) {
-      showMsg('familyModalMsg', famRes.error.message, 'err');
+    var famRes = null;
+    for (var p = 0; p < payloads.length; p++) {
+      famRes = await tryInsert(payloads[p]);
+      if (!famRes.error) break;
+      if ((famRes.error.code === '23505' || /duplicate key|unique constraint/i.test(famRes.error.message || '')) && p < payloads.length) {
+        slug = baseSlug + '-' + Math.floor(1000 + Math.random() * 9000);
+        payloads.forEach(function(obj){ obj.slug = slug; });
+        continue;
+      }
+      if (!/column .* does not exist|Could not find/i.test(famRes.error.message || '')) break;
+    }
+
+    if (!famRes || famRes.error) {
+      showMsg('familyModalMsg', famRes && famRes.error ? famRes.error.message : 'Eroare la creare.', 'error');
       return;
     }
 
