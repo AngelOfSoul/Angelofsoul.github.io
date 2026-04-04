@@ -769,7 +769,7 @@ function setLoading(btnId, loading) {
 async function findFamilyForUser(userId) {
   if (!window.supabase || !userId) return null;
   function ownsFamily(row) {
-    return !!(row && (row.created_by === userId || row.owner_id === userId));
+    return !!(row && row.created_by === userId);
   }
   function sortFamilies(rows) {
     return (rows || []).slice().sort(function(a, b) {
@@ -789,13 +789,6 @@ async function findFamilyForUser(userId) {
       var byPref = await supabase.from('families').select('*').eq('id', preferredId).maybeSingle();
       if (byPref && !byPref.error && ownsFamily(byPref.data)) return byPref.data;
     }
-
-    var byOwner = await supabase.from('families').select('*').eq('owner_id', userId).order('created_at', { ascending: true }).limit(1);
-    if (byOwner && !byOwner.error && Array.isArray(byOwner.data) && byOwner.data.length) {
-      localStorage.setItem('selectedFamily', byOwner.data[0].id);
-      return byOwner.data[0];
-    }
-    if (byOwner && byOwner.error && !isMissingColumnError(byOwner.error)) return null;
 
     var byCreated = await supabase.from('families').select('*').eq('created_by', userId).order('created_at', { ascending: true }).limit(1);
     if (byCreated && !byCreated.error && Array.isArray(byCreated.data) && byCreated.data.length) {
@@ -1034,9 +1027,7 @@ async function doFamilyProfile(e) {
     if (descRo) base.desc_ro = descRo;
     if (descEn) base.desc_en = descEn;
     var payloads = [
-      Object.assign({}, base, { owner_id: userId, created_by: userId }),
       Object.assign({}, base, { created_by: userId }),
-      Object.assign({}, base, { owner_id: userId }),
       Object.assign({}, base)
     ];
     var insRes = null;

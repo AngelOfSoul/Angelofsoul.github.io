@@ -703,7 +703,7 @@ function loadFamilyData() {
         storyRo:   r.desc_ro || '',
         storyEn:   r.desc_en || '',
         story:     r.desc_ro || '',
-        ownerId:   r.created_by || r.owner_id || null
+        ownerId:   r.created_by || null
       };
 
       MEMBERS = (membersRes.data || []).map(function(m) {

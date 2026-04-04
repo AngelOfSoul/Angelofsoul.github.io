@@ -1069,7 +1069,7 @@ if (window.supabase) { checkAdminNavLink(); } else { document.addEventListener('
     (async function(){
       async function findFamilyForUser(userId) {
         function ownsFamily(row) {
-          return !!(row && (row.created_by === userId || row.owner_id === userId));
+          return !!(row && row.created_by === userId);
         }
         function sortFamilies(rows) {
           return (rows || []).slice().sort(function(a, b) {
@@ -1089,13 +1089,6 @@ if (window.supabase) { checkAdminNavLink(); } else { document.addEventListener('
             var byPref = await supabase.from('families').select('*').eq('id', preferredId).maybeSingle();
             if (byPref && !byPref.error && ownsFamily(byPref.data)) return byPref.data;
           }
-
-          var byOwner = await supabase.from('families').select('*').eq('owner_id', userId).order('created_at', { ascending: true }).limit(1);
-          if (byOwner && !byOwner.error && Array.isArray(byOwner.data) && byOwner.data.length) {
-            localStorage.setItem('selectedFamily', byOwner.data[0].id);
-            return byOwner.data[0];
-          }
-          if (byOwner && byOwner.error && !isMissingColumnError(byOwner.error)) return null;
 
           var byCreated = await supabase.from('families').select('*').eq('created_by', userId).order('created_at', { ascending: true }).limit(1);
           if (byCreated && !byCreated.error && Array.isArray(byCreated.data) && byCreated.data.length) {

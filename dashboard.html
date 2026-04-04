@@ -964,7 +964,7 @@ async function fetchCurrentFamily(userId) {
     return row;
   }
   function ownsFamily(row) {
-    return !!(row && (row.owner_id === userId || row.created_by === userId));
+    return !!(row && row.created_by === userId);
   }
   function sortFamilies(rows) {
     return (rows || []).slice().sort(function(a, b) {
@@ -994,19 +994,13 @@ async function fetchCurrentFamily(userId) {
       }
     }
 
-    var byOwner = await tryByColumn('owner_id');
-    if (byOwner.data) {
-      localStorage.setItem('selectedFamily', byOwner.data.id);
-      return { data: normalizeFamilyRow(byOwner.data), error: null };
-    }
-
     var byCreated = await tryByColumn('created_by');
     if (byCreated.data) {
       localStorage.setItem('selectedFamily', byCreated.data.id);
       return { data: normalizeFamilyRow(byCreated.data), error: null };
     }
 
-    var fallbackErr = byCreated.error || byOwner.error;
+    var fallbackErr = byCreated.error;
     if (fallbackErr && !isMissingColumnError(fallbackErr)) {
       return { data: null, error: fallbackErr };
     }
