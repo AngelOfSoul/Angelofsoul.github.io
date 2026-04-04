@@ -1156,6 +1156,16 @@ function escHtml(s) {
         slug: slug,
         name: name,
         display_name: name,
+        owner_id: user.id,
+        created_by: user.id,
+        village: 'Calnic',
+        visibility: 'public',
+        connected_to_village: true
+      },
+      {
+        slug: slug,
+        name: name,
+        display_name: name,
         created_by: user.id,
         village: 'Calnic',
         visibility: 'public',
@@ -1172,7 +1182,20 @@ function escHtml(s) {
       {
         slug: slug,
         name: name,
+        owner_id: user.id,
         created_by: user.id,
+        visibility: 'public'
+      },
+      {
+        slug: slug,
+        name: name,
+        created_by: user.id,
+        visibility: 'public'
+      },
+      {
+        slug: slug,
+        name: name,
+        owner_id: user.id,
         visibility: 'public'
       }
     ];

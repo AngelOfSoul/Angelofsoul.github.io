@@ -812,9 +812,6 @@ async function findFamilyForUser(userId) {
 /* Route an already-authenticated user: Step 2 if no family, else logged-in box */
 async function routeAuthenticatedUser(user) {
   var famCheck = await findFamilyForUser(user.id);
-  if (famCheck.error) {
-    console.error('[Calnic] families query error:', famCheck.error.message);
-  }
   if (famCheck && famCheck.id) {
     showLoggedIn(user);
   } else {
@@ -1027,7 +1024,9 @@ async function doFamilyProfile(e) {
     if (descRo) base.desc_ro = descRo;
     if (descEn) base.desc_en = descEn;
     var payloads = [
+      Object.assign({}, base, { owner_id: userId, created_by: userId }),
       Object.assign({}, base, { created_by: userId }),
+      Object.assign({}, base, { owner_id: userId }),
       Object.assign({}, base)
     ];
     var insRes = null;
