@@ -176,7 +176,7 @@
   .nav-mobile-menu{display:none!important;}
 }
 </style>
-<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js"></script>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
 </head>
 <body>
 
@@ -551,10 +551,6 @@
     <a href="contact.html" style="color:#7a5828;font-size:13px;font-style:normal;letter-spacing:1px;" data-ro="Contact" data-en="Contact">Contact</a>
   </div>
 </footer>
-<script src="js/config.js"></script>
-<script src="js/supabase.js"></script>
-<script src="js/utils.js"></script>
-<script src="js/admin-nav.js"></script>
 <!-- Adauga legatura modal -->
 <div id="relModal" style="display:none;position:fixed;inset:0;z-index:20000;background:rgba(0,0,0,0.82);align-items:center;justify-content:center;">
   <div style="background:#0d0d0d;border:1px solid var(--gold-d);border-radius:4px;padding:0;width:420px;max-width:96vw;max-height:92vh;overflow-y:auto;position:relative;display:flex;flex-direction:column;">
@@ -601,6 +597,10 @@
   </div>
 </div>
 
+<script src="js/config.js"></script>
+<script src="js/supabase.js"></script>
+<script src="js/utils.js"></script>
+<script src="js/admin-nav.js"></script>
 <script>
 'use strict';
 

@@ -26,7 +26,12 @@ nav{background:var(--s1);border-bottom:2px solid var(--gold-d);display:flex;flex
 .node text{fill:var(--text);font-size:13px;pointer-events:none;text-anchor:middle}.node circle{stroke-width:2px;cursor:pointer}
 footer{background:#050505;border-top:2px solid var(--gold-d);padding:16px 24px;text-align:center;font-size:13px;color:var(--muted);letter-spacing:1.5px;font-style:italic}footer .g{color:var(--gold-d);font-style:normal}
 </style>
-<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js"></script>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
+<script src="js/config.js"></script>
+<script src="js/supabase.js"></script>
+<script src="js/utils.js"></script>
+<script src="js/admin-nav.js"></script>
+
 </head>
 <body>
 <div class="lang-bar"><span class="lang-label">LIMBA</span><button class="lang-btn active" id="btn-ro">RO</button><button class="lang-btn" id="btn-en">EN</button></div>
@@ -105,10 +110,6 @@ footer{background:#050505;border-top:2px solid var(--gold-d);padding:16px 24px;t
   </aside>
 </div>
 <footer><div style="max-width:960px;margin:0 auto;display:flex;flex-wrap:wrap;align-items:center;justify-content:center;gap:6px 16px;"><span><span class="g">Calnic</span> · Alba · Romania · <span id="yr"></span></span><span style="color:#2a2a2a;">·</span><span data-ro="Sat cu suflet, memorie vie" data-en="A village with soul, a living memory">Sat cu suflet, memorie vie</span></div></footer>
-<script src="js/config.js"></script>
-<script src="js/supabase.js"></script>
-<script src="js/utils.js"></script>
-<script src="js/admin-nav.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/d3@7"></script>
 <script src="js/data-adapter.js"></script>
 <script src="js/sat-tree.js"></script>

@@ -335,8 +335,12 @@ footer .g { color:var(--gold-d); font-style:normal; }
 </style>
 <link rel="icon" type="image/svg+xml" href="favicon.svg">
 <link rel="icon" type="image/x-icon" href="favicon.ico">
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
+<script src="js/config.js"></script>
+<script src="js/supabase.js"></script>
+<script src="js/utils.js"></script>
+<script src="js/admin-nav.js"></script>
 <script type="application/ld+json">{"@context":"https://schema.org","@type":"WebPage","name":"Galerie Foto — Calnic Online","description":"Galeria foto a satului Calnic, Alba, Transilvania — imagini vechi si noi din sat, cetatea UNESCO, viata comunitatii.","url":"https://calniconline.ro/galerie.html","isPartOf":{"@type":"WebSite","name":"Calnic Online","url":"https://calniconline.ro"}}</script>
-<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js"></script>
 </head>
 <body>
 
@@ -1013,10 +1017,5 @@ if (window.supabase) { loadPhotosFromSupabase(); } else { document.addEventListe
 </script>
 
 <button class="float-add" id="floatAdd" onclick="openUpload()">+ Adauga fotografie</button>
-
-<script src="js/config.js"></script>
-<script src="js/supabase.js"></script>
-<script src="js/utils.js"></script>
-<script src="js/admin-nav.js"></script>
 </body>
 </html>

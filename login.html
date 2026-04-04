@@ -442,7 +442,7 @@ footer .g { color:var(--gold-d); font-style:normal; }
 </style>
 <link rel="icon" type="image/svg+xml" href="favicon.svg">
 <link rel="icon" type="image/x-icon" href="favicon.ico">
-<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js"></script>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
 </head>
 <body>
 
@@ -703,6 +703,10 @@ footer .g { color:var(--gold-d); font-style:normal; }
   </div>
 </div>
 
+<script src="js/config.js"></script>
+<script src="js/supabase.js"></script>
+<script src="js/utils.js"></script>
+<script src="js/admin-nav.js"></script>
 <script>
 document.getElementById('yr').textContent = new Date().getFullYear();
 
@@ -1028,11 +1032,5 @@ document.addEventListener('keydown', function(e) {
 </script>
 
 <!-- Load Supabase client -->
-<script src="js/config.js"></script>
-<script src="js/supabase.js"></script>
-<script src="js/utils.js"></script>
-<script src="js/admin-nav.js"></script>
-
 </body>
 </html>
-

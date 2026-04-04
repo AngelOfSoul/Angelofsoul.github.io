@@ -215,8 +215,12 @@ footer .g{color:var(--gold-d);font-style:normal;}
 </style>
 <link rel="icon" type="image/svg+xml" href="favicon.svg">
 <link rel="icon" type="image/x-icon" href="favicon.ico">
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
+<script src="js/config.js"></script>
+<script src="js/supabase.js"></script>
+<script src="js/utils.js"></script>
+<script src="js/admin-nav.js"></script>
 <script type="application/ld+json">{"@context":"https://schema.org","@type":"WebPage","name":"Intrebari frecvente — Calnic Online","description":"Intrebari frecvente despre Calnic Online — cum functioneaza site-ul, cum adaugi familia, date private si securitate.","url":"https://calniconline.ro/intrebari.html","isPartOf":{"@type":"WebSite","name":"Calnic Online","url":"https://calniconline.ro"}}</script>
-<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js"></script>
 </head>
 <body>
 
@@ -579,9 +583,5 @@ function checkNavSession() {
 }
 if (window.supabase) { checkNavSession(); } else { document.addEventListener('supabase:ready', checkNavSession); }
 </script>
-<script src="js/config.js"></script>
-<script src="js/supabase.js"></script>
-<script src="js/utils.js"></script>
-<script src="js/admin-nav.js"></script>
 </body>
 </html>
