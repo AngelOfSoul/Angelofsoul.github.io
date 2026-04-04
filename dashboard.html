@@ -285,12 +285,7 @@ footer .g { color:var(--gold-d); font-style:normal; }
 </div>
 
 <div class="dash-wrap" id="dashWrap">
- <div id="family-container"></div>
-  <!-- 🔽 ADAUGĂ AICI -->
-  <div id="family-container"></div>
-
-  <!-- restul codului tău continuă -->
-  <!-- Loading state -->
+   <!-- Loading state -->
   <div id="dashLoading" class="dash-loading">
     <div class="dash-spinner"></div>
     <span data-ro="Se incarca..." data-en="Loading...">Se incarca...</span>
@@ -299,7 +294,7 @@ footer .g { color:var(--gold-d); font-style:normal; }
   <!-- No family found -->
   <div id="dashNoFamily" style="display:none;" class="dash-msg-box">
     <div data-ro="Nu ai inca un profil de familie." data-en="You don't have a family profile yet.">Nu ai inca un profil de familie.</div>
-    <a href="login.html" class="dash-btn" data-ro="Creeaza profilul familiei" data-en="Create family profile">Creeaza profilul familiei</a>
+    <button id="createFamilyBtn" type="button" class="dash-btn" data-ro="Creeaza profilul familiei" data-en="Create family profile">Creeaza profilul familiei</button>
   </div>
 
   <!-- Main dashboard (shown after family loaded) -->
@@ -611,18 +606,18 @@ function showMsg(id, text, type) {
 /* Populate form fields from family data */
 function populateForms() {
   if (!familyData) return;
-  document.getElementById('storyName').value = familyData.name || '';
-  document.getElementById('storySince').value = familyData.since || '';
-  document.getElementById('storyDescRo').value = familyData.desc_ro || '';
-  document.getElementById('storyDescEn').value = familyData.desc_en || '';
-  document.getElementById('privShowMembers').checked = familyData.show_members !== false;
-  document.getElementById('privShowGenerations').checked = familyData.show_generations !== false;
-  document.getElementById('privShowPhotos').checked = familyData.show_photos !== false;
-  document.getElementById('privShowSince').checked = familyData.show_since !== false;
-  document.getElementById('dashFamilyName').textContent = 'Familia ' + (familyData.name || '');
+  document.getElementById('storyName').value = familyData.display_name || '';
+  document.getElementById('storySince').value = '';
+  document.getElementById('storyDescRo').value = familyData.notes || '';
+  document.getElementById('storyDescEn').value = '';
+  document.getElementById('privShowMembers').checked = familyData.visibility !== 'private';
+  document.getElementById('privShowGenerations').checked = true;
+  document.getElementById('privShowPhotos').checked = true;
+  document.getElementById('privShowSince').checked = true;
+  document.getElementById('dashFamilyName').textContent = 'Familia ' + (familyData.display_name || '');
   if (currentUser) document.getElementById('dashUserEmail').textContent = currentUser.email || '';
   var pubLink = document.getElementById('viewPublicLink');
-  if (pubLink) pubLink.href = 'familiile-familie.html?family=' + familyId;
+  if (pubLink) pubLink.href = 'familiile-familie.html?family=' + encodeURIComponent(familyData.slug || familyId);
 }
 
 /* Save story */
@@ -631,19 +626,19 @@ async function saveStory() {
   var nameV = document.getElementById('storyName').value.trim();
   if (!nameV) { showMsg('storyMsg', currentLang==='ro'?'Numele familiei este obligatoriu.':'Family name is required.', 'error'); return; }
   btn.disabled = true;
+  var slug = nameV.toLowerCase().normalize('NFD').replace(/[̀-ͯ]/g, '').replace(/[^a-z0-9]+/g, '-').replace(/^-+|-+$/g, '');
   var updates = {
-    name:    document.getElementById('storyName').value.trim(),
-    since:   document.getElementById('storySince').value ? parseInt(document.getElementById('storySince').value,10) : null,
-    desc_ro: document.getElementById('storyDescRo').value.trim(),
-    desc_en: document.getElementById('storyDescEn').value.trim()
+    display_name: nameV,
+    notes: document.getElementById('storyDescRo').value.trim(),
+    slug: slug
   };
   var res = await window.supabase.from('families').update(updates).eq('id', familyId);
   if (res.error) {
     showMsg('storyMsg', res.error.message, 'error');
   } else {
-    familyData = Object.assign({}, familyData, updates);
-    document.getElementById('dashFamilyName').textContent = 'Familia ' + (familyData.name || '');
-    showMsg('storyMsg', currentLang === 'ro' ? 'Salvat cu succes!' : 'Saved successfully!', 'success');
+    familyData = Object.assign({}, familyData || {}, updates);
+    showMsg('storyMsg', currentLang==='ro'?'Salvat cu succes!':'Saved successfully!', 'success');
+    populateForms();
   }
   btn.disabled = false;
 }
@@ -911,43 +906,20 @@ async function savePrivacy() {
   var btn = document.getElementById('privacyBtn');
   btn.disabled = true;
   var updates = {
-    show_members:     document.getElementById('privShowMembers').checked,
-    show_generations: document.getElementById('privShowGenerations').checked,
-    show_photos:      document.getElementById('privShowPhotos').checked,
-    show_since:       document.getElementById('privShowSince').checked
+    visibility: document.getElementById('privShowMembers').checked ? 'public' : 'private'
   };
   var res = await window.supabase.from('families').update(updates).eq('id', familyId);
   if (res.error) {
     showMsg('privacyMsg', res.error.message, 'error');
   } else {
-    familyData = Object.assign({}, familyData, updates);
-    showMsg('privacyMsg', currentLang === 'ro' ? 'Setari salvate!' : 'Settings saved!', 'success');
+    familyData = Object.assign({}, familyData || {}, updates);
+    showMsg('privacyMsg', currentLang==='ro'?'Vizibilitatea a fost actualizata.':'Visibility updated.', 'success');
   }
   btn.disabled = false;
 }
 
 async function changePIN() {
-  var newPin     = document.getElementById('newPinInput').value;
-  var confirmPin = document.getElementById('confirmPinInput').value;
-  if (newPin !== confirmPin) {
-    showMsg('pinMsg', currentLang === 'ro' ? 'PIN-urile nu coincid.' : 'PINs do not match.', 'error');
-    return;
-  }
-  if (!/^[0-9]{4,8}$/.test(newPin)) {
-    showMsg('pinMsg', currentLang === 'ro' ? 'PIN-ul trebuie sa fie 4-8 cifre numerice.' : 'PIN must be 4-8 numeric digits.', 'error');
-    return;
-  }
-  var btn = document.getElementById('pinBtn');
-  btn.disabled = true;
-  var res = await window.supabase.from('families').update({ pin_hash: btoa(newPin) }).eq('id', familyId);
-  if (res.error) {
-    showMsg('pinMsg', res.error.message, 'error');
-  } else {
-    showMsg('pinMsg', currentLang === 'ro' ? 'PIN schimbat cu succes!' : 'PIN changed successfully!', 'success');
-    document.getElementById('newPinInput').value = '';
-    document.getElementById('confirmPinInput').value = '';
-  }
-  btn.disabled = false;
+  showMsg('pinMsg', currentLang === 'ro' ? 'PIN-ul nu este configurat in schema actuala.' : 'PIN is not configured in the current schema.', 'error');
 }
 
 /* Logout */
@@ -970,7 +942,7 @@ function initDashboard() {
       return;
     }
     currentUser = session.user;
-    window.supabase.from('families').select('*').eq('owner_id', currentUser.id).single().then(function(famRes) {
+    window.supabase.from('families').select('id, slug, display_name, notes, visibility, created_by, pin_hash').eq('created_by', currentUser.id).maybeSingle().then(function(famRes) {
       if (famRes.error || !famRes.data) {
         showNoFamily();
         return;
@@ -1021,90 +993,45 @@ function escHtml(s) {
 }
 </script>
 <script>
-document.addEventListener("supabase:ready", async () => {
-  const supabase = window.supabase;
-
-  const { data: userData } = await supabase.auth.getUser();
-  const user = userData?.user;
-  if (!user) return;
-
-  const container = document.getElementById("family-container");
-  if (!container) return;
-
-  const { data: families } = await supabase
-    .from("families")
-    .select("id, slug, display_name")
-    .eq("created_by", user.id)
-    .limit(1);
-
-  if (families && families.length > 0) {
-    const f = families[0];
-
-    container.innerHTML = `
-      <div class="dash-section">
-        <div class="dash-section-body">
-          <h2>${f.display_name}</h2>
-          <button class="dash-btn" id="open-family">Deschide familia</button>
-        </div>
-      </div>
-    `;
-
-    document.getElementById("open-family").onclick = () => {
-      localStorage.setItem("selectedFamily", f.slug);
-      window.location.href = "genealogie.html";
-    };
-
-  } else {
-    container.innerHTML = `
-      <div class="calnic-empty">
-        <div class="calnic-empty-icon">🏛️</div>
-        <div class="calnic-empty-title">Nu ai încă o familie</div>
-        <div class="calnic-empty-sub">
-          Creează profilul familiei pentru a începe genealogia
-        </div>
-        <button class="calnic-empty-btn" id="create-family">
-          Creează profilul familiei
-        </button>
-      </div>
-    `;
-
-    document.getElementById("create-family").onclick = async () => {
-      const name = prompt("Numele familiei:");
-      if (!name) return;
-
-      const slug = name
-        .toLowerCase()
-        .normalize("NFD")
-        .replace(/[\u0300-\u036f]/g, "")
-        .replace(/[^a-z0-9]+/g, "-")
-        .replace(/^-+|-+$/g, "");
-
-      const { data: family, error } = await supabase
-        .from("families")
-        .insert([{
-          slug,
-          display_name: name,
-          created_by: user.id,
-          visibility: "public"
-        }])
-        .select()
-        .single();
-
-      if (error) {
-        alert(error.message);
-        return;
-      }
-
-      await supabase.from("persons").insert([{
-        display_name: name,
-        family_id: family.id
-      }]);
-
-      localStorage.setItem("selectedFamily", family.slug);
-      window.location.href = "genealogie.html";
-    };
+(function(){
+  function slugify(text) {
+    return String(text || '')
+      .toLowerCase()
+      .normalize('NFD').replace(/[̀-ͯ]/g, '')
+      .replace(/[^a-z0-9]+/g, '-')
+      .replace(/^-+|-+$/g, '');
   }
-});
+
+  async function createFamilyFromDashboard() {
+    if (!window.supabase) return;
+    const sesRes = await window.supabase.auth.getSession();
+    const session = sesRes.data && sesRes.data.session;
+    if (!session) { window.location.href = 'login.html'; return; }
+    const user = session.user;
+    const name = prompt('Numele familiei:');
+    if (!name) return;
+    const slug = slugify(name);
+
+    const famRes = await window.supabase
+      .from('families')
+      .insert([{ slug: slug, display_name: name, created_by: user.id, visibility: 'public' }])
+      .select('id, slug, display_name')
+      .single();
+
+    if (famRes.error) { alert(famRes.error.message); return; }
+
+    const personRes = await window.supabase.from('persons').insert([{ display_name: name, family_id: famRes.data.id }]);
+    if (personRes.error) { alert(personRes.error.message); return; }
+
+    localStorage.setItem('selectedFamily', famRes.data.slug);
+    window.location.href = 'genealogie.html';
+  }
+
+  document.addEventListener('DOMContentLoaded', function(){
+    var btn = document.getElementById('createFamilyBtn');
+    if (btn) btn.addEventListener('click', createFamilyFromDashboard);
+  });
+})();
 </script>
 </body>
 </html>
