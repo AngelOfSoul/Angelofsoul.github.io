@@ -217,13 +217,13 @@ function initAdminNav() {
       return;
     }
     Promise.all([
-      window.supabase.from('families').select('name,id').eq('owner_id', session.user.id).maybeSingle(),
+      window.supabase.from('families').select('id,name,display_name,owner_id,created_by').or('owner_id.eq.' + session.user.id + ',created_by.eq.' + session.user.id).limit(1).maybeSingle(),
       window.supabase.from('profiles').select('is_admin').eq('id', session.user.id).limit(1)
     ]).then(function(results) {
       var familyData = results[0].data;
       var profileArr = results[1].data;
       var profileData = Array.isArray(profileArr) ? profileArr[0] : profileArr;
-      var familyName = familyData ? familyData.name : 'Profilul Meu';
+      var familyName = familyData ? (familyData.display_name || familyData.name) : 'Profilul Meu';
       var familyId = familyData ? familyData.id : null;
       var isAdmin = profileData && profileData.is_admin;
       checkNotifications(familyId).then(function(hasNotif) {

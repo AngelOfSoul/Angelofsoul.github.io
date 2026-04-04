@@ -1,145 +1,315 @@
-import { supabase } from "./supabase.js";
+(function () {
+  'use strict';
 
-const width = window.innerWidth;
-const height = window.innerHeight;
+  function qs(id) { return document.getElementById(id); }
+  function lang() { return localStorage.getItem('calnic-lang') || 'ro'; }
+  function t(ro, en) { return lang() === 'en' ? en : ro; }
+  function esc(s) { return String(s == null ? '' : s).replace(/[&<>"']/g, function (ch) { return ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'})[ch]; }); }
+  function params() { return new URLSearchParams(window.location.search); }
 
-const svg = d3.select("#tree")
-  .append("svg")
-  .attr("width", width)
-  .attr("height", height);
+  var shell = qs('tree-container');
+  var svgEl = qs('village-tree');
+  var tooltip = qs('tooltip');
+  var modal = qs('family-modal');
+  var modalTitle = qs('modal-title');
+  var modalText = qs('modal-text');
+  var modalFamilyLink = qs('modal-family-link');
+  var modalGenealogyLink = qs('modal-genealogy-link');
+  var statusEl = qs('status');
+  var searchInput = qs('family-search');
+  var familyList = qs('family-list');
+  var relationFrom = qs('relation-from');
+  var relationTo = qs('relation-to');
+  var clearBtn = qs('clear-selection');
+  var fitBtn = qs('fit-view');
+  var findBtn = qs('find-relation');
 
-const g = svg.append("g");
+  var svg = d3.select(svgEl);
+  var g = svg.append('g');
+  var zoom = d3.zoom().scaleExtent([0.35, 3]).on('zoom', function (event) { g.attr('transform', event.transform); });
+  svg.call(zoom);
 
-svg.call(
-  d3.zoom().on("zoom", (event) => {
-    g.attr("transform", event.transform);
-  })
-);
+  var graphData = null;
+  var simulation = null;
+  var currentTransform = d3.zoomIdentity;
+  var selectedNodeId = null;
+  var highlightedPathKeys = {};
 
-let currentNodes = [];
-let currentLinks = [];
+  function resizeSvg() {
+    var w = shell.clientWidth || 900;
+    var h = 760;
+    svg.attr('viewBox', '0 0 ' + w + ' ' + h).attr('width', w).attr('height', h);
+    if (simulation) simulation.force('center', d3.forceCenter(w / 2, h / 2)).alpha(0.3).restart();
+  }
 
-async function loadData() {
-  const { data: families } = await supabase
-    .from("families")
-    .select("id, slug, display_name, visibility");
+  function status(text) { if (statusEl) statusEl.textContent = text; }
 
-  const { data: linksRaw } = await supabase
-    .from("v_family_connections")
-    .select("*");
+  function populateSelectors(nodes) {
+    var sorted = nodes.slice().sort(function (a, b) { return (a.label || '').localeCompare(b.label || '', 'ro'); });
+    familyList.innerHTML = '';
+    relationFrom.innerHTML = '<option value="">' + t('Alege familia', 'Choose family') + '</option>';
+    relationTo.innerHTML = '<option value="">' + t('Alege familia', 'Choose family') + '</option>';
+    sorted.forEach(function (n) {
+      var label = n.label + (n.village ? ' (' + n.village + ')' : '');
+      var opt1 = document.createElement('option'); opt1.value = n.id; opt1.textContent = label; relationFrom.appendChild(opt1);
+      var opt2 = document.createElement('option'); opt2.value = n.id; opt2.textContent = label; relationTo.appendChild(opt2);
+      var dl = document.createElement('option'); dl.value = n.label; familyList.appendChild(dl);
+    });
+  }
 
-  currentNodes = (families || []).map(f => ({
-    id: f.slug,
-    name: f.display_name,
-    visibility: f.visibility
-  }));
+  function nodeById(id) {
+    return (graphData && graphData.graph.nodes || []).find(function (n) { return String(n.id) === String(id); }) || null;
+  }
 
-  currentLinks = (linksRaw || []).map(l => ({
-    source: l.source,
-    target: l.target
-  }));
+  function openFamilyDetails(node) {
+    if (!node) return;
+    selectedNodeId = node.id;
+    var isPublic = node.visibility === 'public';
+    modal.classList.remove('hidden');
+    modalTitle.textContent = node.label;
+    modalText.innerHTML = isPublic
+      ? esc(t('Familie publica din ' + (node.village || 'Calnic') + '. Poti deschide direct arborele familiei sau poti reveni la lista genealogica.', 'Public family from ' + (node.village || 'Calnic') + '. You can open the family tree directly or return to the genealogy list.'))
+      : esc(t('Familie privata. Numele apare in arborele satului, dar detaliile publice raman ascunse.', 'Private family. The name appears in the village tree, but public details remain hidden.'));
+    modalFamilyLink.href = isPublic ? ('genealogie-familie.html?family=' + encodeURIComponent(node.id)) : '#';
+    modalFamilyLink.style.pointerEvents = isPublic ? 'auto' : 'none';
+    modalFamilyLink.style.opacity = isPublic ? '1' : '.55';
+    modalFamilyLink.textContent = isPublic ? t('Deschide arborele familiei', 'Open family tree') : t('Familie privata', 'Private family');
+    modalGenealogyLink.href = 'genealogie.html';
+    modalGenealogyLink.textContent = t('Vezi in Genealogie', 'See in Genealogy');
+  }
 
-  render();
-}
+  function hideFamilyDetails() { modal.classList.add('hidden'); }
 
-function render() {
-  g.selectAll("*").remove();
+  function fitGraph(duration) {
+    if (!graphData || !graphData.graph.nodes.length) return;
+    var w = shell.clientWidth || 900, h = 760;
+    var nodes = graphData.graph.nodes.filter(function (n) { return isFinite(n.x) && isFinite(n.y); });
+    if (!nodes.length) return;
+    var minX = d3.min(nodes, function (n) { return n.x; }), maxX = d3.max(nodes, function (n) { return n.x; });
+    var minY = d3.min(nodes, function (n) { return n.y; }), maxY = d3.max(nodes, function (n) { return n.y; });
+    var dx = Math.max(200, maxX - minX + 140), dy = Math.max(200, maxY - minY + 140);
+    var scale = Math.max(0.45, Math.min(1.35, 0.92 / Math.max(dx / w, dy / h)));
+    var tx = w / 2 - ((minX + maxX) / 2) * scale;
+    var ty = h / 2 - ((minY + maxY) / 2) * scale;
+    var tr = d3.zoomIdentity.translate(tx, ty).scale(scale);
+    svg.transition().duration(duration || 500).call(zoom.transform, tr);
+  }
 
-  const simulation = d3.forceSimulation(currentNodes)
-    .force("link", d3.forceLink(currentLinks).id(d => d.id).distance(140))
-    .force("charge", d3.forceManyBody().strength(-350))
-    .force("center", d3.forceCenter(width / 2, height / 2));
+  function focusNode(nodeId, duration) {
+    var node = nodeById(nodeId);
+    if (!node || !isFinite(node.x) || !isFinite(node.y)) return;
+    var w = shell.clientWidth || 900, h = 760;
+    var tr = d3.zoomIdentity.translate(w / 2 - node.x * 1.25, h / 2 - node.y * 1.25).scale(1.25);
+    svg.transition().duration(duration || 650).call(zoom.transform, tr);
+    openFamilyDetails(node);
+  }
 
-  const link = g.selectAll(".link")
-    .data(currentLinks)
-    .enter()
-    .append("line")
-    .attr("class", "link");
+  function linkKey(a, b) { return [String(a), String(b)].sort().join('::'); }
 
-  const node = g.selectAll(".node")
-    .data(currentNodes)
-    .enter()
-    .append("g")
-    .attr("class", d => "node " + d.visibility)
-    .call(d3.drag()
-      .on("start", dragstarted)
-      .on("drag", dragged)
-      .on("end", dragended)
-    );
-
-  node.append("circle")
-    .attr("r", 20);
-
-  node.append("text")
-    .text(d => d.name)
-    .attr("x", 25)
-    .attr("y", 5);
-
-  node.on("click", (event, d) => {
-    if (d.visibility === "private") {
-      alert("Privat");
-    } else {
-      window.location.href = `familie.html?slug=${d.id}`;
+  function bfs(from, to) {
+    if (!graphData || !from || !to) return null;
+    if (String(from) === String(to)) return [String(from)];
+    var adj = graphData.graph.adjacency || new Map();
+    var q = [[String(from)]], seen = {}; seen[String(from)] = 1;
+    while (q.length) {
+      var path = q.shift();
+      var cur = path[path.length - 1];
+      var neigh = adj.get(String(cur)) || [];
+      for (var i = 0; i < neigh.length; i++) {
+        var nextId = String(neigh[i].nodeId);
+        if (seen[nextId]) continue;
+        var nextPath = path.concat(nextId);
+        if (nextId === String(to)) return nextPath;
+        seen[nextId] = 1;
+        q.push(nextPath);
+      }
     }
+    return null;
+  }
+
+  function applyPath(path) {
+    highlightedPathKeys = {};
+    if (Array.isArray(path) && path.length > 1) {
+      for (var i = 0; i < path.length - 1; i++) highlightedPathKeys[linkKey(path[i], path[i + 1])] = true;
+    }
+    redrawStyles();
+  }
+
+  function redrawStyles() {
+    g.selectAll('.tree-link')
+      .attr('stroke', function (d) { return highlightedPathKeys[linkKey(d.source.id || d.source, d.target.id || d.target)] ? '#f4d88a' : '#59667a'; })
+      .attr('stroke-width', function (d) { return highlightedPathKeys[linkKey(d.source.id || d.source, d.target.id || d.target)] ? 3.4 : 1.7; })
+      .attr('stroke-opacity', function (d) { return highlightedPathKeys[linkKey(d.source.id || d.source, d.target.id || d.target)] ? 1 : 0.72; });
+
+    g.selectAll('.tree-node circle')
+      .attr('fill', function (d) { return d.visibility === 'public' ? '#d4a84a' : '#6f7884'; })
+      .attr('stroke', function (d) {
+        if (String(d.id) === String(selectedNodeId)) return '#f4d88a';
+        return d.visibility === 'public' ? '#f0d596' : '#9aa4b4';
+      })
+      .attr('stroke-width', function (d) { return String(d.id) === String(selectedNodeId) ? 4 : 2; })
+      .attr('r', function (d) { return String(d.id) === String(selectedNodeId) ? 28 : 24; });
+  }
+
+  function attachEvents(nodeSel) {
+    nodeSel
+      .on('mouseenter', function (event, d) {
+        tooltip.style.display = 'block';
+        tooltip.innerHTML = '<strong>' + esc(d.label) + '</strong><br>' + esc(d.village || 'Calnic');
+      })
+      .on('mousemove', function (event) {
+        var rect = shell.getBoundingClientRect();
+        tooltip.style.left = (event.clientX - rect.left + 16) + 'px';
+        tooltip.style.top = (event.clientY - rect.top + 16) + 'px';
+      })
+      .on('mouseleave', function () { tooltip.style.display = 'none'; })
+      .on('click', function (event, d) {
+        selectedNodeId = d.id;
+        redrawStyles();
+        focusNode(d.id, 450);
+      })
+      .call(d3.drag()
+        .on('start', function (event, d) {
+          if (!event.active) simulation.alphaTarget(0.2).restart();
+          d.fx = d.x; d.fy = d.y;
+        })
+        .on('drag', function (event, d) { d.fx = event.x; d.fy = event.y; })
+        .on('end', function (event, d) {
+          if (!event.active) simulation.alphaTarget(0);
+          d.fx = null; d.fy = null;
+        }));
+  }
+
+  function renderGraph() {
+    var nodes = graphData.graph.nodes;
+    var links = graphData.graph.links;
+    g.selectAll('*').remove();
+
+    simulation = d3.forceSimulation(nodes)
+      .force('link', d3.forceLink(links).id(function (d) { return d.id; }).distance(130).strength(0.7))
+      .force('charge', d3.forceManyBody().strength(-700))
+      .force('collide', d3.forceCollide().radius(52))
+      .force('center', d3.forceCenter((shell.clientWidth || 900) / 2, 760 / 2));
+
+    var link = g.append('g').selectAll('line')
+      .data(links)
+      .enter().append('line')
+      .attr('class', 'tree-link');
+
+    var node = g.append('g').selectAll('g')
+      .data(nodes)
+      .enter().append('g')
+      .attr('class', 'tree-node');
+
+    node.append('circle');
+    node.append('text')
+      .attr('dy', 4)
+      .text(function (d) { return d.label; });
+
+    attachEvents(node);
+
+    simulation.on('tick', function () {
+      link
+        .attr('x1', function (d) { return d.source.x; })
+        .attr('y1', function (d) { return d.source.y; })
+        .attr('x2', function (d) { return d.target.x; })
+        .attr('y2', function (d) { return d.target.y; });
+      node.attr('transform', function (d) { return 'translate(' + d.x + ',' + d.y + ')'; });
+    });
+
+    simulation.on('end', function () {
+      redrawStyles();
+      fitGraph(650);
+      applyInitialState();
+    });
+
+    redrawStyles();
+    status(t(nodes.length + ' familii incarcate.', nodes.length + ' families loaded.'));
+  }
+
+  function applyInitialState() {
+    var q = params();
+    var from = q.get('from');
+    var to = q.get('to');
+    var familyId = q.get('family') || localStorage.getItem('selectedFamily');
+    if (from && to) {
+      relationFrom.value = from;
+      relationTo.value = to;
+      var path = bfs(from, to);
+      applyPath(path);
+      if (path && path.length) {
+        selectedNodeId = path[0];
+        redrawStyles();
+        focusNode(path[0], 650);
+        status(t('Legatura evidentiata intre familii.', 'Connection highlighted between families.'));
+      } else {
+        status(t('Nu exista o legatura documentata intre familiile alese.', 'No documented connection found between the selected families.'));
+      }
+    } else if (familyId) {
+      selectedNodeId = familyId;
+      redrawStyles();
+      focusNode(familyId, 650);
+      localStorage.removeItem('selectedFamily');
+    }
+  }
+
+  function searchByLabel() {
+    var value = String(searchInput.value || '').trim().toLowerCase();
+    if (!value || !graphData) return;
+    var match = graphData.graph.nodes.find(function (n) { return String(n.label || '').toLowerCase() === value || String(n.label || '').toLowerCase().indexOf(value) !== -1; });
+    if (match) {
+      selectedNodeId = match.id;
+      redrawStyles();
+      applyPath(null);
+      focusNode(match.id, 500);
+    }
+  }
+
+  async function bootstrap() {
+    try {
+      resizeSvg();
+      if (!window.VillageTreeAdapter || !window.VillageTreeAdapter.fetchVillageTreeData) {
+        throw new Error('Adapterul pentru arborele satului lipseste.');
+      }
+      graphData = await window.VillageTreeAdapter.fetchVillageTreeData();
+      populateSelectors(graphData.graph.nodes);
+      renderGraph();
+    } catch (err) {
+      console.error(err);
+      status(t('Eroare la incarcarea arborelui satului.', 'Error loading the village tree.'));
+    }
+  }
+
+  if (searchInput) searchInput.addEventListener('change', searchByLabel);
+  if (searchInput) searchInput.addEventListener('keydown', function (e) { if (e.key === 'Enter') searchByLabel(); });
+  if (clearBtn) clearBtn.addEventListener('click', function () {
+    selectedNodeId = null;
+    hideFamilyDetails();
+    applyPath(null);
+    redrawStyles();
+    fitGraph(450);
+    history.replaceState({}, '', 'arborele-satului.html');
+  });
+  if (fitBtn) fitBtn.addEventListener('click', function () { fitGraph(450); });
+  if (findBtn) findBtn.addEventListener('click', function () {
+    var from = relationFrom.value, to = relationTo.value;
+    if (!from || !to || from === to) {
+      status(t('Alege doua familii diferite.', 'Choose two different families.'));
+      return;
+    }
+    var path = bfs(from, to);
+    if (!path) {
+      applyPath(null);
+      status(t('Nu exista o legatura documentata intre familiile alese.', 'No documented connection found between the selected families.'));
+      return;
+    }
+    selectedNodeId = path[0];
+    applyPath(path);
+    focusNode(path[0], 500);
+    status(t('Traseu gasit: ' + path.length + ' familii.', 'Path found: ' + path.length + ' families.'));
+    history.replaceState({}, '', 'arborele-satului.html?from=' + encodeURIComponent(from) + '&to=' + encodeURIComponent(to));
   });
 
-  simulation.on("tick", () => {
-    link
-      .attr("x1", d => d.source.x)
-      .attr("y1", d => d.source.y)
-      .attr("x2", d => d.target.x)
-      .attr("y2", d => d.target.y);
-
-    node.attr("transform", d => `translate(${d.x},${d.y})`);
-  });
-
-  autoFocus(node);
-}
-
-function autoFocus(nodeSelection) {
-  const selected = localStorage.getItem("selectedFamily");
-  if (!selected) return;
-
-  setTimeout(() => {
-    const node = nodeSelection.filter(d => d.id === selected);
-
-    if (!node.empty()) {
-      node.select("circle")
-        .attr("stroke", "gold")
-        .attr("stroke-width", 5);
-
-      const d = node.datum();
-
-      const transform = d3.zoomIdentity
-        .translate(width / 2 - d.x, height / 2 - d.y)
-        .scale(1.2);
-
-      svg.transition().duration(800).call(
-        d3.zoom().transform,
-        transform
-      );
-    }
-
-    localStorage.removeItem("selectedFamily");
-  }, 800);
-}
-
-// AUTO REFRESH
-setInterval(loadData, 5000);
-
-loadData();
-
-function dragstarted(event, d) {
-  d.fx = d.x;
-  d.fy = d.y;
-}
-
-function dragged(event, d) {
-  d.fx = event.x;
-  d.fy = event.y;
-}
-
-function dragended(event, d) {
-  d.fx = null;
-  d.fy = null;
-}
+  window.addEventListener('resize', resizeSvg);
+  bootstrap();
+})();
