@@ -37,6 +37,9 @@
     var btnEn = document.getElementById('btn-en');
     if (btnRo) btnRo.classList.toggle('active', lang === 'ro');
     if (btnEn) btnEn.classList.toggle('active', lang === 'en');
+    document.dispatchEvent(new CustomEvent('calnic:langchange', {
+      detail: { lang: lang }
+    }));
   }
 
   /**
@@ -190,21 +193,35 @@
    * Astepteaza DOMContentLoaded daca e nevoie.
    */
   function initHamburger() {
-    function _init() {
-      var ham = document.getElementById('hamburgerBtn');
-      var menu = document.getElementById('navMobileMenu') || document.getElementById('navMobileMenu2');
-      if (!ham || !menu) return;
-      ham.addEventListener('click', function () {
-        var open = menu.style.display === 'flex';
-        menu.style.display = open ? 'none' : 'flex';
-        ham.setAttribute('aria-expanded', String(!open));
+    function syncHamburgerState(ham, menu, open) {
+      menu.classList.toggle('open', open);
+      ham.setAttribute('aria-expanded', String(open));
+      if (ham.dataset.calnicToggleIcon === 'true') {
+        ham.textContent = open ? '\u2715' : '\u2630';
+      }
+    }
+
+    function bindHamburgerPair(buttonId, menuId) {
+      var ham = document.getElementById(buttonId);
+      var menu = document.getElementById(menuId);
+      if (!ham || !menu || ham.dataset.calnicHamburgerBound === 'true') return;
+      ham.dataset.calnicHamburgerBound = 'true';
+      ham.dataset.calnicToggleIcon = 'true';
+      syncHamburgerState(ham, menu, menu.classList.contains('open'));
+      ham.addEventListener('click', function (e) {
+        e.stopPropagation();
+        syncHamburgerState(ham, menu, !menu.classList.contains('open'));
       });
       document.addEventListener('click', function (e) {
         if (!ham.contains(e.target) && !menu.contains(e.target)) {
-          menu.style.display = 'none';
-          ham.setAttribute('aria-expanded', 'false');
+          syncHamburgerState(ham, menu, false);
         }
       });
+    }
+
+    function _init() {
+      bindHamburgerPair('hamburgerBtn', 'navMobileMenu');
+      bindHamburgerPair('hamburgerBtn2', 'navMobileMenu2');
     }
     if (document.readyState === 'loading') {
       document.addEventListener('DOMContentLoaded', _init);
@@ -335,5 +352,6 @@
   w.getParam    = getParam;
   w.getSession  = getSession;
   w.onSupabaseReady = onSupabaseReady;
+  w.setLang = setLang;
 
 }(window));

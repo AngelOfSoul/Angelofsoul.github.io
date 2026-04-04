@@ -738,11 +738,8 @@ function filterFamilies() {
 }
 
 // ── LANGUAGE ──
-function setLang(lang) {
+function applyPageLang(lang) {
   currentLang = lang;
-  localStorage.setItem('calnic-lang', lang);
-  document.getElementById('btn-ro').classList.toggle('active', lang === 'ro');
-  document.getElementById('btn-en').classList.toggle('active', lang === 'en');
 
   document.querySelectorAll('[data-ro]').forEach(function(el) {
     var val = el.getAttribute('data-' + lang);
@@ -756,21 +753,10 @@ function setLang(lang) {
   filterFamilies();
 }
 
-// ── SCROLL BUTTONS ──
-function updateScrollBtns() {
-  var t = document.getElementById('scrollTop');
-  var b = document.getElementById('scrollBottom');
-  var scrolled = window.scrollY > 300;
-  var atBottom = (window.innerHeight + window.scrollY) >= document.body.scrollHeight - 100;
-  if (t) { t.style.opacity = scrolled ? '1' : '0'; t.style.pointerEvents = scrolled ? 'auto' : 'none'; }
-  if (b) { b.style.opacity = atBottom ? '0' : '1'; b.style.pointerEvents = atBottom ? 'none' : 'auto'; }
-}
-window.addEventListener('scroll', updateScrollBtns);
-window.addEventListener('load', updateScrollBtns);
-setTimeout(updateScrollBtns, 100);
 
 // ── INIT ──
-setLang(currentLang);
+document.addEventListener('calnic:langchange', function(e) { applyPageLang(e.detail.lang); });
+applyPageLang(window.CalnicUtils ? window.CalnicUtils.lang() : currentLang);
 
 /* ── NAV SESSION CHECK ── */
 function checkFamiliiNavSession() {
@@ -794,15 +780,6 @@ function checkFamiliiNavSession() {
 }
 if (window.supabase) { checkFamiliiNavSession(); } else { document.addEventListener('supabase:ready', checkFamiliiNavSession); }
 
-// Hamburger menu
-var ham = document.getElementById('hamburgerBtn');
-var mobileMenu = document.getElementById('navMobileMenu');
-if (ham && mobileMenu) {
-  ham.addEventListener('click', function() {
-    mobileMenu.classList.toggle('open');
-    ham.textContent = mobileMenu.classList.contains('open') ? '✕' : '☰';
-  });
-}
 </script>
 
 <!-- Load Supabase client -->

@@ -360,7 +360,7 @@ var villageConnections=[];
 var connectionAdj={};
 
 document.getElementById('yr').textContent=new Date().getFullYear();
-applyLang(lang());initLang();initScrollBtns();initHamburger();
+applyLang(lang());initLang();
 
 if(window.supabase&&window.supabase.from){bootstrapGenealogy();}else{document.addEventListener('supabase:ready',bootstrapGenealogy);}
 
@@ -579,8 +579,10 @@ function applyLang(l){
   });
 }
 function initLang(){
-  document.getElementById('btn-ro').addEventListener('click',function(){localStorage.setItem('calnic-lang','ro');applyLang('ro');renderFamilies(families);});
-  document.getElementById('btn-en').addEventListener('click',function(){localStorage.setItem('calnic-lang','en');applyLang('en');renderFamilies(families);});
+  document.addEventListener('calnic:langchange', function(e){
+    applyLang(e.detail.lang);
+    renderFamilies(families);
+  });
 }
 function initScrollBtns(){
   var st=document.getElementById('scrollTop'),sb=document.getElementById('scrollBottom');

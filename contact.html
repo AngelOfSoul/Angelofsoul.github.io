@@ -348,7 +348,7 @@ footer .g { color:var(--gold-d); font-style:normal; }
 .info-box strong { color:var(--gold); }
 
 
-/* ── MOBILE NAV / HAMBURGER ── */
+�� NAV SESSION CHECK �� */��─ MOBILE NAV / HAMBURGER ── */
 .hamburger {
   display: none;
   background: none;
@@ -783,11 +783,8 @@ function toggleFaq(el) {
 
 var currentLang = localStorage.getItem('calnic-lang') || 'ro';
 
-function setLang(lang) {
+function applyPageLang(lang) {
   currentLang = lang;
-  localStorage.setItem('calnic-lang', lang);
-  document.getElementById('btn-ro').classList.toggle('active', lang === 'ro');
-  document.getElementById('btn-en').classList.toggle('active', lang === 'en');
   document.querySelectorAll('[data-ro]').forEach(function(el) {
     var val = el.getAttribute('data-' + lang);
     if (val !== null) {
@@ -806,31 +803,8 @@ function setLang(lang) {
   });
 }
 
-document.getElementById('btn-ro').addEventListener('click', function() { setLang('ro'); });
-document.getElementById('btn-en').addEventListener('click', function() { setLang('en'); });
-setLang(currentLang);
-
-function updateScrollBtns() {
-  var t = document.getElementById('scrollTop');
-  var b = document.getElementById('scrollBottom');
-  var scrolled = window.scrollY > 300;
-  var atBottom = (window.innerHeight + window.scrollY) >= document.body.scrollHeight - 100;
-  if (t) { t.style.opacity = scrolled ? '1' : '0'; t.style.pointerEvents = scrolled ? 'auto' : 'none'; }
-  if (b) { b.style.opacity = atBottom ? '0' : '1'; b.style.pointerEvents = atBottom ? 'none' : 'auto'; }
-}
-window.addEventListener('scroll', updateScrollBtns);
-window.addEventListener('load', updateScrollBtns);
-setTimeout(updateScrollBtns, 100);
-
-// Hamburger menu
-var ham = document.getElementById('hamburgerBtn');
-var mobileMenu = document.getElementById('navMobileMenu');
-if (ham && mobileMenu) {
-  ham.addEventListener('click', function() {
-    mobileMenu.classList.toggle('open');
-    ham.textContent = mobileMenu.classList.contains('open') ? '✕' : '☰';
-  });
-}
+document.addEventListener('calnic:langchange', function(e) { applyPageLang(e.detail.lang); });
+applyPageLang(window.CalnicUtils ? window.CalnicUtils.lang() : currentLang);
 
 /* ── NAV SESSION CHECK ── */
 function checkNavSession() {

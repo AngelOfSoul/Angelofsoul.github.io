@@ -806,7 +806,7 @@ var CARD_W=110,GEN_Y={3:30,2:180,1:340,0:490},GEN_GAP_X=28;
 // ── INIT ─────────────────────────────────────────────────
 document.getElementById('yr').textContent=new Date().getFullYear();
 (function(){var params=new URLSearchParams(window.location.search);S.familyId=params.get('family')||params.get('id')||localStorage.getItem('calnic-familyId');if(S.familyId)localStorage.setItem('calnic-familyId',S.familyId);})();
-applyLang(lang());initLang();initScrollBtns();initHamburger();initGuide();initKeyboard();initZoomPan();initUI();
+applyLang(lang());initLang();initGuide();initKeyboard();initZoomPan();initUI();
 
 if(window.supabase&&window.supabase.from){boot();}else{document.addEventListener('supabase:ready',boot);}
 
@@ -2065,8 +2065,9 @@ function applyLang(l){
   document.querySelectorAll('[data-ro]').forEach(function(el){var v=el.getAttribute('data-'+l);if(v!==null)el.textContent=v;});
 }
 function initLang(){
-  document.getElementById('btn-ro').addEventListener('click',function(){localStorage.setItem('calnic-lang','ro');applyLang('ro');});
-  document.getElementById('btn-en').addEventListener('click',function(){localStorage.setItem('calnic-lang','en');applyLang('en');});
+  document.addEventListener('calnic:langchange', function(e){
+    applyLang(e.detail.lang);
+  });
 }
 
 function updateTitle(){if(!S.family)return;document.title=S.family.name+' \u2014 Calnic Online';document.getElementById('treeTitle').textContent='\u{1F337} '+S.family.name;}
