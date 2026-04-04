@@ -506,6 +506,10 @@
         <button onclick="fitTree()" title="Potriveste tot arborele pe ecran" style="width:32px;height:32px;background:#111;border:1px solid #585040;color:#a09070;font-size:12px;cursor:pointer;border-radius:2px;display:flex;align-items:center;justify-content:center;" aria-label="Fit">&#9633;</button>
         <button onclick="navToGen('bottom')" title="Mergi la cei mai tineri membri" style="width:32px;height:32px;background:#111;border:1px solid #585040;color:#a09070;font-size:14px;cursor:pointer;border-radius:2px;display:flex;align-items:center;justify-content:center;" aria-label="Jos">&#8681;</button>
       </div>
+      <div id="treeZoomBtns" style="position:absolute;top:50%;right:10px;transform:translateY(-50%);display:flex;flex-direction:column;gap:6px;z-index:20;">
+        <button onclick="zoomTreeIn()" title="Mareste arborele" style="width:34px;height:34px;background:#111;border:1px solid #b08030;color:#d4a84a;font-size:20px;cursor:pointer;border-radius:2px;display:flex;align-items:center;justify-content:center;" aria-label="Zoom in">+</button>
+        <button onclick="zoomTreeOut()" title="Micsoreaza arborele" style="width:34px;height:34px;background:#111;border:1px solid #585040;color:#a09070;font-size:20px;cursor:pointer;border-radius:2px;display:flex;align-items:center;justify-content:center;" aria-label="Zoom out">-</button>
+      </div>
       <!-- DETAIL PANEL -->
       <div class="dp" id="detailPanel">
         <div class="dp-top"></div>
@@ -2037,6 +2041,21 @@ function navToGen(dir){
   else{S.panY=sh-canvasY*S.zoom-180;}
   applyXform();
 }
+function zoomTreeBy(factor){
+  var stage=document.getElementById('treeStage');
+  if(!stage||!factor||factor<=0)return;
+  var minZ=0.15,maxZ=1.4;
+  var sw=stage.clientWidth||800,sh=stage.clientHeight||660;
+  var cx=sw/2,cy=sh/2;
+  var newZoom=Math.max(minZ,Math.min(maxZ,S.zoom*factor));
+  if(newZoom===S.zoom)return;
+  S.panX=cx-(cx-S.panX)*(newZoom/S.zoom);
+  S.panY=cy-(cy-S.panY)*(newZoom/S.zoom);
+  S.zoom=newZoom;
+  applyXform();
+}
+function zoomTreeIn(){zoomTreeBy(1.14);}
+function zoomTreeOut(){zoomTreeBy(1/1.14);}
 function debounce(fn,ms){var t;return function(){clearTimeout(t);t=setTimeout(fn,ms);};}
 
 function initZoomPan(){

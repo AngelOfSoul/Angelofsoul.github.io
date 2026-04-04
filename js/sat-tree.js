@@ -23,6 +23,8 @@
   var clearBtn = qs('clear-selection');
   var fitBtn = qs('fit-view');
   var findBtn = qs('find-relation');
+  var zoomInBtn = qs('villageZoomIn');
+  var zoomOutBtn = qs('villageZoomOut');
 
   var svg = d3.select(svgEl);
   var g = svg.append('g');
@@ -38,6 +40,13 @@
   var currentTransform = d3.zoomIdentity;
   var selectedNodeId = null;
   var highlightedPathKeys = {};
+
+  function zoomByFactor(factor) {
+    if (!factor || factor <= 0) return;
+    var w = shell.clientWidth || 900;
+    var h = 760;
+    svg.transition().duration(220).call(zoom.scaleBy, factor, [w / 2, h / 2]);
+  }
 
   function resizeSvg() {
     var w = shell.clientWidth || 900;
@@ -299,6 +308,8 @@
     history.replaceState({}, '', 'arborele-satului.html');
   });
   if (fitBtn) fitBtn.addEventListener('click', function () { fitGraph(450); });
+  if (zoomInBtn) zoomInBtn.addEventListener('click', function () { zoomByFactor(1.14); });
+  if (zoomOutBtn) zoomOutBtn.addEventListener('click', function () { zoomByFactor(1 / 1.14); });
   if (findBtn) findBtn.addEventListener('click', function () {
     var from = relationFrom.value, to = relationTo.value;
     if (!from || !to || from === to) {
