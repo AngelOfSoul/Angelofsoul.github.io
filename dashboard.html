@@ -1015,5 +1015,91 @@ function escHtml(s) {
     .replace(/"/g, '&quot;').replace(/'/g, '&#39;');
 }
 </script>
+<script>
+document.addEventListener("supabase:ready", async () => {
+  const supabase = window.supabase;
+
+  const { data: userData } = await supabase.auth.getUser();
+  const user = userData?.user;
+  if (!user) return;
+
+  const container = document.getElementById("family-container");
+  if (!container) return;
+
+  const { data: families } = await supabase
+    .from("families")
+    .select("id, slug, display_name")
+    .eq("created_by", user.id)
+    .limit(1);
+
+  if (families && families.length > 0) {
+    const f = families[0];
+
+    container.innerHTML = `
+      <div class="dash-section">
+        <div class="dash-section-body">
+          <h2>${f.display_name}</h2>
+          <button class="dash-btn" id="open-family">Deschide familia</button>
+        </div>
+      </div>
+    `;
+
+    document.getElementById("open-family").onclick = () => {
+      localStorage.setItem("selectedFamily", f.slug);
+      window.location.href = "genealogie.html";
+    };
+
+  } else {
+    container.innerHTML = `
+      <div class="calnic-empty">
+        <div class="calnic-empty-icon">🏛️</div>
+        <div class="calnic-empty-title">Nu ai încă o familie</div>
+        <div class="calnic-empty-sub">
+          Creează profilul familiei pentru a începe genealogia
+        </div>
+        <button class="calnic-empty-btn" id="create-family">
+          Creează profilul familiei
+        </button>
+      </div>
+    `;
+
+    document.getElementById("create-family").onclick = async () => {
+      const name = prompt("Numele familiei:");
+      if (!name) return;
+
+      const slug = name
+        .toLowerCase()
+        .normalize("NFD")
+        .replace(/[\u0300-\u036f]/g, "")
+        .replace(/[^a-z0-9]+/g, "-")
+        .replace(/^-+|-+$/g, "");
+
+      const { data: family, error } = await supabase
+        .from("families")
+        .insert([{
+          slug,
+          display_name: name,
+          created_by: user.id,
+          visibility: "public"
+        }])
+        .select()
+        .single();
+
+      if (error) {
+        alert(error.message);
+        return;
+      }
+
+      await supabase.from("persons").insert([{
+        display_name: name,
+        family_id: family.id
+      }]);
+
+      localStorage.setItem("selectedFamily", family.slug);
+      window.location.href = "genealogie.html";
+    };
+  }
+});
+</script>
 </body>
 </html>
