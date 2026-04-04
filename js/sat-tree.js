@@ -273,6 +273,10 @@
       }
       graphData = await window.VillageTreeAdapter.fetchVillageTreeData();
       populateSelectors(graphData.graph.nodes);
+      if (!graphData.graph.nodes.length) {
+        status(t('Nu exista inca familii publice de afisat in arborele satului.', 'There are no public families to display in the village tree yet.'));
+        return;
+      }
       renderGraph();
     } catch (err) {
       console.error(err);

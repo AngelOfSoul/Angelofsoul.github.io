@@ -138,31 +138,33 @@
     return Array.from(merged.values());
   }
 
+  async function safeQuery(run) {
+    try {
+      const res = await run();
+      return res && !res.error ? (res.data || []) : [];
+    } catch (err) {
+      return [];
+    }
+  }
+
   async function fetchVillageTreeData() {
     if (!window.supabase || !window.supabase.from) {
       throw new Error('Supabase nu este disponibil.');
     }
 
-    const familyFields = [
-      'id', 'name', 'display_name', 'village', 'since',
-      'members_count', 'generations_count', 'photos_count',
-      'show_members', 'show_generations', 'show_photos', 'show_since',
-      'connected_to_village'
-    ].join(',');
-
-    const [familiesRes, familyLinksRes, membersRes, memberRelationsRes] = await Promise.all([
-      window.supabase.from('families').select(familyFields).order('name'),
-      window.supabase.from('family_links').select('*').order('created_at', { ascending: true }),
-      window.supabase.from('members').select('id,family_id,visibility,name').limit(5000),
-      window.supabase.from('member_relations').select('*').limit(5000)
-    ]);
-
+    const familiesRes = await window.supabase.from('families').select('*').order('name');
     if (familiesRes.error) throw familiesRes.error;
 
     const families = familiesRes.data || [];
-    const familyLinks = familyLinksRes.error ? [] : (familyLinksRes.data || []);
-    const members = membersRes.error ? [] : (membersRes.data || []);
-    const memberRelations = memberRelationsRes.error ? [] : (memberRelationsRes.data || []);
+    const familyLinks = await safeQuery(function () {
+      return window.supabase.from('family_links').select('*').order('created_at', { ascending: true });
+    });
+    const members = await safeQuery(function () {
+      return window.supabase.from('members').select('id,family_id,visibility,name').limit(5000);
+    });
+    const memberRelations = await safeQuery(function () {
+      return window.supabase.from('member_relations').select('*').limit(5000);
+    });
 
     const nodes = buildNodes(families);
     const links = mergeRawLinks(familyLinks, memberRelations, members);

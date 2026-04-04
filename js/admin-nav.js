@@ -216,42 +216,26 @@ function initAdminNav() {
       buildProfileButton(null, null, false);
       return;
     }
-    Promise.all([
-      (async function() {
-        var tries = [
-          function() { return window.supabase.from('families').select('*').eq('owner_id', session.user.id).limit(1).maybeSingle(); },
-          function() { return window.supabase.from('families').select('*').eq('created_by', session.user.id).limit(1).maybeSingle(); }
-        ];
-        var out = { data: null, error: null };
-        for (var i = 0; i < tries.length; i++) {
-          try {
-            out = await tries[i]();
-            if (out && !out.error) break;
-            if (!(out && out.error && /column .* does not exist|Could not find/i.test(out.error.message || ''))) break;
-          } catch (e) {
-            out = { data: null, error: e };
-          }
-        }
-        return out;
-      })(),
-      window.supabase.from('profiles').select('is_admin').eq('id', session.user.id).limit(1)
-    ]).then(function(results) {
-      var familyData = results[0].data;
-      var profileArr = results[1].data;
-      var profileData = Array.isArray(profileArr) ? profileArr[0] : profileArr;
-      var familyName = familyData ? (familyData.display_name || familyData.name) : 'Profilul Meu';
-      var familyId = familyData ? familyData.id : null;
-      var isAdmin = profileData && profileData.is_admin;
-      checkNotifications(familyId).then(function(hasNotif) {
-        buildProfileButton(session, familyName, hasNotif);
-        if (isAdmin) {
-          injectAdminLink();
-          showAdminLink();
-        }
+
+    window.supabase
+      .from('families')
+      .select('id,name,display_name,owner_id')
+      .eq('owner_id', session.user.id)
+      .limit(1)
+      .maybeSingle()
+      .then(function(familyRes) {
+        var familyData = familyRes && !familyRes.error ? familyRes.data : null;
+        var familyName = familyData ? (familyData.display_name || familyData.name || 'Profilul Meu') : 'Profilul Meu';
+        var familyId = familyData ? familyData.id : null;
+        return checkNotifications(familyId).then(function(hasNotif) {
+          buildProfileButton(session, familyName, hasNotif);
+        });
+      })
+      .catch(function() {
+        buildProfileButton(session, 'Profilul Meu', false);
       });
-    }).catch(function() {
-      buildProfileButton(session, null, false);
-    });
+  }).catch(function() {
+    buildProfileButton(null, null, false);
   });
 }
 
