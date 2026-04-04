@@ -565,8 +565,7 @@ if (window.setLang) { window.setLang(currentLang); }
 function checkNavSession() {
   if (!window.supabase) return;
   window.supabase.auth.getUser().then(function(res) {
-    var session = res && res.data ? res.data.session : null;
-    var user = res && res.data ? (res.data.user || (session && session.user) || null) : null;
+    var user = res && res.data ? (res.data.user || null) : null;
     if (!user) return;
     var navLogin = document.querySelector('a.nav-login');
     var mobileLogin = document.querySelector('a.nav-mobile-login');
