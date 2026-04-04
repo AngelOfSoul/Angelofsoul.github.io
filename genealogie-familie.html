@@ -264,7 +264,7 @@
     <div class="guide-sub" data-ro="Iata cum functioneaza — dureaza 30 de secunde." data-en="Here is how it works — takes 30 seconds.">Iata cum functioneaza — dureaza 30 de secunde.</div>
     <div class="guide-hints">
       <div class="gh"><div class="gh-icon">&#128072;</div><div><div class="gh-title" data-ro="Click pe orice cerc" data-en="Click any circle">Click pe orice cerc</div><div class="gh-desc" data-ro="Apasa pe poza sau pe numele oricui pentru a vedea profilul complet al acelei persoane." data-en="Click any photo or name to see that person's full profile.">Apasa pe poza sau pe numele oricui pentru a vedea profilul complet al acelei persoane.</div></div></div>
-      <div class="gh"><div class="gh-icon">&#128433;&#65039;</div><div><div class="gh-title" data-ro="Trage pentru a te misca" data-en="Drag to navigate">Trage pentru a te misca</div><div class="gh-desc" data-ro="Tine apasat pe fundal si trage. Roteste rotita mouse-ului pentru zoom." data-en="Hold and drag the background. Use scroll wheel to zoom.">Tine apasat pe fundal si trage. Roteste rotita mouse-ului pentru zoom.</div></div></div>
+      <div class="gh"><div class="gh-icon">&#128433;&#65039;</div><div><div class="gh-title" data-ro="Trage pentru a te misca" data-en="Drag to navigate">Trage pentru a te misca</div><div class="gh-desc" data-ro="Tine apasat pe fundal si trage. Scroll-ul paginii ramane activ." data-en="Hold and drag the background. Page scroll stays active.">Tine apasat pe fundal si trage. Scroll-ul paginii ramane activ.</div></div></div>
       <div class="gh"><div class="gh-icon">&#9998;&#65039;</div><div><div class="gh-title" data-ro="Editeaza persoanele tale" data-en="Edit your people">Editeaza persoanele tale</div><div class="gh-desc" data-ro="Pe persoanele adaugate de tine, treci cu mouse-ul si apar butoanele Editeaza / Sterge." data-en="Hover over people you added to see Edit / Delete buttons.">Pe persoanele adaugate de tine, treci cu mouse-ul si apar butoanele Editeaza / Sterge.</div></div></div>
       <div class="gh"><div class="gh-icon">&#43;</div><div><div class="gh-title" data-ro="Adauga persoane noi" data-en="Add new people">Adauga persoane noi</div><div class="gh-desc" data-ro="Butonul &laquo;+ Adauga persoana&raquo; din bara de sus adauga un nou cerc in arbore." data-en="The &laquo;+ Add person&raquo; button in the toolbar adds a new circle to the tree.">Butonul &laquo;+ Adauga persoana&raquo; din bara de sus adauga un nou cerc in arbore.</div></div></div>
     </div>
@@ -471,7 +471,7 @@
     <div class="tip-wrap"><button class="tree-btn" id="hlFamilyBtn"><span data-ro="Evidentiaza familia directa" data-en="Highlight direct family">Evidentiaza familia directa</span></button><div class="tip"><span class="tip-title" data-ro="Evidentiaza" data-en="Highlight">Evidentiaza</span><span data-ro="Selecteaza o persoana, apoi apasa acest buton pentru a evidentia familia directa." data-en="Select a person, then press this to highlight their direct family.">Selecteaza o persoana, apoi apasa acest buton pentru a evidentia familia directa.</span></div></div>
     <div class="tip-wrap"><button class="tree-btn" id="exportBtn">&#8659; <span data-ro="Salveaza ca imagine" data-en="Save as image">Salveaza ca imagine</span></button><div class="tip"><span class="tip-title">Export PNG</span><span data-ro="Salveaza arborele complet ca imagine PNG, potrivita pentru tiparit." data-en="Save the complete tree as a PNG image, suitable for printing.">Salveaza arborele complet ca imagine PNG, potrivita pentru tiparit.</span></div></div>
     <div class="tip-wrap"><button class="tree-btn" id="helpBtn">&#63; <span data-ro="Ajutor" data-en="Help">Ajutor</span></button><div class="tip"><span class="tip-title" data-ro="Ghid rapid" data-en="Quick guide">Ghid rapid</span><span data-ro="Arata ghidul de utilizare al arborelui." data-en="Shows the tree usage guide.">Arata ghidul de utilizare al arborelui.</span></div></div>
-    <span class="tree-hint" data-ro="Scroll=zoom &middot; Trage=navigare &middot; ESC=inchide" data-en="Scroll=zoom &middot; Drag=navigate &middot; ESC=close">Scroll=zoom &middot; Trage=navigare &middot; ESC=inchide</span>
+    <span class="tree-hint" data-ro="Trage=navigare &middot; ESC=inchide" data-en="Drag=navigate &middot; ESC=close">Trage=navigare &middot; ESC=inchide</span>
   </div>
 
   <!-- LEGEND -->
@@ -873,20 +873,30 @@ function loadFamily(){
 function loadRelations(rid){
   var ids=S.members.map(function(m){return m.id;});
   if(!ids.length){afterLoad(rid);return;}
-  // Legacy-compatible query path only, avoids 400 on schemas without family_id here.
-  Promise.all([
-    supabase.from('member_relations').select('*').in('from_member_id',ids),
-    supabase.from('member_relations').select('*').in('to_member_id',ids)
-  ]).then(function(results){
+  // Schema-safe strategy:
+  // 1) Try family_id if available (zero noisy 400s on that schema)
+  // 2) Fallback to legacy pair of from_member_id / to_member_id filters
+  supabase.from('member_relations').select('*').eq('family_id',S.familyId).then(function(fr){
     if(rid!==S.reqId)return;
-    var fromRels = results[0].data||[];
-    var toRels   = results[1].data||[];
-    var seen={}, all=[];
-    fromRels.concat(toRels).forEach(function(r){
-      if(!seen[r.id]){seen[r.id]=true;all.push(r);}
-    });
-    S.relations=all;
-    afterLoad(rid);
+    if(!fr.error){
+      S.relations=fr.data||[];
+      afterLoad(rid);
+      return;
+    }
+    Promise.all([
+      supabase.from('member_relations').select('*').in('from_member_id',ids),
+      supabase.from('member_relations').select('*').in('to_member_id',ids)
+    ]).then(function(results){
+      if(rid!==S.reqId)return;
+      var fromRels = results[0].data||[];
+      var toRels   = results[1].data||[];
+      var seen={}, all=[];
+      fromRels.concat(toRels).forEach(function(r){
+        if(!seen[r.id]){seen[r.id]=true;all.push(r);}
+      });
+      S.relations=all;
+      afterLoad(rid);
+    }).catch(function(){if(rid!==S.reqId)return;S.relations=[];afterLoad(rid);});
   }).catch(function(){if(rid!==S.reqId)return;S.relations=[];afterLoad(rid);});
 }
 
@@ -1946,10 +1956,11 @@ function showUndo(msg,action){
 
 // ── CONNECT TO VILLAGE ───────────────────────────────────
 document.getElementById('connectVillageBtn').addEventListener('click',function(){
-  if(!S.familyId)return;
-  if(S.family)S.family.connected_to_village=true;
-  try{localStorage.setItem('calnic-connected-'+S.familyId,'1');}catch(e){}
-  showExportToast(t('Familie marcata local ca fiind conectata la sat.','Family marked locally as connected to village.'));
+  if(!S.familyId||!window.supabase)return;
+  supabase.from('families').update({connected_to_village:true}).eq('id',S.familyId).then(function(r){
+    if(r.error){alert(r.error.message);return;}
+    if(S.family)S.family.connected_to_village=true;showExportToast(t('Familie conectata la arborele satului!','Family connected to the village tree!'));
+  }).catch(function(err){alert(err.message);});
 });
 
 // ── EXPORT ───────────────────────────────────────────────
@@ -1958,20 +1969,8 @@ document.getElementById('exportBtn').addEventListener('click',function(){
   if(typeof html2canvas==='undefined'){var sc=document.createElement('script');sc.src='https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js';sc.onload=function(){doExport(btn);};sc.onerror=function(){btn.disabled=false;btn.innerHTML='&#8659; '+t('Salveaza ca imagine','Save as image');alert(t('Export esuat.','Export failed.'));};document.head.appendChild(sc);}else{doExport(btn);}
 });
 function doExport(btn){
-  html2canvas(document.getElementById('treeCanvas'),{
-    backgroundColor:'#0a0a0a',
-    scale:2,
-    useCORS:true,
-    logging:false,
-    onclone:function(doc){
-      var root=doc.getElementById('treeCanvas');
-      if(!root)return;
-      root.querySelectorAll('img').forEach(function(img){img.remove();});
-    }
-  }).then(function(c){
-    var rawName=(S.family&&(S.family.name||S.family.display_name))?String(S.family.name||S.family.display_name):'arbore';
-    var safeName=rawName.replace(/[^a-zA-Z0-9]/g,'-').replace(/-+/g,'-').replace(/^-|-$/g,'')||'arbore';
-    var l=document.createElement('a');l.download=safeName+'.png';l.href=c.toDataURL('image/png');l.click();
+  html2canvas(document.getElementById('treeCanvas'),{backgroundColor:'#0a0a0a',scale:2,useCORS:true,logging:false}).then(function(c){
+    var l=document.createElement('a');l.download=(S.family?S.family.name.replace(/[^a-zA-Z0-9]/g,'-'):'arbore')+'.png';l.href=c.toDataURL('image/png');l.click();
     btn.disabled=false;btn.innerHTML='&#8659; '+t('Salveaza ca imagine','Save as image');showExportToast(t('Export salvat!','Export saved!'));
   }).catch(function(){btn.disabled=false;btn.innerHTML='&#8659; '+t('Salveaza ca imagine','Save as image');alert(t('Export esuat. Incercati din nou.','Export failed. Please try again.'));});
 }
@@ -2050,19 +2049,7 @@ function initZoomPan(){
   stage.addEventListener('touchstart',function(e){if(e.touches.length===1)lt={x:e.touches[0].clientX,y:e.touches[0].clientY};},{passive:true});
   stage.addEventListener('touchmove',function(e){if(e.touches.length===1&&lt){S.panX+=e.touches[0].clientX-lt.x;S.panY+=e.touches[0].clientY-lt.y;lt={x:e.touches[0].clientX,y:e.touches[0].clientY};applyXform();}},{passive:true});
   stage.addEventListener('click',function(e){if(!e.target.closest('.pn,.ag,.dp'))closeDetail();});
-  // Scroll-wheel zoom toward cursor
-  stage.addEventListener('wheel',function(e){
-    e.preventDefault();
-    var delta=e.deltaY<0?0.06:-0.06;
-    var newZoom=Math.max(0.15,Math.min(1.4,S.zoom+delta));
-    var rect=stage.getBoundingClientRect();
-    var mx=e.clientX-rect.left, my=e.clientY-rect.top;
-    // Keep the point under the cursor stationary
-    S.panX=mx-(mx-S.panX)*(newZoom/S.zoom);
-    S.panY=my-(my-S.panY)*(newZoom/S.zoom);
-    S.zoom=newZoom;
-    applyXform();
-  },{passive:false});
+  // Wheel zoom intentionally disabled so page scrolling remains natural.
   if(window.ResizeObserver){S.resizeObs=new ResizeObserver(debounce(function(){if(S.members.length)render();center();},150));S.resizeObs.observe(stage);}
 }
 
@@ -2127,12 +2114,7 @@ function initLang(){
   });
 }
 
-function updateTitle(){
-  if(!S.family)return;
-  var famName=S.family.name||S.family.display_name||'Familie';
-  document.title=famName+' \u2014 Calnic Online';
-  document.getElementById('treeTitle').textContent='\u{1F337} '+famName;
-}
+function updateTitle(){if(!S.family)return;document.title=S.family.name+' \u2014 Calnic Online';document.getElementById('treeTitle').textContent='\u{1F337} '+S.family.name;}
 
 // ── SCROLL BUTTONS ───────────────────────────────────────
 function initScrollBtns(){

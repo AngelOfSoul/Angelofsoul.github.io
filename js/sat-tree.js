@@ -26,7 +26,11 @@
 
   var svg = d3.select(svgEl);
   var g = svg.append('g');
-  var zoom = d3.zoom().scaleExtent([0.35, 3]).on('zoom', function (event) { g.attr('transform', event.transform); });
+  var zoom = d3.zoom()
+    .scaleExtent([0.35, 3])
+    // Keep page wheel scrolling active; zoom only from explicit UI actions.
+    .filter(function (event) { return event.type !== 'wheel'; })
+    .on('zoom', function (event) { g.attr('transform', event.transform); });
   svg.call(zoom);
 
   var graphData = null;
