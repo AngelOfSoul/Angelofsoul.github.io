@@ -277,11 +277,38 @@ function initAdminNav() {
     buildProfileButton(null, null, false);
   });
 }
+var _adminNavInitTimer = null;
+function scheduleAdminNavInit() {
+  if (_adminNavInitTimer) clearTimeout(_adminNavInitTimer);
+  _adminNavInitTimer = setTimeout(function() {
+    _adminNavInitTimer = null;
+    initAdminNav();
+  }, 0);
+}
 
-if ((window.supabaseClient || window.appSupabase || window.supabase) && ((window.supabaseClient || window.appSupabase || window.supabase).auth)) { 
-  initAdminNav(); 
-} else { 
-  document.addEventListener('supabase:ready', initAdminNav); 
+if (document.readyState === 'loading') {
+  document.addEventListener('DOMContentLoaded', scheduleAdminNavInit, { once: true });
+} else {
+  scheduleAdminNavInit();
+}
+
+window.addEventListener('load', scheduleAdminNavInit);
+document.addEventListener('supabase:ready', scheduleAdminNavInit);
+document.addEventListener('calnic:viewchange', scheduleAdminNavInit);
+
+/* Re-init when index switches between guest/member views. */
+function watchViewSwitches() {
+  var guest = document.getElementById('guest-view');
+  var member = document.getElementById('member-view');
+  if (!guest && !member) return;
+  var mo = new MutationObserver(scheduleAdminNavInit);
+  if (guest) mo.observe(guest, { attributes: true, attributeFilter: ['style', 'class'] });
+  if (member) mo.observe(member, { attributes: true, attributeFilter: ['style', 'class'] });
+}
+if (document.readyState === 'loading') {
+  document.addEventListener('DOMContentLoaded', watchViewSwitches, { once: true });
+} else {
+  watchViewSwitches();
 }
 
 })();

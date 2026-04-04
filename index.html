@@ -734,7 +734,7 @@ footer .g { color:var(--gold-d); font-style:normal; }
     <a class="nav-link" href="intrebari.html">&#10067; <span class="nl">Intrebari</span></a>
     <div class="nav-right">
       <a class="nav-login" id="member-admin-link" href="admin.html" style="display:none;color:#c04040;border-left:1px solid #3a1010;" title="Panou Admin">&#9670; <span class="nl">Admin</span></a>
-      <a class="nav-login" href="dashboard.html">&#128100; <span class="nl" id="li-nav-family">Contul meu</span></a>
+      <a class="nav-login" href="dashboard.html">&#128100; <span class="nl" id="li-nav-family">Profilul meu</span></a>
     </div>
     <button class="hamburger" id="hamburgerBtn2">&#9776;</button>
   </nav>
@@ -746,7 +746,7 @@ footer .g { color:var(--gold-d); font-style:normal; }
     <a class="nav-mobile-link" href="galerie.html">&#128248; Galerie</a>
     <a class="nav-mobile-link" href="contact.html">&#9993; Contact</a>
     <a class="nav-mobile-link" href="intrebari.html">&#10067; Intrebari</a>
-    <a class="nav-mobile-login" href="dashboard.html">&#128100; Contul meu</a>
+    <a class="nav-mobile-login" href="dashboard.html">&#128100; Profilul meu</a>
   </div>
 
   <!-- HERO -->
@@ -1051,6 +1051,7 @@ if (window.supabase) { checkAdminNavLink(); } else { document.addEventListener('
     /* swap views */
     document.getElementById('guest-view').style.display  = 'none';
     document.getElementById('member-view').style.display = 'block';
+    document.dispatchEvent(new Event('calnic:viewchange'));
 
     makeStars();
 
