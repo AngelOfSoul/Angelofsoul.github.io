@@ -1,490 +1,301 @@
-const state = {
+
+(function(){
+'use strict';
+
+function esc(s){return String(s==null?'':s).replace(/[&<>"']/g,function(m){return({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'})[m];});}
+function getLang(){return localStorage.getItem('calnic-lang')||'ro';}
+function tr(ro,en){return getLang()==='en'?en:ro;}
+
+var state = {
   nodes: [],
   links: [],
   adjacency: new Map(),
-  simulation: null,
-  svg: null,
-  gRoot: null,
-  gLinks: null,
-  gNodes: null,
-  zoom: null,
-  width: 0,
-  height: 0,
   selectedNodeId: null,
   highlightedNodeIds: new Set(),
   highlightedLinkKeys: new Set(),
+  svg: null,
+  root: null,
+  linkLayer: null,
+  nodeLayer: null,
+  simulation: null,
+  zoom: null,
+  width: 0,
+  height: 620
 };
 
-const els = {
-  svg: document.getElementById("village-tree"),
-  treeContainer: document.getElementById("tree-container"),
-  status: document.getElementById("status"),
-  familySearch: document.getElementById("family-search"),
-  familyList: document.getElementById("family-list"),
-  relationFrom: document.getElementById("relation-from"),
-  relationTo: document.getElementById("relation-to"),
-  findRelation: document.getElementById("find-relation"),
-  fitView: document.getElementById("fit-view"),
-  clearSelection: document.getElementById("clear-selection"),
-  tooltip: document.getElementById("tooltip"),
-  modal: document.getElementById("family-modal"),
-  modalTitle: document.getElementById("modal-title"),
-  modalText: document.getElementById("modal-text"),
-};
+var els = {};
 
-function setStatus(message, kind = "normal") {
-  els.status.textContent = message;
-  els.status.className = kind === "ok" ? "message-ok" : kind === "warn" ? "message-warn" : "";
+function byId(id){return document.getElementById(id);}
+function linkKey(a,b){return [a,b].sort().join('__');}
+function normalize(v){return String(v||'').toLowerCase().trim().normalize('NFD').replace(/[\u0300-\u036f]/g,'');}
+
+function initEls(){
+  els.stage = byId('treeStage');
+  els.svg = byId('treeSvg');
+  els.status = byId('treeStatus');
+  els.search = byId('familySearch');
+  els.names = byId('familyNames');
+  els.pathFrom = byId('pathFrom');
+  els.pathTo = byId('pathTo');
+  els.pathBtn = byId('pathBtn');
+  els.fitBtn = byId('fitBtn');
+  els.resetBtn = byId('resetBtn');
+  els.tooltip = byId('treeTooltip');
+  els.overlay = byId('treeOverlay');
+  els.overlayTitle = byId('treeOverlayTitle');
+  els.overlayText = byId('treeOverlayText');
+  els.pathResult = byId('pathResult');
+  els.tsFam = byId('ts-fam'); els.tsRel = byId('ts-rel'); els.tsPub = byId('ts-pub'); els.tsPri = byId('ts-pri'); els.tsIso = byId('ts-iso');
 }
 
-function getSupabase() {
-  if (!window.supabase) throw new Error("Supabase nu este încă încărcat.");
-  return window.supabase;
-}
+function setStatus(msg){ if(els.status) els.status.textContent = msg; }
+function setPathResult(msg){ if(!els.pathResult) return; els.pathResult.innerHTML = msg; els.pathResult.classList.add('on'); }
+function hideOverlay(){ if(els.overlay) els.overlay.classList.remove('show'); }
+function showOverlay(title,text){ if(!els.overlay) return; els.overlayTitle.textContent = title; els.overlayText.innerHTML = text; els.overlay.classList.add('show'); }
 
-function normalizeName(value) {
-  return (value || "")
-    .toLowerCase()
-    .trim()
-    .normalize("NFD")
-    .replace(/[\u0300-\u036f]/g, "");
-}
+function getSupabase(){ return window.supabase && typeof window.supabase.from==='function' ? window.supabase : null; }
 
-function linkKey(a, b) {
-  return [a, b].sort().join("__");
-}
-
-async function loadVillageGraph() {
-  const supabase = getSupabase();
-  const [familiesRes, linksRes, pagesRes] = await Promise.all([
-    supabase
-      .from("families")
-      .select("id, display_name, slug, visibility, connected_to_village")
-      .order("display_name", { ascending: true }),
-    supabase
-      .from("v_family_connections")
-      .select("source_family_id, target_family_id, relationship_type"),
-    supabase
-      .from("family_pages")
-      .select("family_id, page_slug, is_public"),
-  ]);
-
-  if (familiesRes.error) throw familiesRes.error;
-  if (linksRes.error && linksRes.error.code !== '42P01') throw linksRes.error;
-  if (pagesRes.error && pagesRes.error.code !== '42P01') throw pagesRes.error;
-
-  const pageMap = new Map((pagesRes.data || []).map(row => [row.family_id, row]));
-
-  const nodes = (familiesRes.data || []).map(f => ({
-    id: f.id,
-    slug: f.slug,
-    name: f.display_name || f.name,
-    visibility: f.visibility || 'public',
-    connectedToVillage: !!f.connected_to_village,
-    pageSlug: pageMap.get(f.id)?.page_slug || null,
-    pagePublic: pageMap.get(f.id)?.is_public || false,
-  }));
-
-  const seen = new Set();
-  const links = [];
-  for (const row of linksRes.data || []) {
-    const dedupeKey = linkKey(row.source_family_id, row.target_family_id) + "::" + row.relationship_type;
-    if (seen.has(dedupeKey)) continue;
-    seen.add(dedupeKey);
-    links.push({
-      source: row.source_family_id,
-      target: row.target_family_id,
-      type: row.relationship_type,
-    });
-  }
-
-  return { nodes, links };
-}
-
-function buildAdjacency(nodes, links) {
-  const adjacency = new Map(nodes.map(node => [node.id, []]));
-  for (const link of links) {
-    adjacency.get(link.source)?.push({ nodeId: link.target, type: link.type });
-    adjacency.get(link.target)?.push({ nodeId: link.source, type: link.type });
-  }
-  return adjacency;
-}
-
-function findNodeByName(inputName) {
-  const normalized = normalizeName(inputName);
-  return state.nodes.find(n => normalizeName(n.name) === normalized) || null;
-}
-
-function populateControls(nodes) {
-  els.familyList.innerHTML = "";
-  els.relationFrom.innerHTML = '<option value="">Alege familia</option>';
-  els.relationTo.innerHTML = '<option value="">Alege familia</option>';
-
-  for (const node of nodes) {
-    const option = document.createElement("option");
-    option.value = node.name;
-    els.familyList.appendChild(option);
-
-    const opt1 = document.createElement("option");
-    opt1.value = node.id;
-    opt1.textContent = node.name;
-    els.relationFrom.appendChild(opt1);
-
-    const opt2 = document.createElement("option");
-    opt2.value = node.id;
-    opt2.textContent = node.name;
-    els.relationTo.appendChild(opt2);
-  }
-}
-
-function showModal(title, text) {
-  els.modalTitle.textContent = title;
-  els.modalText.textContent = text;
-  els.modal.classList.remove("hidden");
-}
-
-function hideModal() {
-  els.modal.classList.add("hidden");
-}
-
-function familyOpenUrl(node) {
-  if (node.pagePublic && node.pageSlug) {
-    return `${node.pageSlug}.html`;
-  }
-  return `genealogie-familie.html?family=${encodeURIComponent(node.id)}`;
-}
-
-function handleNodeClick(event, node) {
-  event.stopPropagation();
-  state.selectedNodeId = node.id;
-  centerOnNode(node, 1.35);
-
-  if (node.visibility === "private") {
-    showModal(node.name, "Privat");
-    setStatus(`Familia "${node.name}" este privată.`, "warn");
-    updateStyles();
+function openFamily(node){
+  if(node.visibility !== 'public' && node.is_public !== true){
+    showOverlay(node.name, tr('Aceasta familie este privata. Structura ei apare in arbore, dar pagina familiei nu poate fi deschisa public.', 'This family is private. Its structure appears in the tree, but the family page cannot be opened publicly.'));
+    setStatus(tr('Familia este privata.', 'The family is private.'));
     return;
   }
-
-  hideModal();
-  setStatus(`Se deschide familia "${node.name}"...`, "ok");
-  updateStyles();
-  window.location.href = familyOpenUrl(node);
+  window.location.href = 'genealogie-familie.html?family=' + encodeURIComponent(node.id);
 }
 
-function renderTooltip(event, node) {
-  const visibilityText = node.visibility === "public" ? "Publică" : "Privată";
-  els.tooltip.innerHTML = `<strong>${node.name}</strong><br>Status: ${visibilityText}`;
-  els.tooltip.style.display = "block";
-  els.tooltip.style.left = `${event.offsetX + 18}px`;
-  els.tooltip.style.top = `${event.offsetY + 18}px`;
-}
-
-function hideTooltip() {
-  els.tooltip.style.display = "none";
-}
-
-function resetHighlight() {
-  state.highlightedNodeIds.clear();
-  state.highlightedLinkKeys.clear();
-  state.selectedNodeId = null;
-  hideModal();
-  updateStyles();
-  setStatus("Vizualizare resetată.");
-}
-
-function updateStyles() {
-  state.gNodes.selectAll("g.node").each(function(d) {
-    const isSelected = state.selectedNodeId === d.id;
-    const dimNode = state.highlightedNodeIds.size > 0 && !state.highlightedNodeIds.has(d.id);
-
-    d3.select(this).select("circle")
-      .attr("fill", d.visibility === "public" ? "#d4a84a" : "#6f7884")
-      .attr("stroke", isSelected ? "#fff4c2" : state.highlightedNodeIds.has(d.id) ? "#f4d88a" : "#243244")
-      .attr("r", isSelected ? 28 : 22)
-      .attr("opacity", dimNode ? 0.22 : 1);
-
-    d3.select(this).select("text")
-      .attr("opacity", dimNode ? 0.25 : 1)
-      .attr("font-weight", isSelected || state.highlightedNodeIds.has(d.id) ? 700 : 500);
-  });
-
-  state.gLinks.selectAll("line").each(function(d) {
-    const sourceId = typeof d.source === "object" ? d.source.id : d.source;
-    const targetId = typeof d.target === "object" ? d.target.id : d.target;
-    const key = linkKey(sourceId, targetId);
-    const dimLink = state.highlightedLinkKeys.size > 0 && !state.highlightedLinkKeys.has(key);
-
-    d3.select(this)
-      .attr("stroke", state.highlightedLinkKeys.has(key) ? "#f4d88a" : "#4f5d73")
-      .attr("stroke-width", state.highlightedLinkKeys.has(key) ? 3.8 : 2)
-      .attr("opacity", dimLink ? 0.16 : 0.9);
+function buildAdjacency(){
+  state.adjacency = new Map(state.nodes.map(function(n){ return [n.id, []]; }));
+  state.links.forEach(function(l){
+    state.adjacency.get(l.source).push({nodeId:l.target,type:l.type});
+    state.adjacency.get(l.target).push({nodeId:l.source,type:l.type});
   });
 }
 
-function fitGraph(duration = 650) {
-  if (!state.nodes.length) return;
-
-  const xs = state.nodes.map(n => n.x || 0);
-  const ys = state.nodes.map(n => n.y || 0);
-
-  const minX = Math.min(...xs) - 80;
-  const maxX = Math.max(...xs) + 80;
-  const minY = Math.min(...ys) - 80;
-  const maxY = Math.max(...ys) + 80;
-
-  const graphWidth = Math.max(1, maxX - minX);
-  const graphHeight = Math.max(1, maxY - minY);
-
-  const scale = Math.min(2.1, 0.9 / Math.max(graphWidth / state.width, graphHeight / state.height));
-  const translateX = state.width / 2 - scale * (minX + graphWidth / 2);
-  const translateY = state.height / 2 - scale * (minY + graphHeight / 2);
-
-  state.svg.transition()
-    .duration(duration)
-    .call(state.zoom.transform, d3.zoomIdentity.translate(translateX, translateY).scale(scale));
-}
-
-function centerOnNode(node, zoomLevel = 1.5, duration = 650) {
-  if (!node) return;
-  const tx = state.width / 2 - zoomLevel * node.x;
-  const ty = state.height / 2 - zoomLevel * node.y;
-
-  state.svg.transition()
-    .duration(duration)
-    .call(state.zoom.transform, d3.zoomIdentity.translate(tx, ty).scale(zoomLevel));
-}
-
-function bfsFamilyPath(startId, endId) {
-  if (!startId || !endId) return null;
-  if (startId === endId) return [startId];
-
-  const queue = [[startId]];
-  const visited = new Set([startId]);
-
-  while (queue.length) {
-    const path = queue.shift();
-    const current = path[path.length - 1];
-    const neighbors = state.adjacency.get(current) || [];
-
-    for (const neighbor of neighbors) {
-      if (visited.has(neighbor.nodeId)) continue;
-      const nextPath = [...path, neighbor.nodeId];
-      if (neighbor.nodeId === endId) return nextPath;
-      visited.add(neighbor.nodeId);
-      queue.push(nextPath);
+function findPath(startId,endId){
+  if(!startId || !endId) return null;
+  if(startId===endId) return [startId];
+  var queue = [[startId]], visited = new Set([startId]);
+  while(queue.length){
+    var path = queue.shift();
+    var current = path[path.length-1];
+    var neighbors = state.adjacency.get(current) || [];
+    for(var i=0;i<neighbors.length;i++){
+      var n = neighbors[i].nodeId;
+      if(visited.has(n)) continue;
+      var np = path.concat([n]);
+      if(n===endId) return np;
+      visited.add(n); queue.push(np);
     }
   }
-
   return null;
 }
 
-function highlightPath(pathIds) {
-  state.highlightedNodeIds = new Set(pathIds);
-  state.highlightedLinkKeys = new Set();
+function updateStats(){
+  var pub = state.nodes.filter(function(n){return n.visibility==='public' || n.is_public===true;}).length;
+  var pri = state.nodes.length - pub;
+  var connectedIds = new Set();
+  state.links.forEach(function(l){connectedIds.add(l.source); connectedIds.add(l.target);});
+  var iso = state.nodes.filter(function(n){ return !connectedIds.has(n.id); }).length;
+  els.tsFam.textContent = state.nodes.length;
+  els.tsRel.textContent = state.links.length;
+  els.tsPub.textContent = pub;
+  els.tsPri.textContent = pri;
+  els.tsIso.textContent = iso;
+}
 
-  for (let i = 0; i < pathIds.length - 1; i += 1) {
-    state.highlightedLinkKeys.add(linkKey(pathIds[i], pathIds[i + 1]));
+function fillControls(){
+  els.names.innerHTML = '';
+  els.pathFrom.innerHTML = '<option value="">'+tr('Alege familia','Choose family')+'</option>';
+  els.pathTo.innerHTML = '<option value="">'+tr('Alege familia','Choose family')+'</option>';
+  state.nodes.slice().sort(function(a,b){return a.name.localeCompare(b.name,'ro');}).forEach(function(n){
+    var o = document.createElement('option'); o.value = n.name; els.names.appendChild(o);
+    var o1 = document.createElement('option'); o1.value = n.id; o1.textContent = n.name; els.pathFrom.appendChild(o1);
+    var o2 = document.createElement('option'); o2.value = n.id; o2.textContent = n.name; els.pathTo.appendChild(o2);
+  });
+}
+
+async function loadData(){
+  var supabase = getSupabase();
+  if(!supabase){
+    throw new Error('Supabase nu este disponibil.');
   }
+  var famRes = await supabase.from('families').select('id, display_name, visibility, is_public').order('display_name');
+  if(famRes.error) throw famRes.error;
+  var linkRes = await supabase.from('v_family_connections').select('source_family_id,target_family_id,relationship_type');
+  if(linkRes.error) throw linkRes.error;
 
-  state.selectedNodeId = pathIds[0] || null;
-  updateStyles();
+  state.nodes = (famRes.data||[]).map(function(f){
+    return { id:f.id, name:f.display_name || 'Familie', visibility:f.visibility || (f.is_public ? 'public' : 'private'), is_public:!!f.is_public };
+  });
 
-  const firstNode = state.nodes.find(n => n.id === pathIds[0]);
-  if (firstNode) centerOnNode(firstNode, 1.2, 500);
+  var seen = new Set();
+  state.links = [];
+  (linkRes.data||[]).forEach(function(l){
+    var key = linkKey(l.source_family_id, l.target_family_id) + '::' + (l.relationship_type||'relation');
+    if(seen.has(key)) return;
+    seen.add(key);
+    state.links.push({source:l.source_family_id, target:l.target_family_id, type:l.relationship_type || 'relation'});
+  });
+  buildAdjacency();
+  updateStats();
+  fillControls();
 }
 
-function attachEvents() {
-  els.findRelation.addEventListener("click", () => {
-    const fromId = els.relationFrom.value;
-    const toId = els.relationTo.value;
-
-    if (!fromId || !toId) {
-      setStatus("Alege ambele familii pentru a verifica relația.", "warn");
-      return;
-    }
-
-    const path = bfsFamilyPath(fromId, toId);
-    if (!path) {
-      state.highlightedNodeIds.clear();
-      state.highlightedLinkKeys.clear();
-      updateStyles();
-      setStatus("Nu există relație între familiile selectate.", "warn");
-      showModal("Fără relație", "Nu a fost găsit niciun traseu între familiile selectate.");
-      return;
-    }
-
-    highlightPath(path);
-    const pathNames = path.map(id => state.nodes.find(n => n.id === id)?.name).filter(Boolean).join(" → ");
-    setStatus(`Relație găsită: ${pathNames}`, "ok");
-    showModal("Relație găsită", pathNames);
-  });
-
-  els.fitView.addEventListener("click", () => {
-    fitGraph();
-    setStatus("Arborele a fost recentrat.");
-  });
-
-  els.clearSelection.addEventListener("click", () => {
-    resetHighlight();
-    fitGraph(450);
-  });
-
-  els.familySearch.addEventListener("change", () => {
-    const node = findNodeByName(els.familySearch.value);
-    if (!node) {
-      setStatus("Familia căutată nu a fost găsită.", "warn");
-      return;
-    }
-    state.selectedNodeId = node.id;
-    state.highlightedNodeIds = new Set([node.id]);
-    state.highlightedLinkKeys.clear();
-    updateStyles();
-    centerOnNode(node, 1.5);
-    setStatus(`Familia "${node.name}" a fost găsită.`, "ok");
-  });
-
-  els.treeContainer.addEventListener("click", (event) => {
-    if (event.target === els.treeContainer || event.target === els.svg) {
-      hideModal();
-    }
-  });
-}
-
-function initSvg() {
-  const rect = els.treeContainer.getBoundingClientRect();
-  state.width = Math.max(300, rect.width);
-  state.height = Math.max(500, rect.height);
-
-  state.svg = d3.select(els.svg)
-    .attr("viewBox", [0, 0, state.width, state.height]);
-
-  state.gRoot = state.svg.append("g");
-  state.gLinks = state.gRoot.append("g").attr("class", "links");
-  state.gNodes = state.gRoot.append("g").attr("class", "nodes");
-
-  state.zoom = d3.zoom()
-    .scaleExtent([0.25, 3.5])
-    .on("zoom", (event) => {
-      state.gRoot.attr("transform", event.transform);
-    });
-
+function initSvg(){
+  var rect = els.stage.getBoundingClientRect();
+  state.width = Math.max(320, rect.width);
+  state.height = 620;
+  state.svg = d3.select(els.svg).attr('viewBox', [0,0,state.width,state.height]);
+  state.root = state.svg.append('g');
+  state.linkLayer = state.root.append('g');
+  state.nodeLayer = state.root.append('g');
+  state.zoom = d3.zoom().scaleExtent([0.25, 3.5]).on('zoom', function(event){ state.root.attr('transform', event.transform); });
   state.svg.call(state.zoom);
 }
 
-function drawGraph() {
+function tooltipHtml(d){
+  return '<strong>'+esc(d.name)+'</strong><br>' + esc((d.visibility==='public'||d.is_public)?tr('Publica','Public'):tr('Privata','Private'));
+}
+
+function showTooltip(event,d){
+  els.tooltip.innerHTML = tooltipHtml(d);
+  els.tooltip.style.display='block';
+  var rect = els.stage.getBoundingClientRect();
+  els.tooltip.style.left = (event.clientX - rect.left + 18)+'px';
+  els.tooltip.style.top = (event.clientY - rect.top + 18)+'px';
+}
+function hideTooltip(){ els.tooltip.style.display='none'; }
+
+function updateStyles(){
+  state.nodeLayer.selectAll('g.tree-node').each(function(d){
+    var selected = state.selectedNodeId === d.id;
+    var dim = state.highlightedNodeIds.size>0 && !state.highlightedNodeIds.has(d.id);
+    d3.select(this).select('circle')
+      .attr('fill', (d.visibility==='public'||d.is_public) ? '#d4a84a' : '#7d8491')
+      .attr('stroke', selected ? '#f0e8d0' : state.highlightedNodeIds.has(d.id) ? '#e0b84a' : '#243244')
+      .attr('r', selected ? 29 : 23)
+      .attr('opacity', dim ? .22 : 1);
+    d3.select(this).select('text').attr('opacity', dim ? .25 : 1).attr('font-weight', selected||state.highlightedNodeIds.has(d.id) ? 700 : 500);
+  });
+  state.linkLayer.selectAll('line').each(function(d){
+    var s = typeof d.source==='object'?d.source.id:d.source;
+    var t = typeof d.target==='object'?d.target.id:d.target;
+    var k = linkKey(s,t);
+    var dim = state.highlightedLinkKeys.size>0 && !state.highlightedLinkKeys.has(k);
+    d3.select(this)
+      .attr('stroke', state.highlightedLinkKeys.has(k)? '#d4a84a' : '#4b5c7c')
+      .attr('stroke-width', state.highlightedLinkKeys.has(k)? 3.5 : 2.1)
+      .attr('opacity', dim ? .16 : .92);
+  });
+}
+
+function fitGraph(duration){
+  duration = duration || 650;
+  if(!state.nodes.length) return;
+  var xs = state.nodes.map(function(n){return n.x||0;}), ys = state.nodes.map(function(n){return n.y||0;});
+  var minX = Math.min.apply(null,xs)-90, maxX=Math.max.apply(null,xs)+90, minY=Math.min.apply(null,ys)-90, maxY=Math.max.apply(null,ys)+90;
+  var gw=Math.max(1,maxX-minX), gh=Math.max(1,maxY-minY);
+  var scale=Math.min(2.2, 0.9 / Math.max(gw/state.width, gh/state.height));
+  var tx=state.width/2 - scale*(minX+gw/2), ty=state.height/2 - scale*(minY+gh/2);
+  state.svg.transition().duration(duration).call(state.zoom.transform, d3.zoomIdentity.translate(tx,ty).scale(scale));
+}
+
+function centerOnNode(node, zoomLevel, duration){
+  zoomLevel = zoomLevel || 1.55; duration = duration || 650;
+  if(!node) return;
+  var tx = state.width/2 - zoomLevel*node.x, ty = state.height/2 - zoomLevel*node.y;
+  state.svg.transition().duration(duration).call(state.zoom.transform, d3.zoomIdentity.translate(tx,ty).scale(zoomLevel));
+}
+
+function draw(){
   state.simulation = d3.forceSimulation(state.nodes)
-    .force("link", d3.forceLink(state.links).id(d => d.id).distance(d => {
-      const sourceId = typeof d.source === "object" ? d.source.id : d.source;
-      const targetId = typeof d.target === "object" ? d.target.id : d.target;
-      const sourceDegree = state.adjacency.get(sourceId)?.length || 0;
-      const targetDegree = state.adjacency.get(targetId)?.length || 0;
-      return (sourceDegree === 0 || targetDegree === 0) ? 240 : 145;
-    }).strength(0.65))
-    .force("charge", d3.forceManyBody().strength(d => ((state.adjacency.get(d.id)?.length || 0) === 0 ? -520 : -680)))
-    .force("center", d3.forceCenter(state.width / 2, state.height / 2))
-    .force("collision", d3.forceCollide().radius(d => ((state.adjacency.get(d.id)?.length || 0) === 0 ? 54 : 42)));
+    .force('link', d3.forceLink(state.links).id(function(d){return d.id;}).distance(function(d){
+      var s = typeof d.source==='object'?d.source.id:d.source;
+      var t = typeof d.target==='object'?d.target.id:d.target;
+      var sd=(state.adjacency.get(s)||[]).length, td=(state.adjacency.get(t)||[]).length;
+      return (sd===0 || td===0) ? 250 : 150;
+    }).strength(0.7))
+    .force('charge', d3.forceManyBody().strength(function(d){return ((state.adjacency.get(d.id)||[]).length===0)? -560 : -720;}))
+    .force('center', d3.forceCenter(state.width/2, state.height/2))
+    .force('collision', d3.forceCollide().radius(function(d){return ((state.adjacency.get(d.id)||[]).length===0) ? 56 : 42;}));
 
-  const linkSelection = state.gLinks.selectAll("line")
-    .data(state.links)
-    .join("line")
-    .attr("stroke", "#4f5d73")
-    .attr("stroke-width", 2)
-    .attr("stroke-linecap", "round");
+  var linkSel = state.linkLayer.selectAll('line').data(state.links).join('line')
+    .attr('stroke','#4b5c7c').attr('stroke-width',2.1).attr('stroke-linecap','round');
 
-  const nodeSelection = state.gNodes.selectAll("g.node")
-    .data(state.nodes)
-    .join("g")
-    .attr("class", "node")
-    .call(
-      d3.drag()
-        .on("start", (event, d) => {
-          if (!event.active) state.simulation.alphaTarget(0.3).restart();
-          d.fx = d.x;
-          d.fy = d.y;
-        })
-        .on("drag", (event, d) => {
-          d.fx = event.x;
-          d.fy = event.y;
-        })
-        .on("end", (event, d) => {
-          if (!event.active) state.simulation.alphaTarget(0);
-          d.fx = null;
-          d.fy = null;
-        })
-    );
+  var nodeSel = state.nodeLayer.selectAll('g.tree-node').data(state.nodes).join('g').attr('class','tree-node')
+    .call(d3.drag()
+      .on('start', function(event,d){ if(!event.active) state.simulation.alphaTarget(0.3).restart(); d.fx=d.x; d.fy=d.y; })
+      .on('drag', function(event,d){ d.fx=event.x; d.fy=event.y; })
+      .on('end', function(event,d){ if(!event.active) state.simulation.alphaTarget(0); d.fx=null; d.fy=null; }));
 
-  nodeSelection.append("circle")
-    .attr("r", 22)
-    .attr("fill", d => d.visibility === "public" ? "#d4a84a" : "#6f7884")
-    .attr("stroke", "#243244");
+  nodeSel.append('circle').attr('r',23).attr('fill', function(d){return (d.visibility==='public'||d.is_public)? '#d4a84a' : '#7d8491';}).attr('stroke','#243244').attr('stroke-width',2);
+  nodeSel.append('text').attr('class','tree-node-label').attr('dy',42).text(function(d){return d.name;});
 
-  nodeSelection.append("text")
-    .attr("dy", 40)
-    .text(d => d.name);
+  nodeSel.on('mouseover', function(event,d){showTooltip(event,d);})
+    .on('mousemove', function(event,d){showTooltip(event,d);})
+    .on('mouseout', hideTooltip)
+    .on('click', function(event,d){ event.stopPropagation(); state.selectedNodeId = d.id; updateStyles(); centerOnNode(d); openFamily(d); });
 
-  nodeSelection
-    .on("mouseover", (event, d) => renderTooltip(event, d))
-    .on("mousemove", (event, d) => renderTooltip(event, d))
-    .on("mouseout", hideTooltip)
-    .on("click", handleNodeClick);
-
-  state.simulation.on("tick", () => {
-    linkSelection
-      .attr("x1", d => d.source.x)
-      .attr("y1", d => d.source.y)
-      .attr("x2", d => d.target.x)
-      .attr("y2", d => d.target.y);
-
-    nodeSelection.attr("transform", d => `translate(${d.x},${d.y})`);
+  state.simulation.on('tick', function(){
+    linkSel.attr('x1', function(d){return d.source.x;}).attr('y1', function(d){return d.source.y;}).attr('x2', function(d){return d.target.x;}).attr('y2', function(d){return d.target.y;});
+    nodeSel.attr('transform', function(d){return 'translate('+d.x+','+d.y+')';});
   });
 
-  state.simulation.on("end", () => {
-    fitGraph();
-    setStatus(`Arbore încărcat: ${state.nodes.length} familii, ${state.links.length} conexiuni.`, "ok");
-  });
-
+  state.simulation.on('end', function(){ fitGraph(); setStatus(tr('Arbore incarcat: ','Tree loaded: ')+state.nodes.length+' '+tr('familii, ','families, ')+state.links.length+' '+tr('conexiuni.','connections.')); });
   updateStyles();
 }
 
-async function boot() {
+function resetHighlights(){
+  state.selectedNodeId = null; state.highlightedNodeIds.clear(); state.highlightedLinkKeys.clear(); updateStyles(); hideOverlay();
+  if(els.pathResult) els.pathResult.classList.remove('on');
+}
+
+function attachEvents(){
+  els.search.addEventListener('change', function(){
+    var q = normalize(els.search.value);
+    var node = state.nodes.find(function(n){return normalize(n.name)===q;}) || state.nodes.find(function(n){return normalize(n.name).indexOf(q)!==-1;});
+    if(!node){ setStatus(tr('Familia nu a fost gasita.','Family not found.')); return; }
+    state.selectedNodeId = node.id; state.highlightedNodeIds = new Set([node.id]); state.highlightedLinkKeys.clear(); updateStyles(); centerOnNode(node,1.65); setStatus(tr('Familie gasita: ','Family found: ')+node.name); hideOverlay();
+  });
+
+  els.pathBtn.addEventListener('click', function(){
+    var from = els.pathFrom.value, to = els.pathTo.value;
+    if(!from || !to || from===to){ setPathResult(esc(tr('Selecteaza doua familii diferite.','Select two different families.'))); return; }
+    var path = findPath(from,to);
+    if(!path){ state.highlightedNodeIds.clear(); state.highlightedLinkKeys.clear(); updateStyles(); setPathResult(esc(tr('Nu exista o legatura documentata intre aceste familii.','There is no documented connection between these families.'))); return; }
+    state.highlightedNodeIds = new Set(path); state.highlightedLinkKeys = new Set();
+    for(var i=0;i<path.length-1;i++) state.highlightedLinkKeys.add(linkKey(path[i], path[i+1]));
+    state.selectedNodeId = path[0]; updateStyles();
+    var names = path.map(function(id){ var n=state.nodes.find(function(x){return x.id===id;}); return n?n.name:id; });
+    setPathResult(esc(tr('Traseu gasit: ','Path found: '))+ names.map(esc).join(' &rarr; '));
+    centerOnNode(state.nodes.find(function(n){return n.id===path[0];}),1.2,500);
+  });
+
+  els.fitBtn.addEventListener('click', function(){ fitGraph(); setStatus(tr('Arborele a fost recentrat.','The tree was re-centered.')); });
+  els.resetBtn.addEventListener('click', function(){ resetHighlights(); fitGraph(450); setStatus(tr('Vizualizare resetata.','View reset.')); });
+  els.stage.addEventListener('click', function(e){ if(e.target===els.stage || e.target===els.svg){ hideOverlay(); } });
+  window.addEventListener('resize', function(){
+    var rect = els.stage.getBoundingClientRect(); state.width = Math.max(320, rect.width); state.svg.attr('viewBox',[0,0,state.width,state.height]);
+    if(state.simulation){ state.simulation.force('center', d3.forceCenter(state.width/2, state.height/2)); state.simulation.alpha(0.25).restart(); setTimeout(function(){ fitGraph(350); },220); }
+  });
+}
+
+function showError(msg){
+  els.stage.innerHTML = '<div class="calnic-error"><div class="calnic-error-icon">&#9888;&#65039;</div><div class="calnic-error-title">'+esc(tr('Nu s-a putut incarca arborele satului','Could not load the village tree'))+'</div><div class="calnic-error-sub">'+esc(msg)+'</div><button class="calnic-error-btn" onclick="location.reload()">'+esc(tr('Incearca din nou','Try again'))+'</button></div>';
+}
+
+async function init(){
+  initEls();
+  initSvg();
+  attachEvents();
   try {
-    setStatus("Se încarcă familiile și relațiile...");
-    initSvg();
-
-    const { nodes, links } = await loadVillageGraph();
-
-    if (!nodes.length) {
-      setStatus("Nu există familii în baza de date.", "warn");
-      return;
-    }
-
-    state.nodes = nodes;
-    state.links = links;
-    state.adjacency = buildAdjacency(nodes, links);
-
-    populateControls(nodes);
-    attachEvents();
-    drawGraph();
-
-    window.addEventListener("resize", () => {
-      const rect = els.treeContainer.getBoundingClientRect();
-      state.width = Math.max(300, rect.width);
-      state.height = Math.max(500, rect.height);
-      state.svg.attr("viewBox", [0, 0, state.width, state.height]);
-      state.simulation?.force("center", d3.forceCenter(state.width / 2, state.height / 2));
-      state.simulation?.alpha(0.25).restart();
-      setTimeout(() => fitGraph(350), 220);
-    });
-  } catch (error) {
-    console.error(error);
-    setStatus("Eroare la încărcarea datelor din Supabase.", "warn");
-    showModal("Eroare", `${error.message || error}`);
-  }
+    setStatus(tr('Se incarca arborele...','Loading tree...'));
+    await loadData();
+    if(!state.nodes.length){ els.stage.innerHTML = '<div class="tree-empty">'+esc(tr('Nu exista inca familii pentru arborele satului.','There are no families yet for the village tree.'))+'</div>'; return; }
+    draw();
+  } catch(err){ console.error(err); showError(err && err.message ? err.message : String(err)); }
 }
 
-if (window.supabase) {
-  boot();
-} else {
-  document.addEventListener('supabase:ready', boot, { once: true });
-}
+if(getSupabase()) init(); else document.addEventListener('supabase:ready', init, {once:true});
+})();
