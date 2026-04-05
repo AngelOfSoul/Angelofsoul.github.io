@@ -38,7 +38,7 @@
 .tree-stage:active{cursor:grabbing;}
 .tree-canvas{position:absolute;transform-origin:0 0;}
 /* ── GEN LABELS ── */
-.gen-label{position:absolute;left:4px;right:auto;z-index:6;pointer-events:none;font-size:9px;letter-spacing:2px;text-transform:uppercase;color:var(--gold-m);font-family:'Playfair Display',serif;opacity:.65;background:rgba(10,10,10,.75);padding:2px 6px;border-radius:2px;white-space:nowrap;max-width:180px;overflow:hidden;text-overflow:ellipsis;}
+.gen-label{position:absolute;left:4px;right:auto;z-index:6;pointer-events:none;font-size:9px;letter-spacing:2px;text-transform:uppercase;color:var(--gold-m);font-family:'Playfair Display',serif;opacity:.65;background:rgba(10,10,10,.75);padding:2px 6px;border-radius:2px;white-space:nowrap;max-width:180px;overflow:hidden;text-overflow:ellipsis;display:none!important;}
 /* ── MINIMAP ── */
 .minimap{position:absolute;bottom:10px;right:10px;background:rgba(8,8,8,.92);border:1px solid var(--b2);border-radius:3px;padding:3px;z-index:20;}
 .minimap canvas{display:block;}
@@ -791,7 +791,7 @@ document.addEventListener('DOMContentLoaded',function(){
     var btn=this;btn.disabled=true;btn.textContent=t('Se salveaza...','Saving...');
     var rows=toAdd.map(function(p){return{from_member_id:p.from,to_member_id:p.to,relation_type:p.type,is_biological:p.bio,confidence:100};});
     var capturedEditing=S.editingId;
-    supabase.from('member_relations').insert(rows).select().then(function(r){
+    insertMemberRelationsSafe(rows).then(function(r){
       btn.disabled=false;btn.textContent=t('Adauga selectate','Add selected');
       if(r.error){return;}
       // Add new relations to memory immediately
@@ -923,6 +923,30 @@ function afterLoad(rid){
 }
 
 function reload(){loadFamily();}
+
+function insertMemberRelationsSafe(rows){
+  var list=Array.isArray(rows)?rows:[rows];
+  function withFields(base, opts){
+    var out=Object.assign({},base);
+    if(opts.familyId) out.family_id=S.familyId;
+    if(opts.createdBy && S.sessionUid) out.created_by=S.sessionUid;
+    return out;
+  }
+  var variants=[
+    {familyId:true, createdBy:true},
+    {familyId:true, createdBy:false},
+    {familyId:false, createdBy:true},
+    {familyId:false, createdBy:false}
+  ];
+  function tryVariant(i){
+    var payload=list.map(function(r){return withFields(r,variants[i]);});
+    return supabase.from('member_relations').insert(payload).select().then(function(res){
+      if(res&&res.error&&i<variants.length-1&&isMissingColumnError(res.error)) return tryVariant(i+1);
+      return res;
+    });
+  }
+  return tryVariant(0);
+}
 
 function resolveMemberPhotoUrl(photoPath){
   if(!photoPath)return '';
@@ -1835,7 +1859,7 @@ function doRemoveRel(relId,item){
     var wasInsert=!editingRelId;
     var promise=editingRelId
       ?supabase.from('member_relations').update({relation_type:selRelType,is_biological:bio}).eq('id',editingRelId).select()
-      :supabase.from('member_relations').insert({from_member_id:capturedFrom,to_member_id:capturedTo,relation_type:capturedType,is_biological:bio,confidence:100}).select();
+      :insertMemberRelationsSafe({from_member_id:capturedFrom,to_member_id:capturedTo,relation_type:capturedType,is_biological:bio,confidence:100});
     promise.then(function(r){
         btn.disabled=false;btn.textContent=t('Salveaza','Save');
         if(r.error){err.textContent=r.error.message;err.style.display='block';return;}
