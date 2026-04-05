@@ -614,12 +614,35 @@ function lang(){return localStorage.getItem('calnic-lang')||'ro';}
 function t(ro,en){return lang()==='en'?en:ro;}
 function showMsg(id,type,txt){var e=document.getElementById(id);if(!e)return;e.className='m-msg '+type;e.textContent=txt;e.style.display='block';setTimeout(function(){e.style.display='none';},5000);}
 var _confirmCb=null;
+var _confirmAlertMode=false;
 function showConfirm(msg,onOk){
+  _confirmAlertMode=false;
+  var cancelBtn=document.getElementById('confirmCancelBtn');
+  var okBtn=document.getElementById('confirmOkBtn');
+  if(cancelBtn) cancelBtn.style.display='';
+  if(okBtn) okBtn.textContent=t('OK','OK');
   _confirmCb=onOk;
   document.getElementById('confirmMsg').textContent=msg;
   document.getElementById('confirmModal').classList.add('open');
 }
+function showSiteAlert(msg){
+  _confirmAlertMode=true;
+  var cancelBtn=document.getElementById('confirmCancelBtn');
+  var okBtn=document.getElementById('confirmOkBtn');
+  if(cancelBtn) cancelBtn.style.display='none';
+  if(okBtn) okBtn.textContent=t('In regula','OK');
+  _confirmCb=null;
+  document.getElementById('confirmMsg').textContent=String(msg||'');
+  document.getElementById('confirmModal').classList.add('open');
+}
 function _closeConfirm(ok){
+  if(_confirmAlertMode){
+    var cancelBtn=document.getElementById('confirmCancelBtn');
+    var okBtn=document.getElementById('confirmOkBtn');
+    if(cancelBtn) cancelBtn.style.display='';
+    if(okBtn) okBtn.textContent=t('OK','OK');
+    _confirmAlertMode=false;
+  }
   document.getElementById('confirmModal').classList.remove('open');
   var cb=_confirmCb;_confirmCb=null;
   if(ok&&cb)cb();
@@ -808,6 +831,7 @@ document.addEventListener('DOMContentLoaded',function(){
 var S={familyId:null,family:null,members:[],relations:[],sessionUid:null,zoom:.88,panX:0,panY:0,panning:false,lastMouse:{x:0,y:0},selectedId:null,editingId:null,addVis:'public',editVis:'public',ttTimer:null,reqId:0,undoTimer:null,resizeObs:null,realtimeCh:null,origVals:{}};
 var CARD_W=110,GEN_Y={3:30,2:180,1:340,0:490},GEN_GAP_X=28;
 var _layoutBounds=null;
+var _canUseConnectedVillageFlag=true;
 
 // ── INIT ─────────────────────────────────────────────────
 document.getElementById('yr').textContent=new Date().getFullYear();
@@ -1983,22 +2007,43 @@ function showUndo(msg,action){
 // ── CONNECT TO VILLAGE ───────────────────────────────────
 document.getElementById('connectVillageBtn').addEventListener('click',function(){
   if(!S.familyId||!window.supabase)return;
+  function openVillageTree(){
+    localStorage.setItem('selectedFamily',S.familyId);
+    window.location.href='arborele-satului.html?family='+encodeURIComponent(S.familyId);
+  }
+  if(!_canUseConnectedVillageFlag){
+    showExportToast(t('Familia este gata pentru arborele satului.','Family is ready for the village tree.'));
+    setTimeout(openVillageTree,220);
+    return;
+  }
   supabase.from('families').update({connected_to_village:true}).eq('id',S.familyId).then(function(r){
-    if(r.error){alert(r.error.message);return;}
-    if(S.family)S.family.connected_to_village=true;showExportToast(t('Familie conectata la arborele satului!','Family connected to the village tree!'));
-  }).catch(function(err){alert(err.message);});
+    if(r.error){
+      if(isMissingColumnError(r.error)){
+        // Legacy schemas may not have this flag; still allow navigation.
+        _canUseConnectedVillageFlag=false;
+        showExportToast(t('Familia este gata pentru arborele satului.','Family is ready for the village tree.'));
+        setTimeout(openVillageTree,220);
+        return;
+      }
+      showSiteAlert(r.error.message);
+      return;
+    }
+    if(S.family)S.family.connected_to_village=true;
+    showExportToast(t('Familie conectata la arborele satului!','Family connected to the village tree!'));
+    setTimeout(openVillageTree,220);
+  }).catch(function(err){showSiteAlert(err.message);});
 });
 
 // ── EXPORT ───────────────────────────────────────────────
 document.getElementById('exportBtn').addEventListener('click',function(){
   var btn=this;btn.disabled=true;btn.innerHTML='&#8659; '+t('Se exporta...','Exporting...');
-  if(typeof html2canvas==='undefined'){var sc=document.createElement('script');sc.src='https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js';sc.onload=function(){doExport(btn);};sc.onerror=function(){btn.disabled=false;btn.innerHTML='&#8659; '+t('Salveaza ca imagine','Save as image');alert(t('Export esuat.','Export failed.'));};document.head.appendChild(sc);}else{doExport(btn);}
+  if(typeof html2canvas==='undefined'){var sc=document.createElement('script');sc.src='https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js';sc.onload=function(){doExport(btn);};sc.onerror=function(){btn.disabled=false;btn.innerHTML='&#8659; '+t('Salveaza ca imagine','Save as image');showSiteAlert(t('Export esuat.','Export failed.'));};document.head.appendChild(sc);}else{doExport(btn);}
 });
 function doExport(btn){
   html2canvas(document.getElementById('treeCanvas'),{backgroundColor:'#0a0a0a',scale:2,useCORS:true,logging:false}).then(function(c){
     var l=document.createElement('a');l.download=(S.family?S.family.name.replace(/[^a-zA-Z0-9]/g,'-'):'arbore')+'.png';l.href=c.toDataURL('image/png');l.click();
     btn.disabled=false;btn.innerHTML='&#8659; '+t('Salveaza ca imagine','Save as image');showExportToast(t('Export salvat!','Export saved!'));
-  }).catch(function(){btn.disabled=false;btn.innerHTML='&#8659; '+t('Salveaza ca imagine','Save as image');alert(t('Export esuat. Incercati din nou.','Export failed. Please try again.'));});
+  }).catch(function(){btn.disabled=false;btn.innerHTML='&#8659; '+t('Salveaza ca imagine','Save as image');showSiteAlert(t('Export esuat. Incercati din nou.','Export failed. Please try again.'));});
 }
 function showExportToast(msg){var e=document.getElementById('exportToast');e.textContent=msg;e.style.display='block';setTimeout(function(){e.style.display='none';},2400);}
 
