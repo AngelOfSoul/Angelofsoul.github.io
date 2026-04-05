@@ -1268,6 +1268,24 @@ function drawConnectors(svg,layout){
 
   // avMid(id): vertical center of avatar from node top — varies by gen/tree size
   function avMid(id){var l=layout[id];return l?Math.round((l.avSz||68)/2):34;}
+  function avRad(id){var l=layout[id];return l?Math.round((l.avSz||68)/2):34;}
+  function nodeCenter(id){
+    var p=layout[id];
+    if(!p)return null;
+    return {x:p.x+CARD_W/2,y:p.y+avMid(id)};
+  }
+  function edgePoint(fromId,toId,pad){
+    var c1=nodeCenter(fromId),c2=nodeCenter(toId);
+    if(!c1||!c2)return null;
+    var dx=c2.x-c1.x,dy=c2.y-c1.y,dist=Math.sqrt(dx*dx+dy*dy)||1;
+    var ux=dx/dist,uy=dy/dist,r=avRad(fromId)+(pad||2);
+    return {x:c1.x+ux*r,y:c1.y+uy*r};
+  }
+  function edgePair(aId,bId,pad){
+    var p1=edgePoint(aId,bId,pad),p2=edgePoint(bId,aId,pad);
+    if(!p1||!p2)return null;
+    return {x1:p1.x,y1:p1.y,x2:p2.x,y2:p2.y};
+  }
   // cardBot(id): bottom of card from node top
   function cardBot(id){var l=layout[id];return l?(l.cardH||110):110;}
   var childrenOf2={},spousePairs2={};
@@ -1295,9 +1313,9 @@ function drawConnectors(svg,layout){
     var k=[r.from_member_id,r.to_member_id].sort().join('|');
     if(drawnSpouse[k])return;drawnSpouse[k]=true;
     var pa=layout[r.from_member_id],pb=layout[r.to_member_id];if(!pa||!pb)return;
-    var x1=pa.x+CARD_W/2,x2=pb.x+CARD_W/2,y=pa.y+avMid(r.from_member_id);
-    addLine(svg,x1,y,x2,y,'#d4a84a',2,null);
-    var tx=mkSvg('text');tx.setAttribute('x',(x1+x2)/2);tx.setAttribute('y',y-4);
+    var seg=edgePair(r.from_member_id,r.to_member_id,3);if(!seg)return;
+    addLine(svg,seg.x1,seg.y1,seg.x2,seg.y2,'#d4a84a',2,null);
+    var tx=mkSvg('text');tx.setAttribute('x',(seg.x1+seg.x2)/2);tx.setAttribute('y',Math.min(seg.y1,seg.y2)-4);
     tx.setAttribute('text-anchor','middle');tx.setAttribute('font-size','13');
     tx.setAttribute('fill','#d4a84a');tx.textContent='♥';svg.appendChild(tx);
   });
@@ -1328,7 +1346,7 @@ function drawConnectors(svg,layout){
       var col=allCh[0].bio?'#c87050':'#5080c8',dash=allCh[0].bio?null:'5 3';
       var cx=cp.x+CARD_W/2;
       addLine(svg,dropX,dropY,cx,dropY,col,1.5,dash);
-      addLine(svg,cx,dropY,cx,cp.y,col,1.5,dash);
+      addLine(svg,cx,dropY,cx,cp.y-2,col,1.5,dash);
     } else {
       var xs=allCh.map(function(c){var cp=layout[c.id];return cp?cp.x+CARD_W/2:dropX;});
       var bL=Math.min.apply(null,xs),bR=Math.max.apply(null,xs);
@@ -1336,7 +1354,7 @@ function drawConnectors(svg,layout){
       allCh.forEach(function(c){
         var cp=layout[c.id];if(!cp)return;
         var col=c.bio?'#c87050':'#5080c8',dash=c.bio?null:'5 3';
-        addLine(svg,cp.x+CARD_W/2,dropY,cp.x+CARD_W/2,cp.y,col,1.5,dash);
+        addLine(svg,cp.x+CARD_W/2,dropY,cp.x+CARD_W/2,cp.y-2,col,1.5,dash);
       });
     }
   });
@@ -1344,8 +1362,8 @@ function drawConnectors(svg,layout){
   // Extended family dashed green lines
   S.relations.forEach(function(r){
     var meta=REL_META[r.relation_type];if(!meta||!meta.isExt)return;
-    var pa=layout[r.from_member_id],pb=layout[r.to_member_id];if(!pa||!pb)return;
-    addLine(svg,pa.x+CARD_W/2,pa.y+avMid(r.from_member_id),pb.x+CARD_W/2,pb.y+avMid(r.to_member_id),'#70a870',1.5,'4 3');
+    var seg=edgePair(r.from_member_id,r.to_member_id,3);if(!seg)return;
+    addLine(svg,seg.x1,seg.y1,seg.x2,seg.y2,'#70a870',1.5,'4 3');
   });
 
   // Sibling indicator lines — only drawn when siblings have NO shared parent in the tree
@@ -1360,8 +1378,9 @@ function drawConnectors(svg,layout){
     var sharedParent=_getParentsOf(r.from_member_id).some(function(p){return _parentChildExists(r.to_member_id,p.memberId);});
     if(sharedParent)return;
     // Draw a short curved bracket between the two sibling avatars
-    var x1=pa.x+CARD_W/2, x2=pb.x+CARD_W/2;
-    var y1=pa.y+avMid(r.from_member_id), y2=pb.y+avMid(r.to_member_id);
+    var seg=edgePair(r.from_member_id,r.to_member_id,3);if(!seg)return;
+    var x1=seg.x1, x2=seg.x2;
+    var y1=seg.y1, y2=seg.y2;
     var mx=(x1+x2)/2, my=Math.min(y1,y2)-18;
     addPath(svg,'M'+x1+' '+y1+' Q'+mx+' '+my+' '+x2+' '+y2,'#8a7040',1,'5 3');
   });
