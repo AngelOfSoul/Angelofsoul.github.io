@@ -26,7 +26,7 @@ nav{background:var(--s1);border-bottom:2px solid var(--gold-d);display:flex;flex
 .tree-zoom-btn{width:34px;height:34px;background:#111;border:1px solid #585040;color:#a09070;font-size:20px;line-height:1;cursor:pointer;border-radius:2px;display:flex;align-items:center;justify-content:center}
 .tree-zoom-btn.primary{border-color:#b08030;color:#d4a84a}
 .tree-zoom-btn:hover{border-color:#d4a84a;color:#d4a84a}
-.tooltip{position:absolute;pointer-events:none;background:#0f141c;border:1px solid rgba(255,255,255,.1);color:var(--text);border-radius:10px;padding:8px 10px;font-size:13px;display:none;box-shadow:0 12px 30px rgba(0,0,0,.35);z-index:4}.overlay-card{position:absolute;right:18px;bottom:18px;width:min(360px, calc(100vw - 36px));background:rgba(16,22,31,.94);border:1px solid rgba(255,255,255,.08);border-radius:14px;padding:14px;box-shadow:0 16px 40px rgba(0,0,0,.35);z-index:3}.overlay-card.hidden{display:none}.overlay-card h3{margin:0 0 8px;color:var(--gold);font-size:18px}.overlay-card p{margin:0;color:var(--muted);line-height:1.5;font-size:14px}.overlay-actions{margin-top:12px;display:flex;gap:8px;flex-wrap:wrap}
+.tooltip{position:absolute;pointer-events:none;background:#0f141c;border:1px solid rgba(255,255,255,.1);color:var(--text);border-radius:10px;padding:8px 10px;font-size:13px;display:none;box-shadow:0 12px 30px rgba(0,0,0,.35);z-index:4}.overlay-card{position:absolute;right:14px;bottom:14px;width:min(300px, calc(100vw - 28px));background:rgba(16,22,31,.94);border:1px solid rgba(255,255,255,.08);border-radius:12px;padding:10px 10px 11px;box-shadow:0 16px 40px rgba(0,0,0,.35);z-index:3}.overlay-card.hidden{display:none}.overlay-card-head{display:flex;align-items:center;justify-content:space-between;gap:8px;margin-bottom:6px}.overlay-card h3{margin:0;color:var(--gold);font-size:16px;line-height:1.2}.overlay-card p{margin:0;color:var(--muted);line-height:1.45;font-size:13px}.overlay-actions{margin-top:10px;display:flex;gap:8px;flex-wrap:wrap}.overlay-actions .btn-link{padding:7px 10px;font-size:12px}.overlay-close{width:28px;height:28px;display:inline-flex;align-items:center;justify-content:center;background:#111;border:1px solid #585040;color:var(--gold);border-radius:2px;cursor:pointer;font-size:18px;line-height:1}.overlay-close:hover{border-color:var(--gold);color:var(--gold-l)}
 .node text{fill:var(--text);font-size:13px;pointer-events:none;text-anchor:middle}.node circle{stroke-width:2px;cursor:pointer}
 footer{background:#050505;border-top:2px solid var(--gold-d);padding:16px 24px;text-align:center;font-size:13px;color:var(--muted);letter-spacing:1.5px;font-style:italic}footer .g{color:var(--gold-d);font-style:normal}
 </style>
@@ -93,7 +93,10 @@ footer{background:#050505;border-top:2px solid var(--gold-d);padding:16px 24px;t
       </div>
       <div id="tooltip" class="tooltip"></div>
       <div id="family-modal" class="overlay-card hidden">
-        <h3 id="modal-title">Detalii familie</h3>
+        <div class="overlay-card-head">
+          <h3 id="modal-title">Detalii familie</h3>
+          <button id="modal-close" class="overlay-close" type="button" aria-label="Inchide">×</button>
+        </div>
         <p id="modal-text"></p>
         <div class="overlay-actions">
           <a id="modal-family-link" class="btn-link" href="genealogie.html">Deschide pagina familiei</a>

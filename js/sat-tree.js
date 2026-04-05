@@ -15,6 +15,7 @@
   var modalText = qs('modal-text');
   var modalFamilyLink = qs('modal-family-link');
   var modalGenealogyLink = qs('modal-genealogy-link');
+  var modalClose = qs('modal-close');
   var statusEl = qs('status');
   var searchInput = qs('family-search');
   var familyList = qs('family-list');
@@ -310,6 +311,7 @@
   if (fitBtn) fitBtn.addEventListener('click', function () { fitGraph(450); });
   if (zoomInBtn) zoomInBtn.addEventListener('click', function () { zoomByFactor(1.14); });
   if (zoomOutBtn) zoomOutBtn.addEventListener('click', function () { zoomByFactor(1 / 1.14); });
+  if (modalClose) modalClose.addEventListener('click', hideFamilyDetails);
   if (findBtn) findBtn.addEventListener('click', function () {
     var from = relationFrom.value, to = relationTo.value;
     if (!from || !to || from === to) {
