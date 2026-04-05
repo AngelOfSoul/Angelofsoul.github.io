@@ -1352,13 +1352,7 @@ function fmeRenderHistory(id) {
   var el = document.getElementById('fmeHistList');
   if (!el || !window.supabase) return;
   el.innerHTML = '<div style="font-size:12px;color:var(--muted);font-style:italic;">Se incarca...</div>';
-  supabase
-    .from('audit_log')
-    .select('*')
-    .eq('table_name', 'members')
-    .eq('record_id', id)
-    .order('created_at', { ascending: false })
-    .limit(30)
+  supabase.from('member_history').select('*').eq('member_id', id).order('created_at', {ascending:false}).limit(30)
     .then(function(r) {
       if (r.error || !r.data || !r.data.length) {
         el.innerHTML = '<div style="font-size:12px;color:var(--muted);font-style:italic;">Nicio modificare inregistrata.</div>';
@@ -1366,14 +1360,7 @@ function fmeRenderHistory(id) {
       }
       el.innerHTML = r.data.map(function(h) {
         var d = h.created_at ? h.created_at.slice(0,10) : '';
-        var lbl = h.action || 'UPDATE';
-        if (h.new_data && h.old_data) {
-          var changed = Object.keys(h.new_data).filter(function(k) {
-            return h.new_data[k] !== h.old_data[k] && k !== 'updated_at';
-          });
-          if (changed.length) lbl += ': ' + changed.join(', ');
-        }
-        return '<div class="hist-row"><span style="color:var(--gold);margin-right:6px;">' + d + '</span>' + escH(lbl) + '</div>';
+        return '<div class="hist-row"><span style="color:var(--gold);margin-right:6px;">' + d + '</span>' + (h.description || h.action || JSON.stringify(h.changes||{})) + '</div>';
       }).join('');
     }).catch(function() {
       el.innerHTML = '<div style="font-size:12px;color:var(--muted);font-style:italic;">Nicio modificare inregistrata.</div>';
