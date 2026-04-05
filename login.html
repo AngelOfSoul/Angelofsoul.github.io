@@ -811,6 +811,7 @@ async function findFamilyForUser(userId) {
 
 /* Route an already-authenticated user: Step 2 if no family, else logged-in box */
 async function routeAuthenticatedUser(user) {
+  if (!user || !user.id) return;
   var famCheck = await findFamilyForUser(user.id);
   if (famCheck && famCheck.id) {
     showLoggedIn(user);
@@ -1041,7 +1042,7 @@ async function doFamilyProfile(e) {
       if (newFamilyId) localStorage.setItem('selectedFamily', newFamilyId);
       pendingUserId = null;
       showMsg('step2Msg', currentLang === 'ro' ? 'Profil creat cu succes! Redirectionare...' : 'Profile created! Redirecting...', 'success');
-      setTimeout(function() { window.location.href = 'dashboard.html'; }, 1200);
+      setTimeout(function() { window.location.href = 'familiile.html'; }, 1200);
     }
   } catch(err) {
     showMsg('step2Msg', err.message || 'Eroare necunoscuta', 'error');

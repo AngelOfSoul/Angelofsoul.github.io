@@ -549,12 +549,13 @@ var DEMO_FAMILIES = [
 
 var families = [];
 var supabaseLoaded = false;
+var familiesCurrentUserId = null;
 
 /* ── SUPABASE LOAD ──
    Runs after supabase.js fires the 'supabase:ready' event.
    On success, replaces the demo families array and re-renders.
    On failure, keeps the demo data and logs a console note. */
-function loadFamiliiFromSupabase() {
+async function loadFamiliiFromSupabase() {
   var gridLoading = document.getElementById('gridLoading');
 
   function mapFamilyRows(rows) {
@@ -562,6 +563,7 @@ function loadFamiliiFromSupabase() {
       var safeName = (r.name && String(r.name).trim()) || (localStorage.getItem('calnic-lang') === 'en' ? 'Family' : 'Familie');
       return {
         id:              r.id,
+        created_by:      r.created_by || null,
         name:            safeName,
         village:         r.village || 'Calnic',
         since:           r.since,
@@ -600,9 +602,10 @@ function loadFamiliiFromSupabase() {
 
   function fetchFamiliesWithFallback() {
     var variants = [
-      'id, name, village, since, desc_ro, desc_en',
-      'id, name, village, since, members_count, generations_count, photos_count, desc_ro, desc_en',
-      'id, name, village, since, members_count, generations_count, photos_count, show_members, show_generations, show_photos, show_since, has_public_photos, has_private_photos, desc_ro, desc_en',
+      'id, created_by, name, village, since, desc_ro, desc_en',
+      'id, created_by, name, village, since, members_count, generations_count, photos_count, desc_ro, desc_en',
+      'id, created_by, name, village, since, members_count, generations_count, photos_count, show_members, show_generations, show_photos, show_since, has_public_photos, has_private_photos, desc_ro, desc_en',
+      'id, created_by, name, village, since',
       'id, name, village, since'
     ];
     function tryVariant(idx) {
@@ -626,6 +629,11 @@ function loadFamiliiFromSupabase() {
     setEmptyGridMsg();
     return;
   }
+
+  try{
+    var u = await window.supabase.auth.getUser();
+    familiesCurrentUserId = (u && u.data && u.data.user) ? u.data.user.id : null;
+  }catch(_e){ familiesCurrentUserId = null; }
 
   fetchFamiliesWithFallback().then(function(res) {
     supabaseLoaded = true;
@@ -741,13 +749,22 @@ function filterFamilies() {
     return matchQ && matchV && matchA;
   });
 
-  if (sort === 'alpha') {
-    filtered.sort(function(a,b){ return String(a.name || '').localeCompare(String(b.name || '')); });
-  } else if (sort === 'oldest') {
-    filtered.sort(function(a,b){ return (a.since || 0) - (b.since || 0); });
-  } else {
-    filtered.sort(function(a,b){ return (b.addedOrder || 0) - (a.addedOrder || 0); });
+  function familyPriority(f) {
+    var selectedId = localStorage.getItem('selectedFamily');
+    if (selectedId && f && f.id === selectedId) return 0;
+    if (familiesCurrentUserId && f && f.created_by === familiesCurrentUserId) return 1;
+    return 2;
   }
+  function compareByMode(a,b){
+    if (sort === 'alpha') return String(a.name || '').localeCompare(String(b.name || ''));
+    if (sort === 'oldest') return (a.since || 0) - (b.since || 0);
+    return (b.addedOrder || 0) - (a.addedOrder || 0);
+  }
+  filtered.sort(function(a,b){
+    var pa = familyPriority(a), pb = familyPriority(b);
+    if (pa !== pb) return pa - pb;
+    return compareByMode(a,b);
+  });
 
   var grid = document.getElementById('familiesGrid');
   var noRes = document.getElementById('noResults');

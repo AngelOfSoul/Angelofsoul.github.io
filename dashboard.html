@@ -1147,7 +1147,7 @@ function escHtml(s) {
       familyData = existingRes.data;
       familyId = existingRes.data.id;
       localStorage.setItem('selectedFamily', existingRes.data.id);
-      window.location.href = 'arborele-satului.html?family=' + encodeURIComponent(existingRes.data.id);
+      window.location.href = 'familiile.html';
       return;
     }
 
@@ -1235,7 +1235,7 @@ function escHtml(s) {
 
     closeFamilyModal();
     localStorage.setItem('selectedFamily', famRes.data.id);
-    window.location.href = 'arborele-satului.html?family=' + encodeURIComponent(famRes.data.id);
+    window.location.href = 'familiile.html';
   }
 
   document.addEventListener('DOMContentLoaded', function(){
