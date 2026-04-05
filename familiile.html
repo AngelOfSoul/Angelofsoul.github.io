@@ -818,7 +818,7 @@ function checkFamiliiNavSession() {
   window.supabase.auth.getUser().then(function(res) {
     var user = res && res.data ? (res.data.user || null) : null;
     if (!user) return;
-    var navLogin = document.querySelector('a.nav-login');
+    var navLogin = document.querySelector('a.nav-login:not(.calnic-admin-link)');
     var mobileLogin = document.querySelector('a.nav-mobile-login');
     if (navLogin) {
       navLogin.href = 'dashboard.html';
