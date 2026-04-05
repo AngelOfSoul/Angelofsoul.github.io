@@ -38,7 +38,7 @@
 .tree-stage:active{cursor:grabbing;}
 .tree-canvas{position:absolute;transform-origin:0 0;}
 /* ── GEN LABELS ── */
-.gen-label{position:absolute;left:4px;right:auto;z-index:6;pointer-events:none;font-size:9px;letter-spacing:2px;text-transform:uppercase;color:var(--gold-m);font-family:'Playfair Display',serif;opacity:.65;background:rgba(10,10,10,.75);padding:2px 6px;border-radius:2px;white-space:nowrap;max-width:180px;overflow:hidden;text-overflow:ellipsis;display:none!important;}
+.gen-label{position:absolute;left:4px;right:auto;z-index:6;pointer-events:none;font-size:9px;letter-spacing:2px;text-transform:uppercase;color:var(--gold-m);font-family:'Playfair Display',serif;opacity:.65;background:rgba(10,10,10,.75);padding:2px 6px;border-radius:2px;white-space:nowrap;max-width:180px;overflow:hidden;text-overflow:ellipsis;}
 /* ── MINIMAP ── */
 .minimap{position:absolute;bottom:10px;right:10px;background:rgba(8,8,8,.92);border:1px solid var(--b2);border-radius:3px;padding:3px;z-index:20;}
 .minimap canvas{display:block;}
@@ -66,8 +66,8 @@
 .g1 .av{border-color:#c8983a;}
 .g0 .av{border-color:var(--gold);border-width:3px;}
 .dec-ring{position:absolute;inset:-5px;border-radius:50%;border:1.5px dashed #5a4020;pointer-events:none;}
-.v-badge{position:absolute;bottom:4px;right:4px;width:11px;height:11px;border-radius:50%;background:var(--green);border:2px solid var(--bg);pointer-events:none;box-shadow:0 0 5px rgba(130,196,106,.55);}
-.own-badge{position:absolute;top:4px;right:4px;width:14px;height:14px;border-radius:50%;background:#1a2808;border:1.5px solid var(--gold);display:flex;align-items:center;justify-content:center;font-size:7px;color:var(--gold);pointer-events:none;line-height:1;}
+.v-badge{position:absolute;bottom:2px;right:2px;width:11px;height:11px;border-radius:50%;background:var(--green);border:2px solid var(--bg);pointer-events:none;box-shadow:0 0 5px rgba(130,196,106,.55);}
+.own-badge{position:absolute;top:-2px;right:-2px;width:16px;height:16px;border-radius:50%;background:#1a2808;border:1.5px solid var(--gold);display:flex;align-items:center;justify-content:center;font-size:7px;color:var(--gold);pointer-events:none;}
 .nl{margin-top:5px;text-align:center;width:110px;}
 .nn{font-family:'Playfair Display',serif;font-size:12px;color:var(--text);line-height:1.3;display:block;word-break:break-word;}
 .ny{font-size:11px;color:var(--muted);display:block;margin-top:1px;}
@@ -614,35 +614,12 @@ function lang(){return localStorage.getItem('calnic-lang')||'ro';}
 function t(ro,en){return lang()==='en'?en:ro;}
 function showMsg(id,type,txt){var e=document.getElementById(id);if(!e)return;e.className='m-msg '+type;e.textContent=txt;e.style.display='block';setTimeout(function(){e.style.display='none';},5000);}
 var _confirmCb=null;
-var _confirmAlertMode=false;
 function showConfirm(msg,onOk){
-  _confirmAlertMode=false;
-  var cancelBtn=document.getElementById('confirmCancelBtn');
-  var okBtn=document.getElementById('confirmOkBtn');
-  if(cancelBtn) cancelBtn.style.display='';
-  if(okBtn) okBtn.textContent=t('OK','OK');
   _confirmCb=onOk;
   document.getElementById('confirmMsg').textContent=msg;
   document.getElementById('confirmModal').classList.add('open');
 }
-function showSiteAlert(msg){
-  _confirmAlertMode=true;
-  var cancelBtn=document.getElementById('confirmCancelBtn');
-  var okBtn=document.getElementById('confirmOkBtn');
-  if(cancelBtn) cancelBtn.style.display='none';
-  if(okBtn) okBtn.textContent=t('In regula','OK');
-  _confirmCb=null;
-  document.getElementById('confirmMsg').textContent=String(msg||'');
-  document.getElementById('confirmModal').classList.add('open');
-}
 function _closeConfirm(ok){
-  if(_confirmAlertMode){
-    var cancelBtn=document.getElementById('confirmCancelBtn');
-    var okBtn=document.getElementById('confirmOkBtn');
-    if(cancelBtn) cancelBtn.style.display='';
-    if(okBtn) okBtn.textContent=t('OK','OK');
-    _confirmAlertMode=false;
-  }
   document.getElementById('confirmModal').classList.remove('open');
   var cb=_confirmCb;_confirmCb=null;
   if(ok&&cb)cb();
@@ -814,7 +791,7 @@ document.addEventListener('DOMContentLoaded',function(){
     var btn=this;btn.disabled=true;btn.textContent=t('Se salveaza...','Saving...');
     var rows=toAdd.map(function(p){return{from_member_id:p.from,to_member_id:p.to,relation_type:p.type,is_biological:p.bio,confidence:100};});
     var capturedEditing=S.editingId;
-    insertMemberRelationsSafe(rows).then(function(r){
+    supabase.from('member_relations').insert(rows).select().then(function(r){
       btn.disabled=false;btn.textContent=t('Adauga selectate','Add selected');
       if(r.error){return;}
       // Add new relations to memory immediately
@@ -831,7 +808,6 @@ document.addEventListener('DOMContentLoaded',function(){
 var S={familyId:null,family:null,members:[],relations:[],sessionUid:null,zoom:.88,panX:0,panY:0,panning:false,lastMouse:{x:0,y:0},selectedId:null,editingId:null,addVis:'public',editVis:'public',ttTimer:null,reqId:0,undoTimer:null,resizeObs:null,realtimeCh:null,origVals:{}};
 var CARD_W=110,GEN_Y={3:30,2:180,1:340,0:490},GEN_GAP_X=28;
 var _layoutBounds=null;
-var _canUseConnectedVillageFlag=true;
 
 // ── INIT ─────────────────────────────────────────────────
 document.getElementById('yr').textContent=new Date().getFullYear();
@@ -947,30 +923,6 @@ function afterLoad(rid){
 }
 
 function reload(){loadFamily();}
-
-function insertMemberRelationsSafe(rows){
-  var list=Array.isArray(rows)?rows:[rows];
-  function withFields(base, opts){
-    var out=Object.assign({},base);
-    if(opts.familyId) out.family_id=S.familyId;
-    if(opts.createdBy && S.sessionUid) out.created_by=S.sessionUid;
-    return out;
-  }
-  var variants=[
-    {familyId:true, createdBy:true},
-    {familyId:true, createdBy:false},
-    {familyId:false, createdBy:true},
-    {familyId:false, createdBy:false}
-  ];
-  function tryVariant(i){
-    var payload=list.map(function(r){return withFields(r,variants[i]);});
-    return supabase.from('member_relations').insert(payload).select().then(function(res){
-      if(res&&res.error&&i<variants.length-1&&isMissingColumnError(res.error)) return tryVariant(i+1);
-      return res;
-    });
-  }
-  return tryVariant(0);
-}
 
 function resolveMemberPhotoUrl(photoPath){
   if(!photoPath)return '';
@@ -1268,24 +1220,6 @@ function drawConnectors(svg,layout){
 
   // avMid(id): vertical center of avatar from node top — varies by gen/tree size
   function avMid(id){var l=layout[id];return l?Math.round((l.avSz||68)/2):34;}
-  function avRad(id){var l=layout[id];return l?Math.round((l.avSz||68)/2):34;}
-  function nodeCenter(id){
-    var p=layout[id];
-    if(!p)return null;
-    return {x:p.x+CARD_W/2,y:p.y+avMid(id)};
-  }
-  function edgePoint(fromId,toId,pad){
-    var c1=nodeCenter(fromId),c2=nodeCenter(toId);
-    if(!c1||!c2)return null;
-    var dx=c2.x-c1.x,dy=c2.y-c1.y,dist=Math.sqrt(dx*dx+dy*dy)||1;
-    var ux=dx/dist,uy=dy/dist,r=avRad(fromId)+(pad||2);
-    return {x:c1.x+ux*r,y:c1.y+uy*r};
-  }
-  function edgePair(aId,bId,pad){
-    var p1=edgePoint(aId,bId,pad),p2=edgePoint(bId,aId,pad);
-    if(!p1||!p2)return null;
-    return {x1:p1.x,y1:p1.y,x2:p2.x,y2:p2.y};
-  }
   // cardBot(id): bottom of card from node top
   function cardBot(id){var l=layout[id];return l?(l.cardH||110):110;}
   var childrenOf2={},spousePairs2={};
@@ -1313,9 +1247,9 @@ function drawConnectors(svg,layout){
     var k=[r.from_member_id,r.to_member_id].sort().join('|');
     if(drawnSpouse[k])return;drawnSpouse[k]=true;
     var pa=layout[r.from_member_id],pb=layout[r.to_member_id];if(!pa||!pb)return;
-    var seg=edgePair(r.from_member_id,r.to_member_id,3);if(!seg)return;
-    addLine(svg,seg.x1,seg.y1,seg.x2,seg.y2,'#d4a84a',2,null);
-    var tx=mkSvg('text');tx.setAttribute('x',(seg.x1+seg.x2)/2);tx.setAttribute('y',Math.min(seg.y1,seg.y2)-4);
+    var x1=pa.x+CARD_W/2,x2=pb.x+CARD_W/2,y=pa.y+avMid(r.from_member_id);
+    addLine(svg,x1,y,x2,y,'#d4a84a',2,null);
+    var tx=mkSvg('text');tx.setAttribute('x',(x1+x2)/2);tx.setAttribute('y',y-4);
     tx.setAttribute('text-anchor','middle');tx.setAttribute('font-size','13');
     tx.setAttribute('fill','#d4a84a');tx.textContent='♥';svg.appendChild(tx);
   });
@@ -1346,7 +1280,7 @@ function drawConnectors(svg,layout){
       var col=allCh[0].bio?'#c87050':'#5080c8',dash=allCh[0].bio?null:'5 3';
       var cx=cp.x+CARD_W/2;
       addLine(svg,dropX,dropY,cx,dropY,col,1.5,dash);
-      addLine(svg,cx,dropY,cx,cp.y-2,col,1.5,dash);
+      addLine(svg,cx,dropY,cx,cp.y,col,1.5,dash);
     } else {
       var xs=allCh.map(function(c){var cp=layout[c.id];return cp?cp.x+CARD_W/2:dropX;});
       var bL=Math.min.apply(null,xs),bR=Math.max.apply(null,xs);
@@ -1354,7 +1288,7 @@ function drawConnectors(svg,layout){
       allCh.forEach(function(c){
         var cp=layout[c.id];if(!cp)return;
         var col=c.bio?'#c87050':'#5080c8',dash=c.bio?null:'5 3';
-        addLine(svg,cp.x+CARD_W/2,dropY,cp.x+CARD_W/2,cp.y-2,col,1.5,dash);
+        addLine(svg,cp.x+CARD_W/2,dropY,cp.x+CARD_W/2,cp.y,col,1.5,dash);
       });
     }
   });
@@ -1362,8 +1296,8 @@ function drawConnectors(svg,layout){
   // Extended family dashed green lines
   S.relations.forEach(function(r){
     var meta=REL_META[r.relation_type];if(!meta||!meta.isExt)return;
-    var seg=edgePair(r.from_member_id,r.to_member_id,3);if(!seg)return;
-    addLine(svg,seg.x1,seg.y1,seg.x2,seg.y2,'#70a870',1.5,'4 3');
+    var pa=layout[r.from_member_id],pb=layout[r.to_member_id];if(!pa||!pb)return;
+    addLine(svg,pa.x+CARD_W/2,pa.y+avMid(r.from_member_id),pb.x+CARD_W/2,pb.y+avMid(r.to_member_id),'#70a870',1.5,'4 3');
   });
 
   // Sibling indicator lines — only drawn when siblings have NO shared parent in the tree
@@ -1378,9 +1312,8 @@ function drawConnectors(svg,layout){
     var sharedParent=_getParentsOf(r.from_member_id).some(function(p){return _parentChildExists(r.to_member_id,p.memberId);});
     if(sharedParent)return;
     // Draw a short curved bracket between the two sibling avatars
-    var seg=edgePair(r.from_member_id,r.to_member_id,3);if(!seg)return;
-    var x1=seg.x1, x2=seg.x2;
-    var y1=seg.y1, y2=seg.y2;
+    var x1=pa.x+CARD_W/2, x2=pb.x+CARD_W/2;
+    var y1=pa.y+avMid(r.from_member_id), y2=pb.y+avMid(r.to_member_id);
     var mx=(x1+x2)/2, my=Math.min(y1,y2)-18;
     addPath(svg,'M'+x1+' '+y1+' Q'+mx+' '+my+' '+x2+' '+y2,'#8a7040',1,'5 3');
   });
@@ -1902,7 +1835,7 @@ function doRemoveRel(relId,item){
     var wasInsert=!editingRelId;
     var promise=editingRelId
       ?supabase.from('member_relations').update({relation_type:selRelType,is_biological:bio}).eq('id',editingRelId).select()
-      :insertMemberRelationsSafe({from_member_id:capturedFrom,to_member_id:capturedTo,relation_type:capturedType,is_biological:bio,confidence:100});
+      :supabase.from('member_relations').insert({from_member_id:capturedFrom,to_member_id:capturedTo,relation_type:capturedType,is_biological:bio,confidence:100}).select();
     promise.then(function(r){
         btn.disabled=false;btn.textContent=t('Salveaza','Save');
         if(r.error){err.textContent=r.error.message;err.style.display='block';return;}
@@ -2026,43 +1959,22 @@ function showUndo(msg,action){
 // ── CONNECT TO VILLAGE ───────────────────────────────────
 document.getElementById('connectVillageBtn').addEventListener('click',function(){
   if(!S.familyId||!window.supabase)return;
-  function openVillageTree(){
-    localStorage.setItem('selectedFamily',S.familyId);
-    window.location.href='arborele-satului.html?family='+encodeURIComponent(S.familyId);
-  }
-  if(!_canUseConnectedVillageFlag){
-    showExportToast(t('Familia este gata pentru arborele satului.','Family is ready for the village tree.'));
-    setTimeout(openVillageTree,220);
-    return;
-  }
   supabase.from('families').update({connected_to_village:true}).eq('id',S.familyId).then(function(r){
-    if(r.error){
-      if(isMissingColumnError(r.error)){
-        // Legacy schemas may not have this flag; still allow navigation.
-        _canUseConnectedVillageFlag=false;
-        showExportToast(t('Familia este gata pentru arborele satului.','Family is ready for the village tree.'));
-        setTimeout(openVillageTree,220);
-        return;
-      }
-      showSiteAlert(r.error.message);
-      return;
-    }
-    if(S.family)S.family.connected_to_village=true;
-    showExportToast(t('Familie conectata la arborele satului!','Family connected to the village tree!'));
-    setTimeout(openVillageTree,220);
-  }).catch(function(err){showSiteAlert(err.message);});
+    if(r.error){alert(r.error.message);return;}
+    if(S.family)S.family.connected_to_village=true;showExportToast(t('Familie conectata la arborele satului!','Family connected to the village tree!'));
+  }).catch(function(err){alert(err.message);});
 });
 
 // ── EXPORT ───────────────────────────────────────────────
 document.getElementById('exportBtn').addEventListener('click',function(){
   var btn=this;btn.disabled=true;btn.innerHTML='&#8659; '+t('Se exporta...','Exporting...');
-  if(typeof html2canvas==='undefined'){var sc=document.createElement('script');sc.src='https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js';sc.onload=function(){doExport(btn);};sc.onerror=function(){btn.disabled=false;btn.innerHTML='&#8659; '+t('Salveaza ca imagine','Save as image');showSiteAlert(t('Export esuat.','Export failed.'));};document.head.appendChild(sc);}else{doExport(btn);}
+  if(typeof html2canvas==='undefined'){var sc=document.createElement('script');sc.src='https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js';sc.onload=function(){doExport(btn);};sc.onerror=function(){btn.disabled=false;btn.innerHTML='&#8659; '+t('Salveaza ca imagine','Save as image');alert(t('Export esuat.','Export failed.'));};document.head.appendChild(sc);}else{doExport(btn);}
 });
 function doExport(btn){
   html2canvas(document.getElementById('treeCanvas'),{backgroundColor:'#0a0a0a',scale:2,useCORS:true,logging:false}).then(function(c){
     var l=document.createElement('a');l.download=(S.family?S.family.name.replace(/[^a-zA-Z0-9]/g,'-'):'arbore')+'.png';l.href=c.toDataURL('image/png');l.click();
     btn.disabled=false;btn.innerHTML='&#8659; '+t('Salveaza ca imagine','Save as image');showExportToast(t('Export salvat!','Export saved!'));
-  }).catch(function(){btn.disabled=false;btn.innerHTML='&#8659; '+t('Salveaza ca imagine','Save as image');showSiteAlert(t('Export esuat. Incercati din nou.','Export failed. Please try again.'));});
+  }).catch(function(){btn.disabled=false;btn.innerHTML='&#8659; '+t('Salveaza ca imagine','Save as image');alert(t('Export esuat. Incercati din nou.','Export failed. Please try again.'));});
 }
 function showExportToast(msg){var e=document.getElementById('exportToast');e.textContent=msg;e.style.display='block';setTimeout(function(){e.style.display='none';},2400);}
 

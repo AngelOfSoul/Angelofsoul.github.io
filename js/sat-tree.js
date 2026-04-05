@@ -15,7 +15,6 @@
   var modalText = qs('modal-text');
   var modalFamilyLink = qs('modal-family-link');
   var modalGenealogyLink = qs('modal-genealogy-link');
-  var modalClose = qs('modal-close');
   var statusEl = qs('status');
   var searchInput = qs('family-search');
   var familyList = qs('family-list');
@@ -151,18 +150,51 @@
 
   function redrawStyles() {
     g.selectAll('.tree-link')
-      .attr('stroke', function (d) { return highlightedPathKeys[linkKey(d.source.id || d.source, d.target.id || d.target)] ? '#f4d88a' : '#59667a'; })
-      .attr('stroke-width', function (d) { return highlightedPathKeys[linkKey(d.source.id || d.source, d.target.id || d.target)] ? 3.4 : 1.7; })
-      .attr('stroke-opacity', function (d) { return highlightedPathKeys[linkKey(d.source.id || d.source, d.target.id || d.target)] ? 1 : 0.72; });
+      .attr('stroke', function (d) { return highlightedPathKeys[linkKey(d.source.id || d.source, d.target.id || d.target)] ? '#9bc5ff' : 'rgba(120,152,208,.45)'; })
+      .attr('stroke-width', function (d) { return highlightedPathKeys[linkKey(d.source.id || d.source, d.target.id || d.target)] ? 3.6 : 1.9; })
+      .attr('stroke-opacity', function (d) { return highlightedPathKeys[linkKey(d.source.id || d.source, d.target.id || d.target)] ? 1 : 0.86; })
+      .attr('filter', function (d) { return highlightedPathKeys[linkKey(d.source.id || d.source, d.target.id || d.target)] ? 'url(#linkGlow)' : null; });
 
-    g.selectAll('.tree-node circle')
-      .attr('fill', function (d) { return d.visibility === 'public' ? '#d4a84a' : '#6f7884'; })
-      .attr('stroke', function (d) {
-        if (String(d.id) === String(selectedNodeId)) return '#f4d88a';
-        return d.visibility === 'public' ? '#f0d596' : '#9aa4b4';
+    g.selectAll('.tree-node .node-glow')
+      .attr('fill', function (d) {
+        if (String(d.id) === String(selectedNodeId)) return 'rgba(120,171,255,.34)';
+        return d.visibility === 'public' ? 'rgba(217,176,93,.18)' : 'rgba(130,145,170,.16)';
       })
-      .attr('stroke-width', function (d) { return String(d.id) === String(selectedNodeId) ? 4 : 2; })
-      .attr('r', function (d) { return String(d.id) === String(selectedNodeId) ? 28 : 24; });
+      .attr('width', function (d) { return String(d.id) === String(selectedNodeId) ? 200 : 186; })
+      .attr('height', function (d) { return String(d.id) === String(selectedNodeId) ? 88 : 76; })
+      .attr('x', function (d) { return String(d.id) === String(selectedNodeId) ? -100 : -93; })
+      .attr('y', function (d) { return String(d.id) === String(selectedNodeId) ? -44 : -38; });
+
+    g.selectAll('.tree-node .node-card')
+      .attr('fill', function (d) {
+        if (String(d.id) === String(selectedNodeId)) return 'url(#nodeSelectedGradient)';
+        return d.visibility === 'public' ? 'url(#nodePublicGradient)' : 'url(#nodePrivateGradient)';
+      })
+      .attr('stroke', function (d) {
+        if (String(d.id) === String(selectedNodeId)) return '#cfe2ff';
+        return d.visibility === 'public' ? 'rgba(233,198,128,.72)' : 'rgba(170,186,214,.48)';
+      })
+      .attr('stroke-width', function (d) { return String(d.id) === String(selectedNodeId) ? 2.3 : 1.2; })
+      .attr('width', function (d) { return String(d.id) === String(selectedNodeId) ? 188 : 174; })
+      .attr('height', function (d) { return String(d.id) === String(selectedNodeId) ? 76 : 68; })
+      .attr('x', function (d) { return String(d.id) === String(selectedNodeId) ? -94 : -87; })
+      .attr('y', function (d) { return String(d.id) === String(selectedNodeId) ? -38 : -34; })
+      .attr('filter', 'url(#cardShadow)');
+
+    g.selectAll('.tree-node .node-accent')
+      .attr('fill', function (d) {
+        if (String(d.id) === String(selectedNodeId)) return '#9bc5ff';
+        return d.visibility === 'public' ? '#d9b05d' : '#8b9bb7';
+      })
+      .attr('width', function (d) { return String(d.id) === String(selectedNodeId) ? 150 : 136; })
+      .attr('x', function (d) { return String(d.id) === String(selectedNodeId) ? -75 : -68; });
+
+    g.selectAll('.tree-node .node-title')
+      .attr('fill', function (d) { return String(d.id) === String(selectedNodeId) ? '#ffffff' : '#f2f7ff'; })
+      .attr('font-size', function (d) { return String(d.id) === String(selectedNodeId) ? 16 : 15; });
+
+    g.selectAll('.tree-node .node-subtitle')
+      .attr('fill', function (d) { return String(d.id) === String(selectedNodeId) ? '#dce8ff' : '#a9bddf'; });
   }
 
   function attachEvents(nodeSel) {
@@ -199,26 +231,62 @@
     var links = graphData.graph.links;
     g.selectAll('*').remove();
 
+    var defs = g.append('defs');
+
+    var cardShadow = defs.append('filter').attr('id', 'cardShadow').attr('x', '-40%').attr('y', '-60%').attr('width', '180%').attr('height', '220%');
+    cardShadow.append('feDropShadow').attr('dx', 0).attr('dy', 12).attr('stdDeviation', 10).attr('flood-color', '#000814').attr('flood-opacity', 0.45);
+
+    var linkGlow = defs.append('filter').attr('id', 'linkGlow').attr('x', '-40%').attr('y', '-40%').attr('width', '180%').attr('height', '180%');
+    linkGlow.append('feDropShadow').attr('dx', 0).attr('dy', 0).attr('stdDeviation', 4).attr('flood-color', '#8fc0ff').attr('flood-opacity', 0.55);
+
+    var gradPublic = defs.append('linearGradient').attr('id', 'nodePublicGradient').attr('x1', '0%').attr('x2', '100%').attr('y1', '0%').attr('y2', '100%');
+    gradPublic.append('stop').attr('offset', '0%').attr('stop-color', '#152b4f');
+    gradPublic.append('stop').attr('offset', '100%').attr('stop-color', '#0b1730');
+
+    var gradPrivate = defs.append('linearGradient').attr('id', 'nodePrivateGradient').attr('x1', '0%').attr('x2', '100%').attr('y1', '0%').attr('y2', '100%');
+    gradPrivate.append('stop').attr('offset', '0%').attr('stop-color', '#13233e');
+    gradPrivate.append('stop').attr('offset', '100%').attr('stop-color', '#0b1324');
+
+    var gradSelected = defs.append('linearGradient').attr('id', 'nodeSelectedGradient').attr('x1', '0%').attr('x2', '100%').attr('y1', '0%').attr('y2', '100%');
+    gradSelected.append('stop').attr('offset', '0%').attr('stop-color', '#25457d');
+    gradSelected.append('stop').attr('offset', '50%').attr('stop-color', '#1d3a6f');
+    gradSelected.append('stop').attr('offset', '100%').attr('stop-color', '#102445');
+
     simulation = d3.forceSimulation(nodes)
-      .force('link', d3.forceLink(links).id(function (d) { return d.id; }).distance(130).strength(0.7))
-      .force('charge', d3.forceManyBody().strength(-700))
-      .force('collide', d3.forceCollide().radius(52))
+      .force('link', d3.forceLink(links).id(function (d) { return d.id; }).distance(170).strength(0.66))
+      .force('charge', d3.forceManyBody().strength(-1200))
+      .force('collide', d3.forceCollide().radius(98))
       .force('center', d3.forceCenter((shell.clientWidth || 900) / 2, 760 / 2));
 
     var link = g.append('g').selectAll('line')
       .data(links)
       .enter().append('line')
-      .attr('class', 'tree-link');
+      .attr('class', 'tree-link')
+      .attr('stroke-linecap', 'round');
 
     var node = g.append('g').selectAll('g')
       .data(nodes)
       .enter().append('g')
       .attr('class', 'tree-node');
 
-    node.append('circle');
+    node.append('rect').attr('class', 'node-glow').attr('rx', 22).attr('ry', 22);
+    node.append('rect').attr('class', 'node-card').attr('rx', 18).attr('ry', 18);
+    node.append('rect').attr('class', 'node-accent').attr('x', -68).attr('y', -24).attr('height', 3).attr('rx', 999).attr('ry', 999);
     node.append('text')
-      .attr('dy', 4)
-      .text(function (d) { return d.label; });
+      .attr('class', 'node-title')
+      .attr('dy', -2)
+      .text(function (d) {
+        var label = String(d.label || '');
+        return label.length > 20 ? label.slice(0, 20) + '…' : label;
+      });
+    node.append('text')
+      .attr('class', 'node-subtitle')
+      .attr('dy', 18)
+      .text(function (d) {
+        return d.visibility === 'public'
+          ? t('Familie publică', 'Public family')
+          : t('Familie privată', 'Private family');
+      });
 
     attachEvents(node);
 
@@ -311,7 +379,6 @@
   if (fitBtn) fitBtn.addEventListener('click', function () { fitGraph(450); });
   if (zoomInBtn) zoomInBtn.addEventListener('click', function () { zoomByFactor(1.14); });
   if (zoomOutBtn) zoomOutBtn.addEventListener('click', function () { zoomByFactor(1 / 1.14); });
-  if (modalClose) modalClose.addEventListener('click', hideFamilyDetails);
   if (findBtn) findBtn.addEventListener('click', function () {
     var from = relationFrom.value, to = relationTo.value;
     if (!from || !to || from === to) {
