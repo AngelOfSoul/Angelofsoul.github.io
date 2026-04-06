@@ -87,7 +87,9 @@
 
     state.users = (pair[0].data || []).map(function (p) {
       var fam = famByOwner[p.id] || null;
-      var title = fam ? (fam.name + (fam.village ? (' · ' + fam.village) : '')) : ('Utilizator ' + String(p.id || '').slice(0, 8));
+      var title = fam
+        ? (fam.name + (fam.village ? (' · ' + fam.village) : ''))
+        : ('Cont fara familie · ' + String(p.id || '').slice(0, 8));
       if (p.is_admin) title += ' (ADMIN)';
       return {
         id: p.id,
