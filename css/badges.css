@@ -25,9 +25,9 @@
   position: relative;
   display: inline-flex;
   align-items: center;
-  gap: 10px;
-  min-height: 58px;
-  padding: 10px 16px 10px 12px;
+  gap: 7px;
+  min-height: 44px;
+  padding: 6px 10px 6px 8px;
   border-radius: 14px;
   border: 1px solid color-mix(in srgb, var(--co-b-accent) 62%, #2a1a08 38%);
   background:
@@ -50,13 +50,13 @@
 }
 
 .co-badge-medal {
-  width: 31px;
-  height: 31px;
+  width: 23px;
+  height: 23px;
   border-radius: 999px;
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  font-size: 14px;
+  font-size: 11px;
   font-weight: 700;
   color: color-mix(in srgb, var(--co-b-accent) 86%, #fff 14%);
   border: 1px solid color-mix(in srgb, var(--co-b-accent) 60%, #000 40%);
@@ -66,8 +66,8 @@
 }
 
 .co-badge-icon {
-  width: 18px;
-  height: 18px;
+  width: 13px;
+  height: 13px;
   display: block;
 }
 
@@ -90,7 +90,7 @@
 
 .co-badge-title {
   font-family: 'Playfair Display', serif;
-  font-size: 14px;
+  font-size: 12px;
   font-weight: 700;
   line-height: 1.15;
   color: #fff4d2;
@@ -103,7 +103,7 @@
 
 .co-badge-desc {
   font-family: 'EB Garamond', serif;
-  font-size: 12px;
+  font-size: 10px;
   line-height: 1.2;
   color: color-mix(in srgb, #fff 70%, var(--co-b-accent) 30%);
   opacity: 0.93;
@@ -119,42 +119,42 @@
 }
 
 .co-badge--compact {
-  min-height: 40px;
-  padding: 6px 11px 6px 8px;
-  border-radius: 11px;
-  gap: 8px;
+  min-height: 28px;
+  padding: 3px 7px 3px 6px;
+  border-radius: 9px;
+  gap: 5px;
   width: 100%;
 }
 
 .co-badge--profile {
-  flex: 0 0 300px;
-  width: 300px;
-  min-height: 82px;
-  padding-top: 14px;
+  flex: 0 0 240px;
+  width: 240px;
+  min-height: 58px;
+  padding-top: 9px;
   max-width: 100%;
 }
 
 .co-badge--profile .co-badge-medal {
-  width: 36px;
-  height: 36px;
-  font-size: 16px;
+  width: 25px;
+  height: 25px;
+  font-size: 12px;
 }
 
 .co-badge--profile .co-badge-title {
-  font-size: 16px;
+  font-size: 12px;
 }
 
 .co-badge--profile .co-badge-desc {
-  font-size: 12px;
+  font-size: 10px;
 }
 
 .co-badge--profile::before {
   content: '✦';
   position: absolute;
-  top: 3px;
+  top: 1px;
   left: 50%;
   transform: translateX(-50%);
-  font-size: 10px;
+  font-size: 8px;
   line-height: 1;
   color: color-mix(in srgb, var(--co-b-accent) 85%, #f7edd2 15%);
   opacity: 0.95;
@@ -164,21 +164,21 @@
 .co-badge--profile::after {
   content: '';
   position: absolute;
-  inset: 3px;
-  border-radius: 11px;
+  inset: 2px;
+  border-radius: 9px;
   border: 1px solid color-mix(in srgb, var(--co-b-accent) 45%, #281a08 55%);
   pointer-events: none;
   opacity: 0.85;
 }
 
 .co-badge--compact .co-badge-medal {
-  width: 24px;
-  height: 24px;
-  font-size: 12px;
+  width: 16px;
+  height: 16px;
+  font-size: 9px;
 }
 
 .co-badge--compact .co-badge-title {
-  font-size: 12px;
+  font-size: 10px;
   line-height: 1.1;
 }
 
