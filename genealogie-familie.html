@@ -1270,8 +1270,14 @@ function inferRelations(fromId,toId,relType){
   var GRAND_LINK=['nepot','nepoata','bunic','bunica','strabunic','strabunica'];
   if(GRAND_LINK.indexOf(relType)!==-1){
     var grandChildId,grandParentId;
-    if(relType==='nepot'||relType==='nepoata'){grandChildId=fromId;grandParentId=toId;}
-    else{grandChildId=toId;grandParentId=fromId;}
+    // relation_type describes TARGET relative to ANCHOR:
+    // - bunica/bunic/strabunic/strabunica => target is grandparent of anchor
+    // - nepot/nepoata => target is grandchild of anchor
+    if(relType==='bunic'||relType==='bunica'||relType==='strabunic'||relType==='strabunica'){
+      grandChildId=fromId;grandParentId=toId;
+    } else {
+      grandChildId=toId;grandParentId=fromId;
+    }
     var gcm=S.members.find(function(m){return m.id===grandChildId;});
     if(gcm){
       var candParents=[],seenP={};
