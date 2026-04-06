@@ -704,41 +704,6 @@ to{transform:rotate(360deg);}
     <div class="this-week-text" id="this-week-text"></div>
   </div>
 
-  <!-- FEATURED PHOTO OF THE MONTH -->
-  <div class="featured-wrap">
-    <div class="section-head" style="margin-top:0;">
-      <span class="section-head-title" data-ro="Fotografia lunii" data-en="Photo of the month">Fotografia lunii</span>
-    </div>
-    <div class="featured" onclick="openLb(0)">
-      <div class="featured-img">
-        <svg viewBox="0 0 900 320" xmlns="http://www.w3.org/2000/svg">
-          <rect width="900" height="320" fill="#1e1608"/>
-          <rect x="280" y="60" width="340" height="210" rx="6" fill="#2a1e08" stroke="#c8983a" stroke-width="2"/>
-          <rect x="360" y="20" width="180" height="45" rx="4" fill="#3a2810" stroke="#c8983a" stroke-width="1.5"/>
-          <line x1="450" y1="60" x2="450" y2="20" stroke="#c8983a" stroke-width="1.5"/>
-          <rect x="380" y="160" width="140" height="110" rx="3" fill="#1a1208"/>
-          <rect x="290" y="58" width="24" height="80" rx="3" fill="#3a2810" stroke="#c8983a" stroke-width="1"/>
-          <rect x="586" y="58" width="24" height="80" rx="3" fill="#3a2810" stroke="#c8983a" stroke-width="1"/>
-          <polygon points="240,270 660,270 700,310 200,310" fill="#0d0a04"/>
-          <ellipse cx="200" cy="280" rx="80" ry="20" fill="#1a1408" opacity="0.5"/>
-          <ellipse cx="700" cy="280" rx="80" ry="20" fill="#1a1408" opacity="0.5"/>
-        </svg>
-        <div class="featured-badge" data-ro="Fotografia lunii" data-en="Photo of the month">Fotografia lunii</div>
-      </div>
-      <div class="featured-info">
-        <div class="featured-info-left">
-          <div class="title" data-ro="Cetatea Calnic — vedere panoramica, 1923" data-en="Calnic Citadel — panoramic view, 1923">Cetatea Calnic — vedere panoramica, 1923</div>
-          <div class="meta"><span data-ro="Donata de" data-en="Donated by">Donata de</span>: <a href="familiile.html" style="color:var(--gold-d);font-size:13px;">Familia Popescu</a> &nbsp;&#183;&nbsp; <span data-ro="Categorie" data-en="Category">Categorie</span>: <span data-ro="Cetatea Calnic" data-en="Calnic Citadel">Cetatea Calnic</span></div>
-          <div class="caption" data-ro="O fotografie rara din arhiva familiei Popescu, realizata in vara anului 1923. Se poate observa turnul Siegfried in toata maretia sa." data-en="A rare photograph from the Popescu family archive, taken in the summer of 1923. The Siegfried tower can be seen in all its majesty.">O fotografie rara din arhiva familiei Popescu, realizata in vara anului 1923. Se poate observa turnul Siegfried in toata maretia sa.</div>
-        </div>
-        <div class="feat-actions">
-          <button class="feat-btn" onclick="event.stopPropagation();downloadPhoto('Cetatea Calnic 1923')" data-ro="&#8659; Descarca" data-en="&#8659; Download">&#8659; Descarca</button>
-          <button class="feat-btn" onclick="event.stopPropagation();sharePhoto(0)" data-ro="&#10548; Distribuie" data-en="&#10548; Share">&#10548; Distribuie</button>
-        </div>
-      </div>
-    </div>
-  </div>
-
   <!-- RECENTLY ADDED -->
   <div class="section-head">
     <span class="section-head-title" data-ro="Adaugate recent" data-en="Recently added">Adaugate recent</span>
@@ -913,16 +878,7 @@ var CATS = [
   {id:'familii', ro:'Familii', en:'Families'}
 ];
 
-var photos = [
-  {id:0, titleRo:'Cetatea Calnic — vedere panoramica, 1923', titleEn:'Calnic Citadel — panoramic view, 1923', cat:'cetatea', year:1923, byRo:'Familia Popescu', byEn:'Popescu Family', captionRo:'O fotografie rara din arhiva familiei Popescu, realizata in vara anului 1923. Turnul Siegfried se observa in toata maretia sa.', captionEn:'A rare photograph from the Popescu family archive, taken in the summer of 1923.', dedicatieRo:'', dedicatieEn:'', priv:false, addedOrder:5, featured:true},
-  {id:1, titleRo:'Padure de salcam in floare', titleEn:'Acacia forest in bloom', cat:'natura', year:2018, byRo:'Familia Ionescu', byEn:'Ionescu Family', captionRo:'Salcamii din dealurile Calnicului, in plina inflorire de mai.', captionEn:'The acacia trees on Calnic hills in full May bloom.', dedicatieRo:'', dedicatieEn:'', priv:false, addedOrder:4, featured:false},
-  {id:2, titleRo:'Familia Popa — reuniune de familie', titleEn:'Popa family reunion', cat:'familii', year:1978, byRo:'Familia Popa', byEn:'Popa Family', captionRo:'Reuniunea de familie din vara lui 1978, in curtea casei din Deal.', captionEn:'Family reunion summer 1978, in the courtyard of the house in Deal.', dedicatieRo:'In memoria bunicului Gheorghe Popa, 1910-1990', dedicatieEn:'In memory of grandfather Gheorghe Popa, 1910-1990', priv:true, addedOrder:3, featured:false},
-  {id:3, titleRo:'Sfintirea bisericii evangelice', titleEn:'Consecration of the evangelical church', cat:'biserica', year:1954, byRo:'Arhiva satului', byEn:'Village archive', captionRo:'Momentul sfintiri bisericii dupa lucrarile de restaurare din 1953-1954.', captionEn:'The consecration moment after restoration works 1953-1954.', dedicatieRo:'', dedicatieEn:'', priv:false, addedOrder:2, featured:false},
-  {id:4, titleRo:'Ulita principala a Calnicului', titleEn:'Main street of Calnic', cat:'viata', year:1965, byRo:'Arhiva satului', byEn:'Village archive', captionRo:'Ulita principala, asa cum arata in anii 1960. Se vad casele sasesti pe stanga.', captionEn:'The main street as it looked in the 1960s. Saxon houses visible on the left.', dedicatieRo:'', dedicatieEn:'', priv:false, addedOrder:1, featured:false},
-  {id:5, titleRo:'Hora de Sfantul Ilie', titleEn:'Saint Elijah day dance', cat:'evenimente', year:1971, byRo:'Familia Moldovan', byEn:'Moldovan Family', captionRo:'Hora traditionala de Sfantul Ilie, sarbatoarea satului, 1971.', captionEn:'Traditional dance on Saint Elijah day, the village feast, 1971.', dedicatieRo:'', dedicatieEn:'', priv:false, addedOrder:6, featured:false},
-  {id:6, titleRo:'Vedere aeriana a cetatii', titleEn:'Aerial view of the citadel', cat:'cetatea', year:2015, byRo:'Familia Muresan', byEn:'Muresan Family', captionRo:'Fotografie realizata cu drona, 2015. Se observa toata incinta cetatii UNESCO.', captionEn:'Drone photo, 2015. The entire UNESCO citadel enclosure is visible.', dedicatieRo:'', dedicatieEn:'', priv:false, addedOrder:7, featured:false},
-  {id:7, titleRo:'Livada de pruni a familiei Moldovan', titleEn:'Moldovan family plum orchard', cat:'natura', year:2020, byRo:'Familia Moldovan', byEn:'Moldovan Family', captionRo:'Livada de pruni in toamna, plina de fructe. Traditie de 4 generatii.', captionEn:'The plum orchard in autumn, full of fruit. A 4-generation tradition.', dedicatieRo:'', dedicatieEn:'', priv:false, addedOrder:8, featured:false}
-];
+var photos = [];
 
 var SVG_SHAPES = [
   '<svg viewBox="0 0 200 140" xmlns="http://www.w3.org/2000/svg"><rect width="200" height="140" fill="#1e1608"/><rect x="55" y="25" width="90" height="80" rx="3" fill="#2a1e08" stroke="#c8983a" stroke-width="1.2"/><rect x="78" y="8" width="44" height="20" rx="2" fill="#3a2810" stroke="#c8983a" stroke-width="0.9"/><line x1="100" y1="25" x2="100" y2="8" stroke="#c8983a" stroke-width="0.9"/><rect x="82" y="70" width="36" height="35" rx="2" fill="#1a1208"/><rect x="57" y="23" width="8" height="30" rx="1" fill="#3a2810"/><rect x="135" y="23" width="8" height="30" rx="1" fill="#3a2810"/><rect x="0" y="118" width="200" height="22" fill="#0d0a04"/></svg>',
@@ -1292,5 +1248,7 @@ if (window.supabase) { loadPhotosFromSupabase(); } else { document.addEventListe
 <script src="js/transitions.js" defer></script>
 </body>
 </html>
+
+
 
 
