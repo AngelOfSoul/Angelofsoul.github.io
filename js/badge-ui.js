@@ -10,16 +10,16 @@
 
   function iconChar(name) {
     var map = {
-      crown: '?',
-      help: '?',
-      medal: '?',
-      feather: '?',
-      shield: '?',
-      seal: '?',
-      'check-shield': '?',
-      gavel: '?'
+      crown: '\u265B',
+      help: '\u2726',
+      medal: '\u2605',
+      feather: '\u2712',
+      shield: '\u2726',
+      seal: '\u2736',
+      'check-shield': '\u2713',
+      gavel: '\u2696'
     };
-    return map[name] || '?';
+    return map[name] || '\u2605';
   }
 
   function normalizeDef(raw) {
@@ -99,7 +99,7 @@
     return (
       '<article class="' + cls + ' co-has-tooltip" ' +
       'style="--co-b-base:' + esc(def.colors.base) + ';--co-b-dark:' + esc(def.colors.dark) + ';--co-b-accent:' + esc(def.colors.accent) + ';" ' +
-      'data-tooltip="' + esc(tooltip) + '" title="' + esc(tooltip) + '">' +
+      'data-tooltip="' + esc(tooltip) + '">' +
         '<span class="co-badge-medal">' + esc(iconChar(def.icon)) + '</span>' +
         '<span class="co-badge-text">' +
           '<span class="co-badge-title">' + esc(def.label) + '</span>' +
@@ -107,6 +107,59 @@
         '</span>' +
       '</article>'
     );
+  }
+
+  function ensureGlobalTooltip() {
+    if (document.getElementById('co-badge-tooltip')) return;
+    var tip = document.createElement('div');
+    tip.id = 'co-badge-tooltip';
+    tip.className = 'co-badge-tooltip';
+    tip.style.display = 'none';
+    document.body.appendChild(tip);
+
+    var active = null;
+
+    function showFor(target) {
+      if (!target) return;
+      var text = target.getAttribute('data-tooltip') || '';
+      if (!text.trim()) return;
+      active = target;
+      tip.textContent = text;
+      tip.style.display = 'block';
+    }
+
+    function hideTip(target) {
+      if (!active) return;
+      if (target && active !== target) return;
+      active = null;
+      tip.style.display = 'none';
+    }
+
+    function moveTip(ev) {
+      if (!active || tip.style.display === 'none') return;
+      var x = ev.clientX + 14;
+      var y = ev.clientY + 14;
+      var maxX = window.innerWidth - tip.offsetWidth - 10;
+      var maxY = window.innerHeight - tip.offsetHeight - 10;
+      tip.style.left = Math.max(10, Math.min(x, maxX)) + 'px';
+      tip.style.top = Math.max(10, Math.min(y, maxY)) + 'px';
+    }
+
+    document.addEventListener('mouseover', function (ev) {
+      var t = ev.target && ev.target.closest ? ev.target.closest('.co-has-tooltip') : null;
+      if (!t) return;
+      showFor(t);
+    });
+
+    document.addEventListener('mouseout', function (ev) {
+      var t = ev.target && ev.target.closest ? ev.target.closest('.co-has-tooltip') : null;
+      if (!t) return;
+      hideTip(t);
+    });
+
+    document.addEventListener('mousemove', moveTip);
+    window.addEventListener('blur', function () { hideTip(); });
+    document.addEventListener('scroll', function () { if (active) tip.style.display = 'none'; }, true);
   }
 
   function compactBadgesHTML(assignments, opts) {
@@ -199,4 +252,10 @@
     fetchUserBadgesMap: fetchUserBadgesMap,
     isMissingBadgeTablesError: isMissingBadgeTablesError
   };
+
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', ensureGlobalTooltip);
+  } else {
+    ensureGlobalTooltip();
+  }
 })(window);
