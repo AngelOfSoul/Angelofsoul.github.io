@@ -129,9 +129,9 @@ function buildProfileButton(session, familyName, hasNotif, isAdmin) {
 
     if (!session) {
       var outBtn = document.createElement('a');
-      outBtn.className = 'prf-btn-out';
+      outBtn.className = 'nav-login';
       outBtn.href = 'login.html';
-      outBtn.innerHTML = 'Profilul meu';
+      outBtn.innerHTML = '&#128274; <span class="nl">Profilul meu</span>';
       navRight.appendChild(outBtn);
       return;
     }
