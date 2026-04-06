@@ -38,6 +38,22 @@
 
 }
 
+.main-wrap {
+max-width:1080px; margin:0 auto; padding:32px 20px; display:grid; grid-template-columns:1fr 272px; gap:36px; align-items:start;
+}
+
+@media(max-width:760px) {
+  .main-wrap { grid-template-columns:1fr; }
+}
+
+.filter-bar {
+display:flex; flex-wrap:wrap; gap:12px; align-items:center; margin-bottom:28px; background:var(--s1); border:1px solid var(--b1); border-left:3px solid var(--gold-d); padding:14px 18px; border-radius:2px;
+}
+
+.families-grid {
+display:grid; grid-template-columns:repeat(auto-fill, minmax(290px,1fr)); gap:22px; align-items:stretch;
+}
+
 .search-input {
 flex:1; min-width:180px; background:var(--s2); border:1px solid var(--b2); color:var(--text); font-family:'EB Garamond',serif; font-size:15px; padding:7px 12px; border-radius:2px; outline:none;
 }
