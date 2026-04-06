@@ -1,1 +1,9 @@
-document.addEventListener('DOMContentLoaded',()=>{window.addEventListener('scroll',()=>{document.querySelectorAll('.section').forEach(s=>{if(s.getBoundingClientRect().top<window.innerHeight-100){s.classList.add('visible')}})})});
+document.addEventListener('DOMContentLoaded',()=>{
+window.addEventListener('scroll',()=>{
+document.querySelectorAll('.section').forEach(s=>{
+if(s.getBoundingClientRect().top<window.innerHeight-100){
+s.classList.add('visible')
+}
+})
+})
+});

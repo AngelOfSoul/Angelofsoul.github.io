@@ -1,1 +1,5 @@
-html{scroll-behavior:smooth;} .gold-title{background:linear-gradient(90deg,#d4af37,#fff,#d4af37);background-size:200%;-webkit-background-clip:text;color:transparent;animation:gold 5s linear infinite;} @keyframes gold{0%{background-position:0%}100%{background-position:200%}} .section{opacity:0;transform:translateY(40px);transition:0.8s;} .section.visible{opacity:1;transform:translateY(0);} 
+html{scroll-behavior:smooth;}
+.gold-title{background:linear-gradient(90deg,#d4af37,#fff,#d4af37);background-size:200%;-webkit-background-clip:text;color:transparent;animation:gold 5s linear infinite;}
+@keyframes gold{0%{background-position:0%}100%{background-position:200%}}
+.section{opacity:0;transform:translateY(40px);transition:0.8s;}
+.section.visible{opacity:1;transform:translateY(0);}
