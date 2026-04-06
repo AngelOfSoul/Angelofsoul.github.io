@@ -408,6 +408,76 @@ margin-left:auto; background:#1c1200; border:1px solid #7a5828; border-radius:2p
 max-width:960px; margin:0 auto; padding:0 24px 60px;
 }
 
+.li-showcase {
+max-width:960px;
+  margin:24px auto 0;
+  padding:0 24px;
+  display:grid;
+  grid-template-columns:1fr 1fr;
+  gap:18px;
+}
+
+.li-emblem-card,
+.li-weather-card {
+background:var(--s1);
+  border:1px solid var(--b1);
+  border-radius:2px;
+  padding:22px;
+}
+
+.li-emblem-wrap {
+display:flex;
+  align-items:center;
+  justify-content:center;
+  min-height:300px;
+}
+
+.li-emblem-wrap img {
+width:180px;
+  max-width:100%;
+  height:auto;
+  filter:drop-shadow(0 0 18px rgba(196,154,75,.12));
+}
+
+.li-weather-main {
+display:flex;
+  align-items:flex-end;
+  justify-content:space-between;
+  gap:14px;
+  margin-top:8px;
+}
+
+.li-weather-temp {
+font-family:'Playfair Display',serif;
+  font-size:46px;
+  line-height:1;
+  color:var(--gold);
+}
+
+.li-weather-desc {
+font-size:14px;
+  color:var(--text);
+  font-style:italic;
+}
+
+.li-weather-meta {
+margin-top:14px;
+  border-top:1px solid var(--s3);
+  padding-top:12px;
+  display:grid;
+  grid-template-columns:1fr 1fr;
+  gap:8px 12px;
+}
+
+.li-weather-row {
+font-size:13px;
+  color:var(--muted);
+}
+
+@media(max-width:900px) {
+  .li-showcase { grid-template-columns:1fr; }
+}
+
 .li-section {
 margin-top:36px;
 }
@@ -966,69 +1036,36 @@ to{transform:rotate(360deg);}
     <div class="li-hero-meta" id="li-hero-meta"></div>
   </div>
 
-  <!-- MILESTONE BAR -->
-  <div class="li-milestone-bar">
-    <div class="li-milestone-inner">
-      <div class="li-milestone-item">
-        <div class="li-milestone-num" id="li-m-families">—</div>
-        <div class="li-milestone-lbl" id="li-m-families-lbl">Familii</div>
-        <div class="li-milestone-sub" id="li-m-families-sub">înregistrate în sat</div>
-      </div>
-      <div class="li-milestone-item">
-        <div class="li-milestone-num" id="li-m-members">—</div>
-        <div class="li-milestone-lbl" id="li-m-members-lbl">Membri</div>
-        <div class="li-milestone-sub" id="li-m-members-sub">în arbori genealogici</div>
-      </div>
-      <div class="li-milestone-item">
-        <div class="li-milestone-num" id="li-m-photos">—</div>
-        <div class="li-milestone-lbl" id="li-m-photos-lbl">Fotografii</div>
-        <div class="li-milestone-sub" id="li-m-photos-sub">păstrate în arhivă</div>
+  <div class="li-showcase">
+    <div class="li-emblem-card">
+      <div class="li-sec-head"><span class="li-sec-title">Emblema Satului</span></div>
+      <div class="li-emblem-wrap">
+        <img src="img/calnic_emblem.svg" alt="Emblema Câlnic - versiunea întunecată">
       </div>
     </div>
-  </div>
-
-  <!-- TODAY BANNER — hidden until data confirms event -->
-  <div id="li-today-wrap" style="display:none;">
-    <div class="li-today-banner">
-      <div class="li-today-inner">
-        <div class="li-today-icon">&#128337;</div>
+    <div class="li-weather-card">
+      <div class="li-sec-head"><span class="li-sec-title">Vremea În Câlnic</span></div>
+      <div class="li-weather-main">
         <div>
-          <div class="li-today-label">Astăzi în familia ta</div>
-          <div class="li-today-text" id="li-today-text"></div>
-          <div class="li-today-sub" id="li-today-sub"></div>
+          <div class="li-weather-temp" id="li-weather-temp">--°C</div>
+          <div class="li-weather-desc" id="li-weather-desc">Se încarcă...</div>
         </div>
-        <div class="li-today-badge" id="li-today-badge"></div>
+        <div class="li-hero-pill" id="li-weather-time">--:--</div>
+      </div>
+      <div class="li-weather-meta">
+        <div class="li-weather-row">Max/Min azi: <strong id="li-weather-range">-- / --</strong></div>
+        <div class="li-weather-row">Resimțită: <strong id="li-weather-feels">--°C</strong></div>
+        <div class="li-weather-row">Vânt: <strong id="li-weather-wind">-- km/h</strong></div>
+        <div class="li-weather-row">Precipitații: <strong id="li-weather-rain">-- mm</strong></div>
       </div>
     </div>
   </div>
 
   <div class="li-sections">
-
-    <!-- ANNOUNCEMENTS — hidden when none active -->
     <div class="li-section" id="li-ann-section" style="display:none;">
       <div class="li-sec-head"><span class="li-sec-title">Anunțuri</span></div>
       <div id="li-ann-list"></div>
     </div>
-
-    <!-- ACTIVITY FEED -->
-    <div class="li-section">
-      <div class="li-sec-head"><span class="li-sec-title">Activitate recentă în sat</span></div>
-      <div class="li-activity-list" id="li-activity-list">
-        <div style="color:#7a5828;font-style:italic;font-size:14px;padding:12px 0;">Se încarcă...</div>
-      </div>
-    </div>
-
-    <!-- PROFILE COMPLETENESS -->
-    <div class="li-section">
-      <div class="li-sec-head"><span class="li-sec-title">Completitudinea profilului</span></div>
-      <div class="li-complete-box">
-        <div class="li-complete-score" id="li-score">—</div>
-        <div class="li-complete-label" id="li-score-label"></div>
-        <div class="li-progress-bar"><div class="li-progress-fill" id="li-progress-fill" style="width:0%"></div></div>
-        <div class="li-complete-items" id="li-complete-items"></div>
-      </div>
-    </div>
-
   </div>
 
 </div><!-- end member-view -->
@@ -1103,6 +1140,7 @@ if (window.supabase) { checkAdminNavLink(); } else { document.addEventListener('
   var MONTH_FULL_RO  = ['ianuarie','februarie','martie','aprilie','mai','iunie','iulie','august','septembrie','octombrie','noiembrie','decembrie'];
 
   function animateCount(el, target) {
+    if (!el) return;
     var duration = 1000, start = performance.now();
     function step(now) {
       var p    = Math.min((now - start) / duration, 1);
@@ -1156,6 +1194,11 @@ if (window.supabase) { checkAdminNavLink(); } else { document.addEventListener('
   }
 
   function renderTodayBanner(members) {
+    var wrap = document.getElementById('li-today-wrap');
+    var txtEl = document.getElementById('li-today-text');
+    var subEl = document.getElementById('li-today-sub');
+    var badgeEl = document.getElementById('li-today-badge');
+    if (!wrap || !txtEl || !subEl || !badgeEl) return;
     var today = new Date();
     var todayM = today.getMonth() + 1;
     var todayD = today.getDate();
@@ -1192,12 +1235,11 @@ if (window.supabase) { checkAdminNavLink(); } else { document.addEventListener('
       }
     });
 
-    var wrap = document.getElementById('li-today-wrap');
     if (events.length > 0) {
       var e = events[0];
-      document.getElementById('li-today-text').textContent  = e.text;
-      document.getElementById('li-today-sub').textContent   = e.sub;
-      document.getElementById('li-today-badge').textContent = e.badge;
+      txtEl.textContent  = e.text;
+      subEl.textContent   = e.sub;
+      badgeEl.textContent = e.badge;
       wrap.style.display = 'block';
     } else {
       wrap.style.display = 'none';
@@ -1206,6 +1248,7 @@ if (window.supabase) { checkAdminNavLink(); } else { document.addEventListener('
 
   function renderActivity(families) {
     var list = document.getElementById('li-activity-list');
+    if (!list) return;
     if (!families || families.length === 0) {
       list.innerHTML = '<div style="color:#7a5828;font-style:italic;font-size:14px;padding:12px 0;">Nicio activitate recentă.</div>';
       return;
@@ -1226,6 +1269,7 @@ if (window.supabase) { checkAdminNavLink(); } else { document.addEventListener('
   function renderAnnouncements(announcements) {
     var section = document.getElementById('li-ann-section');
     var list    = document.getElementById('li-ann-list');
+    if (!section || !list) return;
     var now     = new Date();
     var active  = (announcements || []).filter(function(a) {
       return new Date(a.published_at) <= now && new Date(a.expires_at) >= now;
@@ -1252,6 +1296,53 @@ if (window.supabase) { checkAdminNavLink(); } else { document.addEventListener('
     }).join('');
   }
 
+  function weatherCodeLabel(code) {
+    var map = {
+      0:'Cer senin',1:'Mai mult senin',2:'Parțial noros',3:'Noros',
+      45:'Ceață',48:'Ceață cu chiciură',
+      51:'Burniță slabă',53:'Burniță moderată',55:'Burniță densă',
+      56:'Burniță înghețată',57:'Burniță înghețată',
+      61:'Ploaie slabă',63:'Ploaie moderată',65:'Ploaie puternică',
+      66:'Ploaie înghețată',67:'Ploaie înghețată',
+      71:'Ninsoare slabă',73:'Ninsoare moderată',75:'Ninsoare puternică',
+      77:'Fulguială',80:'Averse slabe',81:'Averse moderate',82:'Averse puternice',
+      85:'Averse de ninsoare',86:'Averse de ninsoare',
+      95:'Furtună',96:'Furtună cu grindină',99:'Furtună cu grindină'
+    };
+    return map[code] || 'Condiții variabile';
+  }
+
+  function loadVillageWeather() {
+    var tempEl  = document.getElementById('li-weather-temp');
+    var descEl  = document.getElementById('li-weather-desc');
+    var timeEl  = document.getElementById('li-weather-time');
+    var rangeEl = document.getElementById('li-weather-range');
+    var feelEl  = document.getElementById('li-weather-feels');
+    var windEl  = document.getElementById('li-weather-wind');
+    var rainEl  = document.getElementById('li-weather-rain');
+    if (!tempEl || !descEl || !timeEl || !rangeEl || !feelEl || !windEl || !rainEl) return;
+
+    var url = 'https://api.open-meteo.com/v1/forecast?latitude=45.91&longitude=23.67&current=temperature_2m,apparent_temperature,precipitation,weather_code,wind_speed_10m&daily=temperature_2m_max,temperature_2m_min&timezone=auto&forecast_days=1';
+
+    fetch(url).then(function(r){ return r.json(); }).then(function(data){
+      if (!data || !data.current) throw new Error('no weather data');
+      var cur = data.current;
+      tempEl.textContent = Math.round(Number(cur.temperature_2m)) + '°C';
+      descEl.textContent = weatherCodeLabel(Number(cur.weather_code));
+      feelEl.textContent = Math.round(Number(cur.apparent_temperature)) + '°C';
+      windEl.textContent = Math.round(Number(cur.wind_speed_10m)) + ' km/h';
+      rainEl.textContent = Number(cur.precipitation || 0).toFixed(1) + ' mm';
+      if (data.daily && data.daily.temperature_2m_max && data.daily.temperature_2m_min) {
+        rangeEl.textContent = Math.round(data.daily.temperature_2m_max[0]) + '°C / ' + Math.round(data.daily.temperature_2m_min[0]) + '°C';
+      }
+      var now = new Date();
+      timeEl.textContent = now.toLocaleTimeString('ro-RO', {hour:'2-digit', minute:'2-digit'});
+    }).catch(function(){
+      descEl.textContent = 'Date meteo indisponibile momentan';
+      timeEl.textContent = '--:--';
+    });
+  }
+
   function showMemberView(session) {
     /* swap views */
     document.getElementById('guest-view').style.display  = 'none';
@@ -1259,6 +1350,7 @@ if (window.supabase) { checkAdminNavLink(); } else { document.addEventListener('
     document.dispatchEvent(new Event('calnic:viewchange'));
 
     makeStars();
+    loadVillageWeather();
 
     /* last visit — store & display */
     var prevVisit = localStorage.getItem('calnic-last-visit');
@@ -1336,15 +1428,21 @@ if (window.supabase) { checkAdminNavLink(); } else { document.addEventListener('
         return '<div class="li-hero-pill">' + p + '</div>';
       }).join('');
 
-      var comp = completenessScore(family);
-      document.getElementById('li-score').textContent         = comp.score + '%';
-      document.getElementById('li-progress-fill').style.width = comp.score + '%';
-      document.getElementById('li-score-label').textContent   =
-        comp.score >= 70 ? 'Profil bine completat' :
-        comp.score >= 40 ? 'Profil parțial completat' : 'Profil la început';
-      document.getElementById('li-complete-items').innerHTML = comp.checks.map(function(c){
-        return '<div class="li-complete-item"><div class="li-ci-dot ' + (c.done?'done':'miss') + '"></div>' + c.label + '</div>';
-      }).join('');
+      var scoreEl = document.getElementById('li-score');
+      var fillEl = document.getElementById('li-progress-fill');
+      var scoreLabelEl = document.getElementById('li-score-label');
+      var scoreItemsEl = document.getElementById('li-complete-items');
+      if (scoreEl && fillEl && scoreLabelEl && scoreItemsEl) {
+        var comp = completenessScore(family);
+        scoreEl.textContent = comp.score + '%';
+        fillEl.style.width = comp.score + '%';
+        scoreLabelEl.textContent =
+          comp.score >= 70 ? 'Profil bine completat' :
+          comp.score >= 40 ? 'Profil parțial completat' : 'Profil la început';
+        scoreItemsEl.innerHTML = comp.checks.map(function(c){
+          return '<div class="li-complete-item"><div class="li-ci-dot ' + (c.done?'done':'miss') + '"></div>' + c.label + '</div>';
+        }).join('');
+      }
 
       window.supabase
         .from('members')
