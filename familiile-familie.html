@@ -99,6 +99,38 @@ font-family:'Playfair Display',serif;font-size:24px;color:var(--gold);display:bl
 font-size:10px;color:var(--muted);font-style:italic;
 }
 
+.fam-hero {
+background:#050505;border-bottom:2px solid var(--gold-d);padding:32px 32px 28px;display:flex;align-items:center;gap:28px;flex-wrap:wrap;
+}
+
+.fam-hero-stats {
+display:flex;gap:22px;flex-shrink:0;
+}
+
+.main-wrap {
+max-width:1000px !important;margin:0 auto;padding:32px 24px !important;display:grid;grid-template-columns:1fr 260px;gap:32px;align-items:start;
+}
+
+.section-head {
+display:flex;align-items:center;gap:14px;margin-bottom:18px;margin-top:34px;
+}
+
+.section-head:first-child {
+margin-top:0;
+}
+
+.section-head::before {
+content:'';width:24px;height:1px;background:var(--gold);flex-shrink:0;
+}
+
+.section-head::after {
+content:'';flex:1;height:1px;background:var(--b2);
+}
+
+.section-head-title {
+font-family:'Playfair Display',serif;font-size:12px;font-weight:600;letter-spacing:3px;text-transform:uppercase;color:var(--gold);white-space:nowrap;
+}
+
 @media(max-width:760px) {
 .main-wrap{grid-template-columns:1fr;}.fam-hero{flex-direction:column;align-items:flex-start;}.fam-hero-stats{flex-wrap:wrap;}
 }
@@ -113,6 +145,10 @@ background:var(--s1);border:1px solid var(--b1);border-radius:2px;padding:14px 1
 
 .member-card:hover {
 border-color:var(--gold-d);
+}
+
+.members-grid {
+display:grid;grid-template-columns:repeat(auto-fill,minmax(135px,1fr));gap:12px;
 }
 
 .member-card.deceased {
@@ -217,6 +253,10 @@ font-size:12px;color:var(--muted);padding:7px 0;border-bottom:1px solid var(--b1
 
 .hist-row:last-child {
 border-bottom:none;
+}
+
+.photos-grid {
+display:grid;grid-template-columns:repeat(4,1fr);gap:8px;
 }
 
 .photo-cell {
