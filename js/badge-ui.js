@@ -8,18 +8,78 @@
       .replace(/'/g, '&#39;');
   }
 
-  function iconChar(name) {
-    var map = {
-      crown: '\u265B',
-      help: '\u2726',
-      medal: '\u2605',
-      feather: '\u2712',
-      shield: '\u2726',
-      seal: '\u2736',
-      'check-shield': '\u2713',
-      gavel: '\u2696'
+  function iconKey(def) {
+    var bySlug = {
+      'fondator': 'crown',
+      'helper': 'handshake',
+      'membru-de-onoare': 'medal',
+      'contribuitor': 'book-feather',
+      'veteran': 'clock',
+      'distinctie-speciala': 'seal-star',
+      'om-de-incredere': 'shield-check',
+      'moderator': 'shield-star'
     };
-    return map[name] || '\u2605';
+    if (def && def.slug && bySlug[def.slug]) return bySlug[def.slug];
+
+    var byOldIcon = {
+      crown: 'crown',
+      help: 'handshake',
+      medal: 'medal',
+      feather: 'book-feather',
+      shield: 'clock',
+      seal: 'seal-star',
+      'check-shield': 'shield-check',
+      gavel: 'shield-star',
+      handshake: 'handshake',
+      clock: 'clock',
+      'book-feather': 'book-feather',
+      'shield-star': 'shield-star'
+    };
+    var k = String((def && def.icon) || '').trim();
+    return byOldIcon[k] || 'medal';
+  }
+
+  function iconSvg(def) {
+    var key = iconKey(def);
+    var svgOpen = '<svg class="co-badge-icon" viewBox="0 0 24 24" aria-hidden="true" focusable="false">';
+    var svgClose = '</svg>';
+
+    var body = {
+      crown:
+        '<path d="M3.5 16.5h17v3h-17z"/>' +
+        '<path d="M3.5 16.5L6.7 8.5l5.3 4 5.3-4 3.2 8"/>' +
+        '<circle cx="6.6" cy="8.3" r="1"/><circle cx="12" cy="6.5" r="1"/><circle cx="17.4" cy="8.3" r="1"/>',
+      handshake:
+        '<path d="M3.5 11.7l4.2-3.2c1.1-.8 2.6-.8 3.6 0l.7.5"/>' +
+        '<path d="M20.5 11.7l-4.2-3.2c-1.1-.8-2.6-.8-3.6 0l-.7.5"/>' +
+        '<path d="M8.4 12.5l2.2 1.8c.8.6 1.9.6 2.7 0l2.3-1.9"/>' +
+        '<path d="M2.8 13.1l2 2.4 3-2.3-2-2.4z"/>' +
+        '<path d="M21.2 13.1l-2 2.4-3-2.3 2-2.4z"/>',
+      medal:
+        '<path d="M8.2 3.5h3l.8 3.6H9zM12.8 3.5h3l-.8 3.6H12z"/>' +
+        '<circle cx="12" cy="14" r="5.5"/>' +
+        '<path d="M12 10.8l1.1 2.3 2.5.3-1.9 1.7.5 2.4-2.2-1.2-2.2 1.2.5-2.4-1.9-1.7 2.5-.3z"/>',
+      'book-feather':
+        '<path d="M4.5 6.2h6.8a2.2 2.2 0 0 1 2.2 2.2v9.4H6.8a2.3 2.3 0 0 0-2.3 2.2z"/>' +
+        '<path d="M19.5 6.2h-6.8a2.2 2.2 0 0 0-2.2 2.2v9.4h6.7a2.3 2.3 0 0 1 2.3 2.2z"/>' +
+        '<path d="M14.7 9.2c2.1.5 3.4 2.2 3.3 4.2-1.9.2-3.7-.9-4.4-2.8.3-.7.7-1.1 1.1-1.4z"/>' +
+        '<path d="M13.5 12.4l3.2 2.8"/>',
+      clock:
+        '<circle cx="12" cy="12" r="7.8"/>' +
+        '<path d="M12 8.2v4.1l3.1 1.9"/>' +
+        '<path d="M12 4.2v1.5M12 18.3v1.5M4.2 12h1.5M18.3 12h1.5"/>',
+      'seal-star':
+        '<path d="M12 4.2l1.5 1 1.8-.4.8 1.7 1.8.6-.1 1.9 1.3 1.3-1 1.6.6 1.8-1.6.9-.3 1.8-1.9.1-1.2 1.4-1.7-.8-1.7.8-1.2-1.4-1.9-.1-.3-1.8-1.6-.9.6-1.8-1-1.6 1.3-1.3-.1-1.9 1.8-.6.8-1.7 1.8.4z"/>' +
+        '<path d="M12 8.8l1.1 2.2 2.5.3-1.8 1.7.4 2.5-2.2-1.2-2.2 1.2.4-2.5-1.8-1.7 2.5-.3z"/>',
+      'shield-check':
+        '<path d="M12 3.8l6 2.2v5.2c0 4.2-2.4 7.2-6 8.9-3.6-1.7-6-4.7-6-8.9V6z"/>' +
+        '<path d="M8.4 12.1l2.2 2.2 4.4-4.4"/>',
+      'shield-star':
+        '<path d="M12 3.8l6 2.2v5.2c0 4.2-2.4 7.2-6 8.9-3.6-1.7-6-4.7-6-8.9V6z"/>' +
+        '<path d="M12 8.2l1 2 2.2.3-1.6 1.4.4 2.2-2-1-2 1 .4-2.2-1.6-1.4 2.2-.3z"/>'
+    }[key];
+
+    return svgOpen + (body || '') + svgClose;
   }
 
   function normalizeDef(raw) {
@@ -100,7 +160,7 @@
       '<article class="' + cls + ' co-has-tooltip" ' +
       'style="--co-b-base:' + esc(def.colors.base) + ';--co-b-dark:' + esc(def.colors.dark) + ';--co-b-accent:' + esc(def.colors.accent) + ';" ' +
       'data-tooltip="' + esc(tooltip) + '">' +
-        '<span class="co-badge-medal">' + esc(iconChar(def.icon)) + '</span>' +
+        '<span class="co-badge-medal">' + iconSvg(def) + '</span>' +
         '<span class="co-badge-text">' +
           '<span class="co-badge-title">' + esc(def.label) + '</span>' +
           (compact ? '' : '<span class="co-badge-desc">' + esc(def.description) + '</span>') +

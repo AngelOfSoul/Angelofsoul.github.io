@@ -15,7 +15,7 @@
       label: 'Helper',
       description: 'Membru care ajuta alti utilizatori.',
       colors: { base: '#2F6DB3', dark: '#1A3E6A', accent: '#74A9E4' },
-      icon: 'help',
+      icon: 'handshake',
       order: 20
     },
     {
@@ -33,7 +33,7 @@
       label: 'Contribuitor',
       description: 'Membru care adauga continut sau informatii utile.',
       colors: { base: '#2E8B57', dark: '#1A5033', accent: '#6FC893' },
-      icon: 'feather',
+      icon: 'book-feather',
       order: 40
     },
     {
@@ -42,7 +42,7 @@
       label: 'Veteran',
       description: 'Membru vechi al comunitatii.',
       colors: { base: '#9C6B30', dark: '#5A3B1A', accent: '#D4A46A' },
-      icon: 'shield',
+      icon: 'clock',
       order: 50
     },
     {
@@ -51,7 +51,7 @@
       label: 'Distinctie speciala',
       description: 'Acordata pentru merite deosebite.',
       colors: { base: '#8B2E3C', dark: '#501822', accent: '#CB6C7A' },
-      icon: 'seal',
+      icon: 'seal-star',
       order: 60
     },
     {
@@ -69,7 +69,7 @@
       label: 'Moderator',
       description: 'Membru cu rol oficial de moderare.',
       colors: { base: '#7A1F2A', dark: '#441017', accent: '#BA5A67' },
-      icon: 'gavel',
+      icon: 'shield-star',
       order: 80
     }
   ];

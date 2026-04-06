@@ -87,13 +87,13 @@ end $$;
 insert into public.badge_definitions (slug, label, description, color_base, color_dark, color_accent, icon, sort_order)
 values
 ('fondator', 'Fondator', 'Creator al proiectului sau membru din nucleul initial.', '#D4A63A', '#8A6217', '#F1CF75', 'crown', 10),
-('helper', 'Helper', 'Membru care ajuta alti utilizatori.', '#2F6DB3', '#1A3E6A', '#74A9E4', 'help', 20),
+('helper', 'Helper', 'Membru care ajuta alti utilizatori.', '#2F6DB3', '#1A3E6A', '#74A9E4', 'handshake', 20),
 ('membru-de-onoare', 'Membru de onoare', 'Membru apreciat in mod special.', '#6E4BAE', '#3D2868', '#B397E8', 'medal', 30),
-('contribuitor', 'Contribuitor', 'Membru care adauga continut sau informatii utile.', '#2E8B57', '#1A5033', '#6FC893', 'feather', 40),
-('veteran', 'Veteran', 'Membru vechi al comunitatii.', '#9C6B30', '#5A3B1A', '#D4A46A', 'shield', 50),
-('distinctie-speciala', 'Distinctie speciala', 'Acordata pentru merite deosebite.', '#8B2E3C', '#501822', '#CB6C7A', 'seal', 60),
+('contribuitor', 'Contribuitor', 'Membru care adauga continut sau informatii utile.', '#2E8B57', '#1A5033', '#6FC893', 'book-feather', 40),
+('veteran', 'Veteran', 'Membru vechi al comunitatii.', '#9C6B30', '#5A3B1A', '#D4A46A', 'clock', 50),
+('distinctie-speciala', 'Distinctie speciala', 'Acordata pentru merite deosebite.', '#8B2E3C', '#501822', '#CB6C7A', 'seal-star', 60),
 ('om-de-incredere', 'Om de incredere', 'Membru serios, respectat si de incredere.', '#1F3C68', '#11233E', '#5C86BE', 'check-shield', 70),
-('moderator', 'Moderator', 'Membru cu rol oficial de moderare.', '#7A1F2A', '#441017', '#BA5A67', 'gavel', 80)
+('moderator', 'Moderator', 'Membru cu rol oficial de moderare.', '#7A1F2A', '#441017', '#BA5A67', 'shield-star', 80)
 on conflict (slug) do update
 set
   label = excluded.label,
