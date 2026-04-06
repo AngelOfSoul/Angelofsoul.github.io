@@ -122,6 +122,19 @@ position:absolute;left:4px;right:auto;z-index:6;pointer-events:none;font-size:9p
 display:none !important;
 }
 
+/* Relation modal dropdown: keep option text readable across browser-native menus */
+#relPersonSelect {
+background:#17120d !important;
+color:#e7d2a0 !important;
+}
+#relPersonSelect option {
+background:#f8f3e8;
+color:#20170d;
+}
+#relPersonSelect option:disabled {
+color:#8a7a5e;
+}
+
 .minimap {
 position:absolute;bottom:10px;right:10px;background:rgba(8,8,8,.92);border:1px solid var(--b2);border-radius:3px;padding:3px;z-index:20;
 }
@@ -1062,7 +1075,7 @@ nav{flex-wrap:nowrap;overflow:hidden;}
         <!-- Target (selected) -->
         <div style="text-align:center;">
           <div id="rmTargetAv" style="width:42px;height:42px;border-radius:50%;background:#1a1208;border:2px solid var(--b2);display:flex;align-items:center;justify-content:center;font-family:'Playfair Display',serif;font-size:18px;color:var(--muted);margin:0 auto 5px;"></div>
-          <select id="relPersonSelect" style="width:100%;background:#1a1208;border:1px solid var(--b2);color:var(--text);font-family:'EB Garamond',serif;font-size:13px;padding:4px 6px;border-radius:2px;text-align:center;"></select>
+          <select id="relPersonSelect" style="width:100%;background:#1a1208;border:1px solid var(--b2);color:#e7d2a0;font-family:'EB Garamond',serif;font-size:13px;padding:4px 6px;border-radius:2px;text-align:center;"></select>
           <div style="font-size:9px;color:var(--muted);letter-spacing:1px;margin-top:4px;">CONECTEAZA CU</div>
         </div>
       </div>
@@ -2244,6 +2257,7 @@ function doRemoveRel(relId,item){
     S.members.forEach(function(m){
       if(m.id===S.editingId)return;
       var opt=document.createElement('option');opt.value=m.id;opt.textContent=m.name;
+      opt.disabled=false;
       if(m.id===preselectPersonId)opt.selected=true;
       sel.appendChild(opt);
     });
