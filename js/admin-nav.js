@@ -164,9 +164,23 @@ function buildProfileButton(session, familyName, hasNotif, isAdmin) {
       ' <div class="prf-dd-sep"> </div>' +
       ' <a class="prf-dd-item logout" href="#" onclick="window.supabase && window.supabase.auth.signOut().then(function(){window.location.href=\'index.html\'});return false;"> &#128275; Deconectare </a>';
 
+    var hideTimer = null;
+    function showDd() {
+      if (hideTimer) { clearTimeout(hideTimer); hideTimer = null; }
+      dd.classList.add('show');
+    }
+    function hideDdSoon() {
+      if (hideTimer) clearTimeout(hideTimer);
+      hideTimer = setTimeout(function() { dd.classList.remove('show'); }, 130);
+    }
+    // Desktop behavior: dropdown on hover, like before.
+    wrap.addEventListener('mouseenter', showDd);
+    wrap.addEventListener('mouseleave', hideDdSoon);
+    // Click fallback (touch/smaller pointers).
     btn.addEventListener('click', function(e) {
       e.preventDefault();
-      dd.classList.toggle('show');
+      if (dd.classList.contains('show')) dd.classList.remove('show');
+      else showDd();
     });
     document.addEventListener('click', function(e) {
       if (!wrap.contains(e.target)) dd.classList.remove('show');

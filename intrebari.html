@@ -574,6 +574,16 @@ function applyPageLang(lang) {
 }
 
 if (window.setLang) { window.setLang(currentLang); }
+function initFaqDefaults() {
+  currentCat = 'all';
+  var search = document.getElementById('faqSearch');
+  if (search) search.value = '';
+  document.querySelectorAll('.cat-chip').forEach(function(c) {
+    c.classList.toggle('active', c.getAttribute('data-cat') === 'all');
+  });
+  applyFilters();
+}
+initFaqDefaults();
 
 /* ── /* PAGE HERO */
 function checkNavSession() {
