@@ -102,9 +102,10 @@ nav::after {
   font-family: var(--font-display) !important;
   font-size: 9px !important;
   letter-spacing: 1.5px !important;
-  color: var(--gold-m) !important;
+  color: #d5bb78 !important;
   text-transform: uppercase !important;
   white-space: nowrap !important;
+  text-shadow: 0 0 4px rgba(212,168,74,0.28) !important;
   transition: color var(--transition-med) !important;
 }
 
@@ -113,7 +114,7 @@ nav::after {
 .nav-link .nav-icon {
   width: 22px !important;
   height: 22px !important;
-  color: #9a7c22 !important;
+  color: #c4a14b !important;
   transition: all var(--transition-med) !important;
   position: relative !important;
   z-index: 4 !important;
@@ -210,7 +211,7 @@ nav::after {
   font-family: var(--font-display) !important;
   font-size: 10px !important;
   letter-spacing: 1.5px !important;
-  color: var(--gold-m) !important;
+  color: #d5bb78 !important;
   border-left: 1px solid rgba(100,78,20,0.22) !important;
   border-right: none !important;
   border-top: none !important;
@@ -227,6 +228,19 @@ nav::after {
 }
 
 .nav-link > span.nl { font-size: 9px; }
+
+/* Vizibilitate mai buna pe starea ne-selectata */
+.nav-link:not(.active):not(:hover) .nl,
+.nav-link:not(.active):not(:hover) > span:not(.nav-icon),
+.nav-login:not(:hover) {
+  color: #d8bf82 !important;
+  text-shadow: 0 0 5px rgba(212,168,74,0.24) !important;
+}
+
+.nav-link:not(.active):not(:hover) svg,
+.nav-link:not(.active):not(:hover) .nav-icon {
+  color: #cfae5e !important;
+}
 
 /* ── NAVBAR MOBIL ── */
 @media (max-width: 740px) {

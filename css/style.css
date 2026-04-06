@@ -195,7 +195,8 @@ nav {
   font-family: 'EB Garamond', serif;
   font-size: 14px;
   letter-spacing: .5px;
-  color: var(--text);
+  color: #d5bb78;
+  text-shadow: 0 0 4px rgba(212,168,74,.2);
   cursor: pointer;
   border-right: 1px solid var(--b1);
   transition: all .18s;
@@ -283,7 +284,8 @@ nav {
   padding: 13px 20px;
   font-family: 'EB Garamond', serif;
   font-size: 16px;
-  color: var(--text);
+  color: #d8bf82;
+  text-shadow: 0 0 4px rgba(212,168,74,.16);
   border-bottom: 1px solid var(--b1);
   text-decoration: none;
   display: flex;
@@ -1322,6 +1324,18 @@ button[type="submit"]::after,button::after,input[type="button"]::after,input[typ
     linear-gradient(180deg,#18120a 0%,#0f0c08 100%) !important;
   color:#fffaf0 !important;
   border-color:rgba(196,154,75,.62) !important;
+}
+
+/* Navbar: contrast mai bun pentru itemii ne-selectati */
+.nav-link:not(.active):not(:hover),
+.nav-mobile-link:not(.active):not(:hover) {
+  color: #d8bf82 !important;
+  text-shadow: 0 0 5px rgba(212,168,74,.2) !important;
+}
+
+.nav-link:not(.active):not(:hover) .nl,
+.nav-login:not(:hover) .nl {
+  color: #d8bf82 !important;
 }
 
 input,textarea,select,.search-input,.form-input,.form-textarea,.df-input,.df-textarea,.fi-input,.fi-select,.fi-textarea,.pb-input{
