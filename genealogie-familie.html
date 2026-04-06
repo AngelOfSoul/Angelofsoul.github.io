@@ -122,18 +122,27 @@ position:absolute;left:4px;right:auto;z-index:6;pointer-events:none;font-size:9p
 display:none !important;
 }
 
-/* Relation modal dropdown: keep option text readable across browser-native menus */
-#relPersonSelect {
-background:#17120d !important;
-color:#e7d2a0 !important;
+/* Relation modal custom dropdown (theme-matched, avoids native white menu) */
+.rel-person-dd { position:relative; width:100%; }
+.rel-person-btn {
+width:100%;display:flex;align-items:center;justify-content:space-between;gap:8px;
+background:#1a1208;border:1px solid var(--b2);color:#e7d2a0;font-family:'EB Garamond',serif;
+font-size:13px;padding:6px 8px;border-radius:2px;cursor:pointer;
 }
-#relPersonSelect option {
-background:#f8f3e8;
-color:#20170d;
+.rel-person-btn:hover { border-color:var(--gold-d); }
+.rel-person-caret { color:var(--gold-d); font-size:11px; line-height:1; }
+.rel-person-menu {
+position:absolute;left:0;right:0;top:calc(100% + 2px);max-height:220px;overflow:auto;z-index:21000;
+background:#0f0f0f;border:1px solid var(--gold-d);border-radius:2px;box-shadow:0 10px 24px rgba(0,0,0,.65);
+display:none;
 }
-#relPersonSelect option:disabled {
-color:#8a7a5e;
+.rel-person-menu.open { display:block; }
+.rel-person-opt {
+display:block;width:100%;text-align:left;background:none;border:none;cursor:pointer;
+padding:7px 10px;font-family:'EB Garamond',serif;font-size:16px;color:#e7d2a0;
 }
+.rel-person-opt:hover { background:#1b150d; color:#f2deae; }
+.rel-person-opt.active { background:#2a1d0d; color:#ffd88d; }
 
 .minimap {
 position:absolute;bottom:10px;right:10px;background:rgba(8,8,8,.92);border:1px solid var(--b2);border-radius:3px;padding:3px;z-index:20;
@@ -1075,7 +1084,14 @@ nav{flex-wrap:nowrap;overflow:hidden;}
         <!-- Target (selected) -->
         <div style="text-align:center;">
           <div id="rmTargetAv" style="width:42px;height:42px;border-radius:50%;background:#1a1208;border:2px solid var(--b2);display:flex;align-items:center;justify-content:center;font-family:'Playfair Display',serif;font-size:18px;color:var(--muted);margin:0 auto 5px;"></div>
-          <select id="relPersonSelect" style="width:100%;background:#1a1208;border:1px solid var(--b2);color:#e7d2a0;font-family:'EB Garamond',serif;font-size:13px;padding:4px 6px;border-radius:2px;text-align:center;"></select>
+          <div class="rel-person-dd" id="relPersonDd">
+            <button type="button" id="relPersonBtn" class="rel-person-btn" aria-haspopup="listbox" aria-expanded="false">
+              <span id="relPersonBtnText">Selecteaza persoana</span>
+              <span class="rel-person-caret">&#9662;</span>
+            </button>
+            <div id="relPersonMenu" class="rel-person-menu" role="listbox" aria-label="Persoane"></div>
+          </div>
+          <select id="relPersonSelect" style="display:none;"></select>
           <div style="font-size:9px;color:var(--muted);letter-spacing:1px;margin-top:4px;">CONECTEAZA CU</div>
         </div>
       </div>
@@ -2206,6 +2222,61 @@ function doRemoveRel(relId,item){
 (function(){
   var selRelType=null;
   var editingRelId=null;
+  var relMenuOpen=false;
+
+  function getRelSelect(){return document.getElementById('relPersonSelect');}
+  function getRelMenu(){return document.getElementById('relPersonMenu');}
+  function getRelBtn(){return document.getElementById('relPersonBtn');}
+  function getRelBtnText(){return document.getElementById('relPersonBtnText');}
+
+  function closeRelPersonMenu(){
+    var menu=getRelMenu(),btn=getRelBtn();
+    if(menu)menu.classList.remove('open');
+    if(btn)btn.setAttribute('aria-expanded','false');
+    relMenuOpen=false;
+  }
+  function openRelPersonMenu(){
+    var menu=getRelMenu(),btn=getRelBtn();
+    if(!menu||!btn)return;
+    menu.classList.add('open');
+    btn.setAttribute('aria-expanded','true');
+    relMenuOpen=true;
+  }
+  function setRelTarget(targetId){
+    var sel=getRelSelect();
+    if(!sel)return;
+    if(targetId!=null)sel.value=targetId;
+    var currentId=sel.value;
+    var m=currentId?S.members.find(function(x){return x.id===currentId;}):null;
+    var txt=getRelBtnText();
+    if(txt)txt.textContent=m?m.name:t('Selecteaza persoana','Select person');
+    var menu=getRelMenu();
+    if(menu){
+      menu.querySelectorAll('.rel-person-opt').forEach(function(el){
+        el.classList.toggle('active',el.getAttribute('data-id')===currentId);
+      });
+    }
+    updatePreview();
+  }
+  function buildRelPersonMenu(){
+    var sel=getRelSelect(),menu=getRelMenu();
+    if(!sel||!menu)return;
+    menu.innerHTML='';
+    Array.from(sel.options).forEach(function(opt){
+      var b=document.createElement('button');
+      b.type='button';
+      b.className='rel-person-opt';
+      b.setAttribute('data-id',opt.value);
+      b.setAttribute('role','option');
+      b.textContent=opt.textContent||'';
+      b.addEventListener('click',function(e){
+        e.preventDefault();
+        setRelTarget(opt.value);
+        closeRelPersonMenu();
+      });
+      menu.appendChild(b);
+    });
+  }
 
   function updatePreview(){
     var anchor=S.members.find(function(m){return m.id===S.editingId;});
@@ -2261,7 +2332,9 @@ function doRemoveRel(relId,item){
       if(m.id===preselectPersonId)opt.selected=true;
       sel.appendChild(opt);
     });
-    sel.onchange=updatePreview;
+    if(!preselectPersonId&&sel.options.length)sel.selectedIndex=0;
+    sel.onchange=function(){setRelTarget(sel.value);};
+    buildRelPersonMenu();
 
     var aav=document.getElementById('rmAnchorAv');if(aav)aav.textContent=(anchor.initial||anchor.name.charAt(0)).toUpperCase();
     var anm=document.getElementById('rmAnchorName');if(anm)anm.textContent=anchor.name;
@@ -2285,7 +2358,7 @@ function doRemoveRel(relId,item){
     });
 
     document.getElementById('relModalError').style.display='none';
-    updatePreview();
+    setRelTarget(sel.value||'');
     document.getElementById('relModal').style.display='flex';
   }
 
@@ -2307,12 +2380,22 @@ function doRemoveRel(relId,item){
 
   function closeModal(){
     document.getElementById('relModal').style.display='none';
+    closeRelPersonMenu();
     selRelType=null;editingRelId=null;
   }
 
   document.getElementById('relModalClose').addEventListener('click',closeModal);
   document.getElementById('relModalCancel').addEventListener('click',closeModal);
   document.getElementById('relModal').addEventListener('click',function(e){if(e.target===this)closeModal();});
+  document.getElementById('relPersonBtn').addEventListener('click',function(e){
+    e.preventDefault();
+    if(relMenuOpen)closeRelPersonMenu();else openRelPersonMenu();
+  });
+  document.addEventListener('click',function(e){
+    var dd=document.getElementById('relPersonDd');
+    if(!dd)return;
+    if(!dd.contains(e.target))closeRelPersonMenu();
+  });
 
   document.getElementById('relModalSave').addEventListener('click',function(){
     var err=document.getElementById('relModalError');
