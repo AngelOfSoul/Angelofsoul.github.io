@@ -1274,17 +1274,32 @@ function inferRelations(fromId,toId,relType){
     else{grandChildId=toId;grandParentId=fromId;}
     var gcm=S.members.find(function(m){return m.id===grandChildId;});
     if(gcm){
-      _getChildrenOf(grandParentId).forEach(function(ch){
-        var childOfGp=S.members.find(function(m){return m.id===ch.memberId;});
+      var candParents=[],seenP={};
+      function addCand(pid){
+        if(!pid||seenP[pid])return;
+        seenP[pid]=1;
+        candParents.push(pid);
+      }
+      // Direct children of grandparent
+      _getChildrenOf(grandParentId).forEach(function(ch){addCand(ch.memberId);});
+      // Children known only via spouse of grandparent
+      _getSpousesOf(grandParentId).forEach(function(sp){
+        _getChildrenOf(sp.memberId).forEach(function(ch){addCand(ch.memberId);});
+      });
+
+      candParents.forEach(function(parentCandidateId){
+        if(parentCandidateId===grandChildId)return;
+        if(parentCandidateId===grandParentId)return;
+        var childOfGp=S.members.find(function(m){return m.id===parentCandidateId;});
         if(!childOfGp)return;
         // Parent candidate: child of grandparent
-        if(!_parentChildExists(grandChildId,ch.memberId)){
-          var pType=_guessParentType(ch.memberId);
+        if(!_parentChildExists(grandChildId,parentCandidateId)){
+          var pType=_guessParentType(parentCandidateId);
           var pLbl=REL_META[pType]?REL_META[pType].l:pType;
-          proposals.push({from:grandChildId,to:ch.memberId,type:pType,bio:true,text:childOfGp.name+' este '+pLbl+' lui '+gcm.name});
+          proposals.push({from:grandChildId,to:parentCandidateId,type:pType,bio:true,text:childOfGp.name+' este '+pLbl+' lui '+gcm.name});
         }
         // Other parent candidate: spouse of the above
-        _getSpousesOf(ch.memberId).forEach(function(sp){
+        _getSpousesOf(parentCandidateId).forEach(function(sp){
           if(_parentChildExists(grandChildId,sp.memberId))return;
           var spM=S.members.find(function(m){return m.id===sp.memberId;});
           if(!spM)return;
