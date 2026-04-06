@@ -1280,6 +1280,17 @@ function inferRelations(fromId,toId,relType){
     }
     var gcm=S.members.find(function(m){return m.id===grandChildId;});
     if(gcm){
+      // Spouse of known grandparent is very likely the co-grandparent.
+      _getSpousesOf(grandParentId).forEach(function(sp){
+        if(!sp||!sp.memberId)return;
+        if(_relHasBetween(grandChildId,sp.memberId))return;
+        var spM=S.members.find(function(m){return m.id===sp.memberId;});
+        if(!spM)return;
+        var gpType=(sp.parentType==='mama')?'bunica':'bunic';
+        var gpLbl=REL_META[gpType]?REL_META[gpType].l:gpType;
+        proposals.push({from:grandChildId,to:sp.memberId,type:gpType,bio:true,text:spM.name+' este '+gpLbl+' lui '+gcm.name});
+      });
+
       var candParents=[],seenP={};
       function addCand(pid){
         if(!pid||seenP[pid])return;
