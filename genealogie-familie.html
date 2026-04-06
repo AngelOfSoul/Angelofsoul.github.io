@@ -99,7 +99,12 @@ border:1px solid var(--b1);border-radius:4px;overflow:hidden;position:relative;b
 position:relative;overflow:hidden;cursor:grab;height:660px;
 }
 
-/* Mask tiny clipped circle fragments at the very top edge of the stage */
+/* Thin top mask to hide anti-aliased clipping specks at the stage edge */
+.tree-stage::before {
+content:'';position:absolute;left:0;right:0;top:0;height:12px;pointer-events:none;z-index:8;
+background:linear-gradient(to bottom, rgba(10,10,10,1) 0%, rgba(10,10,10,.96) 55%, rgba(10,10,10,0) 100%);
+}
+
 .tree-stage:active {
 cursor:grabbing;
 }
@@ -2481,15 +2486,23 @@ function subscribeRT(){
 
 // ── ZOOM / PAN ────────────────────────────────────────────
 function applyXform(){
-  // Keep top-most nodes away from the clipped top edge to avoid arc artifacts.
-  if(_layoutBounds && isFinite(_layoutBounds.minY)){
-    var minVisibleTop = 64; // px safe margin inside tree stage
-    var minPanY = minVisibleTop - (_layoutBounds.minY * S.zoom);
-    if(S.panY < minPanY) S.panY = minPanY;
-  }
+  // Keep top-most nodes away from the clipped top edge to avoid semicircle leftovers.
+  var minPanY=getMinPanY();
+  if(S.panY<minPanY)S.panY=minPanY;
   document.getElementById('treeCanvas').style.transform='translate('+S.panX+'px,'+S.panY+'px) scale('+S.zoom+')';
   updateGenLabels();
   drawMinimap();
+}
+function getMinPanY(){
+  var minVisibleTop=108; // keep the first row well below the clip edge
+  if(_layoutBounds && isFinite(_layoutBounds.minY)) return minVisibleTop-(_layoutBounds.minY*S.zoom);
+  var genKeys=Object.keys(_genYMap||{});
+  if(genKeys.length){
+    var topGenY=Infinity;
+    genKeys.forEach(function(k){var y=_genYMap[k];if(isFinite(y)&&y<topGenY)topGenY=y;});
+    if(isFinite(topGenY)) return minVisibleTop-(topGenY*S.zoom);
+  }
+  return 12;
 }
 // Dynamic gen-Y map built after each render — keyed by gen number → Y px in canvas space
 var _genYMap={};
