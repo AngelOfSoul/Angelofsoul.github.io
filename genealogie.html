@@ -23,7 +23,7 @@
 <link rel="icon" type="image/x-icon" href="favicon.ico">
 
 
-<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js" defer></script>
 
 <style>
 /* Page-specific CSS for genealogie.html */
@@ -544,10 +544,10 @@ display:block;
     <a href="contact.html" style="color:#7a5828;font-size:13px;font-style:normal;letter-spacing:1px;" data-ro="Contact" data-en="Contact">Contact</a>
   </div>
 </footer>
-<script src="js/config.js"></script>
-<script src="js/supabase.js"></script>
-<script src="js/utils.js"></script>
-<script src="js/admin-nav.js"></script>
+<script src="js/config.js" defer></script>
+<script src="js/supabase.js" defer></script>
+<script src="js/utils.js" defer></script>
+<script src="js/admin-nav.js" defer></script>
 <script>
 'use strict';
 function escH(s){return String(s==null?'':s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;').replace(/'/g,'&#39;');}
@@ -816,8 +816,9 @@ function initScrollBtns(){
 }
 function initHamburger(){var h=document.getElementById('hamburgerBtn'),m=document.getElementById('navMobileMenu');if(!h||!m)return;h.addEventListener('click',function(){var o=m.classList.toggle('open');h.textContent=o?'✕':'☰';});}
 </script>
-<script src="js/scroll-effects.js"></script>
-<script src="js/transitions.js"></script>
+<script src="js/scroll-effects.js" defer></script>
+<script src="js/transitions.js" defer></script>
 </body>
 </html>
+
 

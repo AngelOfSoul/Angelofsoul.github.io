@@ -9,10 +9,10 @@
 <link rel="icon" type="image/svg+xml" href="favicon.svg">
 <link rel="icon" type="image/x-icon" href="favicon.ico">
 <meta name="robots" content="noindex, nofollow">
-<script src="js/config.js"></script>
-<script src="js/supabase.js"></script>
-<script src="js/utils.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
+<script src="js/config.js" defer></script>
+<script src="js/supabase.js" defer></script>
+<script src="js/utils.js" defer></script>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js" defer></script>
 
 <style>
 /* Page-specific CSS for 404.html */
@@ -186,7 +186,7 @@ background:var(--gold);color:#050505;text-decoration:none;
   </div>
 </footer>
 
-<script src="js/admin-nav.js"></script>
+<script src="js/admin-nav.js" defer></script>
 <script>
 document.getElementById('yr').textContent = new Date().getFullYear();
 var currentLang = localStorage.getItem('calnic-lang') || 'ro';
@@ -200,8 +200,9 @@ function applyPageLang(lang) {
 document.addEventListener('calnic:langchange', function(e) { applyPageLang(e.detail.lang); });
 applyPageLang(window.CalnicUtils ? window.CalnicUtils.lang() : currentLang);
 </script>
-<script src="js/scroll-effects.js"></script>
-<script src="js/transitions.js"></script>
+<script src="js/scroll-effects.js" defer></script>
+<script src="js/transitions.js" defer></script>
 </body>
 </html>
+
 
