@@ -94,7 +94,7 @@
     if (!row || !row.def) return '';
     var def = row.def;
     var compact = !!(opts && opts.compact);
-    var cls = 'co-badge' + (compact ? ' co-badge--compact' : '') + (row.is_primary ? ' co-badge--primary' : '');
+    var cls = 'co-badge' + (compact ? ' co-badge--compact' : ' co-badge--profile') + (row.is_primary ? ' co-badge--primary' : '');
     var tooltip = def.description || '';
     return (
       '<article class="' + cls + ' co-has-tooltip" ' +
