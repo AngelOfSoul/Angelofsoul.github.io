@@ -59,7 +59,7 @@ if (window.location.pathname.indexOf('login') !== -1) {
     if (!window.supabase) return;
     window.supabase.auth.getUser().then(function(res) {
       if (res.data && res.data.session) {
-        window.location.href = 'dashboard.html';
+        window.location.href = 'index.html';
       }
     });
   }

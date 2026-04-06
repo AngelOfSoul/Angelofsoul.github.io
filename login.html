@@ -467,7 +467,7 @@ to{transform:rotate(360deg);}
     <div class="li-title" data-ro="&#128100; Esti autentificat" data-en="&#128100; You are signed in">&#128100; Esti autentificat</div>
     <div class="li-sub" id="loggedInEmail"></div>
     <div class="li-actions">
-      <a class="cta-btn" href="dashboard.html" id="profileLink" data-ro="Profilul familiei mele" data-en="My family profile">Profilul familiei mele</a>
+      <a class="cta-btn" href="index.html" id="profileLink" data-ro="Profilul familiei mele" data-en="My family profile">Profilul familiei mele</a>
       <button class="cta-btn-sec" id="logoutBtn" data-ro="Deconectare" data-en="Sign out">Deconectare</button>
     </div>
   </div>
@@ -792,7 +792,7 @@ function showLoggedIn(user) {
   var emailEl = document.getElementById('loggedInEmail');
   if (emailEl) emailEl.textContent = user.email || '';
   var profileLink = document.getElementById('profileLink');
-  if (profileLink) profileLink.href = 'dashboard.html';
+  if (profileLink) profileLink.href = 'index.html';
 }
 
 /* LOGIN */
@@ -838,12 +838,12 @@ async function doLogin(e) {
       if (userId) {
         var famCheck = await findFamilyForUser(userId);
         if (famCheck && famCheck.id) {
-          setTimeout(function() { window.location.href = 'dashboard.html'; }, 1200);
+          setTimeout(function() { window.location.href = 'index.html'; }, 1200);
         } else {
           setTimeout(function() { showStep2Panel(userId); }, 500);
         }
       } else {
-        setTimeout(function() { window.location.href = 'dashboard.html'; }, 1200);
+        setTimeout(function() { window.location.href = 'index.html'; }, 1200);
       }
     }
   } catch(err) {
