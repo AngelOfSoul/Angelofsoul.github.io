@@ -82,7 +82,7 @@
     return svgOpen + (body || '') + svgClose;
   }
 
-  function iconAssetPath(def) {
+  function badgeAssetPath(def) {
     var slug = String((def && def.slug) || '').trim();
     var map = {
       'fondator': 'assets/badges/fondator.svg',
@@ -98,7 +98,7 @@
   }
 
   function iconMarkup(def) {
-    var path = iconAssetPath(def);
+    var path = badgeAssetPath(def);
     if (path) {
       return '<img class="co-badge-icon-img" src="' + esc(path) + '" alt="" loading="lazy" decoding="async">';
     }
@@ -179,6 +179,16 @@
     var compact = !!(opts && opts.compact);
     var cls = 'co-badge' + (compact ? ' co-badge--compact' : ' co-badge--profile') + (row.is_primary ? ' co-badge--primary' : '');
     var tooltip = def.description || '';
+    var svgPath = badgeAssetPath(def);
+
+    if (svgPath) {
+      return (
+        '<article class="' + cls + ' co-badge--svg co-has-tooltip" data-tooltip="' + esc(tooltip) + '">' +
+          '<img class="co-badge-art' + (compact ? ' co-badge-art--compact' : ' co-badge-art--profile') + '" src="' + esc(svgPath) + '" alt="' + esc(def.label) + '" loading="lazy" decoding="async">' +
+        '</article>'
+      );
+    }
+
     return (
       '<article class="' + cls + ' co-has-tooltip" ' +
       'style="--co-b-base:' + esc(def.colors.base) + ';--co-b-dark:' + esc(def.colors.dark) + ';--co-b-accent:' + esc(def.colors.accent) + ';" ' +

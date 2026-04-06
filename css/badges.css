@@ -225,6 +225,43 @@
   pointer-events: none;
 }
 
+/* Full SVG badge rendering (uses provided artwork files) */
+.co-badge--svg {
+  background: transparent;
+  border: 0;
+  box-shadow: none;
+  padding: 0;
+  min-height: 0;
+  width: auto;
+}
+
+.co-badge--svg::before,
+.co-badge--svg::after {
+  display: none !important;
+}
+
+.co-badge--svg:hover {
+  transform: translateY(-1px);
+  box-shadow: none;
+  filter: brightness(1.03);
+}
+
+.co-badge-art {
+  display: block;
+  width: 100%;
+  height: auto;
+}
+
+.co-badge-art--profile {
+  width: 240px;
+  max-width: 100%;
+}
+
+.co-badge-art--compact {
+  width: 155px;
+  max-width: 100%;
+}
+
 /* Profile page section */
 .co-profile-badges {
   margin-top: 2px;
@@ -241,6 +278,14 @@
 
 .fc .co-card-badge-slot .co-badge {
   max-width: 100%;
+}
+
+.fc .co-card-badge-slot .co-badge--svg {
+  width: 100%;
+}
+
+.fc .co-card-badge-slot .co-badge-art--compact {
+  width: 100%;
 }
 
 /* Admin section */
