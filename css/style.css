@@ -1464,117 +1464,119 @@ footer .g{color:var(--mp-gold-bright) !important;}
    COMMON RULES EXTRACTED FROM PAGES (5+ pages)
    ═══════════════════════════════════════════════════════════ */
 
-/* in 9 pages */
-.nav-link .nl {
-  display:none;
-}
+@media (max-width: 740px) {
+  /* in 9 pages */
+  .nav-link .nl {
+    display:none;
+  }
 
-/* in 9 pages */
-.nav-login .nl {
-  display:none;
-}
+  /* in 9 pages */
+  .nav-login .nl {
+    display:none;
+  }
 
-/* in 5 pages */
-.who-grid {
-  grid-template-columns:1fr 1fr !important;
-}
+  /* in 5 pages */
+  .who-grid {
+    grid-template-columns:1fr 1fr !important;
+  }
 
-/* in 5 pages */
-.feat-grid {
-  grid-template-columns:1fr !important;
-}
+  /* in 5 pages */
+  .feat-grid {
+    grid-template-columns:1fr !important;
+  }
 
-/* in 6 pages */
-.filter-bar {
-  flex-direction:column !important;
-}
+  /* in 6 pages */
+  .filter-bar {
+    flex-direction:column !important;
+  }
 
-/* in 5 pages */
-.fam-hero {
-  padding:20px 16px !important;
-}
+  /* in 5 pages */
+  .fam-hero {
+    padding:20px 16px !important;
+  }
 
-/* in 5 pages */
-.steps-row {
-  grid-template-columns:1fr !important;
-}
+  /* in 5 pages */
+  .steps-row {
+    grid-template-columns:1fr !important;
+  }
 
-/* in 5 pages */
-.step::after {
-  display:none !important;
-}
+  /* in 5 pages */
+  .step::after {
+    display:none !important;
+  }
 
-/* in 5 pages */
-.pvt-grid {
-  grid-template-columns:1fr !important;
-}
+  /* in 5 pages */
+  .pvt-grid {
+    grid-template-columns:1fr !important;
+  }
 
-/* in 5 pages */
-.free-grid {
-  grid-template-columns:1fr !important;
-}
+  /* in 5 pages */
+  .free-grid {
+    grid-template-columns:1fr !important;
+  }
 
-/* in 5 pages */
-.fam-hero-stats {
-  gap:12px !important;
-}
+  /* in 5 pages */
+  .fam-hero-stats {
+    gap:12px !important;
+  }
 
-/* in 6 pages */
-.vb-stats {
-  display:none !important;
-}
+  /* in 6 pages */
+  .vb-stats {
+    display:none !important;
+  }
 
-/* in 5 pages */
-.families-grid {
-  grid-template-columns:repeat(2,1fr) !important;
-}
+  /* in 5 pages */
+  .families-grid {
+    grid-template-columns:repeat(2,1fr) !important;
+  }
 
-/* in 6 pages */
-.section-head:first-child {
-  margin-top:0;
-}
+  /* in 6 pages */
+  .section-head:first-child {
+    margin-top:0;
+  }
 
-/* in 5 pages */
-.hp-section {
-  padding:28px 14px !important;
-}
+  /* in 5 pages */
+  .hp-section {
+    padding:28px 14px !important;
+  }
 
-/* in 5 pages */
-.cta-wrap {
-  padding:36px 16px !important;
-}
+  /* in 5 pages */
+  .cta-wrap {
+    padding:36px 16px !important;
+  }
 
-/* in 5 pages */
-.cta-title {
-  font-size:22px !important;
-}
+  /* in 5 pages */
+  .cta-title {
+    font-size:22px !important;
+  }
 
-/* in 5 pages */
-.photos-grid {
-  grid-template-columns:repeat(3,1fr) !important;
-}
+  /* in 5 pages */
+  .photos-grid {
+    grid-template-columns:repeat(3,1fr) !important;
+  }
 
-/* in 5 pages */
-.members-grid {
-  grid-template-columns:repeat(2,1fr) !important;
-}
+  /* in 5 pages */
+  .members-grid {
+    grid-template-columns:repeat(2,1fr) !important;
+  }
 
-/* in 6 pages */
-.village-banner {
-  flex-direction:column !important; align-items:flex-start !important;
-}
+  /* in 6 pages */
+  .village-banner {
+    flex-direction:column !important; align-items:flex-start !important;
+  }
 
-/* in 5 pages */
-.page-hero-title, .fam-hero-name {
-  font-size:26px !important;
-}
+  /* in 5 pages */
+  .page-hero-title, .fam-hero-name {
+    font-size:26px !important;
+  }
 
-/* in 5 pages */
-.vb-btn {
-  width:100% !important; text-align:center !important;
-}
+  /* in 5 pages */
+  .vb-btn {
+    width:100% !important; text-align:center !important;
+  }
 
-/* in 5 pages */
-.search-input, .filter-select {
-  width:100% !important;
+  /* in 5 pages */
+  .search-input, .filter-select {
+    width:100% !important;
+  }
 }
