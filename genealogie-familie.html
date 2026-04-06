@@ -1187,8 +1187,14 @@ function _getSiblingsOf(memberId){
 function _getChildrenOf(memberId){
   var PT=['tata','mama','step','adopted'],CT=['fiu','fiica'],res=[];
   S.relations.forEach(function(r){
-    if(r.to_member_id===memberId&&PT.indexOf(r.relation_type)!==-1)res.push({memberId:r.from_member_id,relType:r.relation_type});
-    else if(r.from_member_id===memberId&&CT.indexOf(r.relation_type)!==-1)res.push({memberId:r.to_member_id,relType:r.relation_type});
+    // child -> parent links (tata/mama/step/adopted OR fiu/fiica) => child is "from"
+    if(r.to_member_id===memberId&&(PT.indexOf(r.relation_type)!==-1||CT.indexOf(r.relation_type)!==-1)){
+      res.push({memberId:r.from_member_id,relType:r.relation_type});
+    }
+    // parent -> child links (fiu/fiica) => child is "to"
+    else if(r.from_member_id===memberId&&CT.indexOf(r.relation_type)!==-1){
+      res.push({memberId:r.to_member_id,relType:r.relation_type});
+    }
   });
   return res;
 }
@@ -2479,6 +2485,7 @@ function doRemoveRel(relId,item){
         }
         closeModal();
         render();
+        if(wasInsert)center();
         if(capturedFrom){openEditor(capturedFrom);switchTab(1);}
         if(wasInsert)inferRelations(capturedFrom,capturedTo,capturedType);
       }).catch(function(e){btn.disabled=false;btn.textContent=t('Salveaza','Save');err.textContent=e.message;err.style.display='block';});
