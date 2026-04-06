@@ -49,10 +49,47 @@ stickyStyle.textContent = [
   '@media(min-width:741px) { .mobile-prf-float { display:none!important; } }',
   '.nav-link.active { background:var(--s2,#161616)!important;color:var(--gold,#d4a84a)!important;border-bottom:2px solid var(--gold,#d4a84a)!important;position:relative; }',
   '.nav-link.active::after { content:" ";position:absolute;bottom:-2px;left:50%;transform:translateX(-50%);width:6px;height:6px;background:var(--gold,#d4a84a);border-radius:50%; }',
+  '.site-maint-banner { display:none; box-sizing:border-box; width:100%; padding:8px 14px; text-align:center; font-family:"EB Garamond",serif; font-size:14px; letter-spacing:.4px; color:#f7e7bc; background:linear-gradient(90deg,#2a1600,#4a2600,#2a1600); border-bottom:1px solid rgba(212,168,74,.55); box-shadow:0 3px 14px rgba(0,0,0,.35); z-index:1200; }',
+  '.site-maint-banner strong { color:#ffd479; font-family:"Playfair Display",serif; font-weight:700; margin-right:8px; }',
   '.nav-prf-divider { width:1px;background:linear-gradient(to bottom,transparent,var(--gold-d,#b08030),transparent);margin:8px 4px;flex-shrink:0; }',
   'body { -webkit-font-smoothing: antialiased; -moz-osx-font-smoothing: grayscale; text-rendering: optimizeLegibility; }',
 ].join('\n');
 document.head.appendChild(stickyStyle);
+
+function _boolVal(v) {
+  if (v === true || v === 1) return true;
+  var s = String(v == null ? '' : v).trim().toLowerCase();
+  return s === 'true' || s === '1' || s === 'yes' || s === 'on';
+}
+
+function ensureMaintenanceBanner() {
+  var el = document.getElementById('site-maint-banner');
+  if (el) return el;
+  el = document.createElement('div');
+  el.id = 'site-maint-banner';
+  el.className = 'site-maint-banner';
+  el.innerHTML = '<strong>Mod mentenanta activ</strong>Site-ul este actualizat in acest moment. Unele functii pot fi temporar indisponibile.';
+  if (document.body.firstChild) document.body.insertBefore(el, document.body.firstChild);
+  else document.body.appendChild(el);
+  return el;
+}
+
+function renderMaintenanceBanner(enabled) {
+  var el = ensureMaintenanceBanner();
+  if (!el) return;
+  el.style.display = enabled ? 'block' : 'none';
+}
+
+async function refreshMaintenanceBanner() {
+  var client = window.supabaseClient || window.appSupabase || window.supabase;
+  if (!client || typeof client.from !== 'function') return;
+  try {
+    var res = await client.from('site_settings').select('value').eq('key', 'maintenance');
+    if (!res || res.error || !Array.isArray(res.data)) return;
+    var enabled = res.data.some(function(row) { return _boolVal(row && row.value); });
+    renderMaintenanceBanner(enabled);
+  } catch (e) {}
+}
 
 if (window.location.pathname.indexOf('login') !== -1) {
   function checkLoginRedirect() {
@@ -339,6 +376,17 @@ if (document.readyState === 'loading') {
 window.addEventListener('load', scheduleAdminNavInit);
 document.addEventListener('supabase:ready', scheduleAdminNavInit);
 document.addEventListener('calnic:viewchange', scheduleAdminNavInit);
+if (document.readyState === 'loading') {
+  document.addEventListener('DOMContentLoaded', refreshMaintenanceBanner, { once: true });
+} else {
+  refreshMaintenanceBanner();
+}
+window.addEventListener('load', refreshMaintenanceBanner);
+document.addEventListener('supabase:ready', refreshMaintenanceBanner);
+window.addEventListener('calnic:maintenance-changed', function(e) {
+  var enabled = !!(e && e.detail && e.detail.enabled);
+  renderMaintenanceBanner(enabled);
+});
 
 /* Re-init when index switches between guest/member views. */
 function watchViewSwitches() {

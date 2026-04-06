@@ -1215,6 +1215,7 @@ function initAdminAuth() {
           loadContactMessages();
           loadLogs();
           loadPhotos();
+          loadMaintState();
         } else {
           showScreen('denied');
         }
@@ -1669,14 +1670,48 @@ function doExportCSV() {
   });
 }
 
+function parseMaintBool(v) {
+  if (v === true || v === 1) return true;
+  var s = String(v == null ? '' : v).trim().toLowerCase();
+  return s === 'true' || s === '1' || s === 'yes' || s === 'on';
+}
+
+function paintMaintUi() {
+  var sw = document.getElementById('maint-toggle');
+  var sub = document.getElementById('maint-sub');
+  if (!sw || !sub) return;
+  sw.classList.toggle('on', !!maintMode);
+  sub.textContent = maintMode ? 'Activat — banner mentenanta vizibil pe site' : 'Dezactivat — site-ul functioneaza normal';
+}
+
+function loadMaintState() {
+  var client = window.supabaseClient || window.appSupabase || window.sb || window.supabase;
+  if (!client || typeof client.from !== 'function') { paintMaintUi(); return; }
+  client.from('site_settings')
+    .select('value')
+    .eq('key', 'maintenance')
+    .then(function(r) {
+      if (r && !r.error && Array.isArray(r.data)) {
+        maintMode = r.data.some(function(row) { return parseMaintBool(row && row.value); });
+      }
+      paintMaintUi();
+    })
+    .catch(function() { paintMaintUi(); });
+}
+
 function toggleMaint() {
   maintMode = !maintMode;
-  var sw = document.getElementById('maint-toggle');
-  var sb = document.getElementById('maint-sub');
-  sw.classList.toggle('on', maintMode);
-  sb.textContent = maintMode ? 'Activat â€” banner mentenanta vizibil pe site' : 'Dezactivat â€” site-ul functioneaza normal';
+  paintMaintUi();
+  try {
+    localStorage.setItem('calnic-maintenance', maintMode ? 'true' : 'false');
+    window.dispatchEvent(new CustomEvent('calnic:maintenance-changed', { detail: { enabled: maintMode } }));
+  } catch (e) {}
   if (window.supabase) {
-    supabase.from('site_settings').upsert({key:'maintenance', value: maintMode ? 'true' : 'false'}).then(function(){}).catch(function(){});
+    supabase
+      .from('site_settings')
+      .upsert({key:'maintenance', value: maintMode ? 'true' : 'false'}, { onConflict: 'key' })
+      .then(function(){})
+      .catch(function(){});
   }
   logAction('maintenance', 'Mod mentenanta: ' + (maintMode ? 'activat' : 'dezactivat'));
 }
@@ -1975,5 +2010,6 @@ renderBkHistory();
 <script src="js/transitions.js" defer></script>
 </body>
 </html>
+
 
 
