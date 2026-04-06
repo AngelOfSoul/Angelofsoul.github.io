@@ -15,6 +15,10 @@
 
 <style>
 /* Page-specific CSS for genealogie-familie.html */
+html, body {
+overflow-x:hidden;
+}
+
 .tree-toolbar {
 background:var(--s1);border:1px solid var(--b1);border-left:3px solid var(--gold-d);padding:10px 16px;display:flex;flex-wrap:wrap;gap:8px;align-items:center;margin-bottom:12px;border-radius:2px;
 }
@@ -312,7 +316,7 @@ font-size:9px;color:#786040;font-style:italic;margin-top:6px;text-align:center;b
 }
 
 .dp {
-position:absolute;top:0;right:0;width:290px;height:100%;background:#0e0e0e;border-left:1px solid #c8983a;z-index:50;display:flex;flex-direction:column;transform:translateX(102%);transition:transform .26s cubic-bezier(.4,0,.2,1);box-shadow:-8px 0 32px rgba(0,0,0,.7);
+position:fixed;top:0;right:0;width:290px;max-width:100vw;height:100dvh;background:#0e0e0e;border-left:1px solid #c8983a;z-index:50;display:flex;flex-direction:column;transform:translateX(102%);transition:transform .26s cubic-bezier(.4,0,.2,1);box-shadow:-8px 0 32px rgba(0,0,0,.7);
 }
 
 .dp.open {
