@@ -1201,6 +1201,16 @@ function _guessParentType(parentId){
   });
   return isFemale?'mama':'tata';
 }
+function _dedupeProposals(list){
+  var seen={},out=[];
+  list.forEach(function(p){
+    var k=[p.from,p.to,p.type].join('|');
+    if(seen[k])return;
+    seen[k]=1;
+    out.push(p);
+  });
+  return out;
+}
 function inferRelations(fromId,toId,relType){
   var proposals=[];
 
@@ -1220,6 +1230,7 @@ function inferRelations(fromId,toId,relType){
         }
       });
     });
+    proposals=_dedupeProposals(proposals);
     if(!proposals.length)return;
     _showInferModal(proposals);
     return;
@@ -1242,6 +1253,42 @@ function inferRelations(fromId,toId,relType){
         }
       });
     });
+    proposals=_dedupeProposals(proposals);
+    if(!proposals.length)return;
+    _showInferModal(proposals);
+    return;
+  }
+
+  // Grandchild <-> grandparent inference.
+  // Works even if surname changed after marriage, because it uses relation graph.
+  var GRAND_LINK=['nepot','nepoata','bunic','bunica','strabunic','strabunica'];
+  if(GRAND_LINK.indexOf(relType)!==-1){
+    var grandChildId,grandParentId;
+    if(relType==='nepot'||relType==='nepoata'){grandChildId=fromId;grandParentId=toId;}
+    else{grandChildId=toId;grandParentId=fromId;}
+    var gcm=S.members.find(function(m){return m.id===grandChildId;});
+    if(gcm){
+      _getChildrenOf(grandParentId).forEach(function(ch){
+        var childOfGp=S.members.find(function(m){return m.id===ch.memberId;});
+        if(!childOfGp)return;
+        // Parent candidate: child of grandparent
+        if(!_parentChildExists(grandChildId,ch.memberId)){
+          var pType=_guessParentType(ch.memberId);
+          var pLbl=REL_META[pType]?REL_META[pType].l:pType;
+          proposals.push({from:grandChildId,to:ch.memberId,type:pType,bio:true,text:childOfGp.name+' este '+pLbl+' lui '+gcm.name});
+        }
+        // Other parent candidate: spouse of the above
+        _getSpousesOf(ch.memberId).forEach(function(sp){
+          if(_parentChildExists(grandChildId,sp.memberId))return;
+          var spM=S.members.find(function(m){return m.id===sp.memberId;});
+          if(!spM)return;
+          var spType=sp.parentType||_guessParentType(sp.memberId);
+          var spLbl=REL_META[spType]?REL_META[spType].l:spType;
+          proposals.push({from:grandChildId,to:sp.memberId,type:spType,bio:true,text:spM.name+' este '+spLbl+' lui '+gcm.name});
+        });
+      });
+    }
+    proposals=_dedupeProposals(proposals);
     if(!proposals.length)return;
     _showInferModal(proposals);
     return;
@@ -1281,6 +1328,7 @@ function inferRelations(fromId,toId,relType){
       if(sibM&&pm){var lbl=REL_META[pType]?REL_META[pType].l:pType;proposals.push({from:sibId,to:parentId,type:pType,bio:true,text:pm.name+' este '+lbl+' lui '+sibM.name});}
     }
   });
+  proposals=_dedupeProposals(proposals);
   if(!proposals.length)return;
   _showInferModal(proposals);
 }
