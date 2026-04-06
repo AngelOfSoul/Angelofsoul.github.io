@@ -336,6 +336,137 @@ display:inline-flex; align-items:center; gap:7px; background:#161616; border:1px
 color:#d4a84a; font-family:'Playfair Display',serif; font-size:16px; font-weight:400;
 }
 
+.li-chat-pill-btn {
+background:none;
+  border:none;
+  color:inherit;
+  font:inherit;
+  letter-spacing:inherit;
+  display:inline-flex;
+  align-items:center;
+  gap:7px;
+  cursor:pointer;
+  padding:0;
+}
+
+.li-chat-pill-badge {
+font-size:10px;
+  letter-spacing:1px;
+  text-transform:uppercase;
+  color:#d4a84a;
+  border:1px solid #5f4a25;
+  border-radius:999px;
+  padding:1px 7px;
+}
+
+.li-chat-preview {
+max-width:960px;
+  margin:16px auto 0;
+  padding:0 24px;
+}
+
+.li-chat-shell {
+border:1px solid var(--b1);
+  background:linear-gradient(180deg,#0f0f0f 0%, #0b0b0b 100%);
+  border-radius:2px;
+  display:grid;
+  grid-template-columns:290px 1fr;
+  min-height:320px;
+  overflow:hidden;
+}
+
+.li-chat-list {
+border-right:1px solid #1d1d1d;
+  padding:12px;
+}
+
+.li-chat-item {
+padding:10px 12px;
+  border:1px solid #2a2a2a;
+  border-radius:2px;
+  margin-bottom:8px;
+  color:#c8aa80;
+  font-size:13px;
+}
+
+.li-chat-item.active {
+border-color:#8e6a2c;
+  background:#141008;
+}
+
+.li-chat-item strong {
+display:block;
+  color:#e0b84a;
+  font-family:'Playfair Display',serif;
+  font-size:16px;
+  margin-bottom:3px;
+}
+
+.li-chat-thread {
+display:flex;
+  flex-direction:column;
+  padding:14px;
+  gap:10px;
+}
+
+.li-chat-msg {
+max-width:72%;
+  border:1px solid #2a2a2a;
+  background:#101010;
+  color:#ddd2ba;
+  font-size:14px;
+  line-height:1.35;
+  padding:10px 12px;
+}
+
+.li-chat-msg.me {
+margin-left:auto;
+  border-color:#8e6a2c;
+  background:#171106;
+}
+
+.li-chat-msg-meta {
+display:block;
+  margin-top:4px;
+  font-size:11px;
+  color:#7a5828;
+  letter-spacing:1px;
+}
+
+.li-chat-compose {
+margin-top:auto;
+  border-top:1px solid #1d1d1d;
+  padding-top:10px;
+  display:flex;
+  gap:8px;
+}
+
+.li-chat-compose input {
+flex:1;
+  background:#0c0c0c;
+  border:1px solid #2a2a2a;
+  color:#c8aa80;
+  padding:9px 10px;
+  font-family:'EB Garamond',serif;
+  font-size:14px;
+}
+
+.li-chat-compose button {
+background:#171106;
+  border:1px solid #8e6a2c;
+  color:#d4a84a;
+  padding:8px 14px;
+  font-family:'Playfair Display',serif;
+  font-size:13px;
+}
+
+.li-chat-note {
+margin-top:8px;
+  font-size:12px;
+  color:#7a5828;
+  font-style:italic;
+}
+
 .li-stars {
 position:absolute; top:0; left:0; right:0; bottom:0; pointer-events:none; overflow:hidden;
 }
@@ -497,6 +628,9 @@ font-size:12px;
   .li-emblem-wrap img { width:200px; }
   .li-weather-card { width:100%; }
   .li-weather-temp { font-size:30px; }
+  .li-chat-shell { grid-template-columns:1fr; }
+  .li-chat-list { border-right:none; border-bottom:1px solid #1d1d1d; }
+  .li-chat-msg { max-width:92%; }
 }
 
 .li-section {
@@ -1065,6 +1199,41 @@ to{transform:rotate(360deg);}
     <div class="li-hero-meta" id="li-hero-meta"></div>
   </div>
 
+  <div class="li-chat-preview" id="li-chat-preview" style="display:none;" aria-hidden="true">
+    <div class="li-sec-head"><span class="li-sec-title">Preview Mesaje</span></div>
+    <div class="li-chat-shell">
+      <div class="li-chat-list">
+        <div class="li-chat-item active">
+          <strong>Familia Popa</strong>
+          <span>Putem trimite pozele de la hram?</span>
+        </div>
+        <div class="li-chat-item">
+          <strong>Admin sat</strong>
+          <span>Am actualizat pagina Intrebari.</span>
+        </div>
+        <div class="li-chat-item">
+          <strong>Familia Moldovan</strong>
+          <span>Ne vedem duminica la 12:00.</span>
+        </div>
+      </div>
+      <div class="li-chat-thread">
+        <div class="li-chat-msg">
+          Salut, putem trimite pozele de la hram pana maine?
+          <span class="li-chat-msg-meta">Familia Popa · 16:41</span>
+        </div>
+        <div class="li-chat-msg me">
+          Da, sigur. Le urcam in galerie si va scriu cand apar.
+          <span class="li-chat-msg-meta" data-chat-self>Numele familiei tale · 16:44</span>
+        </div>
+        <div class="li-chat-compose">
+          <input type="text" value="Scrie un mesaj..." readonly>
+          <button type="button" disabled>Trimite</button>
+        </div>
+      </div>
+    </div>
+    <div class="li-chat-note">Preview vizual (fara backend). Daca iti place, implementam chatul real in pasul urmator.</div>
+  </div>
+
   <div class="li-sections">
     <div class="li-section" id="li-ann-section" style="display:none;">
       <div class="li-sec-head"><span class="li-sec-title">Anunțuri</span></div>
@@ -1274,6 +1443,21 @@ if (window.supabase) { checkAdminNavLink(); } else { document.addEventListener('
     }
   }
 
+  function setChatPreviewVisible(show) {
+    var box = document.getElementById('li-chat-preview');
+    if (!box) return;
+    box.style.display = show ? 'block' : 'none';
+    box.setAttribute('aria-hidden', show ? 'false' : 'true');
+    if (show) box.scrollIntoView({ behavior:'smooth', block:'start' });
+  }
+  window.toggleLiChatPreview = function(force) {
+    var box = document.getElementById('li-chat-preview');
+    if (!box) return;
+    var now = box.style.display !== 'none';
+    var next = (typeof force === 'boolean') ? force : !now;
+    setChatPreviewVisible(next);
+  };
+
   function renderActivity(families) {
     var list = document.getElementById('li-activity-list');
     if (!list) return;
@@ -1448,6 +1632,7 @@ if (window.supabase) { checkAdminNavLink(); } else { document.addEventListener('
       if (tagline) document.getElementById('li-family-tagline').textContent = '“' + tagline + '”';
 
       var pills = [];
+      pills.push('<button type="button" class="li-chat-pill-btn" onclick="window.toggleLiChatPreview && window.toggleLiChatPreview()"><span>&#9993;</span> Mesaje <span class="li-chat-pill-badge">preview</span></button>');
       if (family.since)             pills.push('Din <strong>' + escH(family.since) + '</strong>');
       if (family.members_count)     pills.push('<strong>' + family.members_count + '</strong> membri');
       if (family.generations_count) pills.push('<strong>' + family.generations_count + '</strong> generații');
@@ -1455,6 +1640,9 @@ if (window.supabase) { checkAdminNavLink(); } else { document.addEventListener('
       document.getElementById('li-hero-meta').innerHTML = pills.map(function(p){
         return '<div class="li-hero-pill">' + p + '</div>';
       }).join('');
+      document.querySelectorAll('[data-chat-self]').forEach(function(el){
+        el.textContent = family.name + ' · 16:44';
+      });
 
       var scoreEl = document.getElementById('li-score');
       var fillEl = document.getElementById('li-progress-fill');
