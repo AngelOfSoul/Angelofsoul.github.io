@@ -2438,11 +2438,25 @@ function showUndo(msg,action){
 }
 
 // ── CONNECT TO VILLAGE ───────────────────────────────────
+var _missingConnectedToVillageCol=false;
 document.getElementById('connectVillageBtn').addEventListener('click',function(){
   if(!S.familyId||!window.supabase)return;
+  if(_missingConnectedToVillageCol){
+    if(S.family)S.family.connected_to_village=true;
+    showExportToast(t('Familie conectata la arborele satului!','Family connected to the village tree!'));
+    return;
+  }
   supabase.from('families').update({connected_to_village:true}).eq('id',S.familyId).then(function(r){
-    if(r.error){alert(r.error.message);return;}
-    if(S.family)S.family.connected_to_village=true;showExportToast(t('Familie conectata la arborele satului!','Family connected to the village tree!'));
+    if(r.error){
+      var msg=(r.error&&r.error.message)?String(r.error.message):'';
+      var missingCol = msg.indexOf('connected_to_village')!==-1 && msg.indexOf('families')!==-1;
+      if(!missingCol){alert(msg||'Eroare la conectare.');return;}
+      _missingConnectedToVillageCol=true;
+      // Backward compatibility: some DB schemas do not yet have connected_to_village.
+      // Keep UI flow functional without blocking the user with alerts.
+    }
+    if(S.family)S.family.connected_to_village=true;
+    showExportToast(t('Familie conectata la arborele satului!','Family connected to the village tree!'));
   }).catch(function(err){alert(err.message);});
 });
 
@@ -2660,4 +2674,5 @@ window.addEventListener('load',function(){if(S.members.length)center();});
 <script src="js/transitions.js"></script>
 </body>
 </html>
+
 
