@@ -138,11 +138,15 @@ display:none;
 }
 .rel-person-menu.open { display:block; }
 .rel-person-opt {
-display:block;width:100%;text-align:left;background:none;border:none;cursor:pointer;
-padding:7px 10px;font-family:'EB Garamond',serif;font-size:16px;color:#e7d2a0;
+display:block;width:100%;text-align:left;cursor:pointer;
+padding:8px 10px;font-family:'EB Garamond',serif;font-size:16px;color:#e7d2a0;
+background:transparent !important;border:none !important;border-radius:0 !important;
+box-shadow:none !important;outline:none !important;text-shadow:none !important;
+transition:background .12s,color .12s;
 }
-.rel-person-opt:hover { background:#1b150d; color:#f2deae; }
-.rel-person-opt.active { background:#2a1d0d; color:#ffd88d; }
+.rel-person-opt + .rel-person-opt { border-top:1px solid rgba(196,152,58,.22); }
+.rel-person-opt:hover, .rel-person-opt:focus-visible { background:#1b150d !important; color:#f2deae !important; }
+.rel-person-opt.active { background:#2a1d0d !important; color:#ffd88d !important; }
 
 .minimap {
 position:absolute;bottom:10px;right:10px;background:rgba(8,8,8,.92);border:1px solid var(--b2);border-radius:3px;padding:3px;z-index:20;
