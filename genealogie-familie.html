@@ -111,6 +111,11 @@ position:absolute;transform-origin:0 0;
 position:absolute;left:4px;right:auto;z-index:6;pointer-events:none;font-size:9px;letter-spacing:2px;text-transform:uppercase;color:var(--gold-m);font-family:'Playfair Display',serif;opacity:.65;background:rgba(10,10,10,.75);padding:2px 6px;border-radius:2px;white-space:nowrap;max-width:180px;overflow:hidden;text-overflow:ellipsis;
 }
 
+/* UI cleanup requested: hide generation markers (GEN I, GEN II, etc.) */
+.gen-label {
+display:none !important;
+}
+
 .minimap {
 position:absolute;bottom:10px;right:10px;background:rgba(8,8,8,.92);border:1px solid var(--b2);border-radius:3px;padding:3px;z-index:20;
 }
@@ -205,6 +210,11 @@ border-color:var(--gold);border-width:3px;
 
 .dec-ring {
 position:absolute;inset:-5px;border-radius:50%;border:1.5px dashed #5a4020;pointer-events:none;
+}
+
+/* UI cleanup requested: hide decorative deceased semicircle ring */
+.dec-ring {
+display:none !important;
 }
 
 .v-badge {
