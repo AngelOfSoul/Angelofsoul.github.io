@@ -225,6 +225,25 @@
 .ab-status.warn { color: #e0b66a; }
 .ab-status.err { color: #d97a7a; }
 
+/* Admin badges selects: keep dropdown readable in dark theme */
+#sec-badges select.fs {
+  color-scheme: dark;
+}
+
+#sec-badges select.fs option {
+  background: #0d1018;
+  color: #f3e7c8;
+}
+
+#sec-badges select.fs option:checked {
+  background: #2a1b08;
+  color: #ffd987;
+}
+
+#sec-badges select.fs option:disabled {
+  color: #8f7a4b;
+}
+
 @media (max-width: 900px) {
   .ab-grid {
     grid-template-columns: 1fr;
