@@ -32,6 +32,13 @@
 
 <style>
 /* Page-specific CSS for intrebari.html */
+.main-wrap {
+max-width:980px !important;margin:0 auto;padding:36px 24px !important;display:grid;grid-template-columns:1fr 240px;gap:40px;align-items:start;
+}
+
+@media(max-width:760px) {
+  .main-wrap{grid-template-columns:1fr;}
+}
 @media(max-width:740px) {
 .site-header{padding:10px 16px;gap:14px;min-height:80px;}
   .banner-img{height:65px;}
@@ -40,7 +47,7 @@
   .nav-login .nl{display:none;}
 }
 
-NAV SESSION CHECK  */─ PAGE HERO ── */
+/* PAGE HERO */
 .page-hero {
 background:#050505;border-bottom:2px solid var(--gold-d);padding:44px 24px 38px;text-align:center;
 }
@@ -568,7 +575,7 @@ function applyPageLang(lang) {
 
 if (window.setLang) { window.setLang(currentLang); }
 
-/* ── NAV SESSION CHECK ── */
+/* ── /* PAGE HERO */
 function checkNavSession() {
   if (!window.supabase) return;
   window.supabase.auth.getUser().then(function(res) {
@@ -594,4 +601,5 @@ if (window.supabase) { checkNavSession(); } else { document.addEventListener('su
 <script src="js/transitions.js"></script>
 </body>
 </html>
+
 

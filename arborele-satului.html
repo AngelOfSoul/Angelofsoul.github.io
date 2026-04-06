@@ -22,6 +22,14 @@
 margin:0;padding:0;box-sizing:border-box
 }
 
+.main-wrap{
+max-width:1260px !important;margin:0 auto;padding:36px 24px !important;display:grid;grid-template-columns:minmax(0,1fr) 320px;gap:32px;align-items:start
+}
+
+@media(max-width:960px){
+  .main-wrap{grid-template-columns:1fr}
+}
+
 button,input,select {
 font-family:inherit
 }
@@ -32,6 +40,18 @@ padding:13px 20px;font-size:16px;color:var(--text);border-bottom:1px solid var(-
 
 .panel {
 background:var(--s1);border:1px solid var(--b1);border-radius:4px
+}
+
+.toolbar{
+display:grid;grid-template-columns:1.1fr 1fr 1fr auto auto;gap:10px;padding:18px;border:1px solid var(--b1);background:linear-gradient(180deg,#121212,#0f0f0f);border-radius:4px;margin-bottom:20px
+}
+
+@media(max-width:1100px){
+  .toolbar{grid-template-columns:1fr 1fr}
+}
+
+@media(max-width:700px){
+  .toolbar{grid-template-columns:1fr}
 }
 
 .toolbar .field {
