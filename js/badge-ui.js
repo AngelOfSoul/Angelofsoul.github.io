@@ -82,6 +82,29 @@
     return svgOpen + (body || '') + svgClose;
   }
 
+  function iconAssetPath(def) {
+    var slug = String((def && def.slug) || '').trim();
+    var map = {
+      'fondator': 'assets/badges/fondator.svg',
+      'helper': 'assets/badges/helper.svg',
+      'membru-de-onoare': 'assets/badges/membru_de_onoare.svg',
+      'contribuitor': 'assets/badges/contribuitor.svg',
+      'veteran': 'assets/badges/veteran.svg',
+      'distinctie-speciala': 'assets/badges/distinctie_speciala.svg',
+      'om-de-incredere': 'assets/badges/om_de_incredere.svg',
+      'moderator': 'assets/badges/moderator.svg'
+    };
+    return map[slug] || '';
+  }
+
+  function iconMarkup(def) {
+    var path = iconAssetPath(def);
+    if (path) {
+      return '<img class="co-badge-icon-img" src="' + esc(path) + '" alt="" loading="lazy" decoding="async">';
+    }
+    return iconSvg(def);
+  }
+
   function normalizeDef(raw) {
     if (!raw) return null;
     var fallback = null;
@@ -160,7 +183,7 @@
       '<article class="' + cls + ' co-has-tooltip" ' +
       'style="--co-b-base:' + esc(def.colors.base) + ';--co-b-dark:' + esc(def.colors.dark) + ';--co-b-accent:' + esc(def.colors.accent) + ';" ' +
       'data-tooltip="' + esc(tooltip) + '">' +
-        '<span class="co-badge-medal">' + iconSvg(def) + '</span>' +
+        '<span class="co-badge-medal">' + iconMarkup(def) + '</span>' +
         '<span class="co-badge-text">' +
           '<span class="co-badge-title">' + esc(def.label) + '</span>' +
           (compact ? '' : '<span class="co-badge-desc">' + esc(def.description) + '</span>') +

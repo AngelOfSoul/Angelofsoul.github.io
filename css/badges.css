@@ -71,6 +71,13 @@
   display: block;
 }
 
+.co-badge-icon-img {
+  width: 13px;
+  height: 13px;
+  display: block;
+  object-fit: contain;
+}
+
 .co-badge-icon path,
 .co-badge-icon circle,
 .co-badge-icon rect {
@@ -140,6 +147,11 @@
   font-size: 12px;
 }
 
+.co-badge--profile .co-badge-icon-img {
+  width: 14px;
+  height: 14px;
+}
+
 .co-badge--profile .co-badge-title {
   font-size: 12px;
 }
@@ -175,6 +187,11 @@
   width: 16px;
   height: 16px;
   font-size: 9px;
+}
+
+.co-badge--compact .co-badge-icon-img {
+  width: 10px;
+  height: 10px;
 }
 
 .co-badge--compact .co-badge-title {
