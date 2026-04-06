@@ -99,6 +99,11 @@ border:1px solid var(--b1);border-radius:4px;overflow:hidden;position:relative;b
 position:relative;overflow:hidden;cursor:grab;height:660px;
 }
 
+/* Mask tiny clipped circle fragments at the very top edge of the stage */
+.tree-stage::before {
+content:'';position:absolute;left:0;right:0;top:0;height:18px;background:var(--bg);z-index:8;pointer-events:none;
+}
+
 .tree-stage:active {
 cursor:grabbing;
 }
@@ -1824,7 +1829,7 @@ function buildNode(m,pos){
   wrap.setAttribute('data-id',m.id);wrap.setAttribute('tabindex','0');wrap.setAttribute('role','button');
   wrap.setAttribute('aria-label',escH(m.name)+(m.birth_year?', '+m.birth_year:''));
   var av=document.createElement('div');av.className='av';av.style.width=avSz+'px';av.style.height=avSz+'px';
-  if(m.is_deceased){var dr=document.createElement('div');dr.className='dec-ring';av.appendChild(dr);}
+  // UI-only choice: do not render decorative deceased ring.
   if(m.photo_url){var img=document.createElement('img');img.src=resolveMemberPhotoUrl(m.photo_url);img.alt=escH(m.name);img.loading='lazy';img.onerror=function(){img.style.display='none';putInit(av,m,avSz);};av.appendChild(img);}
   else{putInit(av,m,avSz);}
   if(m.visibility==='public'||m.village){var vb=document.createElement('div');vb.className='v-badge';vb.setAttribute('data-ro','in sat');vb.setAttribute('data-en','in village');av.appendChild(vb);}
