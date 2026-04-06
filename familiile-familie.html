@@ -498,6 +498,7 @@ to{transform:rotate(360deg);}
 <link rel="stylesheet" href="css/premium.css">
 <link rel="stylesheet" href="css/navbar-heraldic.css">
 <link rel="stylesheet" href="css/tree-ui.css">
+<link rel="stylesheet" href="css/badges.css">
 </head>
 <body>
 
@@ -610,6 +611,7 @@ to{transform:rotate(360deg);}
   <div class="fam-hero-info">
     <div class="fam-hero-name" id="fam-name"></div>
     <div class="fam-hero-meta" id="fam-meta"></div>
+    <div id="fam-profile-badges" class="co-profile-badges" style="margin:8px 0 0;display:none;"></div>
     <div class="fam-badges">
       <span class="fam-badge pub" data-ro="public" data-en="public">public</span>
       <span class="fam-badge prv" data-ro="continut privat" data-en="private content">continut privat</span>
@@ -748,6 +750,8 @@ to{transform:rotate(360deg);}
 <script src="js/supabase.js" defer></script>
 <script src="js/utils.js" defer></script>
 <script src="js/admin-nav.js" defer></script>
+<script src="js/badges.js" defer></script>
+<script src="js/badge-ui.js" defer></script>
 <script>
 document.getElementById('yr').textContent = new Date().getFullYear();
 
@@ -781,6 +785,24 @@ function isUuidValue(value) {
 var FAM     = null;
 var MEMBERS = [];
 var TIMELINE = [];
+
+async function renderOwnerBadges() {
+  var host = document.getElementById('fam-profile-badges');
+  if (!host) return;
+  host.style.display = 'none';
+  host.innerHTML = '';
+  if (!window.BadgeUI || !window.supabase || !FAM || !FAM.ownerId) return;
+  try {
+    var result = await window.BadgeUI.fetchUserBadgesMap([FAM.ownerId], window.supabase);
+    var list = result && result.map ? (result.map[FAM.ownerId] || []) : [];
+    if (!list.length) return;
+    host.style.display = 'block';
+    window.BadgeUI.renderProfileBadges(host, list, { hideWhenEmpty: true, hideTarget: host });
+  } catch (err) {
+    host.style.display = 'none';
+    host.innerHTML = '';
+  }
+}
 
 /* Populate DOM from loaded data */
 function populateDOM() {
@@ -824,6 +846,7 @@ function populateDOM() {
   renderPhotos();
   renderMembers();
   renderTimeline();
+  renderOwnerBadges();
 }
 
 /* Load from Supabase if configured */

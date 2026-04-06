@@ -330,6 +330,7 @@ display:flex;gap:10px;justify-content:flex-end;flex-wrap:wrap;margin-top:18px
 <link rel="stylesheet" href="css/premium.css">
 <link rel="stylesheet" href="css/navbar-heraldic.css">
 <link rel="stylesheet" href="css/tree-ui.css">
+<link rel="stylesheet" href="css/badges.css">
 </head>
 <body>
 
@@ -414,6 +415,15 @@ display:flex;gap:10px;justify-content:flex-end;flex-wrap:wrap;margin-top:18px
         <a id="viewPublicLink" href="familiile-familie.html?family=" class="dash-btn-sec" data-ro="Profil public" data-en="Public profile">Profil public</a>
         <a id="viewVillageTreeLink" href="arborele-satului.html" class="dash-btn-sec" data-ro="Arborele satului" data-en="Village tree">Arborele satului</a>
         <button id="logoutBtn" class="dash-btn-sec" data-ro="Deconectare" data-en="Sign out">Deconectare</button>
+      </div>
+    </div>
+
+    <div class="dash-section" id="sec-badges-profile" style="display:none;">
+      <div class="dash-section-hdr">
+        <span class="dash-section-title" data-ro="&#127942; Badge-uri" data-en="&#127942; Badges">&#127942; Badge-uri</span>
+      </div>
+      <div class="dash-section-body">
+        <div id="dashBadgesList" class="co-profile-badges"></div>
       </div>
     </div>
 
@@ -631,6 +641,8 @@ display:flex;gap:10px;justify-content:flex-end;flex-wrap:wrap;margin-top:18px
 <script src="js/supabase.js" defer></script>
 <script src="js/utils.js" defer></script>
 <script src="js/admin-nav.js" defer></script>
+<script src="js/badges.js"></script>
+<script src="js/badge-ui.js"></script>
 <script>
 document.getElementById('yr') && (document.getElementById('yr').textContent = new Date().getFullYear());
 
@@ -719,6 +731,31 @@ function populateForms() {
   if (currentUser) document.getElementById('dashUserEmail').textContent = currentUser.email || '';
   var pubLink = document.getElementById('viewPublicLink');
   if (pubLink) pubLink.href = 'familiile-familie.html?family=' + encodeURIComponent((familyData && familyData.id) || familyId || '');
+}
+
+async function loadDashboardBadges() {
+  var section = document.getElementById('sec-badges-profile');
+  var host = document.getElementById('dashBadgesList');
+  if (!section || !host) return;
+  if (!window.BadgeUI || !window.supabase || !currentUser || !currentUser.id) {
+    section.style.display = 'none';
+    host.innerHTML = '';
+    return;
+  }
+  try {
+    var result = await window.BadgeUI.fetchUserBadgesMap([currentUser.id], window.supabase);
+    var list = (result && result.map && result.map[currentUser.id]) ? result.map[currentUser.id] : [];
+    if (!list || !list.length) {
+      section.style.display = 'none';
+      host.innerHTML = '';
+      return;
+    }
+    section.style.display = 'block';
+    window.BadgeUI.renderProfileBadges(host, list, { hideWhenEmpty: true, hideTarget: section });
+  } catch (err) {
+    section.style.display = 'none';
+    host.innerHTML = '';
+  }
 }
 
 /* Save story */
@@ -1163,6 +1200,7 @@ function initDashboard() {
     loadMembers();
     loadTimeline();
     loadPhotos();
+    loadDashboardBadges();
     showMain();
   }).catch(function() { window.location.href = 'login.html'; });
 }

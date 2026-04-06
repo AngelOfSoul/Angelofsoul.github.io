@@ -29,6 +29,8 @@
 <script src="js/supabase.js" defer></script>
 <script src="js/utils.js" defer></script>
 <script src="js/admin-nav.js" defer></script>
+<script src="js/badges.js" defer></script>
+<script src="js/badge-ui.js" defer></script>
 <script type="application/ld+json">{"@context":"https://schema.org","@type":"WebPage","name":"Familiile din Calnic — Calnic Online","description":"Familiile din Calnic, Alba, Transilvania — profiluri publice, genealogie si amintiri ale familiilor din sat.","url":"https://calniconline.ro/familiile.html","isPartOf":{"@type":"WebSite","name":"Calnic Online","url":"https://calniconline.ro"}}</script>
 
 <style>
@@ -292,6 +294,7 @@ to{transform:rotate(360deg);}
 <link rel="stylesheet" href="css/premium.css">
 <link rel="stylesheet" href="css/navbar-heraldic.css">
 <link rel="stylesheet" href="css/tree-ui.css">
+<link rel="stylesheet" href="css/badges.css">
 </head>
 <body>
 
@@ -586,6 +589,7 @@ var DEMO_FAMILIES = [
 var families = [];
 var supabaseLoaded = false;
 var familiesCurrentUserId = null;
+var familyBadgeMap = {};
 
 /* ── SUPABASE LOAD ──
    Runs after supabase.js fires the 'supabase:ready' event.
@@ -626,6 +630,7 @@ async function loadFamiliiFromSupabase() {
 
   function setEmptyGridMsg() {
     families = [];
+    familyBadgeMap = {};
     var grid = document.getElementById('familiesGrid');
     if (grid) grid.innerHTML = '<div style="grid-column:1/-1;text-align:center;padding:60px 20px;color:var(--muted);font-style:italic;font-size:16px;">'
       + (localStorage.getItem('calnic-lang') === 'en'
@@ -634,6 +639,19 @@ async function loadFamiliiFromSupabase() {
       + '</div>';
     buildAlphaBar();
     filterFamilies();
+  }
+
+  async function loadBadgesForCurrentFamilies() {
+    familyBadgeMap = {};
+    if (!window.BadgeUI || !window.supabase) return;
+    var ownerIds = Array.from(new Set((families || []).map(function (f) { return f && f.created_by; }).filter(Boolean)));
+    if (!ownerIds.length) return;
+    try {
+      var badgeRes = await window.BadgeUI.fetchUserBadgesMap(ownerIds, window.supabase);
+      familyBadgeMap = (badgeRes && badgeRes.map) ? badgeRes.map : {};
+    } catch (err) {
+      familyBadgeMap = {};
+    }
   }
 
   function fetchFamiliesWithFallback() {
@@ -686,8 +704,10 @@ async function loadFamiliiFromSupabase() {
     families = mapFamilyRows(res.data);
     var statEl = document.getElementById('statFamiliiNum');
     if (statEl) statEl.textContent = families.length;
-    buildAlphaBar();
-    filterFamilies();
+    loadBadgesForCurrentFamilies().finally(function () {
+      buildAlphaBar();
+      filterFamilies();
+    });
   }).catch(function() {
     supabaseLoaded = true;
     if (gridLoading) gridLoading.style.display = 'none';
@@ -730,6 +750,11 @@ function buildCard(f) {
   if (f.pubPhotos)  badges += '<span class="badge b-pub">' + (lang === 'ro' ? 'poze publice' : 'public photos') + '</span>';
   if (f.privPhotos) badges += '<span class="badge b-priv">' + (lang === 'ro' ? 'poze private' : 'private photos') + '</span>';
 
+  var profileBadgesHtml = '';
+  if (window.BadgeUI && f.created_by && familyBadgeMap && familyBadgeMap[f.created_by]) {
+    profileBadgesHtml = window.BadgeUI.compactBadgesHTML(familyBadgeMap[f.created_by], { max: 2 });
+  }
+
   var showStats = f.showMembers || f.showGenerations || f.showPhotos;
   var statsHtml = '';
   if (showStats) {
@@ -760,6 +785,7 @@ function buildCard(f) {
     +   '<div class="badges">' + badges + '</div>'
     + '</div>'
     + '<div class="body">'
+    +   (profileBadgesHtml ? '<div class="co-card-badge-slot">' + profileBadgesHtml + '</div>' : '')
     +   (f.descRo ? '<div class="fdesc">' + descText + '</div>' + roOnlyNote : '')
     +   spacer
     +   statsHtml

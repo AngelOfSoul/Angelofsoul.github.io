@@ -1,0 +1,236 @@
+/* Calnic Online badges system (scoped, conflict-safe) */
+
+.co-badge-list {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+
+.co-badge-list--profile {
+  gap: 12px;
+}
+
+.co-badge-list--compact {
+  gap: 8px;
+}
+
+.co-badge {
+  --co-b-base: #7a5828;
+  --co-b-dark: #3a2a10;
+  --co-b-accent: #d4a84a;
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  min-height: 52px;
+  padding: 9px 14px 9px 10px;
+  border-radius: 13px;
+  border: 1px solid color-mix(in srgb, var(--co-b-accent) 50%, #1a1a1a 50%);
+  background: linear-gradient(150deg, color-mix(in srgb, var(--co-b-base) 84%, #111 16%), color-mix(in srgb, var(--co-b-dark) 78%, #090909 22%));
+  box-shadow: 0 7px 20px rgba(0, 0, 0, 0.35);
+  color: #f6f2e7;
+  transition: transform 0.18s ease, box-shadow 0.18s ease, filter 0.18s ease;
+}
+
+.co-badge:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 10px 24px rgba(0, 0, 0, 0.42);
+  filter: saturate(1.05);
+}
+
+.co-badge-medal {
+  width: 30px;
+  height: 30px;
+  border-radius: 999px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 15px;
+  font-weight: 700;
+  color: color-mix(in srgb, var(--co-b-accent) 80%, #fff 20%);
+  border: 1px solid color-mix(in srgb, var(--co-b-accent) 60%, #000 40%);
+  background: radial-gradient(circle at 35% 30%, color-mix(in srgb, var(--co-b-accent) 22%, #fff 78%), color-mix(in srgb, var(--co-b-dark) 75%, #0a0a0a 25%));
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.2), 0 2px 7px rgba(0, 0, 0, 0.4);
+  flex-shrink: 0;
+}
+
+.co-badge-text {
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.co-badge-title {
+  font-family: 'Playfair Display', serif;
+  font-size: 14px;
+  line-height: 1.15;
+  color: #fff9ea;
+  letter-spacing: 0.2px;
+}
+
+.co-badge-desc {
+  font-family: 'EB Garamond', serif;
+  font-size: 12px;
+  line-height: 1.2;
+  color: color-mix(in srgb, #fff 75%, var(--co-b-accent) 25%);
+  opacity: 0.93;
+}
+
+.co-badge--primary {
+  outline: 1px solid color-mix(in srgb, var(--co-b-accent) 48%, #1c1c1c 52%);
+  outline-offset: 1px;
+}
+
+.co-badge--compact {
+  min-height: 36px;
+  padding: 6px 11px 6px 8px;
+  border-radius: 11px;
+  gap: 8px;
+}
+
+.co-badge--compact .co-badge-medal {
+  width: 24px;
+  height: 24px;
+  font-size: 12px;
+}
+
+.co-badge--compact .co-badge-title {
+  font-size: 12px;
+}
+
+.co-badge--compact .co-badge-desc {
+  display: none;
+}
+
+.co-badge-empty {
+  font-size: 13px;
+  color: #7a5828;
+  font-style: italic;
+}
+
+.co-has-tooltip::after {
+  content: attr(data-tooltip);
+  position: absolute;
+  left: 50%;
+  top: calc(100% + 8px);
+  transform: translateX(-50%);
+  background: #120f09;
+  border: 1px solid #5b4520;
+  border-radius: 8px;
+  color: #f1e6cb;
+  padding: 6px 10px;
+  font-family: 'EB Garamond', serif;
+  font-size: 12px;
+  line-height: 1.2;
+  white-space: nowrap;
+  box-shadow: 0 6px 18px rgba(0, 0, 0, 0.45);
+  opacity: 0;
+  pointer-events: none;
+  z-index: 16;
+  transition: opacity 0.16s ease;
+}
+
+.co-has-tooltip:hover::after {
+  opacity: 1;
+}
+
+/* Profile page section */
+.co-profile-badges {
+  margin-top: 2px;
+}
+
+/* Family cards integration */
+.co-card-badge-slot {
+  margin-top: 8px;
+}
+
+.fc .co-card-badge-slot .co-badge-list {
+  gap: 6px;
+}
+
+.fc .co-card-badge-slot .co-badge {
+  max-width: 100%;
+}
+
+/* Admin section */
+.ab-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 14px;
+  margin-bottom: 14px;
+}
+
+.ab-box {
+  background: var(--s2);
+  border: 1px solid var(--b1);
+  border-radius: 2px;
+  padding: 14px;
+}
+
+.ab-title {
+  font-size: 12px;
+  letter-spacing: 2px;
+  text-transform: uppercase;
+  color: var(--gold-m);
+  margin-bottom: 10px;
+}
+
+.ab-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  padding: 7px 0;
+  border-bottom: 1px solid var(--b1);
+}
+
+.ab-row:last-child {
+  border-bottom: none;
+}
+
+.ab-row-badge {
+  min-width: 0;
+}
+
+.ab-row-actions {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.ab-primary-tag {
+  font-size: 11px;
+  color: #f1c96a;
+  border: 1px solid #6f5220;
+  background: #1b1407;
+  border-radius: 2px;
+  padding: 3px 8px;
+  white-space: nowrap;
+}
+
+.ab-empty {
+  color: var(--gold-m);
+  font-style: italic;
+  font-size: 13px;
+}
+
+.ab-status {
+  margin-top: 10px;
+  font-size: 13px;
+  color: var(--muted);
+}
+
+.ab-status.ok { color: #86c978; }
+.ab-status.warn { color: #e0b66a; }
+.ab-status.err { color: #d97a7a; }
+
+@media (max-width: 900px) {
+  .ab-grid {
+    grid-template-columns: 1fr;
+  }
+  .co-has-tooltip::after {
+    white-space: normal;
+    width: min(280px, 85vw);
+  }
+}
