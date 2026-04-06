@@ -1,0 +1,343 @@
+/* ═══════════════════════════════════════════════════════
+   CALNIC ONLINE — PREMIUM STYLES
+   Efecte vizuale, animații, carduri, hover-uri.
+   NU conține logică — doar aparență.
+   ═══════════════════════════════════════════════════════ */
+
+/* ── BODY & BACKGROUND ── */
+html { scroll-behavior: smooth; }
+
+body {
+  background:
+    radial-gradient(circle at top center, rgba(255,255,255,0.025), transparent 28%),
+    linear-gradient(180deg, #080808 0%, var(--bg) 100%);
+  text-rendering: optimizeLegibility;
+  -webkit-font-smoothing: antialiased;
+}
+
+body::before {
+  content: "";
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+  z-index: 0;
+  background:
+    radial-gradient(circle at 20% 18%, rgba(255,255,255,0.03), transparent 18%),
+    radial-gradient(circle at 78% 14%, rgba(255,255,255,0.024), transparent 16%),
+    radial-gradient(circle at 52% 75%, rgba(196,154,75,0.05), transparent 28%);
+  opacity: 0.7;
+}
+
+body > * { position: relative; z-index: 1; }
+
+/* ── FADE-IN PAGINA ── */
+body {
+  animation: page-fade-in 0.4s ease forwards;
+}
+
+@keyframes page-fade-in {
+  from { opacity: 0; }
+  to   { opacity: 1; }
+}
+
+body.page-fade-out {
+  animation: page-fade-out 0.3s ease forwards;
+}
+
+@keyframes page-fade-out {
+  from { opacity: 1; }
+  to   { opacity: 0; }
+}
+
+/* ── SCROLLBAR ── */
+::-webkit-scrollbar { width: 6px; height: 6px; }
+::-webkit-scrollbar-track { background: var(--bg-deep); }
+::-webkit-scrollbar-thumb { background: var(--gold-d); border-radius: 3px; }
+::-webkit-scrollbar-thumb:hover { background: var(--gold); }
+* { scrollbar-width: thin; scrollbar-color: var(--gold-d) var(--bg-deep); }
+
+/* ── TRANZIȚII GLOBALE ── */
+a, button, input, select, textarea,
+.nav-link, .nav-login, .feat-card, .btn-link {
+  transition:
+    all var(--transition-med),
+    box-shadow 0.28s ease,
+    border-color var(--transition-med),
+    background var(--transition-med),
+    color var(--transition-med);
+}
+
+/* ── TITLURI CU SHIMMER AURIU ── */
+.gold-title,
+.page-hero-title,
+.section-head-title {
+  background: linear-gradient(90deg, var(--gold-d), var(--gold-l), #fff, var(--gold-l), var(--gold-d));
+  background-size: 300% 100%;
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  animation: gold-shimmer 6s linear infinite;
+}
+
+@keyframes gold-shimmer {
+  0%   { background-position: 0% 50%; }
+  100% { background-position: 300% 50%; }
+}
+
+/* ── SCROLL REVEAL ── */
+.section {
+  opacity: 0;
+  transform: translateY(32px);
+  transition: opacity 0.7s ease, transform 0.7s ease;
+}
+.section.visible {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+/* ── CARDURI PREMIUM ── */
+.who-card, .feat-card, .free-cell, .info-card, .person-card,
+.contact-card, .sidebar-box, .side-card, .li-ann-card,
+.dash-section, .fam-story, .member-card, .conn-card,
+.photo-tile, .photo-card, .featured-wrap, .faq-item,
+.notfound-box, .auth-form, .logged-in-box,
+.tree-sidebox, .overlay-card, .rep-box, .lb-box,
+.family-modal, .modal-box, .adm-wrap, .access-screen,
+.rep-card, .guide-box, .stat-cell,
+.families-grid > *, .people-grid > *, .feat-grid > *, .free-grid > * {
+  position: relative;
+  overflow: hidden;
+  border-radius: var(--radius-md) !important;
+  background: var(--mp-panel-bg) !important;
+  border: 1px solid var(--mp-border-faint) !important;
+  box-shadow:
+    inset 0 1px 0 rgba(255,255,255,0.06),
+    inset 0 0 0 1px rgba(196,154,75,0.08),
+    0 16px 40px rgba(0,0,0,0.36) !important;
+  transition: transform var(--transition-med), box-shadow var(--transition-med), border-color var(--transition-med);
+}
+
+/* Reflexie internă pe carduri */
+.who-card::before, .feat-card::before, .free-cell::before,
+.info-card::before, .person-card::before, .contact-card::before,
+.dash-section::before, .fam-story::before, .member-card::before,
+.photo-tile::before, .photo-card::before, .faq-item::before,
+.auth-form::before, .modal-box::before, .stat-cell::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  background:
+    radial-gradient(circle at top left, rgba(255,255,255,0.035), transparent 20%),
+    linear-gradient(180deg, rgba(255,255,255,0.03), transparent 18%);
+}
+
+/* Border interior auriu subtil */
+.who-card::after, .feat-card::after, .free-cell::after,
+.info-card::after, .person-card::after, .contact-card::after,
+.dash-section::after, .fam-story::after, .member-card::after,
+.photo-tile::after, .photo-card::after, .faq-item::after,
+.auth-form::after, .modal-box::after, .stat-cell::after {
+  content: "";
+  position: absolute;
+  inset: 5px;
+  pointer-events: none;
+  border: 1px solid rgba(196,154,75,0.07);
+}
+
+/* Hover pe carduri */
+.feat-card:hover, .who-card:hover, .photo-tile:hover,
+.faq-item:hover, .member-card:hover {
+  transform: translateY(-3px);
+  border-color: rgba(196,154,75,0.35) !important;
+  box-shadow:
+    inset 0 1px 0 rgba(255,255,255,0.08),
+    0 20px 50px rgba(0,0,0,0.5),
+    0 0 30px rgba(196,154,75,0.08) !important;
+}
+
+/* ── BUTOANE PREMIUM ── */
+.lang-btn, .tab-btn, .faq-toggle, .topic-chip, .cat-chip,
+.vbtn, .pf-btn, .cta-btn, .btn-submit, .dash-btn, .dash-btn-sec,
+.access-btn, .adm-btn, .adm-btn-sec, .adm-btn-big, .adm-btn-red,
+.lb-btn, .rep-send, .rep-cancel, .ma-save, .ma-cancel,
+button[type="submit"], input[type="button"], input[type="submit"] {
+  position: relative;
+  background: var(--mp-gloss), linear-gradient(180deg, #111214 0%, #090909 100%) !important;
+  color: var(--mp-text) !important;
+  border: 1px solid var(--mp-border-soft) !important;
+  box-shadow:
+    inset 0 0 0 1px rgba(0,0,0,0.65),
+    inset 0 1px 0 rgba(255,255,255,0.08),
+    0 6px 18px rgba(0,0,0,0.24),
+    0 0 0 1px rgba(196,154,75,0.08) !important;
+}
+
+/* Border interior pe butoane */
+.lang-btn::after,
+button[type="submit"]::after {
+  content: "";
+  position: absolute;
+  inset: 3px;
+  border: 1px solid rgba(196,154,75,0.12);
+  pointer-events: none;
+  border-radius: calc(var(--radius-sm) - 1px);
+}
+
+/* Hover butoane */
+.lang-btn:hover, button:hover, input[type="button"]:hover {
+  border-color: rgba(224,184,106,0.62) !important;
+  color: #fff !important;
+  box-shadow:
+    inset 0 0 0 1px rgba(0,0,0,0.55),
+    inset 0 1px 0 rgba(255,255,255,0.11),
+    0 10px 22px rgba(0,0,0,0.34),
+    0 0 22px rgba(196,154,75,0.12) !important;
+}
+
+/* Stare activ butoane */
+.lang-btn.active, .ma-save, .dash-btn {
+  background:
+    linear-gradient(180deg, rgba(255,255,255,0.12), rgba(255,255,255,0.02) 22%, rgba(0,0,0,0) 42%),
+    linear-gradient(180deg, #18120a 0%, #0f0c08 100%) !important;
+  color: #fffaf0 !important;
+  border-color: rgba(196,154,75,0.62) !important;
+}
+
+/* ── INPUTS PREMIUM ── */
+input, textarea, select,
+.fi-input, .fi-select, .fi-textarea,
+.form-input, .form-textarea, .search-input {
+  background: linear-gradient(180deg, #0f1011, #090909) !important;
+  color: var(--mp-text) !important;
+  border: 1px solid rgba(196,154,75,0.22) !important;
+  box-shadow:
+    inset 0 1px 0 rgba(255,255,255,0.035),
+    inset 0 0 0 1px rgba(0,0,0,0.45) !important;
+}
+
+input::placeholder, textarea::placeholder { color: #a8a299 !important; opacity: 1; }
+
+input:focus, textarea:focus, select:focus {
+  outline: none;
+  border-color: rgba(224,184,106,0.55) !important;
+  box-shadow:
+    0 0 0 2px rgba(196,154,75,0.08),
+    inset 0 1px 0 rgba(255,255,255,0.05) !important;
+}
+
+/* ── HEADER, NAV, FOOTER ── */
+.site-header, .lang-bar, nav, .nav-mobile-menu, footer {
+  border-color: var(--mp-border-soft) !important;
+}
+
+.site-header, .lang-bar, .nav-mobile-menu,
+.page-hero, .login-hero, .li-hero, .dash-header, .fam-hero {
+  background:
+    linear-gradient(180deg, rgba(255,255,255,0.03), rgba(255,255,255,0.01) 16%, rgba(0,0,0,0) 55%),
+    linear-gradient(180deg, #090909 0%, #050505 100%) !important;
+}
+
+/* ── ORNAMENTE HERO ── */
+.page-hero, .login-hero, .li-hero, .dash-header, .fam-hero {
+  position: relative;
+  overflow: hidden;
+}
+
+.page-hero::before, .login-hero::before, .li-hero::before,
+.dash-header::before, .fam-hero::before {
+  content: "";
+  position: absolute;
+  left: 24px; right: 24px; top: 14px; bottom: 14px;
+  border: 1px solid rgba(196,154,75,0.12);
+  pointer-events: none;
+}
+
+.page-hero::after, .login-hero::after, .li-hero::after,
+.dash-header::after, .fam-hero::after {
+  content: "\2726";
+  position: absolute;
+  left: 50%;
+  transform: translateX(-50%);
+  bottom: 8px;
+  color: rgba(196,154,75,0.8);
+  font-size: 11px;
+  letter-spacing: 6px;
+}
+
+/* ── ORNAMENTE SECTION HEAD ── */
+.section-head-title::before,
+.section-head-title::after {
+  content: "\2726";
+  color: rgba(196,154,75,0.6);
+  font-size: 10px;
+  margin: 0 10px;
+}
+
+/* ── TREE PAGE ── */
+.toolbar {
+  background: linear-gradient(180deg, #101113, #090909) !important;
+  border-radius: var(--radius-md) !important;
+}
+
+.tree-shell {
+  background:
+    radial-gradient(circle at center, rgba(255,255,255,0.02), transparent 32%),
+    linear-gradient(180deg, rgba(255,255,255,0.03), rgba(255,255,255,0.008) 16%, rgba(0,0,0,0) 46%),
+    linear-gradient(180deg, #0b0c0d, #050505) !important;
+}
+
+.tooltip {
+  background: #0c0d10 !important;
+  border-color: rgba(196,154,75,0.28) !important;
+  border-radius: var(--radius-md) !important;
+  color: var(--mp-text) !important;
+}
+
+.node text, .tree-node text {
+  font-family: var(--font-title) !important;
+  fill: #f7f4ee !important;
+}
+
+/* ── BADGE-URI ── */
+.badge, .pill, .fam-badge, .change-pill, .topic-chip, .cat-chip {
+  background: linear-gradient(180deg, #121212, #0b0b0b) !important;
+  border: 1px solid rgba(196,154,75,0.24) !important;
+  color: #f1e8d5 !important;
+}
+
+/* ── PROGRESS ── */
+.li-progress-bar, .li-milestone-bar, .progress, .track {
+  background: #090909 !important;
+  border: 1px solid rgba(196,154,75,0.14) !important;
+}
+
+.li-progress-fill, .li-milestone-inner, .resp-fill {
+  background: linear-gradient(90deg, var(--gold-d), var(--gold-bright)) !important;
+}
+
+/* ── FOOTER ── */
+footer {
+  color: var(--mp-text-soft) !important;
+  background: #050505 !important;
+}
+footer .g { color: var(--mp-gold-bright) !important; }
+
+/* ── ANIMAȚII GENERALE ── */
+@keyframes calnic-spin { to { transform: rotate(360deg); } }
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(8px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+@keyframes gold-pulse {
+  0%, 100% { box-shadow: 0 0 8px rgba(196,154,75,0.2); }
+  50%       { box-shadow: 0 0 20px rgba(196,154,75,0.5); }
+}
+
+/* ── RESPONSIVE ── */
+@media (max-width: 960px) {
+  .page-hero::before, .login-hero::before, .li-hero::before,
+  .dash-header::before, .fam-hero::before {
+    left: 12px; right: 12px; top: 10px; bottom: 10px;
+  }
+}

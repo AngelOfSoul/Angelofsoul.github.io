@@ -1,0 +1,34 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 200" fill="none">
+  <!-- Top-left corner ornament -->
+  <g stroke="rgba(196,154,75,.5)" stroke-width=".8" fill="none">
+    <!-- Corner flourish -->
+    <path d="M10,2 Q2,2 2,10" stroke-width="1"/>
+    <path d="M20,2 Q6,3 3,14 Q2,8 2,20"/>
+    <path d="M30,2 C18,3 8,8 4,22"/>
+    <!-- Top edge -->
+    <path d="M40,2 Q100,6 160,2" stroke-dasharray="2 4"/>
+    <!-- Top-right corner (mirrored) -->
+    <path d="M190,2 Q198,2 198,10" stroke-width="1"/>
+    <path d="M180,2 Q194,3 197,14 Q198,8 198,20"/>
+    <path d="M170,2 C182,3 192,8 196,22"/>
+    <!-- Right edge -->
+    <path d="M198,40 Q194,100 198,160" stroke-dasharray="2 4"/>
+    <!-- Bottom-right corner -->
+    <path d="M198,190 Q198,198 190,198" stroke-width="1"/>
+    <path d="M198,180 Q197,194 186,197 Q192,198 180,198"/>
+    <path d="M198,170 C197,182 192,192 178,196"/>
+    <!-- Bottom edge -->
+    <path d="M160,198 Q100,194 40,198" stroke-dasharray="2 4"/>
+    <!-- Bottom-left corner -->
+    <path d="M2,190 Q2,198 10,198" stroke-width="1"/>
+    <path d="M2,180 Q3,194 14,197 Q8,198 20,198"/>
+    <path d="M2,170 C3,182 8,192 22,196"/>
+    <!-- Left edge -->
+    <path d="M2,160 Q6,100 2,40" stroke-dasharray="2 4"/>
+  </g>
+  <!-- Center diamond ornament -->
+  <path d="M100,6 L104,10 L100,14 L96,10 Z" fill="rgba(196,154,75,.4)"/>
+  <path d="M100,186 L104,190 L100,194 L96,190 Z" fill="rgba(196,154,75,.4)"/>
+  <path d="M6,100 L10,104 L14,100 L10,96 Z" fill="rgba(196,154,75,.3)"/>
+  <path d="M186,100 L190,104 L194,100 L190,96 Z" fill="rgba(196,154,75,.3)"/>
+</svg>

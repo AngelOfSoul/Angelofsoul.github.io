@@ -11,176 +11,85 @@
 <meta property="og:url" content="https://calniconline.ro/login.html">
 <meta property="og:locale" content="ro_RO">
 <title>Contul Familiei — Calnic Online</title>
-<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,600;0,700;1,400&family=EB+Garamond:ital,wght@0,400;0,500;1,400&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="css/style.css">
+
+<link rel="icon" type="image/svg+xml" href="favicon.svg">
+<link rel="icon" type="image/x-icon" href="favicon.ico">
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
+
 <style>
-:root {
-  --bg:      #0a0a0a;
-  --s1:      #111111;
-  --s2:      #161616;
-  --s3:      #1c1c1c;
-  --b1:      #2a2a2a;
-  --b2:      #383838;
-  --gold:    #d4a84a;
-  --gold-l:  #e0b84a;
-  --gold-d:  #b08030;
-  --gold-m:#9b7538;
-  --text:    #f5eed8;
-  --muted:   #c8aa80;
+/* Page-specific CSS for login.html */
+.nav-login.active {
+background:var(--s2); color:var(--gold); border-bottom:2px solid var(--gold);
 }
-* { margin:0; padding:0; box-sizing:border-box; }
-body { background:var(--bg); color:var(--text); font-family:'EB Garamond',Georgia,serif; font-size:17px; line-height:1.75; min-height:100vh; }
-a { color:var(--gold); text-decoration:none; }
-a:hover { color:var(--gold-l); }
-
-.lang-bar { background:#050505; border-bottom:1px solid var(--b1); padding:5px 24px; display:flex; justify-content:flex-end; align-items:center; gap:8px; }
-.lang-label { font-size:12px; letter-spacing:2px; color:#c8a870; }
-.lang-btn { background:none; border:1px solid #585040; color:var(--text); padding:2px 11px; cursor:pointer; font-family:'EB Garamond',serif; font-size:12px; letter-spacing:1px; transition:all 0.2s; border-radius:1px; }
-.lang-btn.active { background:var(--gold-d); border-color:var(--gold-l); color:#050505; font-weight:700; }
-.lang-btn:hover:not(.active) { border-color:var(--gold); }
-
-.site-header { background:#050505; border-bottom:2px solid var(--gold-d); display:flex; align-items:center; justify-content:center; gap:28px; padding:10px 32px; min-height:110px; }
-.banner-img { height:90px; width:auto; display:block; flex-shrink:0; border-radius:2px; border:1px solid var(--b2); }
-.header-divider { width:1px; height:75px; background:linear-gradient(to bottom,transparent,var(--gold-d),transparent); flex-shrink:0; opacity:0.5; }
-.header-motto { display:flex; flex-direction:column; align-items:center; gap:6px; flex-shrink:0; }
-.header-sub { font-family:'EB Garamond',serif; font-style:italic; font-size:15px; color:var(--text); letter-spacing:3px; }
-
-nav { background:var(--s1); border-bottom:2px solid var(--gold-d); display:flex; flex-wrap:wrap; align-items:stretch; }
-.nav-link { padding:11px 16px; font-family:'EB Garamond',serif; font-size:14px; letter-spacing:0.5px; color:var(--text); cursor:pointer; border-right:1px solid var(--b1); transition:all 0.18s; display:flex; align-items:center; gap:6px; text-decoration:none; }
-.nav-link:hover { background:var(--s2); color:var(--gold-l); text-decoration:none; }
-.nav-link.active { background:var(--s2); color:var(--gold); border-bottom:2px solid var(--gold); }
-.nav-right { margin-left:auto; display:flex; }
-.nav-login { padding:11px 18px; font-family:'EB Garamond',serif; font-size:14px; color:var(--gold); cursor:pointer; border-left:1px solid var(--b1); transition:all 0.18s; display:flex; align-items:center; gap:6px; text-decoration:none; }
-.nav-login:hover { background:#2a0a0a; color:var(--text); text-decoration:none; }
-.nav-login.active { background:var(--s2); color:var(--gold); border-bottom:2px solid var(--gold); }
-
-.scroll-top { position:fixed; bottom:28px; right:24px; background:#111111; border:1px solid #b08030; color:#d4a84a; width:40px; height:40px; border-radius:2px; cursor:pointer; font-size:20px; display:flex; align-items:center; justify-content:center; opacity:0; transition:opacity 0.3s; z-index:9999; text-decoration:none; }
-.scroll-top:hover { background:#b08030; color:#0a0a0a; }
-.scroll-bottom { position:fixed; bottom:74px; right:24px; background:#111111; border:1px solid #383838; color:#c8aa80; width:40px; height:40px; border-radius:2px; cursor:pointer; font-size:20px; display:flex; align-items:center; justify-content:center; opacity:1; transition:opacity 0.3s; z-index:9999; text-decoration:none; }
-.scroll-bottom:hover { border-color:#b08030; color:#d4a84a; }
-
-footer { background:#050505; border-top:2px solid var(--gold-d); padding:16px 24px; text-align:center; font-family:'EB Garamond',serif; font-size:14px; color:var(--muted); letter-spacing:1.5px; font-style:italic; }
-footer .g { color:var(--gold-d); font-style:normal; }
 
 @media(max-width:740px) {
-  .site-header { padding:10px 16px; gap:14px; min-height:80px; }
+.site-header { padding:10px 16px; gap:14px; min-height:80px; }
   .banner-img { height:65px; }
   .header-sub { font-size:12px; letter-spacing:1.5px; }
   .nav-link .nl { display:none; }
   .nav-login .nl { display:none; }
 }
 
-/* ── MOBILE NAV / HAMBURGER ── */
-.hamburger {
-  display: none;
-  background: none;
-  border: 1px solid var(--b2);
-  color: var(--gold);
-  padding: 6px 10px;
-  cursor: pointer;
-  font-size: 20px;
-  margin-left: auto;
-  border-radius: 2px;
-  transition: all 0.2s;
-}
-.hamburger:hover { border-color: var(--gold-d); background: var(--s2); }
-.nav-mobile-menu {
-  display: none;
-  flex-direction: column;
-  background: var(--s1);
-  border-bottom: 2px solid var(--gold-d);
-  width: 100%;
-}
-.nav-mobile-menu.open { display: flex; }
-.nav-mobile-link {
-  padding: 13px 20px;
-  font-family: 'EB Garamond', serif;
-  font-size: 16px;
-  color: var(--text);
-  border-bottom: 1px solid var(--b1);
-  text-decoration: none;
-  display: flex;
-  align-items: center;
-  gap: 10px;
-  transition: all 0.15s;
-}
-.nav-mobile-link:hover { background: var(--s2); color: var(--gold-l); text-decoration: none; }
-.nav-mobile-link.active { color: var(--gold); background: var(--s2); border-left: 3px solid var(--gold); }
-.nav-mobile-login {
-  padding: 13px 20px;
-  font-family: 'EB Garamond', serif;
-  font-size: 16px;
-  color: var(--gold);
-  border-bottom: 1px solid var(--b1);
-  text-decoration: none;
-  display: flex;
-  align-items: center;
-  gap: 10px;
-}
-@media(max-width:740px) {
-  nav { flex-wrap: nowrap; overflow: hidden; }
-  .nav-link { display: none !important; }
-  .nav-right { display: none !important; }
-  .hamburger { display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
-}
-@media(min-width:741px) {
-  .hamburger { display: none !important; }
-}
-
-/* ── LOGIN PAGE STYLES ── */
 .login-wrap {
-  max-width: 520px;
+max-width: 520px;
   margin: 48px auto;
   padding: 0 20px 48px;
 }
+
 .login-hero {
-  text-align: center;
+text-align: center;
   padding: 32px 0 24px;
 }
+
 .login-hero-title {
-  font-family: 'Playfair Display', serif;
+font-family: 'Playfair Display', serif;
   font-size: 28px;
   font-weight: 600;
   color: var(--gold-l);
   letter-spacing: 1.5px;
   margin-bottom: 8px;
 }
+
 .login-hero-sub {
-  font-size: 15px;
+font-size: 15px;
   color: var(--muted);
   font-style: italic;
 }
 
-/* Already-logged-in box */
 .logged-in-box {
-  background: var(--s1);
+background: var(--s1);
   border: 1px solid var(--b1);
   border-left: 3px solid var(--gold-d);
   border-radius: 2px;
   padding: 28px 28px;
   text-align: center;
 }
+
 .logged-in-box .li-title {
-  font-family: 'Playfair Display', serif;
+font-family: 'Playfair Display', serif;
   font-size: 18px;
   color: var(--gold-l);
   margin-bottom: 10px;
 }
+
 .logged-in-box .li-sub {
-  font-size: 15px;
+font-size: 15px;
   color: var(--muted);
   margin-bottom: 20px;
 }
-.logged-in-box .li-actions { display: flex; gap: 14px; justify-content: center; flex-wrap: wrap; }
 
-/* Tab switcher */
+.logged-in-box .li-actions {
+display: flex; gap: 14px; justify-content: center; flex-wrap: wrap;
+}
+
 .tab-bar {
-  display: flex;
+display: flex;
   border-bottom: 2px solid var(--b1);
   margin-bottom: 28px;
 }
+
 .tab-btn {
-  flex: 1;
+flex: 1;
   padding: 13px 10px;
   background: none;
   border: none;
@@ -193,23 +102,21 @@ footer .g { color:var(--gold-d); font-style:normal; }
   transition: all 0.18s;
   letter-spacing: 0.5px;
 }
-.tab-btn:hover { color: var(--gold-l); }
-.tab-btn.active { color: var(--gold); border-bottom-color: var(--gold); font-weight: 500; }
 
-/* Form */
-.auth-form { display: flex; flex-direction: column; gap: 16px; }
-.form-group { display: flex; flex-direction: column; gap: 5px; }
-.form-label {
-  font-size: 13px;
-  letter-spacing: 1px;
-  color: var(--muted);
-  text-transform: uppercase;
-  display: flex;
-  align-items: center;
-  gap: 7px;
+.tab-btn:hover {
+color: var(--gold-l);
 }
+
+.tab-btn.active {
+color: var(--gold); border-bottom-color: var(--gold); font-weight: 500;
+}
+
+.auth-form {
+display: flex; flex-direction: column; gap: 16px;
+}
+
 .pb-input {
-  background: var(--s1);
+background: var(--s1);
   border: 1px solid var(--b2);
   color: var(--text);
   padding: 11px 14px;
@@ -220,11 +127,17 @@ footer .g { color:var(--gold-d); font-style:normal; }
   transition: border-color 0.2s;
   width: 100%;
 }
-.pb-input:focus { border-color: var(--gold); }
-.pb-input::placeholder { color: var(--b2); }
+
+.pb-input:focus {
+border-color: var(--gold);
+}
+
+.pb-input::placeholder {
+color: var(--b2);
+}
 
 .pb-submit {
-  background: var(--gold-d);
+background: var(--gold-d);
   border: 1px solid var(--gold);
   color: #050505;
   font-family: 'Playfair Display', serif;
@@ -238,29 +151,28 @@ footer .g { color:var(--gold-d); font-style:normal; }
   transition: all 0.2s;
   margin-top: 4px;
 }
-.pb-submit:hover { background: var(--gold); }
-.pb-submit:disabled { opacity: 0.5; cursor: default; }
 
-.form-msg {
-  padding: 11px 15px;
-  border-radius: 2px;
-  font-size: 14px;
-  display: none;
+.pb-submit:hover {
+background: var(--gold);
 }
-.form-msg.error { background: #2a0808; border: 1px solid #8a2020; color: #e08080; display: block; }
-.form-msg.success { background: #082a10; border: 1px solid #207840; color: #80e0a0; display: block; }
+
+.pb-submit:disabled {
+opacity: 0.5; cursor: default;
+}
 
 .forgot-link {
-  font-size: 13px;
+font-size: 13px;
   color: var(--muted);
   text-align: right;
   cursor: pointer;
 }
-.forgot-link:hover { color: var(--gold); }
 
-/* Forgot-password modal */
+.forgot-link:hover {
+color: var(--gold);
+}
+
 #forgotModal {
-  display: none;
+display: none;
   position: fixed;
   inset: 0;
   background: rgba(0,0,0,0.75);
@@ -268,9 +180,13 @@ footer .g { color:var(--gold-d); font-style:normal; }
   align-items: center;
   justify-content: center;
 }
-#forgotModal.open { display: flex; }
+
+#forgotModal.open {
+display: flex;
+}
+
 .forgot-modal-box {
-  background: var(--s1);
+background: var(--s1);
   border: 1px solid var(--b1);
   border-top: 3px solid var(--gold-d);
   border-radius: 3px;
@@ -279,22 +195,28 @@ footer .g { color:var(--gold-d); font-style:normal; }
   max-width: 420px;
   margin: 16px;
 }
+
 .forgot-modal-title {
-  font-family: 'Playfair Display', serif;
+font-family: 'Playfair Display', serif;
   font-size: 20px;
   color: var(--gold);
   margin-bottom: 20px;
   text-align: center;
   letter-spacing: 1px;
 }
+
 .forgot-modal-actions {
-  display: flex;
+display: flex;
   gap: 10px;
   margin-top: 16px;
 }
-.forgot-modal-actions .pb-submit { flex: 1; margin-top: 0; }
+
+.forgot-modal-actions .pb-submit {
+flex: 1; margin-top: 0;
+}
+
 .forgot-modal-cancel {
-  flex: 0 0 auto;
+flex: 0 0 auto;
   background: none;
   border: 1px solid var(--b2);
   color: var(--muted);
@@ -306,11 +228,13 @@ footer .g { color:var(--gold-d); font-style:normal; }
   border-radius: 1px;
   transition: border-color 0.2s, color 0.2s;
 }
-.forgot-modal-cancel:hover { border-color: var(--gold); color: var(--gold); }
 
-/* PIN info tooltip */
+.forgot-modal-cancel:hover {
+border-color: var(--gold); color: var(--gold);
+}
+
 .pin-info {
-  display: inline-block;
+display: inline-block;
   width: 16px;
   height: 16px;
   background: var(--b1);
@@ -323,8 +247,9 @@ footer .g { color:var(--gold-d); font-style:normal; }
   cursor: help;
   position: relative;
 }
+
 .pin-info:hover::after {
-  content: attr(data-tip);
+content: attr(data-tip);
   position: absolute;
   left: 22px;
   top: -4px;
@@ -344,14 +269,13 @@ footer .g { color:var(--gold-d); font-style:normal; }
 }
 
 .section-divider {
-  border: none;
+border: none;
   border-top: 1px solid var(--b1);
   margin: 8px 0;
 }
 
-/* Buttons shared */
 .cta-btn {
-  display: inline-block;
+display: inline-block;
   background: var(--gold-d);
   border: 1px solid var(--gold);
   color: #050505;
@@ -366,9 +290,13 @@ footer .g { color:var(--gold-d); font-style:normal; }
   transition: all 0.2s;
   text-decoration: none;
 }
-.cta-btn:hover { background: var(--gold); color: #050505; text-decoration: none; }
+
+.cta-btn:hover {
+background: var(--gold); color: #050505; text-decoration: none;
+}
+
 .cta-btn-sec {
-  display: inline-block;
+display: inline-block;
   background: none;
   border: 1px solid var(--b2);
   color: var(--muted);
@@ -381,15 +309,18 @@ footer .g { color:var(--gold-d); font-style:normal; }
   transition: all 0.2s;
   text-decoration: none;
 }
-.cta-btn-sec:hover { border-color: var(--gold-d); color: var(--gold); text-decoration: none; }
+
+.cta-btn-sec:hover {
+border-color: var(--gold-d); color: var(--gold); text-decoration: none;
+}
 
 @media(max-width:540px) {
-  .login-wrap { padding: 0 12px 32px; }
+.login-wrap { padding: 0 12px 32px; }
   .login-hero-title { font-size: 22px; }
 }
 
 .pb-textarea {
-  width: 100%;
+width: 100%;
   background: var(--s2);
   border: 1px solid var(--b2);
   color: var(--text);
@@ -402,48 +333,36 @@ footer .g { color:var(--gold-d); font-style:normal; }
   min-height: 70px;
   transition: border-color 0.2s;
 }
-.pb-textarea:focus { border-color: var(--gold-d); }
-.pb-textarea::placeholder { color: var(--muted); }
-.step-note { font-size:13px; color:var(--muted); font-style:italic; text-align:center; padding:8px 0 4px; }
 
-/* ── PASSWORD TOGGLE ── */
-.pw-wrap { position: relative; }
-.pw-wrap .pb-input { padding-right: 42px; }
-.pw-toggle {
-  position: absolute;
-  right: 10px;
-  top: 50%;
-  transform: translateY(-50%);
-  background: none;
-  border: none;
-  color: var(--muted);
-  cursor: pointer;
-  padding: 4px;
-  line-height: 1;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  transition: color 0.2s;
+.pb-textarea:focus {
+border-color: var(--gold-d);
 }
-.pw-toggle:hover { color: var(--gold); }
-.pw-toggle svg { display: block; }
 
-/* ── CONSISTENT SPINNER ── */
-.calnic-spinner{display:inline-block;width:22px;height:22px;border:2px solid #2a2a2a;border-top-color:#d4a84a;border-radius:50%;animation:calnic-spin 0.8s linear infinite;vertical-align:middle;}
-@keyframes calnic-spin{to{transform:rotate(360deg);}}
-.calnic-loading{display:flex;align-items:center;justify-content:center;gap:12px;padding:48px 24px;color:#a89878;font-style:italic;font-size:15px;}
-/* ── EMPTY STATE ── */
-.calnic-empty{text-align:center;padding:60px 24px;}
-.calnic-empty-icon{font-size:40px;color:#2a2a2a;margin-bottom:14px;}
-.calnic-empty-title{font-family:'Playfair Display',serif;font-size:20px;color:#d4a84a;margin-bottom:8px;}
-.calnic-empty-sub{font-size:15px;color:#a89878;font-style:italic;line-height:1.7;margin-bottom:24px;}
-.calnic-empty-btn{display:inline-block;background:#b08030;border:1px solid #d4a84a;color:#050505;font-family:'Playfair Display',serif;font-size:13px;font-weight:700;letter-spacing:2px;text-transform:uppercase;padding:10px 28px;border-radius:2px;cursor:pointer;transition:all 0.2s;text-decoration:none;}
-.calnic-empty-btn:hover{background:#d4a84a;text-decoration:none;}
+.pb-textarea::placeholder {
+color: var(--muted);
+}
+
+.step-note {
+font-size:13px; color:var(--muted); font-style:italic; text-align:center; padding:8px 0 4px;
+}
+
+.pw-wrap .pb-input {
+padding-right: 42px;
+}
+
+@keyframes calnic-spin {
+to{transform:rotate(360deg);}
+}
 </style>
-<link rel="icon" type="image/svg+xml" href="favicon.svg">
-<link rel="icon" type="image/x-icon" href="favicon.ico">
-<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
-<link rel="stylesheet" href="css/wow.css">
+
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;500&family=EB+Garamond:ital,wght@0,400;0,500;1,400&family=Playfair+Display:wght@400;600&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="css/tokens.css">
+<link rel="stylesheet" href="css/style.css">
+<link rel="stylesheet" href="css/premium.css">
+<link rel="stylesheet" href="css/navbar-heraldic.css">
+<link rel="stylesheet" href="css/tree-ui.css">
 </head>
 <body>
 
@@ -500,19 +419,36 @@ footer .g { color:var(--gold-d); font-style:normal; }
   </div>
 </header>
 
+<div class="nav-wrapper">
+<div class="nav-gold-line"></div>
 <nav>
-  <a class="nav-link" href="index.html">&#8962; <span class="nl" data-ro="Acasa" data-en="Homepage">Acasa</span></a>
-  <a class="nav-link" href="istorie.html">&#128506; <span class="nl" data-ro="Istoria Satului" data-en="Village History">Istoria Satului</span></a>
-  <a class="nav-link" href="familiile.html">&#128106; <span class="nl" data-ro="Familiile" data-en="Families">Familiile</span></a>
-  <a class="nav-link" href="genealogie.html">&#127803; <span class="nl" data-ro="Genealogie" data-en="Genealogy">Genealogie</span></a>
-  <a class="nav-link" href="galerie.html">&#128248; <span class="nl" data-ro="Galerie" data-en="Gallery">Galerie</span></a>
-  <a class="nav-link" href="contact.html">&#9993; <span class="nl" data-ro="Contact" data-en="Contact">Contact</span></a>
-  <a class="nav-link" href="intrebari.html">&#10067; <span class="nl" data-ro="Intrebari" data-en="FAQ">Intrebari</span></a>
+  <a class="nav-link" href="index.html">
+  <svg viewBox="0 0 32 32" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" width="22" height="22"><path d="M4 13 L16 3 L28 13 L28 29 L4 29 Z"/><rect x="12" y="19" width="8" height="10" rx="1"/></svg>
+  <span class="nl" data-ro="Acasa" data-en="Homepage">Acasa</span></a>
+  <a class="nav-link" href="istorie.html">
+  <svg viewBox="0 0 32 32" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" width="22" height="22"><path d="M6 4 L6 28 Q6 30 8 30 L26 30 L26 8 L20 4 Z"/><path d="M20 4 L20 8 L26 8"/><line x1="10" y1="14" x2="22" y2="14"/><line x1="10" y1="18" x2="22" y2="18"/></svg>
+  <span class="nl" data-ro="Istoria Satului" data-en="Village History">Istoria Satului</span></a>
+  <a class="nav-link" href="familiile.html">
+  <svg viewBox="0 0 32 32" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" width="22" height="22"><path d="M16 2 L4 7 L4 17 C4 23.5 9.5 28.5 16 30.5 C22.5 28.5 28 23.5 28 17 L28 7 Z"/><circle cx="11" cy="12" r="2.5"/><circle cx="21" cy="12" r="2.5"/><path d="M8 22 C8 18.5 11 16 14 16 L18 16 C21 16 24 18.5 24 22" fill="none"/></svg>
+  <span class="nl" data-ro="Familiile" data-en="Families">Familiile</span></a>
+  <a class="nav-link" href="genealogie.html">
+  <svg viewBox="0 0 32 32" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" width="22" height="22"><circle cx="16" cy="5" r="3"/><circle cx="8" cy="16" r="3"/><circle cx="24" cy="16" r="3"/><line x1="16" y1="8" x2="16" y2="12"/><line x1="16" y1="12" x2="8" y2="13"/><line x1="16" y1="12" x2="24" y2="13"/></svg>
+  <span class="nl" data-ro="Genealogie" data-en="Genealogy">Genealogie</span></a>
+  <a class="nav-link" href="galerie.html">
+  <svg viewBox="0 0 32 32" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" width="22" height="22"><rect x="4" y="5" width="24" height="22" rx="1.5"/><rect x="7" y="8" width="18" height="13" rx="1"/><circle cx="10.5" cy="11.5" r="2"/><path d="M7 18 L12 13.5 L16 17 L19 14.5 L25 19"/></svg>
+  <span class="nl" data-ro="Galerie" data-en="Gallery">Galerie</span></a>
+  <a class="nav-link" href="contact.html">
+  <svg viewBox="0 0 32 32" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" width="22" height="22"><rect x="3" y="6" width="26" height="20" rx="2"/><path d="M3 8 L16 18 L29 8"/></svg>
+  <span class="nl" data-ro="Contact" data-en="Contact">Contact</span></a>
+  <a class="nav-link" href="intrebari.html">
+  <svg viewBox="0 0 32 32" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" width="22" height="22"><circle cx="16" cy="16" r="12"/><path d="M13 12.5 C13 10 14.5 8.5 16 8.5 C17.8 8.5 19.5 10 19.5 12 C19.5 14.5 16 16 16 18.5"/><circle cx="16" cy="22" r="1.3" fill="currentColor" stroke="none"/></svg>
+  <span class="nl" data-ro="Intrebari" data-en="FAQ">Intrebari</span></a>
   <div class="nav-right">
     <a class="nav-login active" href="login.html">&#128274; <span class="nl" data-ro="Contul Familiei" data-en="Family Login">Contul Familiei</span></a>
   </div>
   <button class="hamburger" id="hamburgerBtn">&#9776;</button>
 </nav>
+</div>
 <div class="nav-mobile-menu" id="navMobileMenu">
   <a class="nav-mobile-link" href="index.html">&#8962; Acasa</a>
   <a class="nav-mobile-link" href="istorie.html">&#128506; Istoria Satului</a>
@@ -1069,8 +1005,8 @@ document.addEventListener('keydown', function(e) {
 </script>
 
 <!-- Load Supabase client -->
-<script src="js/wow.js"></script>
+<script src="js/scroll-effects.js"></script>
+<script src="js/transitions.js"></script>
 </body>
 </html>
-
 

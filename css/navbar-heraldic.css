@@ -1,0 +1,251 @@
+/* ═══════════════════════════════════════════════════════
+   CALNIC ONLINE — NAVBAR HERALDIC
+   Stilul nou: butoane separate cu icon + text, glow auriu.
+   Toate clasele JS (.nav-link, .nav-right etc.) PĂSTRATE.
+   ═══════════════════════════════════════════════════════ */
+
+/* ── WRAPPER NAVBAR ── */
+.nav-wrapper {
+  position: sticky;
+  top: 0;
+  z-index: 900;
+}
+
+.nav-wrapper::before {
+  content: '';
+  display: block;
+  height: 1px;
+  background: linear-gradient(90deg,
+    transparent 0%, #3a2c08 5%,
+    #806020 20%, #c0a040 50%,
+    #806020 80%, #3a2c08 95%, transparent 100%);
+}
+
+.nav-gold-line {
+  height: 3px;
+  background: linear-gradient(90deg,
+    transparent 0%,
+    #4a3810 4%,
+    #9a7820 15%,
+    #d4a830 30%,
+    #fff0a0 45%,
+    #ffe060 50%,
+    #fff0a0 55%,
+    #d4a830 70%,
+    #9a7820 85%,
+    #4a3810 96%,
+    transparent 100%);
+}
+
+/* ── NAVBAR PRINCIPAL ── */
+nav {
+  display: flex !important;
+  height: 80px !important;
+  position: relative !important;
+  background:
+    repeating-linear-gradient(90deg,
+      rgba(255,240,160,0.013) 0px, rgba(255,240,160,0.013) 1px,
+      transparent 1px, transparent 20px),
+    repeating-linear-gradient(92deg,
+      rgba(0,0,0,0.07) 0px, rgba(0,0,0,0.07) 1px,
+      transparent 1px, transparent 30px),
+    linear-gradient(180deg,
+      #28200c 0%, #1e1809 30%,
+      #161408 60%, #0e0c06 100%) !important;
+  border-bottom: 1px solid #3a2e0a !important;
+  border-top: none !important;
+  flex-wrap: nowrap !important;
+  align-items: stretch !important;
+}
+
+nav::after {
+  content: '';
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  height: 1px;
+  background: linear-gradient(90deg,
+    transparent 0%, #3a2c08 5%,
+    #806020 20%, #c0a040 50%,
+    #806020 80%, #3a2c08 95%, transparent 100%);
+  pointer-events: none;
+}
+
+/* ── NAV LINK — STILUL NOU ── */
+.nav-link {
+  flex: 1 !important;
+  display: flex !important;
+  flex-direction: column !important;
+  align-items: center !important;
+  justify-content: center !important;
+  gap: 5px !important;
+  border: none !important;
+  background: transparent !important;
+  cursor: pointer !important;
+  position: relative !important;
+  transition: background var(--transition-med) !important;
+  border-right: 1px solid rgba(100,78,20,0.22) !important;
+  border-bottom: none !important;
+  padding: 0 8px !important;
+  height: 80px !important;
+  text-decoration: none !important;
+  box-shadow: none !important;
+}
+
+.nav-link:last-of-type { border-right: none !important; }
+
+/* Text nav */
+.nav-link .nl,
+.nav-link > span:not(.nav-icon) {
+  display: block !important;
+  font-family: var(--font-display) !important;
+  font-size: 9px !important;
+  letter-spacing: 1.5px !important;
+  color: var(--gold-m) !important;
+  text-transform: uppercase !important;
+  white-space: nowrap !important;
+  transition: color var(--transition-med) !important;
+}
+
+/* Icon nav */
+.nav-link svg,
+.nav-link .nav-icon {
+  width: 22px !important;
+  height: 22px !important;
+  color: #9a7c22 !important;
+  transition: all var(--transition-med) !important;
+  position: relative !important;
+  z-index: 4 !important;
+}
+
+/* ── HOVER NAV LINK ── */
+.nav-link:hover {
+  background: radial-gradient(ellipse 120% 100% at 50% 50%,
+    rgba(170,130,30,0.1) 0%, transparent 100%) !important;
+  color: var(--gold) !important;
+  border-bottom: none !important;
+}
+
+.nav-link:hover svg,
+.nav-link:hover .nav-icon {
+  color: var(--gold-d) !important;
+  filter: drop-shadow(0 0 6px rgba(212,168,48,0.75)) !important;
+}
+
+.nav-link:hover .nl,
+.nav-link:hover > span:not(.nav-icon) {
+  color: #c8a030 !important;
+}
+
+.nav-link:hover::before {
+  content: '';
+  position: absolute;
+  inset: 4px;
+  border: 1px solid rgba(196,154,75,0.25);
+  pointer-events: none;
+  z-index: 3;
+}
+
+/* ── ACTIV NAV LINK ── */
+.nav-link.active {
+  background: radial-gradient(ellipse 110% 110% at 50% 50%,
+    rgba(170,130,30,0.18) 0%,
+    rgba(140,110,25,0.08) 60%,
+    transparent 100%) !important;
+  color: var(--gold-bright) !important;
+  border-bottom: none !important;
+}
+
+.nav-link.active::before {
+  content: '' !important;
+  position: absolute !important;
+  top: 0 !important; left: 10% !important; right: 10% !important;
+  height: 100% !important;
+  background: radial-gradient(ellipse 70% 55% at 50% -5%,
+    rgba(255,240,100,0.9) 0%,
+    rgba(240,200,60,0.5) 20%,
+    rgba(200,160,40,0.18) 45%,
+    transparent 75%) !important;
+  pointer-events: none !important;
+  z-index: 2 !important;
+  border: none !important;
+}
+
+.nav-link.active::after {
+  content: '' !important;
+  position: absolute !important;
+  inset: 4px !important;
+  border: 1px solid rgba(196,154,75,0.7) !important;
+  pointer-events: none !important;
+  z-index: 3 !important;
+  background: none !important;
+}
+
+.nav-link.active svg,
+.nav-link.active .nav-icon {
+  color: var(--gold-bright) !important;
+  filter: drop-shadow(0 0 10px rgba(255,220,80,1)) !important;
+}
+
+.nav-link.active .nl,
+.nav-link.active > span:not(.nav-icon) {
+  color: var(--gold-bright) !important;
+  text-shadow: 0 0 8px rgba(255,220,80,0.6) !important;
+}
+
+/* ── NAV RIGHT ── */
+.nav-right {
+  margin-left: auto !important;
+  display: flex !important;
+  align-items: center !important;
+}
+
+.nav-login {
+  padding: 0 18px !important;
+  height: 80px !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  font-family: var(--font-display) !important;
+  font-size: 10px !important;
+  letter-spacing: 1.5px !important;
+  color: var(--gold-m) !important;
+  border-left: 1px solid rgba(100,78,20,0.22) !important;
+  border-right: none !important;
+  border-top: none !important;
+  border-bottom: none !important;
+  text-decoration: none !important;
+  transition: all var(--transition-med) !important;
+  background: transparent !important;
+}
+
+.nav-login:hover {
+  background: radial-gradient(ellipse 120% 100% at 50% 50%,
+    rgba(170,130,30,0.1) 0%, transparent 100%) !important;
+  color: var(--gold) !important;
+}
+
+.nav-link > span.nl { font-size: 9px; }
+
+/* ── NAVBAR MOBIL ── */
+@media (max-width: 740px) {
+  nav {
+    height: auto !important;
+    flex-wrap: wrap !important;
+  }
+
+  .nav-link {
+    height: 56px !important;
+    flex: 1 1 auto !important;
+    min-width: 70px !important;
+  }
+
+  .nav-link svg { width: 18px !important; height: 18px !important; }
+  .nav-link .nl { font-size: 8px !important; letter-spacing: 1px !important; }
+}
+
+@media (max-width: 480px) {
+  .nav-link { display: none !important; }
+  .hamburger { display: flex !important; }
+}

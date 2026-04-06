@@ -5,52 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <meta name="description" content="Pagina nu a fost gasita pe Calnic Online.">
 <title>404 — Pagina nu a fost gasita — Calnic Online</title>
-<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,600;0,700;1,400&family=EB+Garamond:ital,wght@0,400;0,500;1,400&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="css/style.css">
-<style>
-:root{--bg:#0a0a0a;--s1:#111111;--s2:#161616;--s3:#1c1c1c;--b1:#2a2a2a;--b2:#383838;--gold:#d4a84a;--gold-l:#e0b84a;--gold-d:#b08030;--gold-m:#9b7538;--text:#f0e8d0;--muted:#a09070;}
-*{margin:0;padding:0;box-sizing:border-box;}
-body{background:var(--bg);color:var(--text);font-family:'EB Garamond',Georgia,serif;font-size:17px;line-height:1.75;min-height:100vh;display:flex;flex-direction:column;}
-a{color:var(--gold);text-decoration:none;}
-a:hover{color:var(--gold-l);}
-.lang-bar{background:#050505;border-bottom:1px solid var(--b1);padding:5px 24px;display:flex;justify-content:flex-end;align-items:center;gap:8px;}
-.lang-label{font-size:11px;letter-spacing:2px;color:#c8a870;}
-.lang-btn{background:none;border:1px solid #585040;color:var(--text);padding:2px 11px;cursor:pointer;font-family:'EB Garamond',serif;font-size:12px;letter-spacing:1px;transition:all 0.2s;border-radius:1px;}
-.lang-btn.active{background:var(--gold-d);border-color:var(--gold-l);color:#050505;font-weight:700;}
-.lang-btn:hover:not(.active){border-color:var(--gold);}
-.site-header{background:#050505;border-bottom:2px solid var(--gold-d);display:flex;align-items:center;justify-content:center;gap:28px;padding:10px 32px;min-height:110px;}
-.banner-img{height:90px;width:auto;display:block;flex-shrink:0;border-radius:2px;border:1px solid var(--b2);}
-.header-divider{width:1px;height:75px;background:linear-gradient(to bottom,transparent,var(--gold-d),transparent);flex-shrink:0;opacity:0.5;}
-.header-motto{display:flex;flex-direction:column;align-items:center;gap:6px;flex-shrink:0;}
-.header-sub{font-family:'EB Garamond',serif;font-style:italic;font-size:15px;color:var(--text);letter-spacing:3px;}
-footer{background:#050505;border-top:2px solid var(--gold-d);padding:16px 24px;text-align:center;font-family:'EB Garamond',serif;font-size:13px;color:var(--muted);letter-spacing:1.5px;font-style:italic;margin-top:auto;}
-footer .g{color:var(--gold-d);font-style:normal;}
-@media(max-width:740px){
-  .site-header{padding:10px 16px;gap:14px;min-height:80px;}
-  .banner-img{height:65px;}
-  .header-sub{font-size:12px;letter-spacing:1.5px;}
-}
 
-/* 404 content */
-.notfound-wrap{flex:1;display:flex;align-items:center;justify-content:center;padding:60px 24px;}
-.notfound-box{text-align:center;max-width:560px;}
-.notfound-num{font-family:'Playfair Display',serif;font-size:120px;color:var(--b2);line-height:1;margin-bottom:8px;letter-spacing:-4px;}
-.notfound-orn{color:var(--gold-m);letter-spacing:8px;font-size:14px;margin-bottom:28px;}
-.notfound-title{font-family:'Playfair Display',serif;font-size:28px;color:var(--gold-l);margin-bottom:12px;}
-.notfound-sub{font-size:16px;color:var(--muted);font-style:italic;line-height:1.8;margin-bottom:36px;}
-.notfound-links{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin-bottom:32px;}
-.nl-card{background:var(--s1);border:1px solid var(--b1);border-top:2px solid var(--gold-d);border-radius:2px;padding:16px 12px;text-align:center;transition:all 0.2s;text-decoration:none;display:block;}
-.nl-card:hover{border-color:var(--gold);background:var(--s2);transform:translateY(-2px);text-decoration:none;}
-.nl-icon{font-size:22px;margin-bottom:6px;}
-.nl-label{font-family:'Playfair Display',serif;font-size:13px;color:var(--text);}
-.back-btn{display:inline-block;background:var(--gold-d);border:1px solid var(--gold);color:#050505;font-family:'Playfair Display',serif;font-size:13px;font-weight:700;letter-spacing:3px;text-transform:uppercase;padding:12px 32px;border-radius:2px;cursor:pointer;transition:all 0.2s;text-decoration:none;}
-.back-btn:hover{background:var(--gold);color:#050505;text-decoration:none;}
-@media(max-width:500px){
-  .notfound-num{font-size:80px;}
-  .notfound-links{grid-template-columns:1fr 1fr;}
-  .notfound-title{font-size:22px;}
-}
-</style>
 <link rel="icon" type="image/svg+xml" href="favicon.svg">
 <link rel="icon" type="image/x-icon" href="favicon.ico">
 <meta name="robots" content="noindex, nofollow">
@@ -58,7 +13,76 @@ footer .g{color:var(--gold-d);font-style:normal;}
 <script src="js/supabase.js"></script>
 <script src="js/utils.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
-<link rel="stylesheet" href="css/wow.css">
+
+<style>
+/* Page-specific CSS for 404.html */
+.notfound-wrap {
+flex:1;display:flex;align-items:center;justify-content:center;padding:60px 24px;
+}
+
+.notfound-box {
+text-align:center;max-width:560px;
+}
+
+.notfound-num {
+font-family:'Playfair Display',serif;font-size:120px;color:var(--b2);line-height:1;margin-bottom:8px;letter-spacing:-4px;
+}
+
+.notfound-orn {
+color:var(--gold-m);letter-spacing:8px;font-size:14px;margin-bottom:28px;
+}
+
+.notfound-title {
+font-family:'Playfair Display',serif;font-size:28px;color:var(--gold-l);margin-bottom:12px;
+}
+
+.notfound-sub {
+font-size:16px;color:var(--muted);font-style:italic;line-height:1.8;margin-bottom:36px;
+}
+
+.notfound-links {
+display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin-bottom:32px;
+}
+
+.nl-card {
+background:var(--s1);border:1px solid var(--b1);border-top:2px solid var(--gold-d);border-radius:2px;padding:16px 12px;text-align:center;transition:all 0.2s;text-decoration:none;display:block;
+}
+
+.nl-card:hover {
+border-color:var(--gold);background:var(--s2);transform:translateY(-2px);text-decoration:none;
+}
+
+.nl-icon {
+font-size:22px;margin-bottom:6px;
+}
+
+.nl-label {
+font-family:'Playfair Display',serif;font-size:13px;color:var(--text);
+}
+
+.back-btn {
+display:inline-block;background:var(--gold-d);border:1px solid var(--gold);color:#050505;font-family:'Playfair Display',serif;font-size:13px;font-weight:700;letter-spacing:3px;text-transform:uppercase;padding:12px 32px;border-radius:2px;cursor:pointer;transition:all 0.2s;text-decoration:none;
+}
+
+.back-btn:hover {
+background:var(--gold);color:#050505;text-decoration:none;
+}
+
+@media(max-width:500px) {
+.notfound-num{font-size:80px;}
+  .notfound-links{grid-template-columns:1fr 1fr;}
+  .notfound-title{font-size:22px;}
+}
+</style>
+
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;500&family=EB+Garamond:ital,wght@0,400;0,500;1,400&family=Playfair+Display:wght@400;600&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="css/tokens.css">
+<link rel="stylesheet" href="css/style.css">
+<link rel="stylesheet" href="css/premium.css">
+<link rel="stylesheet" href="css/navbar-heraldic.css">
+<link rel="stylesheet" href="css/tree-ui.css">
 </head>
 <body>
 
@@ -162,9 +186,6 @@ footer .g{color:var(--gold-d);font-style:normal;}
   </div>
 </footer>
 
-<script src="js/config.js"></script>
-<script src="js/supabase.js"></script>
-<script src="js/utils.js"></script>
 <script src="js/admin-nav.js"></script>
 <script>
 document.getElementById('yr').textContent = new Date().getFullYear();
@@ -179,7 +200,8 @@ function applyPageLang(lang) {
 document.addEventListener('calnic:langchange', function(e) { applyPageLang(e.detail.lang); });
 applyPageLang(window.CalnicUtils ? window.CalnicUtils.lang() : currentLang);
 </script>
-<script src="js/wow.js"></script>
+<script src="js/scroll-effects.js"></script>
+<script src="js/transitions.js"></script>
 </body>
 </html>
 

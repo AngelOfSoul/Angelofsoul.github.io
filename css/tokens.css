@@ -1,0 +1,83 @@
+/* ═══════════════════════════════════════════════════════
+   CALNIC ONLINE — DESIGN TOKENS
+   Singurul loc unde se definesc culori, fonturi, spațieri.
+   Niciun hex în altă parte.
+   ═══════════════════════════════════════════════════════ */
+
+:root {
+  /* ── Culori de bază ── */
+  --bg:            #0c0a07;
+  --bg-deep:       #080604;
+  --s1:            #111111;
+  --s2:            #161616;
+  --s3:            #1c1c1c;
+  --b1:            #2a2a2a;
+  --b2:            #383838;
+
+  /* ── Auriu — paleta completă ── */
+  --gold:          #d4a84a;
+  --gold-l:        #e0b84a;
+  --gold-d:        #b08030;
+  --gold-m:        #9b7538;
+  --gold-pale:     #c8a840;
+  --gold-bright:   #ffe070;
+  --gold-glow:     rgba(212,168,48,0.75);
+  --gold-glow-soft:rgba(196,154,75,0.18);
+
+  /* ── Navbar specific ── */
+  --nav-bg:        #12100a;
+  --nav-border-top:#c0a040;
+  --nav-item-bg:   linear-gradient(180deg, #28200c 0%, #1e1809 30%, #161408 60%, #0e0c06 100%);
+  --nav-separator: rgba(100,78,20,0.22);
+
+  /* ── Text ── */
+  --text:          #f5eed8;
+  --muted:         #c8aa80;
+  --text-soft:     #ddd8cf;
+
+  /* ── Stări ── */
+  --green:         #82c46a;
+  --green-bg:      #0d1a0d;
+  --green-br:      #2a4a2a;
+  --red:           #c86a6a;
+  --red-bg:        #1a0d0d;
+  --red-br:        #3a1a1a;
+  --amber:         #c8a040;
+  --amber-bg:      #1a1000;
+  --amber-br:      #3a2800;
+  --blood:         #c87050;
+  --alliance:      #5080c8;
+
+  /* ── Fonturi ── */
+  --font-display:  'Cinzel', 'Playfair Display', Georgia, serif;
+  --font-body:     'EB Garamond', Georgia, serif;
+  --font-title:    'Playfair Display', Georgia, serif;
+
+  /* ── Tranziții ── */
+  --transition-fast:  0.15s ease;
+  --transition-med:   0.22s ease;
+  --transition-slow:  0.4s ease;
+
+  /* ── Spațieri ── */
+  --radius-sm:  3px;
+  --radius-md:  6px;
+  --radius-lg:  8px;
+
+  /* ── Umbre ── */
+  --shadow-card:   0 8px 32px rgba(0,0,0,0.4);
+  --shadow-gold:   0 0 20px rgba(196,154,75,0.15);
+  --shadow-hover:  0 12px 40px rgba(0,0,0,0.5), 0 0 20px rgba(196,154,75,0.1);
+
+  /* Variabile medieval-premium (compatibilitate) */
+  --mp-border:         #c49a4b;
+  --mp-border-soft:    rgba(196,154,75,0.35);
+  --mp-border-faint:   rgba(196,154,75,0.18);
+  --mp-text:           #f5f5f2;
+  --mp-text-soft:      #ddd8cf;
+  --mp-gold:           #c49a4b;
+  --mp-gold-bright:    #e0b86a;
+  --mp-gold-shadow:    rgba(196,154,75,0.18);
+  --mp-panel-bg:       linear-gradient(180deg, rgba(255,255,255,0.022), rgba(255,255,255,0.006) 14%, rgba(0,0,0,0) 55%),
+                       linear-gradient(180deg, #0f1012, #090909);
+  --mp-gloss:          linear-gradient(180deg, rgba(255,255,255,0.085), rgba(255,255,255,0.015) 18%, rgba(255,255,255,0) 38%);
+}
