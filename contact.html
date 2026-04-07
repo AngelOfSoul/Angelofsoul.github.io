@@ -538,7 +538,7 @@ to{transform:rotate(360deg);}
 
         <div class="form-row">
           <label class="form-label" id="lbl-family" data-ro="Familia din Calnic" data-en="Family from Calnic">Familia din Calnic <span id="lbl-family-opt" data-ro="optional" data-en="optional">optional</span></label>
-          <input class="form-input" id="inp-family" type="text" placeholder="ex: Familia Muresan" autocomplete="off"/>
+          <input class="form-input" id="inp-family" type="text" placeholder="ex: Familia Muresan" autocomplete="new-password" name="family_optional" spellcheck="false"/>
         </div>
 
         <div class="form-row">
@@ -682,6 +682,16 @@ function updateCount() {
   document.getElementById('charCount').textContent = msg.value.length;
 }
 
+function initContactFields() {
+  var familyInput = document.getElementById('inp-family');
+  if (!familyInput) return;
+  familyInput.setAttribute('autocomplete', 'new-password');
+  familyInput.setAttribute('readonly', 'readonly');
+  familyInput.addEventListener('focus', function() {
+    familyInput.removeAttribute('readonly');
+  }, { once: true });
+}
+
 function submitForm() {
   var name = document.getElementById('inp-name').value.trim();
   var email = document.getElementById('inp-email').value.trim();
@@ -743,14 +753,28 @@ function submitForm() {
   Promise.all([sendFormspree(data), saveToAdminInbox(data)]).then(function(results) {
     var sentMail = !!results[0];
     var savedAdmin = !!results[1];
-    if (sentMail || savedAdmin) {
+    if (sentMail && savedAdmin) {
       document.getElementById('formBody').style.display = 'none';
       document.getElementById('formSuccess').style.display = 'block';
       return;
     }
+
+    if (savedAdmin && !sentMail) {
+      alert(currentLang === 'ro'
+        ? 'Mesajul a fost salvat in Admin Panel, dar NU a plecat emailul catre admin. Verifica Formspree.'
+        : 'Message was saved in Admin Panel, but the admin email was NOT sent. Check Formspree.');
+    } else if (sentMail && !savedAdmin) {
+      alert(currentLang === 'ro'
+        ? 'Emailul a fost trimis, dar mesajul NU s-a salvat in Admin Panel. Verifica tabela contact_messages/RLS.'
+        : 'Email was sent, but message was NOT saved in Admin Panel. Check contact_messages table/RLS.');
+    } else {
+      alert(currentLang === 'ro'
+        ? 'Eroare la trimitere. Nu s-a putut livra nici emailul, nici salvarea in admin.'
+        : 'Sending failed. Neither email delivery nor admin save succeeded.');
+    }
+
     btn.disabled = false;
     btnLbl.textContent = currentLang === 'ro' ? 'TRIMITE MESAJUL' : 'SEND MESSAGE';
-    alert(currentLang === 'ro' ? 'Eroare la trimitere. Incercati din nou.' : 'Sending failed. Please try again.');
   }).catch(function() {
     btn.disabled = false;
     btnLbl.textContent = currentLang === 'ro' ? 'TRIMITE MESAJUL' : 'SEND MESSAGE';
@@ -789,6 +813,7 @@ function applyPageLang(lang) {
 
 document.addEventListener('calnic:langchange', function(e) { applyPageLang(e.detail.lang); });
 applyPageLang(window.CalnicUtils ? window.CalnicUtils.lang() : currentLang);
+initContactFields();
 
 /* ── NAV SESSION CHECK ── */
 function checkNavSession() {

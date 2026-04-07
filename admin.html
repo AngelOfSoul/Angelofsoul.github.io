@@ -2605,13 +2605,37 @@ function loadPollSuggestions() {
       list.innerHTML = rows.map(function(s) {
         var q = s.polls && s.polls.question ? s.polls.question : 'Sondaj';
         return '<div style="border-left:2px solid var(--gold-d);padding:9px 12px;background:var(--s2);margin-bottom:8px;">' +
-          '<div style="font-size:10px;letter-spacing:1px;color:var(--gold-m);text-transform:uppercase;">' + escH(q) + ' · ' + escH(fmtDate(s.created_at)) + '</div>' +
-          '<div style="font-size:14px;color:var(--text);margin-top:4px;">' + escH(s.suggestion || '') + '</div>' +
+          '<div style="font-size:10px;letter-spacing:1px;color:var(--gold-m);text-transform:uppercase;display:flex;align-items:center;justify-content:space-between;gap:8px;">' +
+            '<span>' + escH(q) + ' · ' + escH(fmtDate(s.created_at)) + '</span>' +
+            '<button type="button" class="tbtn red" onclick="deletePollSuggestion(\'' + s.id + '\')">Sterge</button>' +
+          '</div>' +
+          '<div style="font-size:14px;color:var(--text);margin-top:6px;">' + escH(s.suggestion || '') + '</div>' +
         '</div>';
       }).join('');
     })
     .catch(function() {
       list.innerHTML = '<div style="color:var(--red);font-size:13px;">Nu am putut incarca sugestiile.</div>';
+    });
+}
+
+function deletePollSuggestion(voteId) {
+  var sb = getSB();
+  if (!sb || typeof sb.from !== 'function' || !voteId) return;
+  if (!confirm('Stergi aceasta sugestie din lista? Votul ramane, doar textul sugestiei se sterge.')) return;
+  sb
+    .from('poll_votes')
+    .update({ suggestion: null })
+    .eq('id', voteId)
+    .then(function(r) {
+      if (r && r.error) {
+        alert('Eroare: ' + r.error.message);
+        return;
+      }
+      logAction('poll-suggestion-delete', 'Sugestie sondaj stearsa: ' + voteId);
+      loadPollSuggestions();
+    })
+    .catch(function(e) {
+      alert('Eroare: ' + (e && e.message ? e.message : 'necunoscuta'));
     });
 }
 
@@ -2919,12 +2943,13 @@ function loadContactMessages() {
         var resolved = m.resolved;
         return '<div class="contact-card">' +
           '<div class="contact-top">' +
-          '<div class="contact-name">' + (m.name||'Anonim') + ' &nbsp;<span style="font-size:12px;color:var(--muted);font-family:\'EB Garamond\',serif;">' + (m.email||'') + '</span></div>' +
+          '<div class="contact-name">' + escH(m.name || 'Anonim') + ' &nbsp;<span style="font-size:12px;color:var(--muted);font-family:\'EB Garamond\',serif;">' + escH(m.email || '') + '</span></div>' +
           '<div class="contact-meta"><span class="badge ' + (resolved?'ok':'new') + '">' + (resolved?'Rezolvat':'Nou') + '</span><span style="font-size:11px;color:var(--gold-m);">' + fmtDate(m.created_at) + '</span></div>' +
           '</div>' +
-          '<div class="contact-msg">"' + (m.message||'') + '"</div>' +
+          '<div class="contact-msg">"' + escH(m.message || '') + '"</div>' +
           '<div class="contact-actions">' +
           (!resolved ? '<button class="tbtn green" onclick="resolveContact(\''+m.id+'\')">Marcheaza rezolvat</button>' : '') +
+          '<button class="tbtn red" onclick="deleteContactMessage(\''+m.id+'\')">Sterge mesaj</button>' +
           '</div></div>';
       }).join('');
     }).catch(function(){ document.getElementById('contact-list').innerHTML = '<div style="color:var(--gold-m);font-style:italic;font-size:13px;">Tabelul contact_messages nu exista inca.</div>'; });
@@ -2934,6 +2959,21 @@ function resolveContact(id) {
   supabase.from('contact_messages').update({resolved:true}).eq('id',id).then(function(){
     loadContactMessages();
     logAction('contact-resolve', 'Mesaj contact rezolvat: ' + id);
+  });
+}
+
+function deleteContactMessage(id) {
+  if (!window.supabase || !id) return;
+  if (!confirm('Stergi definitiv acest mesaj de contact?')) return;
+  supabase.from('contact_messages').delete().eq('id', id).then(function(r) {
+    if (r && r.error) {
+      alert('Eroare: ' + r.error.message);
+      return;
+    }
+    logAction('contact-delete', 'Mesaj contact sters: ' + id);
+    loadContactMessages();
+  }).catch(function(e) {
+    alert('Eroare: ' + (e && e.message ? e.message : 'necunoscuta'));
   });
 }
 
