@@ -1,5 +1,12 @@
-{
-  "devDependencies": {
-    "playwright": "^1.59.1"
-  }
+﻿{
+    "devDependencies":  {
+                            "playwright":  "^1.59.1"
+                        },
+    "scripts":  {
+                    "test:visual":  "node scripts/testing/run-visual-test.js",
+                    "staging:copy":  "node scripts/testing/create-staging-copy.js",
+                    "test:usersim":  "node scripts/testing/run-user-sim.js",
+                    "test:staging":  "node scripts/testing/run-staging-tests.js",
+                    "test:load":  "node scripts/testing/run-load-test.js"
+                }
 }

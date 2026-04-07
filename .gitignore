@@ -1,0 +1,5 @@
+.staging-site/
+backup/
+reports/
+tmp_review_zip/
+scripts/testing/

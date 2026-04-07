@@ -47,6 +47,15 @@
   padding:7px 10px; margin-bottom:10px; border-radius:1px;
 }
 .vc-pinned-text { font-size:12px; color:var(--muted); font-style:italic; line-height:1.5; }
+.vc-pinned-actions { display:none; gap:8px; margin-top:6px; }
+.vc-pinned-actions.show { display:flex; }
+.vc-pinned-btn {
+  font-size:10px; color:var(--dim); cursor:pointer;
+  background:none; border:1px solid var(--b2); font-family:'EB Garamond',serif;
+  padding:2px 7px; transition:all 0.12s;
+}
+.vc-pinned-btn:hover { color:var(--gold); border-color:var(--gold-d); }
+.vc-pinned-btn.danger:hover { color:#c46a6a; border-color:#7a2a2a; }
 .vc-messages {
   min-height:220px; max-height:320px; overflow-y:auto;
   margin-bottom:8px;
@@ -84,7 +93,7 @@
   padding:3px 7px; margin:3px 0 4px 28px;
 }
 .vc-reply-quote span { font-size:11px; color:var(--muted); font-style:italic; }
-.vc-body { font-size:13px; color:#cfc0a0; line-height:1.5; padding-left:28px; }
+.vc-body { font-size:15px; color:var(--text); line-height:1.6; padding-left:28px; }
 .vc-actions { display:none; gap:8px; padding-left:28px; margin-top:2px; }
 .vc-msg:hover .vc-actions { display:flex; }
 .vc-act {
@@ -591,6 +600,10 @@ to{transform:rotate(360deg);}
     <!-- ── VATRA SATULUI CHAT ── -->
     <div id="vc-pinned" class="vc-pinned" style="display:none;">
       <div class="vc-pinned-text" id="vc-pinned-text"></div>
+      <div class="vc-pinned-actions" id="vc-pinned-actions">
+        <button class="vc-pinned-btn danger" onclick="vcDeletePinned()">✕ Șterge fixat</button>
+        <button class="vc-pinned-btn" onclick="vcUnpinPinned()">Scoate fixat</button>
+      </div>
     </div>
 
     <div class="vc-messages" id="vc-msgs">
@@ -1125,6 +1138,9 @@ if (window.supabase) { checkFamiliiNavSession(); } else { document.addEventListe
   var vcLastSent = 0;
   var vcSentTimestamps = [];
   var vcDialogBusy = false;
+  var vcPinnedMessageId = null;
+  var vcModerationRules = { blockLinks: false, blockBannedWords: false, bannedWords: [] };
+  var vcModerationLoadedAt = 0;
 
   /* ── Helpers DOM ── */
   function $id(id) { return document.getElementById(id); }
@@ -1203,6 +1219,46 @@ if (window.supabase) { checkFamiliiNavSession(); } else { document.addEventListe
       document.addEventListener('keydown', keyHandler, true);
     });
   }
+  function vcParseModerationRules(valueText) {
+    var out = { blockLinks: false, blockBannedWords: false, bannedWords: [] };
+    if (!valueText) return out;
+    try {
+      var cfg = JSON.parse(String(valueText || ''));
+      if (cfg && typeof cfg === 'object') {
+        out.blockLinks = !!cfg.block_links;
+        out.blockBannedWords = !!cfg.block_banned_words;
+        out.bannedWords = String(cfg.blocked_words || '')
+          .split(',')
+          .map(function(w) { return w.trim().toLowerCase(); })
+          .filter(function(w) { return !!w; });
+      }
+    } catch (_e) {}
+    return out;
+  }
+  async function vcLoadModerationRules(force) {
+    if (typeof supabase === 'undefined') return vcModerationRules;
+    var now = Date.now();
+    if (!force && vcModerationLoadedAt && (now - vcModerationLoadedAt < 45000)) return vcModerationRules;
+    try {
+      var res = await supabase.from('site_settings').select('value').eq('key', 'chat_moderation').maybeSingle();
+      if (res && !res.error && res.data && typeof res.data.value !== 'undefined') {
+        vcModerationRules = vcParseModerationRules(res.data.value);
+      }
+      vcModerationLoadedAt = Date.now();
+    } catch (_e) {}
+    return vcModerationRules;
+  }
+  function vcBodyHasLink(text) {
+    return /(https?:\/\/|www\.)/i.test(String(text || ''));
+  }
+  function vcFindBlockedWord(text) {
+    var body = String(text || '').toLowerCase();
+    var words = vcModerationRules && Array.isArray(vcModerationRules.bannedWords) ? vcModerationRules.bannedWords : [];
+    for (var i = 0; i < words.length; i++) {
+      if (body.indexOf(words[i]) !== -1) return words[i];
+    }
+    return '';
+  }
   function vcRefreshEmptyState() {
     var list = $id('vc-msgs');
     var empty = $id('vc-empty');
@@ -1217,6 +1273,7 @@ if (window.supabase) { checkFamiliiNavSession(); } else { document.addEventListe
       setTimeout(vcInit, 300);
       return;
     }
+    vcLoadModerationRules(false);
     vcDetectUser();
   }
 
@@ -1308,10 +1365,10 @@ if (window.supabase) { checkFamiliiNavSession(); } else { document.addEventListe
           .limit(1)
           .maybeSingle();
         if (pinnedRes && pinnedRes.data) {
-          vcShowPinned(pinnedRes.data.body);
+          vcShowPinned(pinnedRes.data.body, pinnedRes.data.id);
         } else {
           var lang = document.documentElement.lang || 'ro';
-          vcShowPinned(lang === 'en' ? PINNED_DEFAULT_EN : PINNED_DEFAULT_RO);
+          vcShowPinned(lang === 'en' ? PINNED_DEFAULT_EN : PINNED_DEFAULT_RO, null);
         }
       }
     } catch(e) {}
@@ -1343,9 +1400,18 @@ if (window.supabase) { checkFamiliiNavSession(); } else { document.addEventListe
           var el = document.querySelector('[data-msg-id="' + updated.id + '"]');
           if (updated.status === 'deleted' || updated.status === 'reported' || updated.status === 'pinned') {
             if (el) el.remove();
-            if (updated.status === 'pinned') vcShowPinned(updated.body);
+            if (updated.status === 'pinned') {
+              vcShowPinned(updated.body, updated.id);
+            } else if (vcPinnedMessageId && vcPinnedMessageId === updated.id) {
+              var lang = document.documentElement.lang || 'ro';
+              vcShowPinned(lang === 'en' ? PINNED_DEFAULT_EN : PINNED_DEFAULT_RO, null);
+            }
             vcRefreshEmptyState();
           } else if (updated.status === 'active') {
+            if (vcPinnedMessageId && vcPinnedMessageId === updated.id) {
+              var lang2 = document.documentElement.lang || 'ro';
+              vcShowPinned(lang2 === 'en' ? PINNED_DEFAULT_EN : PINNED_DEFAULT_RO, null);
+            }
             if (!el) vcRenderMessage(updated);
           }
         })
@@ -1381,7 +1447,7 @@ if (window.supabase) { checkFamiliiNavSession(); } else { document.addEventListe
       '<button class="vc-act vc-act-del" onclick="vcDeleteMsg(\'' + msg.id + '\')">✕ Șterge</button>' : '';
     var pinBtn = isAdmin ?
       '<button class="vc-act" onclick="vcPinMsg(\'' + msg.id + '\')">📌 Fixează</button>' : '';
-    var reportBtn = (!isAdmin && !isOwn) ?
+    var reportBtn = (!isOwn) ?
       '<button class="vc-act" onclick="vcReportMsg(\'' + msg.id + '\')">⚑ Raportează</button>' : '';
 
     var d = document.createElement('div');
@@ -1410,10 +1476,19 @@ if (window.supabase) { checkFamiliiNavSession(); } else { document.addEventListe
     var list = $id('vc-msgs');
     if (list) list.scrollTop = list.scrollHeight;
   }
-  function vcShowPinned(text) {
+  function vcShowPinned(text, id) {
     var pin = $id('vc-pinned');
     var pt = $id('vc-pinned-text');
-    if (pin && pt) { pt.textContent = '📌 ' + text; pin.style.display = 'block'; }
+    var actions = $id('vc-pinned-actions');
+    vcPinnedMessageId = id || null;
+    if (pin && pt) {
+      pt.textContent = '📌 ' + text;
+      pin.style.display = 'block';
+    }
+    if (actions) {
+      var isAdmin = vcCurrentUser && vcCurrentUser.type === 'admin';
+      actions.classList.toggle('show', !!(isAdmin && vcPinnedMessageId));
+    }
   }
 
   /* ── Reply ── */
@@ -1445,6 +1520,26 @@ if (window.supabase) { checkFamiliiNavSession(); } else { document.addEventListe
     if (!inp) return;
     var body = inp.value.trim();
     if (!body || body.length > MAX_CHARS) return;
+    await vcLoadModerationRules(false);
+    if (vcModerationRules.blockLinks && vcBodyHasLink(body)) {
+      await vcDialogOpen({
+        title: 'Mesaj blocat',
+        message: 'Linkurile sunt blocate momentan de administrator.',
+        hideCancel: true
+      });
+      return;
+    }
+    if (vcModerationRules.blockBannedWords) {
+      var bad = vcFindBlockedWord(body);
+      if (bad) {
+        await vcDialogOpen({
+          title: 'Mesaj blocat',
+          message: 'Mesajul contine cuvant interzis: ' + bad,
+          hideCancel: true
+        });
+        return;
+      }
+    }
 
     /* Anti-spam vizitator */
     if (vcCurrentUser.type === 'guest') {
@@ -1465,15 +1560,6 @@ if (window.supabase) { checkFamiliiNavSession(); } else { document.addEventListe
         await vcDialogOpen({
           title: 'Limită atinsă',
           message: 'Ai atins limita de ' + MAX_MSGS_PER_WINDOW + ' mesaje per 30 de minute.',
-          hideCancel: true
-        });
-        return;
-      }
-      /* Fără linkuri */
-      if (/https?:\/\//i.test(body) || /www\./i.test(body)) {
-        await vcDialogOpen({
-          title: 'Mesaj blocat',
-          message: 'Linkurile nu sunt permise pentru vizitatori.',
           hideCancel: true
         });
         return;
@@ -1546,6 +1632,36 @@ if (window.supabase) { checkFamiliiNavSession(); } else { document.addEventListe
     } catch(e) {
       await vcDialogOpen({
         title: 'Ștergere eșuată',
+        message: 'Eroare neașteptată: ' + ((e && e.message) ? e.message : 'necunoscută'),
+        hideCancel: true
+      });
+    }
+  };
+  window.vcDeletePinned = async function() {
+    if (!vcPinnedMessageId) return;
+    await vcDeleteMsg(vcPinnedMessageId);
+  };
+  window.vcUnpinPinned = async function() {
+    if (!vcCurrentUser || vcCurrentUser.type !== 'admin' || !vcPinnedMessageId) return;
+    try {
+      var res = await supabase
+        .from('chat_messages')
+        .update({ status: 'active' })
+        .eq('id', vcPinnedMessageId)
+        .select('id');
+      if (res && res.error) {
+        await vcDialogOpen({
+          title: 'Scoatere eșuată',
+          message: 'Nu am putut scoate mesajul fixat: ' + res.error.message,
+          hideCancel: true
+        });
+        return;
+      }
+      var lang = document.documentElement.lang || 'ro';
+      vcShowPinned(lang === 'en' ? PINNED_DEFAULT_EN : PINNED_DEFAULT_RO, null);
+    } catch(e) {
+      await vcDialogOpen({
+        title: 'Scoatere eșuată',
         message: 'Eroare neașteptată: ' + ((e && e.message) ? e.message : 'necunoscută'),
         hideCancel: true
       });
