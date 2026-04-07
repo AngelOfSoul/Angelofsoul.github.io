@@ -612,7 +612,7 @@ border:1px solid var(--b1); border-radius:2px; padding:20px 22px; margin-bottom:
 .li-poll-radio { width:13px; height:13px; border-radius:50%; border:1px solid var(--b2); flex-shrink:0; background:var(--s1); transition:all .15s; }
 .li-poll-opt.sel .li-poll-radio { border-color:var(--gold); background:var(--gold); }
 .li-poll-opt-text { font-size:14px; color:var(--text); flex:1; }
-.li-poll-opt-other { border-style:dashed; }
+.li-poll-opt-other { border-style:dashed; user-select:text; }
 .li-poll-other-input { flex:1; background:transparent; border:none; outline:none; font-family:'EB Garamond',serif; font-size:14px; color:var(--text); }
 .li-poll-other-input::placeholder { color:var(--dim); font-style:italic; }
 .li-poll-vote-btn { background:var(--s3); border:1px solid var(--gold-m); color:var(--gold); font-family:'Cinzel',serif; font-size:10px; letter-spacing:1.5px; padding:7px 20px; cursor:pointer; border-radius:1px; transition:all .15s; text-transform:uppercase; }
@@ -1383,6 +1383,7 @@ if (window.supabase) { checkAdminNavLink(); } else { document.addEventListener('
       var voted = !!activePollVotes[poll.id];
       var opts = pollSortedOptions(poll);
       var selected = activePollSelected[poll.id] || null;
+      var canVoteNow = !voted && !!selected && (selected.kind !== 'other' || (selected.text && selected.text.trim().length > 0));
       var optionsHtml = opts.map(function(opt) {
         var sel = selected && selected.kind === 'option' && selected.optionId === opt.id;
         return '<div class="li-poll-opt' + (sel ? ' sel' : '') + '" onclick="pollSelectOption(\'' + poll.id + '\',\'' + opt.id + '\')">' +
@@ -1396,7 +1397,7 @@ if (window.supabase) { checkAdminNavLink(); } else { document.addEventListener('
         var otherVal = otherSel ? (selected.text || '') : '';
         optionsHtml += '<div class="li-poll-opt li-poll-opt-other' + (otherSel ? ' sel' : '') + '" onclick="pollSelectOther(\'' + poll.id + '\')">' +
           '<div class="li-poll-radio"></div>' +
-          '<input class="li-poll-other-input" id="li-poll-other-' + poll.id + '" placeholder="Alta idee - scrie aici..." value="' + escH(otherVal) + '" oninput="pollUpdateOtherText(\'' + poll.id + '\', this.value)" onclick="event.stopPropagation();pollSelectOther(\'' + poll.id + '\')" />' +
+          '<input class="li-poll-other-input" id="li-poll-other-' + poll.id + '" placeholder="Alta idee - scrie aici..." value="' + escH(otherVal) + '" oninput="pollUpdateOtherText(\'' + poll.id + '\', this.value)" onfocus="pollSelectOther(\'' + poll.id + '\', true)" onclick="event.stopPropagation()" onmousedown="event.stopPropagation()" />' +
         '</div>';
       }
 
@@ -1413,7 +1414,6 @@ if (window.supabase) { checkAdminNavLink(); } else { document.addEventListener('
         '</div>';
       }).join('') + '<div class="li-poll-total">' + total + ' voturi total</div>';
 
-      var canVote = !voted && !!selected && (selected.kind !== 'other' || (selected.text && selected.text.trim().length > 0));
       var navHtml = '';
       if (activePolls.length > 1) {
         var prevBtn = idx > 0 ? '<button class="li-poll-nav-btn" onclick="pollShowIndex(' + (idx - 1) + ')">&#8249; Anterior</button>' : '';
@@ -1431,7 +1431,7 @@ if (window.supabase) { checkAdminNavLink(); } else { document.addEventListener('
           ? '<div class="li-poll-results">' + resultsHtml + '</div>'
           : '<div class="li-poll-opt-list">' + optionsHtml + '</div>') +
         '<div class="li-poll-footer">' +
-          '<div>' + (voted ? '<span style="font-size:13px;color:var(--gold-m);font-style:italic;">Multumim pentru vot!</span>' : '<button class="li-poll-vote-btn" onclick="pollVote(\'' + poll.id + '\')"' + (canVote ? '' : ' disabled') + '>Voteaza</button>') + '</div>' +
+          '<div>' + (voted ? '<span style="font-size:13px;color:var(--gold-m);font-style:italic;">Multumim pentru vot!</span>' : '<button class="li-poll-vote-btn" id="li-poll-vote-' + poll.id + '" onclick="pollVote(\'' + poll.id + '\')"' + (canVoteNow ? '' : ' disabled') + '>Voteaza</button>') + '</div>' +
           '<div style="display:flex;align-items:center;gap:10px;">' + navHtml + '<span class="li-poll-exp">' + pollDaysText(poll.expires_at) + '</span></div>' +
         '</div>' +
       '</div>';
@@ -1474,6 +1474,19 @@ if (window.supabase) { checkAdminNavLink(); } else { document.addEventListener('
     }
   }
 
+  function pollCanVote(pollId) {
+    if (activePollVotes[pollId]) return false;
+    var selected = activePollSelected[pollId];
+    if (!selected) return false;
+    if (selected.kind !== 'other') return true;
+    return !!String(selected.text || '').trim();
+  }
+  function pollRefreshVoteButton(pollId) {
+    var btn = document.getElementById('li-poll-vote-' + pollId);
+    if (!btn) return;
+    btn.disabled = !pollCanVote(pollId);
+  }
+
   window.pollShowIndex = function(idx) {
     if (!activePolls.length) return;
     if (idx < 0) idx = 0;
@@ -1488,14 +1501,33 @@ if (window.supabase) { checkAdminNavLink(); } else { document.addEventListener('
     renderPollSection();
   };
 
-  window.pollSelectOther = function(pollId) {
+  window.pollSelectOther = function(pollId, keepFocus) {
     if (activePollVotes[pollId]) return;
     var current = activePollSelected[pollId];
+    if (current && current.kind === 'other') {
+      if (keepFocus) {
+        var existingInput = document.getElementById('li-poll-other-' + pollId);
+        if (existingInput) existingInput.focus();
+      }
+      pollRefreshVoteButton(pollId);
+      return;
+    }
     activePollSelected[pollId] = {
       kind: 'other',
       text: current && current.kind === 'other' ? (current.text || '') : ''
     };
     renderPollSection();
+    if (keepFocus) {
+      setTimeout(function() {
+        var input = document.getElementById('li-poll-other-' + pollId);
+        if (!input) return;
+        input.focus();
+        try {
+          var len = input.value.length;
+          input.setSelectionRange(len, len);
+        } catch (_e) {}
+      }, 0);
+    }
   };
 
   window.pollUpdateOtherText = function(pollId, text) {
@@ -1506,6 +1538,7 @@ if (window.supabase) { checkAdminNavLink(); } else { document.addEventListener('
     }
     current.text = String(text || '');
     activePollSelected[pollId] = current;
+    pollRefreshVoteButton(pollId);
   };
 
   window.pollVote = async function(pollId) {
@@ -1872,10 +1905,3 @@ if (window.supabase) { checkAdminNavLink(); } else { document.addEventListener('
 <script src="js/transitions.js" defer></script>
 </body>
 </html>
-
-
-
-
-
-
-
