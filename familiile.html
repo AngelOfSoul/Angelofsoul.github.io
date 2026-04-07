@@ -40,6 +40,110 @@
 
 }
 
+/* ── Vatra satului chat ── */
+.vc-pinned {
+  background:#0d0b06; border:1px solid var(--b1);
+  border-left:2px solid var(--gold-d);
+  padding:7px 10px; margin-bottom:10px; border-radius:1px;
+}
+.vc-pinned-text { font-size:12px; color:var(--muted); font-style:italic; line-height:1.5; }
+.vc-messages {
+  min-height:220px; max-height:320px; overflow-y:auto;
+  margin-bottom:0;
+}
+.vc-messages::-webkit-scrollbar { width:3px; }
+.vc-messages::-webkit-scrollbar-thumb { background:var(--b2); border-radius:2px; }
+.vc-msg { padding:7px 0; border-bottom:1px solid #1a1508; }
+.vc-msg:last-child { border-bottom:none; }
+.vc-msg:hover { background:var(--s2); padding-left:4px; transition:padding 0.1s; }
+.vc-head { display:flex; align-items:center; gap:6px; margin-bottom:3px; flex-wrap:wrap; }
+.vc-avatar {
+  width:22px; height:22px; border-radius:50%;
+  background:#1a1408; border:1px solid var(--b2);
+  display:flex; align-items:center; justify-content:center;
+  font-family:'Playfair Display',serif; font-size:10px;
+  color:var(--gold); flex-shrink:0;
+}
+.vc-avatar.vc-guest { border-color:var(--dim); color:var(--muted); }
+.vc-author { font-family:'Playfair Display',serif; font-size:12px; color:var(--text); }
+.vc-badge {
+  font-size:8px; letter-spacing:0.8px; padding:1px 5px;
+  border-radius:1px; font-family:'Cinzel',serif; text-transform:uppercase;
+}
+.vc-badge-member { background:#0e1e0a; color:#82c46a; border:1px solid #2a4a1a; }
+.vc-badge-guest  { background:#1a1208; color:var(--muted); border:1px solid var(--b1); }
+.vc-badge-admin  { background:#1e0a0a; color:#c46a6a; border:1px solid #4a1a1a; }
+.vc-time { font-size:10px; color:var(--dim); margin-left:auto; }
+.vc-reply-quote {
+  background:var(--s3); border-left:2px solid var(--gold-d);
+  padding:3px 7px; margin:3px 0 4px 28px;
+}
+.vc-reply-quote span { font-size:11px; color:var(--muted); font-style:italic; }
+.vc-body { font-size:13px; color:#cfc0a0; line-height:1.5; padding-left:28px; }
+.vc-actions { display:none; gap:8px; padding-left:28px; margin-top:2px; }
+.vc-msg:hover .vc-actions { display:flex; }
+.vc-act {
+  font-size:10px; color:var(--dim); cursor:pointer;
+  background:none; border:none; font-family:'EB Garamond',serif;
+  padding:0; transition:color 0.12s;
+}
+.vc-act:hover { color:var(--gold); }
+.vc-act-del:hover { color:#c46a6a; }
+.vc-reply-bar {
+  display:none; align-items:center; gap:6px;
+  background:var(--s3); border:1px solid var(--b1);
+  border-bottom:none; padding:5px 8px;
+}
+.vc-reply-bar.vc-show { display:flex; }
+.vc-reply-info { flex:1; border-left:2px solid var(--gold-d); padding-left:6px; }
+.vc-reply-author { font-size:10px; color:var(--gold-d); }
+.vc-reply-preview { font-size:11px; color:var(--muted); font-style:italic; }
+.vc-reply-close {
+  background:none; border:none; color:var(--dim);
+  cursor:pointer; font-size:13px; padding:0; line-height:1;
+}
+.vc-gate { padding:12px 0 8px; }
+.vc-gate p { font-size:12px; color:var(--muted); font-style:italic; margin:0 0 8px; }
+.vc-gate-input {
+  width:100%; background:var(--s2); border:1px solid var(--b2);
+  color:var(--text); font-family:'EB Garamond',serif; font-size:13px;
+  padding:6px 8px; border-radius:1px; outline:none;
+  margin-bottom:7px; box-sizing:border-box; transition:border-color 0.15s;
+}
+.vc-gate-input:focus { border-color:var(--gold-d); }
+.vc-gate-btn {
+  background:var(--s3); border:1px solid var(--gold-d); color:var(--gold);
+  font-family:'Cinzel',serif; font-size:10px; letter-spacing:1px;
+  padding:6px 14px; cursor:pointer; border-radius:1px; transition:all 0.15s;
+}
+.vc-gate-btn:hover { background:var(--gold-d); color:#050505; }
+.vc-composer { border:1px solid var(--b1); border-top:2px solid var(--b2); background:var(--s1); padding:8px 10px; }
+.vc-composer-row { display:flex; gap:6px; align-items:flex-end; }
+.vc-input-field {
+  flex:1; background:var(--s2); border:1px solid var(--b2);
+  color:var(--text); font-family:'EB Garamond',serif;
+  font-size:13px; padding:6px 8px; border-radius:1px;
+  resize:none; outline:none; min-height:32px; max-height:70px;
+  line-height:1.4; transition:border-color 0.15s;
+}
+.vc-input-field:focus { border-color:var(--gold-d); }
+.vc-input-field::placeholder { color:var(--dim); font-style:italic; }
+.vc-send {
+  background:var(--s3); border:1px solid var(--gold-d); color:var(--gold);
+  font-family:'Cinzel',serif; font-size:10px; letter-spacing:1px;
+  padding:6px 10px; cursor:pointer; border-radius:1px;
+  transition:all 0.15s; white-space:nowrap;
+}
+.vc-send:hover { background:var(--gold-d); color:#050505; }
+.vc-meta { display:flex; justify-content:space-between; margin-top:5px; align-items:center; }
+.vc-status { font-size:11px; color:var(--muted); font-style:italic; }
+.vc-dot {
+  display:inline-block; width:5px; height:5px; border-radius:50%;
+  background:#82c46a; margin-right:4px; vertical-align:middle;
+}
+.vc-chars { font-size:10px; color:var(--dim); }
+/* ── end Vatra satului ── */
+
 .main-wrap {
 max-width:1080px !important; margin:0 auto; padding:32px 20px !important; display:grid; grid-template-columns:1fr 272px; gap:36px; align-items:start;
 }
@@ -431,39 +535,50 @@ to{transform:rotate(360deg);}
   <div class="sidebar-col">
 
     <div class="section-head">
-      <span class="section-head-title" data-ro="Calnic in cifre" data-en="Calnic by the numbers">Calnic in cifre</span>
-    </div>
-    <div class="stats-grid">
-      <div class="stat-cell"><span class="stat-num" id="statFamiliiNum">47</span><span class="stat-lbl" data-ro="familii" data-en="families">familii</span></div>
-      <div class="stat-cell"><span class="stat-num">312</span><span class="stat-lbl" data-ro="locuitori" data-en="residents">locuitori</span></div>
-      <div class="stat-cell"><span class="stat-num">1269</span><span class="stat-lbl" data-ro="atestat" data-en="first recorded">atestat</span></div>
-      <div class="stat-cell"><span class="stat-num" style="font-size:13px;">UNESCO</span><span class="stat-lbl" data-ro="cetatea" data-en="citadel">cetatea</span></div>
+      <span class="section-head-title" data-ro="Vatra satului" data-en="Village hearth">Vatra satului</span>
     </div>
 
-    <div class="side-orn">— &#10022; —</div>
+    <!-- ── VATRA SATULUI CHAT ── -->
+    <div id="vc-pinned" class="vc-pinned" style="display:none;">
+      <div class="vc-pinned-text" id="vc-pinned-text"></div>
+    </div>
 
-    <div class="section-head">
-      <span class="section-head-title" data-ro="Despre sat" data-en="About the village">Despre sat</span>
+    <div class="vc-messages" id="vc-msgs">
+      <div class="vc-empty" id="vc-empty">
+        <div style="text-align:center;padding:30px 10px;color:var(--muted);font-style:italic;font-size:13px;">
+          Nu există încă mesaje.<br>Fii primul care începe conversația.
+        </div>
+      </div>
     </div>
-    <div class="info-row"><span class="info-lbl" data-ro="Judet" data-en="County">Judet</span><span class="info-val">Alba</span></div>
-    <div class="info-row"><span class="info-lbl" data-ro="Regiune" data-en="Region">Regiune</span><span class="info-val">Transilvania</span></div>
-    <div class="info-row"><span class="info-lbl" data-ro="Cetatea" data-en="Citadel">Cetatea</span><span class="info-val" style="color:var(--gold);">Patrimoniu UNESCO</span></div>
-    <div class="info-row"><span class="info-lbl" data-ro="Altitudine" data-en="Altitude">Altitudine</span><span class="info-val">380 m</span></div>
 
-    <div class="side-orn">— &#10022; —</div>
+    <div class="vc-reply-bar" id="vc-reply-bar">
+      <div class="vc-reply-info">
+        <div class="vc-reply-author" id="vc-reply-author"></div>
+        <div class="vc-reply-preview" id="vc-reply-preview"></div>
+      </div>
+      <button class="vc-reply-close" onclick="vcClearReply()">✕</button>
+    </div>
 
-    <div class="section-head">
-      <span class="section-head-title" data-ro="Anunturi" data-en="Announcements">Anunturi</span>
+    <!-- Guest gate: apare doar dacă vizitatorul nu are nickname -->
+    <div class="vc-gate" id="vc-gate">
+      <p data-ro="Alege un nume pentru a scrie în chat:" data-en="Choose a name to write in chat:">Alege un nume pentru a scrie în chat:</p>
+      <input class="vc-gate-input" id="vc-gate-input" type="text" maxlength="30"
+        placeholder="Numele tău..." onkeydown="if(event.key==='Enter') vcSetGuest()"/>
+      <button class="vc-gate-btn" onclick="vcSetGuest()">Continuă</button>
     </div>
-    <div class="ann">
-      <div class="ann-date" data-ro="Martie 2026" data-en="March 2026">Martie 2026</div>
-      <strong data-ro="Site nou lansat!" data-en="New site launched!">Site nou lansat!</strong>
-      <span data-ro=" — Bine ati venit pe noul site al comunei Calnic." data-en=" — Welcome to the new Calnic village website."> — Bine ati venit pe noul site al comunei Calnic.</span>
+
+    <div class="vc-composer" id="vc-composer" style="display:none;">
+      <div class="vc-composer-row">
+        <textarea class="vc-input-field" id="vc-input" placeholder="Scrie un mesaj..." rows="1"
+          oninput="vcCount(this)" onkeydown="vcKey(event)" maxlength="300"></textarea>
+        <button class="vc-send" onclick="vcSend()">Trimite</button>
+      </div>
+      <div class="vc-meta">
+        <div class="vc-status" id="vc-status-label"><span class="vc-dot"></span><span id="vc-author-label"></span></div>
+        <div class="vc-chars"><span id="vc-n">0</span>/300</div>
+      </div>
     </div>
-    <div class="ann">
-      <div class="ann-date" data-ro="Martie 2026" data-en="March 2026">Martie 2026</div>
-      <span data-ro="Familiile se pot inregistra incepand de astazi." data-en="Families can register starting today.">Familiile se pot inregistra incepand de astazi.</span>
-    </div>
+    <!-- ── END VATRA SATULUI CHAT ── -->
 
   </div><!-- end sidebar-col -->
 
@@ -940,6 +1055,345 @@ if (window.supabase) { checkFamiliiNavSession(); } else { document.addEventListe
 <!-- Load Supabase client -->
 <script src="js/scroll-effects.js" defer></script>
 <script src="js/transitions.js" defer></script>
+
+<!-- ── VATRA SATULUI CHAT ── -->
+<script>
+(function() {
+  /* ── Constante ── */
+  var PINNED_DEFAULT_RO = 'Bine ați venit. Păstrați un ton civilizat, fără spam și fără linkuri.';
+  var PINNED_DEFAULT_EN = 'Welcome. Keep a civilised tone, no spam or links.';
+  var MAX_CHARS = 300;
+  var COOLDOWN_MS = 45000;
+  var MAX_MSGS_PER_WINDOW = 8;
+  var WINDOW_MS = 30 * 60 * 1000;
+  var MSG_TTL_DAYS = 7;
+
+  /* ── Stare ── */
+  var vcReplyTo = null;
+  var vcCurrentUser = null; /* { name, type: 'member'|'guest'|'admin', userId } */
+  var vcChannel = null;
+  var vcLastSent = 0;
+  var vcSentTimestamps = [];
+
+  /* ── Helpers DOM ── */
+  function $id(id) { return document.getElementById(id); }
+
+  /* ── Init după ce supabase e gata ── */
+  function vcInit() {
+    if (typeof supabase === 'undefined') {
+      setTimeout(vcInit, 300);
+      return;
+    }
+    vcDetectUser();
+  }
+
+  /* ── Detectare user logat sau vizitator ── */
+  async function vcDetectUser() {
+    try {
+      var sess = await supabase.auth.getSession();
+      var user = sess && sess.data && sess.data.session && sess.data.session.user;
+      if (user) {
+        /* Încearcă să ia numele familiei din tabelul families */
+        var res = await supabase.from('families').select('name').eq('created_by', user.id).maybeSingle();
+        var name = (res && res.data && res.data.name) ? res.data.name : (user.email || 'Membru');
+        var isAdmin = user.email && user.email === (window.ADMIN_EMAIL || '');
+        vcCurrentUser = { name: name, type: isAdmin ? 'admin' : 'member', userId: user.id };
+      }
+    } catch(e) {}
+
+    if (!vcCurrentUser) {
+      /* Vizitator — verifică localStorage */
+      var guestName = localStorage.getItem('vc_guest_name');
+      if (guestName) {
+        vcCurrentUser = { name: guestName, type: 'guest', userId: null };
+      }
+    }
+
+    vcRenderComposer();
+    vcLoadMessages();
+    vcSubscribe();
+  }
+
+  /* ── Composer: gate sau input ── */
+  function vcRenderComposer() {
+    var gate = $id('vc-gate');
+    var composer = $id('vc-composer');
+    if (!vcCurrentUser) {
+      if (gate) gate.style.display = 'block';
+      if (composer) composer.style.display = 'none';
+    } else {
+      if (gate) gate.style.display = 'none';
+      if (composer) composer.style.display = 'block';
+      var lbl = $id('vc-author-label');
+      if (lbl) lbl.textContent = vcCurrentUser.name;
+    }
+  }
+
+  /* ── Guest: setare nickname ── */
+  window.vcSetGuest = function() {
+    var inp = $id('vc-gate-input');
+    if (!inp) return;
+    var name = inp.value.trim();
+    if (!name || name.length < 2) { inp.focus(); return; }
+    name = name.substring(0, 30);
+    localStorage.setItem('vc_guest_name', name);
+    vcCurrentUser = { name: name, type: 'guest', userId: null };
+    vcRenderComposer();
+  };
+
+  /* ── Încarcă mesaje existente ── */
+  async function vcLoadMessages() {
+    if (typeof supabase === 'undefined') return;
+    try {
+      var cutoff = new Date(Date.now() - MSG_TTL_DAYS * 86400000).toISOString();
+      var res = await supabase
+        .from('chat_messages')
+        .select('*')
+        .gte('created_at', cutoff)
+        .eq('status', 'active')
+        .order('created_at', { ascending: true })
+        .limit(60);
+      if (res && res.data) {
+        var empty = $id('vc-empty');
+        if (res.data.length > 0) {
+          if (empty) empty.style.display = 'none';
+          res.data.forEach(function(msg) { vcRenderMessage(msg); });
+          vcScrollBottom();
+        } else {
+          if (empty) empty.style.display = 'block';
+        }
+        /* Pinned */
+        var pinnedRes = await supabase
+          .from('chat_messages')
+          .select('*')
+          .eq('status', 'pinned')
+          .order('created_at', { ascending: false })
+          .limit(1)
+          .maybeSingle();
+        if (pinnedRes && pinnedRes.data) {
+          vcShowPinned(pinnedRes.data.body);
+        } else {
+          var lang = document.documentElement.lang || 'ro';
+          vcShowPinned(lang === 'en' ? PINNED_DEFAULT_EN : PINNED_DEFAULT_RO);
+        }
+      }
+    } catch(e) {}
+  }
+
+  /* ── Realtime subscribe ── */
+  function vcSubscribe() {
+    if (typeof supabase === 'undefined') return;
+    try {
+      vcChannel = supabase
+        .channel('chat_messages_changes')
+        .on('postgres_changes', {
+          event: 'INSERT',
+          schema: 'public',
+          table: 'chat_messages',
+          filter: 'status=eq.active'
+        }, function(payload) {
+          var empty = $id('vc-empty');
+          if (empty) empty.style.display = 'none';
+          vcRenderMessage(payload.new);
+          vcScrollBottom();
+        })
+        .on('postgres_changes', {
+          event: 'UPDATE',
+          schema: 'public',
+          table: 'chat_messages'
+        }, function(payload) {
+          var updated = payload.new;
+          var el = document.querySelector('[data-msg-id="' + updated.id + '"]');
+          if (updated.status === 'deleted' || updated.status === 'reported') {
+            if (el) el.remove();
+          } else if (updated.status === 'pinned') {
+            vcShowPinned(updated.body);
+          }
+        })
+        .subscribe();
+    } catch(e) {}
+  }
+
+  /* ── Render mesaj ── */
+  function vcRenderMessage(msg) {
+    var list = $id('vc-msgs');
+    if (!list) return;
+    /* Evită duplicate */
+    if (document.querySelector('[data-msg-id="' + msg.id + '"]')) return;
+
+    var initial = (msg.author_display_name || '?').charAt(0).toUpperCase();
+    var avatarClass = msg.author_type === 'guest' ? ' vc-guest' : '';
+    var badgeClass = 'vc-badge-' + (msg.author_type || 'guest');
+    var badgeText = msg.author_type === 'member' ? 'Membru' : msg.author_type === 'admin' ? 'Admin' : 'Vizitator';
+    var time = new Date(msg.created_at).toLocaleTimeString('ro-RO', { hour: '2-digit', minute: '2-digit' });
+
+    var replyHtml = '';
+    if (msg.reply_to_name && msg.reply_to_body) {
+      replyHtml = '<div class="vc-reply-quote"><span>' +
+        vcEsc(msg.reply_to_name) + ': ' +
+        vcEsc(msg.reply_to_body.substring(0, 60)) + (msg.reply_to_body.length > 60 ? '...' : '') +
+        '</span></div>';
+    }
+
+    var isAdmin = vcCurrentUser && vcCurrentUser.type === 'admin';
+    var isOwn = vcCurrentUser && vcCurrentUser.userId && msg.user_id === vcCurrentUser.userId;
+    var deleteBtn = (isAdmin || isOwn) ?
+      '<button class="vc-act vc-act-del" onclick="vcDeleteMsg(\'' + msg.id + '\')">✕ Șterge</button>' : '';
+    var pinBtn = isAdmin ?
+      '<button class="vc-act" onclick="vcPinMsg(\'' + msg.id + '\')">📌 Fixează</button>' : '';
+    var reportBtn = (!isAdmin && !isOwn) ?
+      '<button class="vc-act" onclick="vcReportMsg(\'' + msg.id + '\')">⚑ Raportează</button>' : '';
+
+    var d = document.createElement('div');
+    d.className = 'vc-msg';
+    d.setAttribute('data-msg-id', msg.id);
+    d.innerHTML =
+      '<div class="vc-head">' +
+        '<div class="vc-avatar' + avatarClass + '">' + vcEsc(initial) + '</div>' +
+        '<span class="vc-author">' + vcEsc(msg.author_display_name) + '</span>' +
+        '<span class="vc-badge ' + badgeClass + '">' + badgeText + '</span>' +
+        '<span class="vc-time">' + time + '</span>' +
+      '</div>' +
+      replyHtml +
+      '<div class="vc-body">' + vcEsc(msg.body) + '</div>' +
+      '<div class="vc-actions">' +
+        '<button class="vc-act" onclick="vcSetReply(\'' + vcEsc(msg.id) + '\',\'' +
+          vcEsc(msg.author_display_name) + '\',\'' + vcEsc(msg.body.substring(0,60)) + '\')">↩ Răspunde</button>' +
+        reportBtn + deleteBtn + pinBtn +
+      '</div>';
+    list.appendChild(d);
+  }
+
+  /* ── Helpers ── */
+  function vcEsc(str) {
+    return String(str || '').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;').replace(/'/g,'&#39;');
+  }
+  function vcScrollBottom() {
+    var list = $id('vc-msgs');
+    if (list) list.scrollTop = list.scrollHeight;
+  }
+  function vcShowPinned(text) {
+    var pin = $id('vc-pinned');
+    var pt = $id('vc-pinned-text');
+    if (pin && pt) { pt.textContent = '📌 ' + text; pin.style.display = 'block'; }
+  }
+
+  /* ── Reply ── */
+  window.vcSetReply = function(id, author, preview) {
+    vcReplyTo = { id: id, author: author, body: preview };
+    var bar = $id('vc-reply-bar');
+    if (bar) bar.classList.add('vc-show');
+    var a = $id('vc-reply-author'); if (a) a.textContent = author;
+    var p = $id('vc-reply-preview'); if (p) p.textContent = preview + (preview.length >= 60 ? '...' : '');
+    var inp = $id('vc-input'); if (inp) inp.focus();
+  };
+  window.vcClearReply = function() {
+    vcReplyTo = null;
+    var bar = $id('vc-reply-bar'); if (bar) bar.classList.remove('vc-show');
+  };
+
+  /* ── Trimite mesaj ── */
+  window.vcCount = function(el) {
+    var n = $id('vc-n'); if (n) n.textContent = el.value.length;
+    el.style.height = 'auto';
+    el.style.height = Math.min(el.scrollHeight, 70) + 'px';
+  };
+  window.vcKey = function(e) {
+    if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); vcSend(); }
+  };
+  window.vcSend = async function() {
+    if (!vcCurrentUser) return;
+    var inp = $id('vc-input');
+    if (!inp) return;
+    var body = inp.value.trim();
+    if (!body || body.length > MAX_CHARS) return;
+
+    /* Anti-spam vizitator */
+    if (vcCurrentUser.type === 'guest') {
+      var now = Date.now();
+      /* Cooldown */
+      if (now - vcLastSent < COOLDOWN_MS) {
+        var secs = Math.ceil((COOLDOWN_MS - (now - vcLastSent)) / 1000);
+        alert('Așteaptă ' + secs + ' secunde înainte de a trimite un alt mesaj.');
+        return;
+      }
+      /* Limită fereastră */
+      vcSentTimestamps = vcSentTimestamps.filter(function(t) { return now - t < WINDOW_MS; });
+      if (vcSentTimestamps.length >= MAX_MSGS_PER_WINDOW) {
+        alert('Ai atins limita de ' + MAX_MSGS_PER_WINDOW + ' mesaje per 30 de minute.');
+        return;
+      }
+      /* Fără linkuri */
+      if (/https?:\/\//i.test(body) || /www\./i.test(body)) {
+        alert('Linkurile nu sunt permise pentru vizitatori.');
+        return;
+      }
+    }
+
+    var payload = {
+      body: body,
+      author_type: vcCurrentUser.type,
+      author_display_name: vcCurrentUser.name,
+      user_id: vcCurrentUser.userId || null,
+      guest_id: vcCurrentUser.type === 'guest' ? (localStorage.getItem('vc_guest_id') || vcMakeGuestId()) : null,
+      status: 'active',
+      reply_to_id: vcReplyTo ? vcReplyTo.id : null,
+      reply_to_name: vcReplyTo ? vcReplyTo.author : null,
+      reply_to_body: vcReplyTo ? vcReplyTo.body : null
+    };
+
+    try {
+      await supabase.from('chat_messages').insert(payload);
+      vcLastSent = Date.now();
+      vcSentTimestamps.push(vcLastSent);
+      inp.value = ''; inp.style.height = 'auto';
+      var n = $id('vc-n'); if (n) n.textContent = '0';
+      vcClearReply();
+    } catch(e) {}
+  };
+
+  function vcMakeGuestId() {
+    var id = 'g_' + Math.random().toString(36).substr(2, 9);
+    localStorage.setItem('vc_guest_id', id);
+    return id;
+  }
+
+  /* ── Moderare (admin) ── */
+  window.vcDeleteMsg = async function(id) {
+    if (!vcCurrentUser) return;
+    if (!confirm('Ștergi acest mesaj?')) return;
+    try {
+      await supabase.from('chat_messages').update({ status: 'deleted' }).eq('id', id);
+      var el = document.querySelector('[data-msg-id="' + id + '"]');
+      if (el) el.remove();
+    } catch(e) {}
+  };
+  window.vcPinMsg = async function(id) {
+    if (!vcCurrentUser || vcCurrentUser.type !== 'admin') return;
+    try {
+      /* Desprinde pinul vechi */
+      await supabase.from('chat_messages').update({ status: 'active' }).eq('status', 'pinned');
+      await supabase.from('chat_messages').update({ status: 'pinned' }).eq('id', id);
+    } catch(e) {}
+  };
+  window.vcReportMsg = async function(id) {
+    if (!confirm('Raportezi acest mesaj administratorului?')) return;
+    try {
+      await supabase.from('chat_messages').update({ status: 'reported' }).eq('id', id);
+      var el = document.querySelector('[data-msg-id="' + id + '"]');
+      if (el) el.remove();
+    } catch(e) {}
+  };
+
+  /* ── Start ── */
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', vcInit);
+  } else {
+    vcInit();
+  }
+})();
+</script>
+<!-- ── END VATRA SATULUI CHAT ── -->
 </body>
 </html>
 
