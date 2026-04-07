@@ -301,8 +301,15 @@ background:#1a0a0a;border:1px solid #4a1a1a;color:var(--red);
   color:var(--text);
   font-family:'EB Garamond',serif;
   font-size:13px;
-  padding:6px 10px;
+  padding:6px 32px 6px 10px;
   border-radius:2px;
+  appearance:none;
+  -webkit-appearance:none;
+  -moz-appearance:none;
+  background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='14' height='14' viewBox='0 0 24 24' fill='none' stroke='%23d4a84a' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolyline points='6 9 12 15 18 9'/%3E%3C/svg%3E");
+  background-repeat:no-repeat;
+  background-position:right 9px center;
+  background-size:14px 14px;
 }
 
 .chatm-pill {
@@ -483,6 +490,23 @@ border-color:var(--gold-d);
 
 .fs {
 background:var(--s3);border:1px solid var(--b2);color:var(--text);padding:8px 12px;font-family:'EB Garamond',serif;font-size:14px;border-radius:2px;outline:none;width:100%;
+appearance:none;-webkit-appearance:none;-moz-appearance:none;
+padding-right:34px;
+background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='14' height='14' viewBox='0 0 24 24' fill='none' stroke='%23d4a84a' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolyline points='6 9 12 15 18 9'/%3E%3C/svg%3E");
+background-repeat:no-repeat;
+background-position:right 10px center;
+background-size:14px 14px;
+}
+
+.fs option,
+.chatm-select option {
+background:#111214 !important;
+color:#f5eed8 !important;
+}
+
+.fs option:disabled,
+.chatm-select option:disabled {
+color:#8f7a55 !important;
 }
 
 .df-msg {
@@ -587,6 +611,18 @@ background:var(--gold-m);color:#050505;
 
 .log-list {
 background:var(--s2);border:1px solid var(--b1);border-radius:2px;padding:14px 18px;
+}
+
+.log-toolbar {
+display:flex;gap:8px;align-items:center;justify-content:flex-end;margin-bottom:8px;flex-wrap:wrap;
+}
+
+.log-del-btn {
+background:none;border:1px solid var(--b2);color:var(--muted);font-size:11px;padding:3px 10px;border-radius:2px;cursor:pointer;font-family:'EB Garamond',serif;transition:all 0.15s;
+}
+
+.log-del-btn:hover {
+border-color:var(--red);color:var(--red-l);
 }
 
 .log-row {
@@ -1191,9 +1227,9 @@ left:23px;
           </div>
           <div id="ann-msg"></div>
           <div style="display:flex;gap:10px;margin-top:4px;flex-wrap:wrap;">
-            <button class="adm-btn" onclick="doPublishAnn(false)">Publica</button>
+            <button type="button" class="adm-btn" onclick="doPublishAnn(false)">Publica</button>
             <div class="tip-wrap">
-              <button class="adm-btn-sec" onclick="doPublishAnn(true)">Trimite test</button>
+              <button type="button" class="adm-btn-sec" onclick="doPublishAnn(true)">Trimite test</button>
               <div class="tip-btn" onclick="tip('t-test',event)">?</div>
               <div class="tip-box" id="t-test"><strong>Test anunt</strong>Vizibil doar pentru contul tau de admin. Poti vedea exact cum arata pe homepage inainte sa il trimiti tuturor familiilor.</div>
             </div>
@@ -1223,8 +1259,8 @@ left:23px;
               <input class="fi poll-opt-input" maxlength="120" placeholder="Optiunea 2"/>
             </div>
             <div style="display:flex;gap:8px;margin-top:8px;">
-              <button class="adm-btn-sec" onclick="pollAddOptionInput()">+ Adauga optiune</button>
-              <button class="adm-btn-sec" onclick="pollRemoveOptionInput()">- Scoate ultima</button>
+              <button type="button" class="adm-btn-sec" onclick="pollAddOptionInput()">+ Adauga optiune</button>
+              <button type="button" class="adm-btn-sec" onclick="pollRemoveOptionInput()">- Scoate ultima</button>
             </div>
           </div>
           <div style="margin-bottom:14px;">
@@ -1232,7 +1268,7 @@ left:23px;
           </div>
           <div style="margin-bottom:14px;"><label class="fl">Expira la</label><input class="fi" type="datetime-local" id="poll-expires"/></div>
           <div id="poll-msg"></div>
-          <button class="adm-btn" onclick="createPoll()">Creeaza sondaj</button>
+          <button type="button" class="adm-btn" onclick="createPoll()">Creeaza sondaj</button>
         </div>
 
         <div class="section-label" style="margin-bottom:10px;">Sondaje</div>
@@ -1334,6 +1370,9 @@ left:23px;
               <div class="tip-btn" style="display:inline-flex;margin-left:4px;" onclick="tip('t-actlog',event)">?</div>
               <div class="tip-box" id="t-actlog" style="position:absolute;"><strong>Jurnal actiuni</strong>Inregistreaza TOT ce faci in admin. Daca ceva merge gresit pe site, te uiti aici si stii exact ce s-a intamplat si cand.</div>
             </div>
+            <div class="log-toolbar">
+              <button type="button" class="log-del-btn" onclick="clearLogs('actions')">Sterge actiuni</button>
+            </div>
             <div class="log-list" id="action-log"><div style="color:var(--gold-m);font-style:italic;font-size:13px;">Se incarca...</div></div>
           </div>
           <div>
@@ -1342,8 +1381,14 @@ left:23px;
               <div class="tip-btn" style="display:inline-flex;margin-left:4px;" onclick="tip('t-acclog',event)">?</div>
               <div class="tip-box" id="t-acclog" style="position:absolute;"><strong>Jurnal acces</strong>Fiecare deschidere a paginii admin: cine, de unde, la ce ora. Crucial cand adaugi colegi admin â€” stii imediat daca cineva acceseaza din locatii suspecte.</div>
             </div>
+            <div class="log-toolbar">
+              <button type="button" class="log-del-btn" onclick="clearLogs('access')">Sterge acces</button>
+            </div>
             <div class="log-list" id="access-log"><div style="color:var(--gold-m);font-style:italic;font-size:13px;">Se incarca...</div></div>
           </div>
+        </div>
+        <div class="log-toolbar" style="margin-top:12px;justify-content:flex-start;">
+          <button type="button" class="log-del-btn" onclick="clearLogs('all')">Sterge tot istoricul</button>
         </div>
       </div>
 
@@ -1436,6 +1481,28 @@ var ADMIN_EMAIL = '';
 var MONTHS_RO = ['ian','feb','mar','apr','mai','iun','iul','aug','sep','oct','noi','dec'];
 var maintMode = false;
 var demoVisible = true;
+var ADMIN_EMAIL_CACHE = {};
+
+function getSB() {
+  return window.supabaseClient || window.appSupabase || window.sb || window.supabase || null;
+}
+
+function loadAdminEmailMap() {
+  var sb = getSB();
+  if (!sb || typeof sb.rpc !== 'function') return Promise.resolve({});
+  return sb.rpc('admin_list_user_emails').then(function(r) {
+    if (!r || r.error || !Array.isArray(r.data)) return {};
+    var map = {};
+    r.data.forEach(function(row) {
+      if (!row || !row.id) return;
+      map[String(row.id)] = String(row.email || '').trim();
+    });
+    ADMIN_EMAIL_CACHE = map;
+    return map;
+  }).catch(function() {
+    return {};
+  });
+}
 
 /* â”€â”€ BOOT â”€â”€ */
 function initAdminAuth() {
@@ -1633,16 +1700,18 @@ function loadDashboard() {
 
 /* USERS */
 function loadUsers() {
-  if (!window.supabase) return;
+  var sb = getSB();
+  if (!sb || typeof sb.from !== 'function') return;
   var el = document.getElementById('users-list');
   if (!el) return;
-  // Join profiles + families for user email + family assignment
   Promise.all([
-    supabase.from('profiles').select('*').order('created_at', {ascending: false}),
-    supabase.from('families').select('created_by, name, village, created_at')
+    sb.from('profiles').select('*').order('created_at', {ascending: false}),
+    sb.from('families').select('created_by, name, village, created_at'),
+    loadAdminEmailMap()
   ]).then(function(results) {
     var profiles = results[0].data || [];
     var families = results[1].data || [];
+    var emailMap = results[2] || {};
 
     if (profiles.length === 0) {
       el.innerHTML = '<div style="color:var(--gold-m);font-style:italic;font-size:13px;">Nu exista utilizatori inregistrati.</div>';
@@ -1663,7 +1732,7 @@ function loadUsers() {
       '</tr>' +
       profiles.map(function(p) {
         var fam = famByOwner[p.id];
-        var emailRaw = (p.email || p.user_email || p.contact_email || '').trim();
+        var emailRaw = (p.email || p.user_email || p.contact_email || emailMap[String(p.id)] || '').trim();
         var emailSafe = emailRaw
           ? escH(emailRaw)
           : ('<span style="color:var(--muted);font-style:italic;">ID: ' + escH(String(p.id || '').slice(0, 8)) + '...</span>');
@@ -2011,8 +2080,9 @@ function runSQL() {
 
 /* â”€â”€ ANNOUNCEMENTS â”€â”€ */
 function loadAnnouncements() {
-  if (!window.supabase) return;
-  supabase.from('announcements').select('*').order('created_at', {ascending:false}).then(function(r){
+  var sb = getSB();
+  if (!sb || typeof sb.from !== 'function') return;
+  sb.from('announcements').select('*').order('created_at', {ascending:false}).then(function(r){
     var anns = r.data || [];
     var el = document.getElementById('ann-list');
     if (anns.length === 0) {
@@ -2057,7 +2127,8 @@ function doPublishAnn(testOnly) {
     return;
   }
 
-  if (!window.supabase) { showMsg('ann-msg','Supabase nu este disponibil.','error'); return; }
+  var sb = getSB();
+  if (!sb || typeof sb.from !== 'function') { showMsg('ann-msg','Supabase nu este disponibil.','error'); return; }
   var row = {
     title:        title,
     body:         body,
@@ -2065,19 +2136,23 @@ function doPublishAnn(testOnly) {
     published_at: pubAt ? new Date(pubAt).toISOString() : new Date().toISOString(),
     expires_at:   new Date(expAt).toISOString()
   };
-  supabase.from('announcements').insert(row).then(function(r){
+  sb.from('announcements').insert(row).then(function(r){
     if (r.error) { showMsg('ann-msg', 'Eroare: ' + r.error.message, 'error'); return; }
     showMsg('ann-msg', '&#10003; Anunt publicat cu succes!', 'success');
     logAction('ann-publish', 'Anunt publicat: "' + title + '"');
     document.getElementById('ann-title').value = '';
     document.getElementById('ann-body').value  = '';
     loadAnnouncements();
+  }).catch(function(e){
+    showMsg('ann-msg', 'Eroare la publicare: ' + (e && e.message ? e.message : 'necunoscuta'), 'error');
   });
 }
 
 function deleteAnn(id) {
   if (!confirm('Stergi acest anunt? Actiunea este permanenta.')) return;
-  supabase.from('announcements').delete().eq('id', id).then(function(){
+  var sb = getSB();
+  if (!sb || typeof sb.from !== 'function') return;
+  sb.from('announcements').delete().eq('id', id).then(function(){
     logAction('ann-delete', 'Anunt sters: ' + id);
     loadAnnouncements();
   });
@@ -2134,11 +2209,12 @@ function renderPollResultsInline(poll) {
 }
 
 function loadPollsAdmin() {
-  if (!window.supabase) return;
+  var sb = getSB();
+  if (!sb || typeof sb.from !== 'function') return;
   var list = document.getElementById('polls-admin-list');
   if (!list) return;
   list.innerHTML = '<div style="color:var(--gold-m);font-style:italic;font-size:13px;">Se incarca sondajele...</div>';
-  supabase
+  sb
     .from('polls')
     .select('id,question,description,status,allow_other,expires_at,created_at,poll_options(id,label,votes_count,position)')
     .order('created_at', { ascending: false })
@@ -2244,8 +2320,9 @@ function renderPollEditor(poll) {
 }
 
 function openPollEditor(pollId) {
-  if (!pollId || !window.supabase) return;
-  supabase
+  var sb = getSB();
+  if (!pollId || !sb || typeof sb.from !== 'function') return;
+  sb
     .from('polls')
     .select('id,question,description,status,allow_other,expires_at,poll_options(id,label,votes_count,position)')
     .eq('id', pollId)
@@ -2261,7 +2338,8 @@ function openPollEditor(pollId) {
 }
 
 function savePollEditor(pollId) {
-  if (!pollId || !window.supabase) return;
+  var sb = getSB();
+  if (!pollId || !sb || typeof sb.from !== 'function') return;
   var qEl = document.getElementById('poll-edit-question');
   var dEl = document.getElementById('poll-edit-description');
   var xEl = document.getElementById('poll-edit-expires');
@@ -2293,7 +2371,7 @@ function savePollEditor(pollId) {
     });
   }
 
-  supabase.from('polls').update({
+  sb.from('polls').update({
     question: question,
     description: description || null,
     expires_at: expiresDate.toISOString(),
@@ -2301,7 +2379,7 @@ function savePollEditor(pollId) {
   }).eq('id', pollId).then(function(pr) {
     if (pr && pr.error) { showMsg('poll-edit-msg', 'Eroare: ' + pr.error.message, 'error'); return; }
     var updates = optionRows.map(function(o) {
-      return supabase.from('poll_options')
+      return sb.from('poll_options')
         .update({ label: o.label, position: o.position })
         .eq('id', o.id);
     });
@@ -2323,11 +2401,12 @@ function savePollEditor(pollId) {
 }
 
 function loadPollSuggestions() {
-  if (!window.supabase) return;
+  var sb = getSB();
+  if (!sb || typeof sb.from !== 'function') return;
   var list = document.getElementById('poll-suggestions-list');
   if (!list) return;
   list.innerHTML = '<div style="color:var(--gold-m);font-style:italic;font-size:13px;">Se incarca sugestiile...</div>';
-  supabase
+  sb
     .from('poll_votes')
     .select('id,poll_id,suggestion,created_at,polls(question)')
     .not('suggestion', 'is', null)
@@ -2358,12 +2437,14 @@ function loadPollSuggestions() {
 }
 
 function createPoll() {
+  var sb = getSB();
   var qEl = document.getElementById('poll-question');
   var dEl = document.getElementById('poll-description');
   var xEl = document.getElementById('poll-expires');
   var oEl = document.getElementById('poll-options-wrap');
   var allowEl = document.getElementById('poll-allow-other');
   if (!qEl || !xEl || !oEl || !allowEl) return;
+  if (!sb || typeof sb.from !== 'function') { showMsg('poll-msg', 'Supabase nu este disponibil.', 'error'); return; }
   var question = qEl.value.trim();
   var description = dEl ? dEl.value.trim() : '';
   var expiresRaw = xEl.value;
@@ -2383,7 +2464,7 @@ function createPoll() {
   }
   var expiresIso = expiresDate.toISOString();
 
-  supabase.from('polls').insert({
+  sb.from('polls').insert({
     question: question,
     description: description || null,
     status: 'active',
@@ -2396,7 +2477,7 @@ function createPoll() {
     var rows = options.map(function(label, idx) {
       return { poll_id: pollId, label: label, position: idx };
     });
-    supabase.from('poll_options').insert(rows).then(function(or) {
+    sb.from('poll_options').insert(rows).then(function(or) {
       if (or && or.error) { showMsg('poll-msg', 'Sondaj creat, dar opțiunile au eșuat: ' + or.error.message, 'error'); return; }
       showMsg('poll-msg', 'Sondaj creat cu succes.', 'success');
       logAction('poll-create', 'Sondaj creat: ' + question);
@@ -2411,14 +2492,20 @@ function createPoll() {
       }
       loadPollsAdmin();
       loadPollSuggestions();
+    }).catch(function(e){
+      showMsg('poll-msg', 'Eroare la optiuni: ' + (e && e.message ? e.message : 'necunoscuta'), 'error');
     });
+  }).catch(function(e){
+    showMsg('poll-msg', 'Eroare la crearea sondajului: ' + (e && e.message ? e.message : 'necunoscuta'), 'error');
   });
 }
 
 function closePoll(id) {
   if (!id) return;
   if (!confirm('Inchizi acest sondaj? Utilizatorii nu vor mai putea vota.')) return;
-  supabase.from('polls').update({ status: 'closed' }).eq('id', id).then(function(r) {
+  var sb = getSB();
+  if (!sb || typeof sb.from !== 'function') return;
+  sb.from('polls').update({ status: 'closed' }).eq('id', id).then(function(r) {
     if (r && r.error) { alert('Eroare: ' + r.error.message); return; }
     logAction('poll-close', 'Sondaj inchis: ' + id);
     loadPollsAdmin();
@@ -2428,7 +2515,9 @@ function closePoll(id) {
 function deletePoll(id) {
   if (!id) return;
   if (!confirm('Stergi definitiv acest sondaj si toate voturile lui?')) return;
-  supabase.from('polls').delete().eq('id', id).then(function(r) {
+  var sb = getSB();
+  if (!sb || typeof sb.from !== 'function') return;
+  sb.from('polls').delete().eq('id', id).then(function(r) {
     if (r && r.error) { alert('Eroare: ' + r.error.message); return; }
     logAction('poll-delete', 'Sondaj sters: ' + id);
     loadPollsAdmin();
@@ -2713,22 +2802,25 @@ function renderChatLinkAllowList() {
 }
 
 function loadChatModerationUsers() {
-  if (!window.supabase) return Promise.resolve();
+  var sb = getSB();
+  if (!sb || typeof sb.from !== 'function') return Promise.resolve();
   var sel = document.getElementById('chatm-link-user-select');
   if (!sel) return Promise.resolve();
   return Promise.all([
-    supabase.from('profiles').select('*').order('created_at', { ascending: false }).limit(600),
-    supabase.from('families').select('created_by, name, village').limit(600)
+    sb.from('profiles').select('*').order('created_at', { ascending: false }).limit(600),
+    sb.from('families').select('created_by, name, village').limit(600),
+    loadAdminEmailMap()
   ]).then(function(results) {
     var profiles = results[0] && results[0].data ? results[0].data : [];
     var families = results[1] && results[1].data ? results[1].data : [];
+    var emailMap = results[2] || {};
     var famByOwner = {};
     families.forEach(function(f) {
       if (f && f.created_by && !famByOwner[f.created_by]) famByOwner[f.created_by] = f;
     });
     CHATM_STATE.users = profiles.map(function(p) {
       var fam = famByOwner[p.id] || null;
-      var email = (p.email || p.user_email || p.contact_email || '').trim();
+      var email = (p.email || p.user_email || p.contact_email || emailMap[String(p.id)] || '').trim();
       var label = fam
         ? (fam.name + (email ? (' · ' + email) : ''))
         : (email || ('Cont fara familie · ' + String(p.id || '').slice(0, 8)));
@@ -3026,8 +3118,9 @@ function doPreviewMsg() {
 
 /* â”€â”€ LOGS â”€â”€ */
 function loadLogs() {
-  if (!window.supabase) return;
-  supabase.from('admin_logs').select('*').order('created_at', {ascending:false}).limit(20)
+  var sb = getSB();
+  if (!sb || typeof sb.from !== 'function') return;
+  sb.from('admin_logs').select('*').order('created_at', {ascending:false}).limit(60)
     .then(function(r){
       var logs = r.data || [];
       var actions = logs.filter(function(l){ return l.action !== 'access'; });
@@ -3050,8 +3143,83 @@ function renderLogList(elId, logs) {
     var cls = l.action === 'backup' ? 'green' : l.action.includes('delete') ? 'red' : 'blue';
     return '<div class="log-row"><div class="log-dot '+cls+'"></div>' +
       '<div class="log-time">' + fmtDate(l.created_at) + '</div>' +
-      '<div class="log-text">' + (l.details||l.action) + '</div></div>';
+      '<div class="log-text">' + (l.details||l.action) + '</div>' +
+      '<button type="button" class="log-del-btn" onclick="deleteLogRow(\'' + l.id + '\')">Sterge</button></div>';
   }).join('');
+}
+
+function deleteLogRow(logId) {
+  var sb = getSB();
+  if (!logId || !sb) return;
+  if (!confirm('Stergi aceasta inregistrare din jurnal?')) return;
+  sb.from('admin_logs').delete().eq('id', logId).then(function(r){
+    if (r && r.error) {
+      if (typeof sb.rpc === 'function') {
+        sb.rpc('admin_delete_log', { p_log_id: logId }).then(function(rr){
+          if (rr && rr.error) { alert('Eroare: ' + rr.error.message); return; }
+          loadLogs();
+        }).catch(function(e){ alert('Eroare: ' + (e && e.message ? e.message : 'necunoscuta')); });
+        return;
+      }
+      alert('Eroare: ' + r.error.message);
+      return;
+    }
+    loadLogs();
+  });
+}
+
+function clearLogs(kind) {
+  var sb = getSB();
+  if (!sb) return;
+  var label = kind === 'actions' ? 'toate actiunile' : (kind === 'access' ? 'toate intrarile de acces' : 'TOT istoricul');
+  if (!confirm('Stergi ' + label + '?')) return;
+
+  function refresh() {
+    loadLogs();
+    logAction('logs-clear', 'Istoric sters: ' + kind);
+  }
+
+  if (kind === 'actions') {
+    sb.from('admin_logs').delete().neq('action', 'access').then(function(r){
+      if (r && r.error && typeof sb.rpc === 'function') {
+        sb.rpc('admin_clear_logs', { p_scope: 'actions' }).then(function(rr){
+          if (rr && rr.error) { alert('Eroare: ' + rr.error.message); return; }
+          refresh();
+        }).catch(function(e){ alert('Eroare: ' + (e && e.message ? e.message : 'necunoscuta')); });
+        return;
+      }
+      if (r && r.error) { alert('Eroare: ' + r.error.message); return; }
+      refresh();
+    });
+    return;
+  }
+
+  if (kind === 'access') {
+    sb.from('admin_logs').delete().eq('action', 'access').then(function(r){
+      if (r && r.error && typeof sb.rpc === 'function') {
+        sb.rpc('admin_clear_logs', { p_scope: 'access' }).then(function(rr){
+          if (rr && rr.error) { alert('Eroare: ' + rr.error.message); return; }
+          refresh();
+        }).catch(function(e){ alert('Eroare: ' + (e && e.message ? e.message : 'necunoscuta')); });
+        return;
+      }
+      if (r && r.error) { alert('Eroare: ' + r.error.message); return; }
+      refresh();
+    });
+    return;
+  }
+
+  sb.from('admin_logs').delete().neq('id', '00000000-0000-0000-0000-000000000000').then(function(r){
+    if (r && r.error && typeof sb.rpc === 'function') {
+      sb.rpc('admin_clear_logs', { p_scope: 'all' }).then(function(rr){
+        if (rr && rr.error) { alert('Eroare: ' + rr.error.message); return; }
+        refresh();
+      }).catch(function(e){ alert('Eroare: ' + (e && e.message ? e.message : 'necunoscuta')); });
+      return;
+    }
+    if (r && r.error) { alert('Eroare: ' + r.error.message); return; }
+    refresh();
+  });
 }
 
 /* â”€â”€ PHOTOS â”€â”€ */
@@ -3104,6 +3272,7 @@ renderBkHistory();
 <script src="js/transitions.js" defer></script>
 </body>
 </html>
+
 
 
 
