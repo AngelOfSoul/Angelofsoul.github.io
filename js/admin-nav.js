@@ -36,6 +36,7 @@ stickyStyle.textContent = [
   '.calnic-admin-link.show { display:flex!important;color:#c04040!important;border-left:1px solid #3a1010!important; }',
   '.calnic-admin-mobile-link { display:none!important; }',
   '.calnic-admin-mobile-link.show { display:flex!important;color:#c04040!important;border-left:3px solid #c04040!important; }',
+  '.co-guest-hide-gallery { display:none!important; }',
   '.nav-lang { display:flex;align-items:center;gap:4px;padding:0 10px;border-left:1px solid var(--b1,#2a2a2a); }',
   '.nav-lang-btn { background:none;border:1px solid #585040;color:var(--text,#f5eed8);padding:2px 8px;cursor:pointer;font-family:"EB Garamond",serif;font-size:11px;letter-spacing:1px;transition:all 0.2s;border-radius:1px; }',
   '.nav-lang-btn.active { background:var(--gold-d,#b08030);border-color:var(--gold,#d4a84a);color:#050505;font-weight:700; }',
@@ -154,6 +155,12 @@ function buildProfileButton(session, familyName, hasNotif, isAdmin) {
   var navRights = getActiveNavRights();
   if (!navRights.length) return;
 
+  function setGuestGalleryVisibility(isGuest) {
+    document.querySelectorAll('a[href="galerie.html"], a[href="./galerie.html"]').forEach(function (a) {
+      a.classList.toggle('co-guest-hide-gallery', !!isGuest);
+    });
+  }
+
   navRights.forEach(function(navRight) {
     navRight.querySelectorAll('.prf-btn-out, .prf-btn-in, .prf-btn-wrap').forEach(function(el){ el.remove(); });
     navRight.querySelectorAll('.nav-login:not(.calnic-admin-link)').forEach(function(el){ el.remove(); });
@@ -165,6 +172,7 @@ function buildProfileButton(session, familyName, hasNotif, isAdmin) {
     }
 
     if (!session) {
+      setGuestGalleryVisibility(true);
       var outBtn = document.createElement('a');
       outBtn.className = 'nav-login';
       outBtn.href = 'login.html';
@@ -172,6 +180,8 @@ function buildProfileButton(session, familyName, hasNotif, isAdmin) {
       navRight.appendChild(outBtn);
       return;
     }
+
+    setGuestGalleryVisibility(false);
 
     var profileName = isAdmin ? 'Admin' : (familyName || 'Profilul meu');
     var profileSub = isAdmin ? 'ADMIN' : 'PROFILUL MEU';

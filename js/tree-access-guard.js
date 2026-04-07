@@ -9,7 +9,8 @@
   var protectedPages = {
     'genealogie.html': true,
     'genealogie-familie.html': true,
-    'arborele-satului.html': true
+    'arborele-satului.html': true,
+    'galerie.html': true
   };
   if (!protectedPages[file]) return;
 
@@ -76,4 +77,3 @@
     if (checkAuth()) clearInterval(timer);
   });
 })();
-

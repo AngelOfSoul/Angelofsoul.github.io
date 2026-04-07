@@ -9,15 +9,18 @@
 
   // ─── LIMBA ────────────────────────────────────────────────────────────────
 
-  var currentLang = localStorage.getItem('calnic-lang') || 'ro';
+  var currentLang = (localStorage.getItem('calnic-lang') || 'ro');
+  if (currentLang !== 'ro' && currentLang !== 'en') currentLang = 'ro';
 
   /**
    * Schimba limba si actualizeaza toate elementele [data-ro] / [data-en].
    * @param {'ro'|'en'} lang
    */
   function setLang(lang) {
+    if (lang !== 'ro' && lang !== 'en') lang = 'ro';
     currentLang = lang;
     localStorage.setItem('calnic-lang', lang);
+    document.documentElement.setAttribute('lang', lang);
     document.querySelectorAll('[data-ro]').forEach(function (el) {
       var val = el.getAttribute('data-' + lang);
       if (val == null) return;
@@ -259,11 +262,23 @@
    * Se apeleaza o singura data, la DOMContentLoaded.
    */
   function initLang() {
+    var stored = localStorage.getItem('calnic-lang');
+    if (stored === 'ro' || stored === 'en') currentLang = stored;
+    else currentLang = 'ro';
+
     var btnRo = document.getElementById('btn-ro') || document.getElementById('btn-ro-li');
     var btnEn = document.getElementById('btn-en') || document.getElementById('btn-en-li');
     if (btnRo) btnRo.addEventListener('click', function () { setLang('ro'); });
     if (btnEn) btnEn.addEventListener('click', function () { setLang('en'); });
     if (window.setLang) { window.setLang(currentLang); } // aplica la incarcare
+
+    // Keep language uniform when page toggles guest/member or dynamic fragments.
+    document.addEventListener('calnic:viewchange', function () {
+      setLang(currentLang);
+    });
+    window.addEventListener('pageshow', function () {
+      setLang(currentLang);
+    });
   }
 
   // ─── URL PARAMS ───────────────────────────────────────────────────────────
