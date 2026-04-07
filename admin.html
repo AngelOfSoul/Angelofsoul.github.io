@@ -2160,6 +2160,7 @@ function loadPollsAdmin() {
         var closeBtn = p.status === 'active'
           ? '<button class="tbtn" onclick="closePoll(\'' + p.id + '\')">Inchide</button>'
           : '';
+        var editBtn = '<button class="tbtn" onclick="openPollEditor(\'' + p.id + '\')">Edit</button>';
         return '<div style="border:1px solid var(--b1);background:var(--s2);padding:12px;border-radius:2px;margin-bottom:10px;">' +
           '<div style="display:flex;justify-content:space-between;gap:10px;align-items:flex-start;flex-wrap:wrap;">' +
             '<div>' +
@@ -2169,6 +2170,7 @@ function loadPollsAdmin() {
               '<div style="font-size:11px;color:var(--gold-m);margin-top:4px;">' + totalVotes + ' voturi' + (p.allow_other ? ' · cu "Alta idee"' : '') + '</div>' +
             '</div>' +
             '<div style="display:flex;gap:6px;flex-wrap:wrap;">' +
+              editBtn +
               closeBtn +
               '<button class="tbtn red" onclick="deletePoll(\'' + p.id + '\')">Sterge</button>' +
             '</div>' +
@@ -2180,6 +2182,144 @@ function loadPollsAdmin() {
     .catch(function() {
       list.innerHTML = '<div style="color:var(--red);font-size:13px;">Tabelul polls nu exista inca. Ruleaza scriptul SQL pentru polls.</div>';
     });
+}
+
+var POLL_EDITOR_MODAL_ID = 'poll-editor-modal';
+
+function toDateTimeLocalValue(iso) {
+  if (!iso) return '';
+  var d = new Date(iso);
+  if (isNaN(d.getTime())) return '';
+  var pad = function(n) { return n < 10 ? ('0' + n) : String(n); };
+  return d.getFullYear() + '-' + pad(d.getMonth() + 1) + '-' + pad(d.getDate()) + 'T' + pad(d.getHours()) + ':' + pad(d.getMinutes());
+}
+
+function closePollEditor() {
+  var modal = document.getElementById(POLL_EDITOR_MODAL_ID);
+  if (!modal) return;
+  modal.style.display = 'none';
+  modal.innerHTML = '';
+}
+
+function renderPollEditor(poll) {
+  var modal = document.getElementById(POLL_EDITOR_MODAL_ID);
+  if (!modal) {
+    modal = document.createElement('div');
+    modal.id = POLL_EDITOR_MODAL_ID;
+    modal.style.cssText = 'position:fixed;inset:0;background:rgba(0,0,0,.72);z-index:2300;display:none;overflow:auto;padding:24px;';
+    document.body.appendChild(modal);
+  }
+
+  var opts = (poll.poll_options || []).slice().sort(function(a, b) {
+    return Number(a.position || 0) - Number(b.position || 0);
+  });
+
+  var optsHtml = opts.map(function(o, idx) {
+    return '<div style="margin-bottom:10px;">' +
+      '<label class="fl" for="poll-edit-opt-' + idx + '">Optiunea ' + (idx + 1) + '</label>' +
+      '<input class="fi poll-edit-opt" id="poll-edit-opt-' + idx + '" data-option-id="' + escAttr(o.id) + '" value="' + escAttr(o.label || '') + '" maxlength="120"/>' +
+      '<div style="font-size:11px;color:var(--gold-m);margin-top:2px;">Voturi curente: ' + Number(o.votes_count || 0) + '</div>' +
+    '</div>';
+  }).join('');
+
+  modal.innerHTML = '<div style="max-width:760px;margin:0 auto;background:var(--s2);border:1px solid var(--b2);padding:18px 16px;border-radius:2px;">' +
+    '<div class="sec-hdr" style="margin-bottom:12px;"><div class="ct-title">Editare sondaj</div></div>' +
+    '<div class="ct-sub" style="margin-bottom:14px;">Poti edita inclusiv sondajele active direct din admin.</div>' +
+    '<div id="poll-edit-msg" style="margin-bottom:10px;"></div>' +
+    '<div style="margin-bottom:12px;"><label class="fl" for="poll-edit-question">Intrebare</label><input class="fi" id="poll-edit-question" maxlength="250" value="' + escAttr(poll.question || '') + '"/></div>' +
+    '<div style="margin-bottom:12px;"><label class="fl" for="poll-edit-description">Descriere (optional)</label><input class="fi" id="poll-edit-description" maxlength="300" value="' + escAttr(poll.description || '') + '"/></div>' +
+    '<div style="display:flex;gap:12px;flex-wrap:wrap;margin-bottom:12px;">' +
+      '<div style="flex:1;min-width:220px;"><label class="fl" for="poll-edit-expires">Expira la</label><input class="fi" id="poll-edit-expires" type="datetime-local" value="' + escAttr(toDateTimeLocalValue(poll.expires_at)) + '"/></div>' +
+      '<div style="display:flex;align-items:flex-end;min-width:180px;"><label class="fl" style="margin-bottom:8px;"><input type="checkbox" id="poll-edit-allow-other" style="width:14px;height:14px;accent-color:var(--gold-d);margin-right:6px;vertical-align:middle;" ' + (poll.allow_other ? 'checked' : '') + '/>Permite "Alta idee"</label></div>' +
+    '</div>' +
+    '<div class="section-label" style="margin-bottom:8px;">Optiuni sondaj</div>' +
+    '<div style="max-height:34vh;overflow:auto;padding-right:4px;">' + optsHtml + '</div>' +
+    '<div style="display:flex;gap:10px;justify-content:flex-end;margin-top:14px;">' +
+      '<button class="adm-btn-sec" onclick="closePollEditor()">Anuleaza</button>' +
+      '<button class="adm-btn" onclick="savePollEditor(\'' + escAttr(poll.id) + '\')">Salveaza</button>' +
+    '</div>' +
+  '</div>';
+
+  modal.style.display = 'block';
+}
+
+function openPollEditor(pollId) {
+  if (!pollId || !window.supabase) return;
+  supabase
+    .from('polls')
+    .select('id,question,description,status,allow_other,expires_at,poll_options(id,label,votes_count,position)')
+    .eq('id', pollId)
+    .single()
+    .then(function(r) {
+      if (r && r.error) { alert('Eroare la incarcarea sondajului: ' + r.error.message); return; }
+      if (!r || !r.data) { alert('Sondajul nu a fost gasit.'); return; }
+      renderPollEditor(r.data);
+    })
+    .catch(function(e) {
+      alert('Eroare la incarcare: ' + (e && e.message ? e.message : 'necunoscuta'));
+    });
+}
+
+function savePollEditor(pollId) {
+  if (!pollId || !window.supabase) return;
+  var qEl = document.getElementById('poll-edit-question');
+  var dEl = document.getElementById('poll-edit-description');
+  var xEl = document.getElementById('poll-edit-expires');
+  var allowEl = document.getElementById('poll-edit-allow-other');
+  var optEls = document.querySelectorAll('.poll-edit-opt');
+  if (!qEl || !xEl || !allowEl || !optEls.length) return;
+
+  var question = (qEl.value || '').trim();
+  var description = (dEl && dEl.value ? dEl.value : '').trim();
+  var expiresRaw = (xEl.value || '').trim();
+
+  if (!question) { showMsg('poll-edit-msg', 'Intrebarea este obligatorie.', 'error'); return; }
+  if (!expiresRaw) { showMsg('poll-edit-msg', 'Seteaza data de expirare.', 'error'); return; }
+  var expiresDate = new Date(expiresRaw);
+  if (!expiresDate || isNaN(expiresDate.getTime())) {
+    showMsg('poll-edit-msg', 'Data de expirare este invalida.', 'error');
+    return;
+  }
+
+  var optionRows = [];
+  for (var i = 0; i < optEls.length; i++) {
+    var node = optEls[i];
+    var label = String(node.value || '').trim();
+    if (!label) { showMsg('poll-edit-msg', 'Toate optiunile trebuie completate.', 'error'); return; }
+    optionRows.push({
+      id: String(node.getAttribute('data-option-id') || ''),
+      label: label,
+      position: i
+    });
+  }
+
+  supabase.from('polls').update({
+    question: question,
+    description: description || null,
+    expires_at: expiresDate.toISOString(),
+    allow_other: !!allowEl.checked
+  }).eq('id', pollId).then(function(pr) {
+    if (pr && pr.error) { showMsg('poll-edit-msg', 'Eroare: ' + pr.error.message, 'error'); return; }
+    var updates = optionRows.map(function(o) {
+      return supabase.from('poll_options')
+        .update({ label: o.label, position: o.position })
+        .eq('id', o.id);
+    });
+    Promise.all(updates).then(function(results) {
+      for (var j = 0; j < results.length; j++) {
+        if (results[j] && results[j].error) {
+          showMsg('poll-edit-msg', 'Eroare la optiuni: ' + results[j].error.message, 'error');
+          return;
+        }
+      }
+      logAction('poll-edit', 'Sondaj editat: ' + question);
+      closePollEditor();
+      loadPollsAdmin();
+      alert('Sondajul a fost actualizat cu succes.');
+    });
+  }).catch(function(e) {
+    showMsg('poll-edit-msg', 'Eroare la salvare: ' + (e && e.message ? e.message : 'necunoscuta'), 'error');
+  });
 }
 
 function loadPollSuggestions() {
