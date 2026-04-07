@@ -260,6 +260,70 @@ background:#1a1200;border:1px solid #4a3800;color:var(--amber);
 background:#1a0a0a;border:1px solid #4a1a1a;color:var(--red);
 }
 
+.chatm-wrap {
+  margin-top:18px;
+  background:var(--s2);
+  border:1px solid var(--b1);
+  border-top:2px solid var(--gold-d);
+  padding:14px;
+}
+
+.chatm-top {
+  display:flex;
+  gap:10px;
+  align-items:center;
+  flex-wrap:wrap;
+  margin-bottom:10px;
+}
+
+.chatm-select {
+  width:190px;
+}
+
+.chatm-list {
+  display:flex;
+  flex-direction:column;
+  gap:8px;
+}
+
+.chatm-item {
+  border:1px solid var(--b1);
+  background:var(--s1);
+  padding:10px;
+}
+
+.chatm-head {
+  display:flex;
+  align-items:center;
+  gap:8px;
+  flex-wrap:wrap;
+}
+
+.chatm-author {
+  color:var(--gold-l);
+  font-family:'Playfair Display',serif;
+  font-size:15px;
+}
+
+.chatm-time {
+  margin-left:auto;
+  color:var(--dim);
+  font-size:11px;
+}
+
+.chatm-body {
+  color:var(--text);
+  margin-top:6px;
+  line-height:1.5;
+}
+
+.chatm-actions {
+  margin-top:8px;
+  display:flex;
+  gap:8px;
+  flex-wrap:wrap;
+}
+
 .badge.crit {
 background:#1a0808;border:1px solid #5a1010;color:#e05050;
 }
@@ -1108,6 +1172,23 @@ left:23px;
             <button class="adm-btn-sec" onclick="doPreviewMsg()">Previzualizeaza</button>
           </div>
         </div>
+
+        <div class="chatm-wrap">
+          <div class="section-label" style="margin-bottom:10px;">Moderare chat "Vatra satului"</div>
+          <div class="chatm-top">
+            <select class="fs chatm-select" id="chatm-filter" onchange="loadChatModeration()">
+              <option value="reported">Raportate</option>
+              <option value="active">Active</option>
+              <option value="pinned">Fixat</option>
+              <option value="deleted">Sterse</option>
+            </select>
+            <button class="tbtn" onclick="loadChatModeration()">Reincarca</button>
+          </div>
+          <div id="chatm-msg" style="margin-bottom:8px;"></div>
+          <div id="chatm-list" class="chatm-list">
+            <div style="color:var(--gold-m);font-style:italic;font-size:13px;">Se incarca mesajele din chat...</div>
+          </div>
+        </div>
       </div>
 
       <!-- â•â• CONTACT â•â• -->
@@ -1263,6 +1344,7 @@ function initAdminAuth() {
           loadFamilies();
           loadUsers();
           loadContactMessages();
+          loadChatModeration();
           loadLogs();
           loadPhotos();
           loadMaintState();
@@ -1305,6 +1387,7 @@ function nav(el, id) {
   if (el && el.classList) el.classList.add('active');
   var sec = document.getElementById('sec-' + id);
   if (sec) sec.classList.add('active');
+  if (id === 'msg') loadChatModeration();
   closeTips();
 }
 
@@ -1947,6 +2030,92 @@ function resolveContact(id) {
   supabase.from('contact_messages').update({resolved:true}).eq('id',id).then(function(){
     loadContactMessages();
     logAction('contact-resolve', 'Mesaj contact rezolvat: ' + id);
+  });
+}
+
+/* ── CHAT MODERATION (Vatra satului) ── */
+function loadChatModeration() {
+  if (!window.supabase) return;
+  var list = document.getElementById('chatm-list');
+  var filterEl = document.getElementById('chatm-filter');
+  if (!list || !filterEl) return;
+  var status = filterEl.value || 'reported';
+  list.innerHTML = '<div style="color:var(--gold-m);font-style:italic;font-size:13px;">Se incarca mesajele din chat...</div>';
+  supabase
+    .from('chat_messages')
+    .select('id, author_display_name, author_type, body, status, created_at')
+    .eq('status', status)
+    .order('created_at', { ascending: false })
+    .limit(60)
+    .then(function (r) {
+      var rows = (r && r.data) ? r.data : [];
+      if (!rows.length) {
+        list.innerHTML = '<div style="color:var(--gold-m);font-style:italic;font-size:13px;">Nu exista mesaje pentru filtrul selectat.</div>';
+        return;
+      }
+      list.innerHTML = rows.map(function (m) {
+        var type = String(m.author_type || 'guest');
+        var badgeCls = type === 'admin' ? 'low' : type === 'member' ? 'ok' : 'warn';
+        var badgeTxt = type === 'admin' ? 'ADMIN' : type === 'member' ? 'MEMBRU' : 'VIZITATOR';
+        var actions = '';
+        if (m.status !== 'deleted') {
+          actions += '<button class="tbtn red" onclick="chatModerationAction(\'delete\',\'' + m.id + '\')">Sterge</button>';
+        }
+        if (m.status === 'reported') {
+          actions += '<button class="tbtn green" onclick="chatModerationAction(\'restore\',\'' + m.id + '\')">Aproba (active)</button>';
+        }
+        if (m.status === 'active') {
+          actions += '<button class="tbtn" onclick="chatModerationAction(\'pin\',\'' + m.id + '\')">Fixeaza</button>';
+        }
+        if (m.status === 'pinned') {
+          actions += '<button class="tbtn" onclick="chatModerationAction(\'unpin\',\'' + m.id + '\')">Scoate pin</button>';
+        }
+        return (
+          '<div class="chatm-item">' +
+            '<div class="chatm-head">' +
+              '<span class="chatm-author">' + escH(m.author_display_name || 'Anonim') + '</span>' +
+              '<span class="badge ' + badgeCls + '">' + badgeTxt + '</span>' +
+              '<span class="badge warn">' + escH((m.status || '').toUpperCase()) + '</span>' +
+              '<span class="chatm-time">' + fmtDate(m.created_at) + '</span>' +
+            '</div>' +
+            '<div class="chatm-body">' + escH(m.body || '') + '</div>' +
+            '<div class="chatm-actions">' + actions + '</div>' +
+          '</div>'
+        );
+      }).join('');
+    })
+    .catch(function (e) {
+      list.innerHTML = '<div style="color:var(--red);font-size:13px;">Eroare la incarcare chat: ' + escH(e.message || 'necunoscuta') + '</div>';
+    });
+}
+
+function chatModerationAction(action, id) {
+  if (!window.supabase || !id) return;
+  var map = {
+    delete:  { status: 'deleted', text: 'Mesaj sters' },
+    restore: { status: 'active',  text: 'Mesaj aprobat' },
+    unpin:   { status: 'active',  text: 'Pin eliminat' }
+  };
+  if (action === 'pin') {
+    supabase.from('chat_messages').update({ status: 'active' }).eq('status', 'pinned').then(function () {
+      supabase.from('chat_messages').update({ status: 'pinned' }).eq('id', id).then(function () {
+        showMsg('chatm-msg', 'Mesaj fixat in chat.', 'ok');
+        logAction('chat-pin', 'Mesaj fixat: ' + id);
+        loadChatModeration();
+      });
+    });
+    return;
+  }
+  var cfg = map[action];
+  if (!cfg) return;
+  supabase.from('chat_messages').update({ status: cfg.status }).eq('id', id).then(function (r) {
+    if (r && r.error) {
+      showMsg('chatm-msg', 'Eroare: ' + r.error.message, 'err');
+      return;
+    }
+    showMsg('chatm-msg', cfg.text + ' (' + id + ').', 'ok');
+    logAction('chat-' + action, cfg.text + ': ' + id);
+    loadChatModeration();
   });
 }
 

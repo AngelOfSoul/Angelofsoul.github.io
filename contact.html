@@ -712,22 +712,46 @@ function submitForm() {
     topic: selectedTopic || 'necunoscut'
   };
 
-  fetch('https://formspree.io/f/xpqygdjn', {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json', 'Accept': 'application/json' },
-    body: JSON.stringify(data)
-  })
-  .then(function(resp) {
-    if (resp.ok) {
+  function sendFormspree(payload) {
+    return fetch('https://formspree.io/f/xpqygdjn', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', 'Accept': 'application/json' },
+      body: JSON.stringify(payload)
+    }).then(function(resp) {
+      return !!(resp && resp.ok);
+    }).catch(function() {
+      return false;
+    });
+  }
+
+  function saveToAdminInbox(payload) {
+    var client = window.supabaseClient || window.appSupabase || window.sb || window.supabase;
+    if (!client || typeof client.from !== 'function') return Promise.resolve(false);
+    var row = {
+      name: payload.name,
+      email: payload.email,
+      message: payload.message,
+      resolved: false
+    };
+    return client.from('contact_messages').insert([row]).then(function(res) {
+      return !!(res && !res.error);
+    }).catch(function() {
+      return false;
+    });
+  }
+
+  Promise.all([sendFormspree(data), saveToAdminInbox(data)]).then(function(results) {
+    var sentMail = !!results[0];
+    var savedAdmin = !!results[1];
+    if (sentMail || savedAdmin) {
       document.getElementById('formBody').style.display = 'none';
       document.getElementById('formSuccess').style.display = 'block';
-    } else {
-      btn.disabled = false;
-      btnLbl.textContent = currentLang === 'ro' ? 'TRIMITE MESAJUL' : 'SEND MESSAGE';
-      alert(currentLang === 'ro' ? 'Eroare la trimitere. Incercati din nou.' : 'Sending failed. Please try again.');
+      return;
     }
-  })
-  .catch(function() {
+    btn.disabled = false;
+    btnLbl.textContent = currentLang === 'ro' ? 'TRIMITE MESAJUL' : 'SEND MESSAGE';
+    alert(currentLang === 'ro' ? 'Eroare la trimitere. Incercati din nou.' : 'Sending failed. Please try again.');
+  }).catch(function() {
     btn.disabled = false;
     btnLbl.textContent = currentLang === 'ro' ? 'TRIMITE MESAJUL' : 'SEND MESSAGE';
     alert(currentLang === 'ro' ? 'Eroare de retea. Verificati conexiunea si incercati din nou.' : 'Network error. Check your connection and try again.');

@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+﻿<!DOCTYPE html>
 <html lang="ro" style="background:#0a0a0a;">
 <head>
 <meta charset="UTF-8">
@@ -49,7 +49,12 @@
 .vc-pinned-text { font-size:12px; color:var(--muted); font-style:italic; line-height:1.5; }
 .vc-messages {
   min-height:220px; max-height:320px; overflow-y:auto;
-  margin-bottom:0;
+  margin-bottom:8px;
+  background:var(--s1);
+  border:1px solid var(--b1);
+  border-top:2px solid var(--b2);
+  padding:4px 10px 6px;
+  border-radius:1px;
 }
 .vc-messages::-webkit-scrollbar { width:3px; }
 .vc-messages::-webkit-scrollbar-thumb { background:var(--b2); border-radius:2px; }
@@ -142,6 +147,51 @@
   background:#82c46a; margin-right:4px; vertical-align:middle;
 }
 .vc-chars { font-size:10px; color:var(--dim); }
+
+.vc-dialog-overlay {
+  position:fixed; inset:0; background:rgba(4,4,4,0.78);
+  z-index:5000; display:none; align-items:center; justify-content:center;
+  padding:16px;
+}
+.vc-dialog-overlay.vc-show { display:flex; }
+.vc-dialog {
+  width:min(460px, 100%);
+  background:linear-gradient(180deg,#101010,#0c0c0c);
+  border:1px solid var(--gold-d);
+  box-shadow:0 14px 42px rgba(0,0,0,0.65);
+}
+.vc-dialog-head {
+  padding:10px 14px;
+  border-bottom:1px solid #2a2010;
+  font-family:'Cinzel',serif;
+  font-size:12px;
+  letter-spacing:1.1px;
+  color:var(--gold);
+  text-transform:uppercase;
+}
+.vc-dialog-body {
+  padding:14px;
+  color:var(--text);
+  font-family:'EB Garamond',serif;
+  line-height:1.5;
+}
+.vc-dialog-actions {
+  display:flex; justify-content:flex-end; gap:8px;
+  padding:0 14px 14px;
+}
+.vc-dialog-btn {
+  border:1px solid var(--gold-d);
+  background:var(--s3);
+  color:var(--gold);
+  font-family:'Cinzel',serif;
+  font-size:11px;
+  letter-spacing:0.9px;
+  padding:7px 12px;
+  cursor:pointer;
+}
+.vc-dialog-btn:hover { background:var(--gold-d); color:#060606; }
+.vc-dialog-btn.vc-danger { border-color:#7a2a2a; color:#d08a8a; background:#1a0a0a; }
+.vc-dialog-btn.vc-danger:hover { background:#7a2a2a; color:#f5dddd; }
 /* ── end Vatra satului ── */
 
 .main-wrap {
@@ -1074,9 +1124,81 @@ if (window.supabase) { checkFamiliiNavSession(); } else { document.addEventListe
   var vcChannel = null;
   var vcLastSent = 0;
   var vcSentTimestamps = [];
+  var vcDialogBusy = false;
 
   /* ── Helpers DOM ── */
   function $id(id) { return document.getElementById(id); }
+  function vcEsc(str) {
+    return String(str || '').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;').replace(/'/g,'&#39;');
+  }
+  function vcIsAdminEmail(email) {
+    if (!email) return false;
+    var e = String(email).trim().toLowerCase();
+    var cfg = String(window.ADMIN_EMAIL || '').trim().toLowerCase();
+    return !!cfg && e === cfg;
+  }
+  async function vcIsAdminUser(user) {
+    if (!user) return false;
+    if (vcIsAdminEmail(user.email)) return true;
+    try {
+      var adminRes = await supabase.from('profiles').select('is_admin').eq('id', user.id).maybeSingle();
+      if (adminRes && !adminRes.error && adminRes.data && adminRes.data.is_admin) return true;
+    } catch (_e) {}
+    return false;
+  }
+  function vcDialogClose() {
+    var ov = $id('vc-dialog');
+    if (ov) { ov.classList.remove('vc-show'); ov.setAttribute('aria-hidden', 'true'); }
+    vcDialogBusy = false;
+  }
+  function vcDialogOpen(opts) {
+    if (vcDialogBusy) return Promise.resolve(false);
+    vcDialogBusy = true;
+    var ov = $id('vc-dialog');
+    var title = $id('vc-dialog-title');
+    var body = $id('vc-dialog-body');
+    var actions = $id('vc-dialog-actions');
+    if (!ov || !title || !body || !actions) {
+      vcDialogBusy = false;
+      return Promise.resolve(false);
+    }
+    title.textContent = opts && opts.title ? opts.title : 'Confirmare';
+    body.textContent = opts && opts.message ? opts.message : '';
+    actions.innerHTML = '';
+    return new Promise(function(resolve) {
+      var keyHandler = null;
+      function end(v) {
+        if (keyHandler) document.removeEventListener('keydown', keyHandler, true);
+        ov.onclick = null;
+        vcDialogClose();
+        resolve(v);
+      }
+      var cancel = document.createElement('button');
+      cancel.className = 'vc-dialog-btn';
+      cancel.textContent = (opts && opts.cancelText) || 'Anulează';
+      cancel.onclick = function() { end(false); };
+      var ok = document.createElement('button');
+      ok.className = 'vc-dialog-btn' + ((opts && opts.danger) ? ' vc-danger' : '');
+      ok.textContent = (opts && opts.okText) || 'OK';
+      ok.onclick = function() { end(true); };
+      if (opts && opts.hideCancel) {
+        actions.appendChild(ok);
+      } else {
+        actions.appendChild(cancel);
+        actions.appendChild(ok);
+      }
+      ov.classList.add('vc-show');
+      ov.setAttribute('aria-hidden', 'false');
+      ov.onclick = function(e) { if (e.target === ov && !(opts && opts.hideCancel)) end(false); };
+      setTimeout(function() { ok.focus(); }, 0);
+      keyHandler = function(e) {
+        if (!ov.classList.contains('vc-show')) return;
+        if (e.key === 'Escape' && !(opts && opts.hideCancel)) end(false);
+        if (e.key === 'Enter') end(true);
+      };
+      document.addEventListener('keydown', keyHandler, true);
+    });
+  }
 
   /* ── Init după ce supabase e gata ── */
   function vcInit() {
@@ -1096,7 +1218,7 @@ if (window.supabase) { checkFamiliiNavSession(); } else { document.addEventListe
         /* Încearcă să ia numele familiei din tabelul families */
         var res = await supabase.from('families').select('name').eq('created_by', user.id).maybeSingle();
         var name = (res && res.data && res.data.name) ? res.data.name : (user.email || 'Membru');
-        var isAdmin = user.email && user.email === (window.ADMIN_EMAIL || '');
+        var isAdmin = await vcIsAdminUser(user);
         vcCurrentUser = { name: name, type: isAdmin ? 'admin' : 'member', userId: user.id };
       }
     } catch(e) {}
@@ -1265,9 +1387,6 @@ if (window.supabase) { checkFamiliiNavSession(); } else { document.addEventListe
   }
 
   /* ── Helpers ── */
-  function vcEsc(str) {
-    return String(str || '').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;').replace(/'/g,'&#39;');
-  }
   function vcScrollBottom() {
     var list = $id('vc-msgs');
     if (list) list.scrollTop = list.scrollHeight;
@@ -1314,18 +1433,30 @@ if (window.supabase) { checkFamiliiNavSession(); } else { document.addEventListe
       /* Cooldown */
       if (now - vcLastSent < COOLDOWN_MS) {
         var secs = Math.ceil((COOLDOWN_MS - (now - vcLastSent)) / 1000);
-        alert('Așteaptă ' + secs + ' secunde înainte de a trimite un alt mesaj.');
+        await vcDialogOpen({
+          title: 'Prea rapid',
+          message: 'Așteaptă ' + secs + ' secunde înainte de a trimite un alt mesaj.',
+          hideCancel: true
+        });
         return;
       }
       /* Limită fereastră */
       vcSentTimestamps = vcSentTimestamps.filter(function(t) { return now - t < WINDOW_MS; });
       if (vcSentTimestamps.length >= MAX_MSGS_PER_WINDOW) {
-        alert('Ai atins limita de ' + MAX_MSGS_PER_WINDOW + ' mesaje per 30 de minute.');
+        await vcDialogOpen({
+          title: 'Limită atinsă',
+          message: 'Ai atins limita de ' + MAX_MSGS_PER_WINDOW + ' mesaje per 30 de minute.',
+          hideCancel: true
+        });
         return;
       }
       /* Fără linkuri */
       if (/https?:\/\//i.test(body) || /www\./i.test(body)) {
-        alert('Linkurile nu sunt permise pentru vizitatori.');
+        await vcDialogOpen({
+          title: 'Mesaj blocat',
+          message: 'Linkurile nu sunt permise pentru vizitatori.',
+          hideCancel: true
+        });
         return;
       }
     }
@@ -1361,7 +1492,13 @@ if (window.supabase) { checkFamiliiNavSession(); } else { document.addEventListe
   /* ── Moderare (admin) ── */
   window.vcDeleteMsg = async function(id) {
     if (!vcCurrentUser) return;
-    if (!confirm('Ștergi acest mesaj?')) return;
+    var ok = await vcDialogOpen({
+      title: 'Ștergere mesaj',
+      message: 'Ștergi acest mesaj?',
+      okText: 'Șterge',
+      danger: true
+    });
+    if (!ok) return;
     try {
       await supabase.from('chat_messages').update({ status: 'deleted' }).eq('id', id);
       var el = document.querySelector('[data-msg-id="' + id + '"]');
@@ -1377,7 +1514,12 @@ if (window.supabase) { checkFamiliiNavSession(); } else { document.addEventListe
     } catch(e) {}
   };
   window.vcReportMsg = async function(id) {
-    if (!confirm('Raportezi acest mesaj administratorului?')) return;
+    var ok = await vcDialogOpen({
+      title: 'Raportare mesaj',
+      message: 'Raportezi acest mesaj administratorului?',
+      okText: 'Raportează'
+    });
+    if (!ok) return;
     try {
       await supabase.from('chat_messages').update({ status: 'reported' }).eq('id', id);
       var el = document.querySelector('[data-msg-id="' + id + '"]');
@@ -1394,7 +1536,15 @@ if (window.supabase) { checkFamiliiNavSession(); } else { document.addEventListe
 })();
 </script>
 <!-- ── END VATRA SATULUI CHAT ── -->
+<div id="vc-dialog" class="vc-dialog-overlay" aria-hidden="true">
+  <div class="vc-dialog" role="dialog" aria-modal="true" aria-labelledby="vc-dialog-title">
+    <div class="vc-dialog-head" id="vc-dialog-title">Confirmare</div>
+    <div class="vc-dialog-body" id="vc-dialog-body"></div>
+    <div class="vc-dialog-actions" id="vc-dialog-actions"></div>
+  </div>
+</div>
 </body>
 </html>
+
 
 
