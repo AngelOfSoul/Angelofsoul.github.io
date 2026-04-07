@@ -296,24 +296,45 @@ background:#1a0a0a;border:1px solid #4a1a1a;color:var(--red);
 
 .chatm-select {
   width:190px;
-}
-
-#chatm-filter {
-  background:#0f0f0f;
+  background:var(--s3);
+  border:1px solid var(--b2);
   color:var(--text);
+  font-family:'EB Garamond',serif;
+  font-size:13px;
+  padding:6px 10px;
+  border-radius:2px;
 }
 
-/* Native dropdown popup on Windows may ignore dark option bg.
-   Force light popup with dark text for readability. */
-#chatm-filter option {
-  background:#ffffff !important;
-  color:#111111 !important;
+.chatm-pill {
+  display:inline-flex;
+  align-items:center;
+  padding:6px 10px;
+  border:1px solid var(--gold-d);
+  background:#1a1200;
+  color:var(--gold);
+  font-family:'Playfair Display',serif;
+  letter-spacing:1px;
+  font-size:12px;
+  text-transform:uppercase;
+  border-radius:2px;
 }
 
-/* Keep selected value readable in collapsed control (Windows/Edge). */
-#chatm-filter::-ms-value {
-  background:#0f0f0f;
-  color:var(--text);
+.chatm-allow-list {
+  display:flex;
+  gap:8px;
+  flex-wrap:wrap;
+  margin-top:8px;
+}
+
+.chatm-allow-chip {
+  display:inline-flex;
+  align-items:center;
+  background:#0c1e33;
+  border:1px solid #185fa5;
+  color:var(--blue-l);
+  font-size:11px;
+  padding:3px 9px;
+  border-radius:2px;
 }
 
 .chatm-list {
@@ -1260,14 +1281,8 @@ left:23px;
         <div class="chatm-wrap">
           <div class="section-label" style="margin-bottom:10px;">Mesaje chat</div>
           <div class="chatm-top">
-            <select class="fs chatm-select" id="chatm-filter" onchange="loadChatModeration()">
-              <option value="all">Toate</option>
-              <option value="reported">Raportate</option>
-              <option value="active">Active</option>
-              <option value="pinned">Fixat</option>
-              <option value="deleted">Sterse</option>
-            </select>
-            <input class="fi" id="chatm-search" style="max-width:260px;" placeholder="Cauta in mesaje..." oninput="loadChatModeration()"/>
+            <span class="chatm-pill">Filtru fix: Raportate</span>
+            <input class="fi" id="chatm-search" style="max-width:300px;" placeholder="Cauta in mesaje raportate..." oninput="loadChatModeration()"/>
             <button class="tbtn" onclick="loadChatModeration()">Reincarca</button>
           </div>
           <div style="display:flex;gap:10px;flex-wrap:wrap;margin:0 0 10px 0;align-items:center;">
@@ -1277,9 +1292,17 @@ left:23px;
             <button class="tbtn" onclick="saveChatModerationSettings()">Salveaza reguli</button>
           </div>
           <div style="display:flex;gap:10px;flex-wrap:wrap;margin:0 0 10px 0;align-items:center;">
-            <label style="display:flex;align-items:center;gap:6px;font-size:12px;color:var(--muted);"><input type="checkbox" id="chatm-rule-block-links"/> blocheaza linkuri la trimitere</label>
+            <label style="display:flex;align-items:center;gap:6px;font-size:12px;color:var(--muted);"><input type="checkbox" id="chatm-rule-allow-links"/> permite linkuri in chat (global)</label>
             <label style="display:flex;align-items:center;gap:6px;font-size:12px;color:var(--muted);"><input type="checkbox" id="chatm-rule-block-banned"/> blocheaza cuvinte interzise la trimitere</label>
           </div>
+          <div style="display:flex;gap:10px;flex-wrap:wrap;margin:0 0 10px 0;align-items:center;">
+            <select class="chatm-select" id="chatm-link-user-select">
+              <option value="">Alege utilizator...</option>
+            </select>
+            <button class="tbtn green" onclick="chatAllowLinksForSelectedUser()">Permite linkuri pentru user</button>
+            <button class="tbtn red" onclick="chatRevokeLinksForSelectedUser()">Revoca permisiunea</button>
+          </div>
+          <div id="chatm-link-allow-list" class="chatm-allow-list"></div>
           <div id="chatm-msg" style="margin-bottom:8px;"></div>
           <div id="chatm-list" class="chatm-list">
             <div style="color:var(--gold-m);font-style:italic;font-size:13px;">Se incarca mesajele din chat...</div>
@@ -1613,9 +1636,9 @@ function loadUsers() {
   if (!window.supabase) return;
   var el = document.getElementById('users-list');
   if (!el) return;
-  // Join profiles + families to get email-equivalent (owner) info
+  // Join profiles + families for user email + family assignment
   Promise.all([
-    supabase.from('profiles').select('id, is_admin, created_at').order('created_at', {ascending: false}),
+    supabase.from('profiles').select('*').order('created_at', {ascending: false}),
     supabase.from('families').select('created_by, name, village, created_at')
   ]).then(function(results) {
     var profiles = results[0].data || [];
@@ -1632,7 +1655,7 @@ function loadUsers() {
 
     el.innerHTML = '<div class="tbl-wrap"><table class="adm-tbl">' +
       '<tr>' +
-        '<th style="width:180px;">Familie / Cont</th>' +
+        '<th style="width:230px;">Familie / Email</th>' +
         '<th style="width:100px;">Sat</th>' +
         '<th style="width:110px;">Inregistrat</th>' +
         '<th style="width:120px;">Rol</th>' +
@@ -1640,7 +1663,14 @@ function loadUsers() {
       '</tr>' +
       profiles.map(function(p) {
         var fam = famByOwner[p.id];
-        var famName = fam ? escH(fam.name) : '<span style="color:var(--muted);font-style:italic;">Fara familie</span>';
+        var emailRaw = (p.email || p.user_email || p.contact_email || '').trim();
+        var emailSafe = emailRaw
+          ? escH(emailRaw)
+          : ('<span style="color:var(--muted);font-style:italic;">ID: ' + escH(String(p.id || '').slice(0, 8)) + '...</span>');
+        var famName = fam ? escH(fam.name) : '';
+        var famOrEmail = fam
+          ? ('<div style="line-height:1.2;"><div>' + famName + '</div><div style="font-size:11px;color:var(--gold-m);font-family:\'EB Garamond\',serif;">' + emailSafe + '</div></div>')
+          : ('<div style="line-height:1.2;"><div style="font-family:\'EB Garamond\',serif;">' + emailSafe + '</div><div style="font-size:11px;color:var(--muted);font-style:italic;">Fara familie inca</div></div>');
         var village = fam ? escH(fam.village || '-') : '-';
         var since   = p.created_at ? fmtDate(p.created_at).slice(0, 11) : '-';
         var adminBadge = p.is_admin
@@ -1648,7 +1678,7 @@ function loadUsers() {
           : '<span class="badge low">Utilizator</span>';
         var resetBtn = '<button class="tbtn" onclick="resetUserPassword(\'' + p.id + '\')" title="Trimite email resetare parola">&#128274; Reset</button>';
         return '<tr>' +
-          '<td>' + famName + '</td>' +
+          '<td>' + famOrEmail + '</td>' +
           '<td>' + village + '</td>' +
           '<td>' + since + '</td>' +
           '<td>' + adminBadge + '</td>' +
@@ -2296,8 +2326,161 @@ function loadFamilies() {
   });
 }
 
+var FAMILY_EDITOR_MODAL_ID = 'family-editor-modal';
+
+function escAttr(v) {
+  return String(v == null ? '' : v)
+    .replace(/&/g, '&amp;')
+    .replace(/"/g, '&quot;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;');
+}
+
+function isFamilyFieldEditable(key) {
+  var blocked = {
+    id: true,
+    created_at: true,
+    created_by: true,
+    updated_at: true,
+    members_count: true,
+    photos_count: true,
+    generations_count: true
+  };
+  return !blocked[key];
+}
+
+function fmtFamilyFieldLabel(key) {
+  return String(key || '')
+    .replace(/_/g, ' ')
+    .replace(/\b\w/g, function(m){ return m.toUpperCase(); });
+}
+
+function inferEditorType(value) {
+  if (typeof value === 'boolean') return 'checkbox';
+  if (typeof value === 'number') return 'number';
+  if (typeof value === 'string' && value.length > 80) return 'textarea';
+  return 'text';
+}
+
+function closeFamilyEditor() {
+  var modal = document.getElementById(FAMILY_EDITOR_MODAL_ID);
+  if (!modal) return;
+  modal.style.display = 'none';
+  modal.innerHTML = '';
+}
+
+function renderFamilyEditor(family) {
+  var modal = document.getElementById(FAMILY_EDITOR_MODAL_ID);
+  if (!modal) {
+    modal = document.createElement('div');
+    modal.id = FAMILY_EDITOR_MODAL_ID;
+    modal.style.cssText = 'position:fixed;inset:0;background:rgba(0,0,0,.72);z-index:2200;display:none;overflow:auto;padding:24px;';
+    document.body.appendChild(modal);
+  }
+
+  var keys = Object.keys(family || {}).filter(function(k){
+    var val = family[k];
+    if (!isFamilyFieldEditable(k)) return false;
+    if (val != null && typeof val === 'object') return false;
+    return true;
+  }).sort();
+
+  var fieldsHtml = keys.map(function(key){
+    var val = family[key];
+    var editorType = inferEditorType(val);
+    var label = fmtFamilyFieldLabel(key);
+    var id = 'fam-edit-' + key;
+
+    if (editorType === 'checkbox') {
+      return '<div style="margin-bottom:10px;"><label class="fl" for="' + id + '">' +
+        '<input type="checkbox" id="' + id + '" data-key="' + escAttr(key) + '" data-editor="checkbox" ' + (val ? 'checked' : '') + ' style="width:14px;height:14px;accent-color:var(--gold-d);margin-right:6px;vertical-align:middle;"/>' +
+        label + '</label></div>';
+    }
+
+    if (editorType === 'textarea') {
+      return '<div style="margin-bottom:12px;"><label class="fl" for="' + id + '">' + label + '</label>' +
+        '<textarea class="ft" id="' + id + '" data-key="' + escAttr(key) + '" data-editor="textarea" style="min-height:90px;">' + escH(val == null ? '' : String(val)) + '</textarea></div>';
+    }
+
+    return '<div style="margin-bottom:12px;"><label class="fl" for="' + id + '">' + label + '</label>' +
+      '<input class="fi" id="' + id + '" type="' + (editorType === 'number' ? 'number' : 'text') + '" data-key="' + escAttr(key) + '" data-editor="' + editorType + '" value="' + escAttr(val == null ? '' : String(val)) + '"/></div>';
+  }).join('');
+
+  modal.innerHTML = '<div style="max-width:760px;margin:0 auto;background:var(--s2);border:1px solid var(--b2);padding:18px 16px;border-radius:2px;">' +
+    '<div class="sec-hdr" style="margin-bottom:12px;">' +
+      '<div class="ct-title">Editare familie: ' + escH(family.name || 'Fara nume') + '</div>' +
+    '</div>' +
+    '<div class="ct-sub" style="margin-bottom:14px;">Editezi direct din Admin Panel. Campurile de sistem (ID, owner, contoare) sunt protejate.</div>' +
+    '<div id="family-edit-msg" style="margin-bottom:10px;"></div>' +
+    '<div style="max-height:62vh;overflow:auto;padding-right:4px;">' + fieldsHtml + '</div>' +
+    '<div style="display:flex;gap:10px;justify-content:flex-end;margin-top:14px;">' +
+      '<button class="adm-btn-sec" onclick="closeFamilyEditor()">Anuleaza</button>' +
+      '<button class="adm-btn" onclick="saveFamilyEditor(\'' + escAttr(family.id) + '\')">Salveaza</button>' +
+    '</div>' +
+  '</div>';
+
+  modal.style.display = 'block';
+}
+
+function saveFamilyEditor(familyId) {
+  if (!familyId || !window.supabase) return;
+  var modal = document.getElementById(FAMILY_EDITOR_MODAL_ID);
+  if (!modal) return;
+  var nodes = modal.querySelectorAll('[data-key]');
+  var payload = {};
+
+  Array.prototype.forEach.call(nodes, function(node){
+    var key = node.getAttribute('data-key');
+    var editor = node.getAttribute('data-editor');
+    var raw = '';
+    if (editor === 'checkbox') {
+      payload[key] = !!node.checked;
+      return;
+    }
+    raw = (node.value || '').trim();
+    if (editor === 'number') {
+      payload[key] = raw === '' ? null : Number(raw);
+    } else {
+      payload[key] = raw === '' ? null : raw;
+    }
+  });
+
+  if (!payload.name) {
+    showMsg('family-edit-msg', 'Numele familiei este obligatoriu.', 'error');
+    return;
+  }
+
+  supabase.from('families').update(payload).eq('id', familyId).then(function(r){
+    if (r && r.error) {
+      showMsg('family-edit-msg', 'Eroare la salvare: ' + r.error.message, 'error');
+      return;
+    }
+    logAction('family-edit', 'Familie editata: ' + (payload.name || familyId));
+    closeFamilyEditor();
+    loadFamilies();
+    loadDashboard();
+    loadUsers();
+    alert('Modificarile familiei au fost salvate.');
+  }).catch(function(err){
+    showMsg('family-edit-msg', 'Eroare la salvare: ' + (err && err.message ? err.message : 'necunoscuta'), 'error');
+  });
+}
+
 function editFamily(id, name) {
-  alert('Editarea completa a familiei "' + name + '" va fi disponibila in versiunea finala.\nPentru modificari urgente, foloseste Supabase Table Editor.');
+  if (!id || !window.supabase) return;
+  supabase.from('families').select('*').eq('id', id).single().then(function(r){
+    if (r && r.error) {
+      alert('Nu am putut incarca familia pentru editare: ' + r.error.message);
+      return;
+    }
+    if (!r || !r.data) {
+      alert('Familia nu a fost gasita.');
+      return;
+    }
+    renderFamilyEditor(r.data);
+  }).catch(function(err){
+    alert('Eroare la deschiderea editorului: ' + (err && err.message ? err.message : 'necunoscuta'));
+  });
 }
 
 function deleteFamily(id, name) {
@@ -2347,16 +2530,223 @@ function resolveContact(id) {
 }
 
 /* ── CHAT MODERATION (Vatra satului) ── */
+var CHATM_STATE = {
+  allowLinkUserIds: [],
+  users: []
+};
+
+function chatHasLink(text) {
+  return /(https?:\/\/|www\.)/i.test(String(text || ''));
+}
+
+function normalizeUserIdList(list) {
+  if (!Array.isArray(list)) return [];
+  var out = [];
+  list.forEach(function(v) {
+    var id = String(v || '').trim();
+    if (!id) return;
+    if (out.indexOf(id) !== -1) return;
+    out.push(id);
+  });
+  return out;
+}
+
+function findChatUserLabel(userId) {
+  var id = String(userId || '');
+  if (!id) return '';
+  for (var i = 0; i < CHATM_STATE.users.length; i++) {
+    if (String(CHATM_STATE.users[i].id) === id) return CHATM_STATE.users[i].label;
+  }
+  return 'User ' + id.slice(0, 8) + '...';
+}
+
+function renderChatLinkAllowList() {
+  var box = document.getElementById('chatm-link-allow-list');
+  if (!box) return;
+  if (!CHATM_STATE.allowLinkUserIds.length) {
+    box.innerHTML = '<span style="color:var(--muted);font-size:12px;">Niciun user cu exceptie de linkuri.</span>';
+    return;
+  }
+  box.innerHTML = CHATM_STATE.allowLinkUserIds.map(function(uid) {
+    return '<span class="chatm-allow-chip">' + escH(findChatUserLabel(uid)) + '</span>';
+  }).join('');
+}
+
+function loadChatModerationUsers() {
+  if (!window.supabase) return Promise.resolve();
+  var sel = document.getElementById('chatm-link-user-select');
+  if (!sel) return Promise.resolve();
+  return Promise.all([
+    supabase.from('profiles').select('*').order('created_at', { ascending: false }).limit(600),
+    supabase.from('families').select('created_by, name, village').limit(600)
+  ]).then(function(results) {
+    var profiles = results[0] && results[0].data ? results[0].data : [];
+    var families = results[1] && results[1].data ? results[1].data : [];
+    var famByOwner = {};
+    families.forEach(function(f) {
+      if (f && f.created_by && !famByOwner[f.created_by]) famByOwner[f.created_by] = f;
+    });
+    CHATM_STATE.users = profiles.map(function(p) {
+      var fam = famByOwner[p.id] || null;
+      var email = (p.email || p.user_email || p.contact_email || '').trim();
+      var label = fam
+        ? (fam.name + (email ? (' · ' + email) : ''))
+        : (email || ('Cont fara familie · ' + String(p.id || '').slice(0, 8)));
+      if (p.is_admin) label += ' (ADMIN)';
+      return { id: p.id, label: label };
+    }).sort(function(a, b) { return a.label.localeCompare(b.label); });
+    sel.innerHTML = '<option value="">Alege utilizator...</option>' + CHATM_STATE.users.map(function(u) {
+      return '<option value="' + escH(u.id) + '">' + escH(u.label) + '</option>';
+    }).join('');
+    renderChatLinkAllowList();
+  }).catch(function() {
+    CHATM_STATE.users = [];
+    sel.innerHTML = '<option value="">Utilizatori indisponibili</option>';
+    renderChatLinkAllowList();
+  });
+}
+
+function saveChatModerationSettings(opts) {
+  opts = opts || {};
+  try {
+    var bannedWordsEl = document.getElementById('chatm-banned-words');
+    var onlyLinksEl = document.getElementById('chatm-only-links');
+    var onlyBannedEl = document.getElementById('chatm-only-banned');
+    var allowLinksEl = document.getElementById('chatm-rule-allow-links');
+    var blockBannedEl = document.getElementById('chatm-rule-block-banned');
+
+    var bannedWords = bannedWordsEl ? String(bannedWordsEl.value || '') : '';
+    var allowLinksGlobal = !!(allowLinksEl && allowLinksEl.checked);
+    var blockBanned = !!(blockBannedEl && blockBannedEl.checked);
+    CHATM_STATE.allowLinkUserIds = normalizeUserIdList(CHATM_STATE.allowLinkUserIds);
+
+    localStorage.setItem('chatm-banned-words', bannedWords);
+    localStorage.setItem('chatm-only-links', onlyLinksEl && onlyLinksEl.checked ? '1' : '0');
+    localStorage.setItem('chatm-only-banned', onlyBannedEl && onlyBannedEl.checked ? '1' : '0');
+    localStorage.setItem('chatm-rule-allow-links', allowLinksGlobal ? '1' : '0');
+    localStorage.setItem('chatm-rule-block-links', allowLinksGlobal ? '0' : '1');
+    localStorage.setItem('chatm-rule-block-banned', blockBanned ? '1' : '0');
+    localStorage.setItem('chatm-allow-link-user-ids', JSON.stringify(CHATM_STATE.allowLinkUserIds));
+
+    var cfg = {
+      blocked_words: bannedWords,
+      allow_links_global: allowLinksGlobal,
+      block_links: !allowLinksGlobal,
+      block_banned_words: blockBanned,
+      allow_link_user_ids: CHATM_STATE.allowLinkUserIds
+    };
+
+    function doneOk() {
+      renderChatLinkAllowList();
+      showMsg('chatm-msg', opts.successMessage || 'Regulile de moderare au fost salvate.', 'ok');
+      if (!opts.skipReload) loadChatModeration();
+    }
+
+    if (!window.supabase) { doneOk(); return; }
+
+    supabase
+      .from('site_settings')
+      .upsert({ key: 'chat_moderation', value: JSON.stringify(cfg) }, { onConflict: 'key' })
+      .then(function(r) {
+        if (r && r.error) {
+          showMsg('chatm-msg', 'Eroare salvare reguli: ' + r.error.message, 'err');
+          return;
+        }
+        doneOk();
+      })
+      .catch(function(e) {
+        showMsg('chatm-msg', 'Eroare salvare reguli: ' + (e && e.message ? e.message : 'necunoscuta'), 'err');
+      });
+  } catch (_e) {}
+}
+
+function loadChatModerationSettings() {
+  try {
+    var bannedWordsEl = document.getElementById('chatm-banned-words');
+    var onlyLinksEl = document.getElementById('chatm-only-links');
+    var onlyBannedEl = document.getElementById('chatm-only-banned');
+    var allowLinksEl = document.getElementById('chatm-rule-allow-links');
+    var blockBannedEl = document.getElementById('chatm-rule-block-banned');
+
+    if (bannedWordsEl) bannedWordsEl.value = localStorage.getItem('chatm-banned-words') || '';
+    if (onlyLinksEl) onlyLinksEl.checked = (localStorage.getItem('chatm-only-links') || '0') === '1';
+    if (onlyBannedEl) onlyBannedEl.checked = (localStorage.getItem('chatm-only-banned') || '0') === '1';
+    if (allowLinksEl) allowLinksEl.checked = (localStorage.getItem('chatm-rule-allow-links') || '0') === '1';
+    if (blockBannedEl) blockBannedEl.checked = (localStorage.getItem('chatm-rule-block-banned') || '1') === '1';
+    try {
+      CHATM_STATE.allowLinkUserIds = normalizeUserIdList(JSON.parse(localStorage.getItem('chatm-allow-link-user-ids') || '[]'));
+    } catch (_e) {
+      CHATM_STATE.allowLinkUserIds = [];
+    }
+
+    loadChatModerationUsers();
+
+    if (window.supabase) {
+      supabase.from('site_settings').select('value').eq('key', 'chat_moderation').maybeSingle().then(function (r) {
+        if (r && !r.error && r.data && r.data.value) {
+          var cfg = null;
+          try { cfg = JSON.parse(r.data.value); } catch (_e) {}
+          if (cfg) {
+            if (bannedWordsEl && typeof cfg.blocked_words === 'string') bannedWordsEl.value = cfg.blocked_words;
+            if (allowLinksEl) {
+              if (typeof cfg.allow_links_global !== 'undefined') allowLinksEl.checked = !!cfg.allow_links_global;
+              else if (typeof cfg.block_links !== 'undefined') allowLinksEl.checked = !cfg.block_links;
+            }
+            if (blockBannedEl && typeof cfg.block_banned_words !== 'undefined') blockBannedEl.checked = !!cfg.block_banned_words;
+            if (Array.isArray(cfg.allow_link_user_ids)) {
+              CHATM_STATE.allowLinkUserIds = normalizeUserIdList(cfg.allow_link_user_ids);
+              localStorage.setItem('chatm-allow-link-user-ids', JSON.stringify(CHATM_STATE.allowLinkUserIds));
+            }
+            renderChatLinkAllowList();
+          }
+        }
+      }).catch(function(){});
+    }
+  } catch (_e) {}
+}
+
+function chatAllowLinksForSelectedUser() {
+  var sel = document.getElementById('chatm-link-user-select');
+  var uid = sel ? String(sel.value || '').trim() : '';
+  if (!uid) { showMsg('chatm-msg', 'Alege un utilizator mai intai.', 'warn'); return; }
+  if (CHATM_STATE.allowLinkUserIds.indexOf(uid) !== -1) {
+    showMsg('chatm-msg', 'Utilizatorul are deja permisiunea de link.', 'info');
+    return;
+  }
+  CHATM_STATE.allowLinkUserIds.push(uid);
+  CHATM_STATE.allowLinkUserIds = normalizeUserIdList(CHATM_STATE.allowLinkUserIds);
+  saveChatModerationSettings({
+    skipReload: true,
+    successMessage: 'Permisiune link acordata pentru: ' + findChatUserLabel(uid)
+  });
+  logAction('chat-link-allow-user', 'Permisiune link acordata: ' + uid);
+}
+
+function chatRevokeLinksForSelectedUser() {
+  var sel = document.getElementById('chatm-link-user-select');
+  var uid = sel ? String(sel.value || '').trim() : '';
+  if (!uid) { showMsg('chatm-msg', 'Alege un utilizator mai intai.', 'warn'); return; }
+  var before = CHATM_STATE.allowLinkUserIds.length;
+  CHATM_STATE.allowLinkUserIds = CHATM_STATE.allowLinkUserIds.filter(function(v) { return v !== uid; });
+  if (CHATM_STATE.allowLinkUserIds.length === before) {
+    showMsg('chatm-msg', 'Utilizatorul nu avea permisiune de link.', 'info');
+    return;
+  }
+  saveChatModerationSettings({
+    skipReload: true,
+    successMessage: 'Permisiune link revocata pentru: ' + findChatUserLabel(uid)
+  });
+  logAction('chat-link-revoke-user', 'Permisiune link revocata: ' + uid);
+}
+
 function loadChatModeration() {
   if (!window.supabase) return;
   var list = document.getElementById('chatm-list');
-  var filterEl = document.getElementById('chatm-filter');
   var searchEl = document.getElementById('chatm-search');
   var onlyLinksEl = document.getElementById('chatm-only-links');
   var onlyBannedEl = document.getElementById('chatm-only-banned');
   var bannedWordsEl = document.getElementById('chatm-banned-words');
-  if (!list || !filterEl) return;
-  var status = filterEl.value || 'all';
+  if (!list) return;
   var searchText = searchEl ? String(searchEl.value || '').trim().toLowerCase() : '';
   var onlyLinks = !!(onlyLinksEl && onlyLinksEl.checked);
   var onlyBanned = !!(onlyBannedEl && onlyBannedEl.checked);
@@ -2375,10 +2765,10 @@ function loadChatModeration() {
   list.innerHTML = '<div style="color:var(--gold-m);font-style:italic;font-size:13px;">Se incarca mesajele din chat...</div>';
   var q = supabase
     .from('chat_messages')
-    .select('id, author_display_name, author_type, body, status, created_at')
+    .select('id, user_id, author_display_name, author_type, body, status, created_at')
     .order('created_at', { ascending: false })
+    .eq('status', 'reported')
     .limit(200);
-  if (status !== 'all') q = q.eq('status', status);
   q
     .then(function (r) {
       var rows = (r && r.data) ? r.data : [];
@@ -2390,31 +2780,22 @@ function loadChatModeration() {
         return true;
       });
       if (!rows.length) {
-        list.innerHTML = '<div style="color:var(--gold-m);font-style:italic;font-size:13px;">Nu exista mesaje pentru filtrul selectat.</div>';
+        list.innerHTML = '<div style="color:var(--gold-m);font-style:italic;font-size:13px;">Nu exista mesaje raportate in acest moment.</div>';
         return;
       }
       list.innerHTML = rows.map(function (m) {
         var type = String(m.author_type || 'guest');
         var badgeCls = type === 'admin' ? 'low' : type === 'member' ? 'ok' : 'warn';
         var badgeTxt = type === 'admin' ? 'ADMIN' : type === 'member' ? 'MEMBRU' : 'VIZITATOR';
+        var uid = String(m.user_id || '').trim();
+        var userHasLinkOverride = uid && CHATM_STATE.allowLinkUserIds.indexOf(uid) !== -1;
         var actions = '';
-        if (m.status !== 'deleted') {
-          actions += '<button class="tbtn red" onclick="chatModerationAction(\'delete\',\'' + m.id + '\')">Sterge</button>';
-        }
-        if (m.status === 'reported') {
-          actions += '<button class="tbtn green" onclick="chatModerationAction(\'restore\',\'' + m.id + '\')">Aproba (active)</button>';
-        }
-        if (m.status === 'active') {
-          actions += '<button class="tbtn" onclick="chatModerationAction(\'pin\',\'' + m.id + '\')">Fixeaza</button>';
-        }
-        if (m.status === 'pinned') {
-          actions += '<button class="tbtn" onclick="chatModerationAction(\'unpin\',\'' + m.id + '\')">Scoate pin</button>';
-        }
-        if (m.status !== 'reported') {
-          actions += '<button class="tbtn" onclick="chatModerationAction(\'report\',\'' + m.id + '\')">Marcheaza raportat</button>';
-        }
+        actions += '<button class="tbtn red" onclick="chatModerationAction(\'delete\',\'' + m.id + '\')">Sterge</button>';
+        actions += '<button class="tbtn green" onclick="chatModerationAction(\'restore\',\'' + m.id + '\')">Aproba (active)</button>';
+        actions += '<button class="tbtn" onclick="chatModerationAction(\'pin\',\'' + m.id + '\')">Aproba + Fixeaza</button>';
         var badges = '';
-        if (hasLink(m.body)) badges += '<span class="badge info">LINK</span>';
+        if (chatHasLink(m.body)) badges += '<span class="badge info">LINK</span>';
+        if (userHasLinkOverride) badges += '<span class="badge ok">USER LINK PERMIS</span>';
         if (hasBannedWord(m.body)) badges += '<span class="badge crit">CUVANT INTERZIS</span>';
         return (
           '<div class="chatm-item">' +
@@ -2441,7 +2822,6 @@ function chatModerationAction(action, id) {
   var map = {
     delete:  { status: 'deleted', text: 'Mesaj sters' },
     restore: { status: 'active',  text: 'Mesaj aprobat' },
-    report:  { status: 'reported', text: 'Mesaj marcat raportat' },
     unpin:   { status: 'active',  text: 'Pin eliminat' }
   };
   if (action === 'pin') {
@@ -2465,68 +2845,6 @@ function chatModerationAction(action, id) {
     logAction('chat-' + action, cfg.text + ': ' + id);
     loadChatModeration();
   });
-}
-
-function saveChatModerationSettings() {
-  try {
-    var bannedWordsEl = document.getElementById('chatm-banned-words');
-    var onlyLinksEl = document.getElementById('chatm-only-links');
-    var onlyBannedEl = document.getElementById('chatm-only-banned');
-    var blockLinksEl = document.getElementById('chatm-rule-block-links');
-    var blockBannedEl = document.getElementById('chatm-rule-block-banned');
-    var bannedWords = bannedWordsEl ? bannedWordsEl.value : '';
-    var blockLinks = blockLinksEl && blockLinksEl.checked ? true : false;
-    var blockBanned = blockBannedEl && blockBannedEl.checked ? true : false;
-    localStorage.setItem('chatm-banned-words', bannedWordsEl ? bannedWordsEl.value : '');
-    localStorage.setItem('chatm-only-links', onlyLinksEl && onlyLinksEl.checked ? '1' : '0');
-    localStorage.setItem('chatm-only-banned', onlyBannedEl && onlyBannedEl.checked ? '1' : '0');
-    localStorage.setItem('chatm-rule-block-links', blockLinks ? '1' : '0');
-    localStorage.setItem('chatm-rule-block-banned', blockBanned ? '1' : '0');
-    if (window.supabase) {
-      supabase
-        .from('site_settings')
-        .upsert({
-          key: 'chat_moderation',
-          value: JSON.stringify({
-            blocked_words: bannedWords,
-            block_links: blockLinks,
-            block_banned_words: blockBanned
-          })
-        }, { onConflict: 'key' })
-        .then(function(){})
-        .catch(function(){});
-    }
-    showMsg('chatm-msg', 'Regulile de moderare au fost salvate local.', 'ok');
-    loadChatModeration();
-  } catch (_e) {}
-}
-
-function loadChatModerationSettings() {
-  try {
-    var bannedWordsEl = document.getElementById('chatm-banned-words');
-    var onlyLinksEl = document.getElementById('chatm-only-links');
-    var onlyBannedEl = document.getElementById('chatm-only-banned');
-    var blockLinksEl = document.getElementById('chatm-rule-block-links');
-    var blockBannedEl = document.getElementById('chatm-rule-block-banned');
-    if (bannedWordsEl) bannedWordsEl.value = localStorage.getItem('chatm-banned-words') || '';
-    if (onlyLinksEl) onlyLinksEl.checked = (localStorage.getItem('chatm-only-links') || '0') === '1';
-    if (onlyBannedEl) onlyBannedEl.checked = (localStorage.getItem('chatm-only-banned') || '0') === '1';
-    if (blockLinksEl) blockLinksEl.checked = (localStorage.getItem('chatm-rule-block-links') || '1') === '1';
-    if (blockBannedEl) blockBannedEl.checked = (localStorage.getItem('chatm-rule-block-banned') || '1') === '1';
-    if (window.supabase) {
-      supabase.from('site_settings').select('value').eq('key', 'chat_moderation').maybeSingle().then(function (r) {
-        if (r && !r.error && r.data && r.data.value) {
-          var cfg = null;
-          try { cfg = JSON.parse(r.data.value); } catch (_e) {}
-          if (cfg) {
-            if (bannedWordsEl && typeof cfg.blocked_words === 'string') bannedWordsEl.value = cfg.blocked_words;
-            if (blockLinksEl && typeof cfg.block_links !== 'undefined') blockLinksEl.checked = !!cfg.block_links;
-            if (blockBannedEl && typeof cfg.block_banned_words !== 'undefined') blockBannedEl.checked = !!cfg.block_banned_words;
-          }
-        }
-      }).catch(function(){});
-    }
-  } catch (_e) {}
 }
 
 /* â”€â”€ MESSAGES â”€â”€ */

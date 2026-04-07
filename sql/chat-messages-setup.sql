@@ -52,6 +52,60 @@ $$;
 revoke all on function public.chat_is_admin(uuid) from public;
 grant execute on function public.chat_is_admin(uuid) to anon, authenticated;
 
+-- Helper: verifica daca userul are voie sa posteze linkuri in chat,
+-- pe baza setarilor din site_settings.key='chat_moderation'.
+-- Compatibil cu ambele chei:
+--   allow_links_global (nou)
+--   block_links (legacy)
+create or replace function public.chat_can_post_links(_uid uuid default auth.uid())
+returns boolean
+language plpgsql
+security definer
+set search_path = public
+as $$
+declare
+  cfg jsonb := '{}'::jsonb;
+  allow_global boolean := false;
+begin
+  if to_regclass('public.site_settings') is not null then
+    begin
+      select coalesce(value::jsonb, '{}'::jsonb)
+      into cfg
+      from public.site_settings
+      where key = 'chat_moderation'
+      limit 1;
+    exception when others then
+      cfg := '{}'::jsonb;
+    end;
+  end if;
+
+  if cfg ? 'allow_links_global' then
+    allow_global := coalesce((cfg->>'allow_links_global')::boolean, false);
+  elsif cfg ? 'block_links' then
+    allow_global := not coalesce((cfg->>'block_links')::boolean, true);
+  else
+    allow_global := false;
+  end if;
+
+  if allow_global then
+    return true;
+  end if;
+
+  if _uid is null then
+    return false;
+  end if;
+
+  return exists (
+    select 1
+    from jsonb_array_elements_text(coalesce(cfg->'allow_link_user_ids', '[]'::jsonb)) as u(uid_text)
+    where u.uid_text = _uid::text
+  );
+end;
+$$;
+
+revoke all on function public.chat_can_post_links(uuid) from public;
+grant execute on function public.chat_can_post_links(uuid) to anon, authenticated;
+
 -- Citire publica doar pentru mesaje vizibile; admin vede tot.
 create policy "chat_select_visible_or_admin"
   on chat_messages for select
