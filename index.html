@@ -592,6 +592,49 @@ font-size:12px; color:var(--gold-m); font-style:italic;
 font-size:11px; color:var(--b2); letter-spacing:1px;
 }
 
+
+.li-poll-card {
+border:1px solid var(--b1); border-radius:2px; padding:20px 22px; margin-bottom:12px; position:relative; overflow:hidden;
+  max-width:960px;
+  margin-left:auto;
+  margin-right:auto;
+  background:#110d08;
+  border-color:#5f3a1e;
+}
+.li-poll-card::before { content:''; position:absolute; left:0; top:0; bottom:0; width:3px; background:var(--gold); }
+.li-poll-top { display:flex; align-items:flex-start; justify-content:space-between; gap:16px; margin-bottom:8px; }
+.li-poll-title { font-family:'Playfair Display',serif; font-size:17px; color:var(--text); line-height:1.3; flex:1; }
+.li-poll-desc { font-size:15px; color:var(--muted); line-height:1.7; margin-bottom:12px; }
+.li-poll-opt-list { display:flex; flex-direction:column; gap:7px; margin-bottom:14px; }
+.li-poll-opt { display:flex; align-items:center; gap:11px; padding:9px 13px; border:1px solid var(--b2); border-radius:2px; cursor:pointer; background:var(--s2); transition:border-color .15s,background .15s; user-select:none; }
+.li-poll-opt:hover { border-color:var(--gold-m); background:var(--s3); }
+.li-poll-opt.sel { border-color:var(--gold); background:var(--s3); }
+.li-poll-radio { width:13px; height:13px; border-radius:50%; border:1px solid var(--b2); flex-shrink:0; background:var(--s1); transition:all .15s; }
+.li-poll-opt.sel .li-poll-radio { border-color:var(--gold); background:var(--gold); }
+.li-poll-opt-text { font-size:14px; color:var(--text); flex:1; }
+.li-poll-opt-other { border-style:dashed; }
+.li-poll-other-input { flex:1; background:transparent; border:none; outline:none; font-family:'EB Garamond',serif; font-size:14px; color:var(--text); }
+.li-poll-other-input::placeholder { color:var(--dim); font-style:italic; }
+.li-poll-vote-btn { background:var(--s3); border:1px solid var(--gold-m); color:var(--gold); font-family:'Cinzel',serif; font-size:10px; letter-spacing:1.5px; padding:7px 20px; cursor:pointer; border-radius:1px; transition:all .15s; text-transform:uppercase; }
+.li-poll-vote-btn:hover { background:var(--gold-m); color:#050505; }
+.li-poll-vote-btn:disabled { opacity:.35; cursor:not-allowed; }
+.li-poll-msg { font-size:12px; color:var(--gold-m); margin-bottom:8px; min-height:16px; }
+.li-poll-results { display:flex; flex-direction:column; gap:9px; margin-bottom:14px; }
+.li-poll-res-row { display:flex; flex-direction:column; gap:4px; }
+.li-poll-res-top { display:flex; justify-content:space-between; align-items:baseline; }
+.li-poll-res-label { font-size:14px; color:var(--text); }
+.li-poll-res-pct { font-size:12px; color:var(--gold); font-family:'Cinzel',serif; letter-spacing:.5px; }
+.li-poll-bar-wrap { height:3px; background:var(--b1); border-radius:2px; overflow:hidden; }
+.li-poll-bar { height:100%; background:var(--gold-m); border-radius:2px; transition:width .7s ease; }
+.li-poll-bar.win { background:var(--gold); }
+.li-poll-total { font-size:12px; color:var(--dim); font-style:italic; margin-top:2px; }
+.li-poll-footer { display:flex; align-items:center; justify-content:space-between; gap:12px; flex-wrap:wrap; }
+.li-poll-nav { display:flex; align-items:center; gap:10px; }
+.li-poll-nav-btn { display:flex; align-items:center; gap:5px; background:none; border:1px solid var(--b2); color:var(--muted); font-family:'Cinzel',serif; font-size:10px; letter-spacing:1px; text-transform:uppercase; padding:5px 11px; cursor:pointer; border-radius:1px; transition:all .15s; }
+.li-poll-nav-btn:hover { border-color:var(--gold-m); color:var(--gold); }
+.li-poll-count { font-size:11px; color:var(--dim); font-family:'Cinzel',serif; letter-spacing:.5px; white-space:nowrap; }
+.li-poll-exp { font-size:12px; color:var(--dim); font-style:italic; }
+
 .li-activity-list {
 display:flex; flex-direction:column;
 }
@@ -1071,6 +1114,11 @@ to{transform:rotate(360deg);}
       <div class="li-sec-head"><span class="li-sec-title">Anunțuri</span></div>
       <div id="li-ann-list"></div>
     </div>
+
+    <div class="li-section" id="li-poll-section" style="display:none;">
+      <div class="li-sec-head"><span class="li-sec-title">Sondaje</span></div>
+      <div id="li-poll-list"></div>
+    </div>
   </div>
 
   <div class="li-showcase">
@@ -1294,6 +1342,218 @@ if (window.supabase) { checkAdminNavLink(); } else { document.addEventListener('
     });
     list.innerHTML = items.join('');
   }
+
+  var activePolls = [];
+  var activePollVotes = {};
+  var activePollSelected = {};
+  var activePollIndex = 0;
+
+  function hidePollSection() {
+    var section = document.getElementById('li-poll-section');
+    var list = document.getElementById('li-poll-list');
+    if (section) section.style.display = 'none';
+    if (list) list.innerHTML = '';
+    activePolls = [];
+    activePollVotes = {};
+    activePollSelected = {};
+    activePollIndex = 0;
+  }
+
+  function pollDaysText(expIso) {
+    var daysLeft = Math.ceil((new Date(expIso) - new Date()) / 86400000);
+    if (daysLeft <= 1) return 'Expira astazi';
+    if (daysLeft === 2) return 'Expira maine';
+    return 'Expira in ' + (daysLeft - 1) + ' zile';
+  }
+
+  function pollSortedOptions(poll) {
+    return (poll.poll_options || []).slice().sort(function(a, b) {
+      return Number(a.position || 0) - Number(b.position || 0);
+    });
+  }
+
+  function renderPollSection() {
+    var section = document.getElementById('li-poll-section');
+    var list = document.getElementById('li-poll-list');
+    if (!section || !list) return;
+    if (!activePolls.length) { hidePollSection(); return; }
+
+    section.style.display = 'block';
+    list.innerHTML = activePolls.map(function(poll, idx) {
+      var voted = !!activePollVotes[poll.id];
+      var opts = pollSortedOptions(poll);
+      var selected = activePollSelected[poll.id] || null;
+      var optionsHtml = opts.map(function(opt) {
+        var sel = selected && selected.kind === 'option' && selected.optionId === opt.id;
+        return '<div class="li-poll-opt' + (sel ? ' sel' : '') + '" onclick="pollSelectOption(\'' + poll.id + '\',\'' + opt.id + '\')">' +
+          '<div class="li-poll-radio"></div>' +
+          '<span class="li-poll-opt-text">' + escH(opt.label || '') + '</span>' +
+        '</div>';
+      }).join('');
+
+      if (poll.allow_other) {
+        var otherSel = selected && selected.kind === 'other';
+        var otherVal = otherSel ? (selected.text || '') : '';
+        optionsHtml += '<div class="li-poll-opt li-poll-opt-other' + (otherSel ? ' sel' : '') + '" onclick="pollSelectOther(\'' + poll.id + '\')">' +
+          '<div class="li-poll-radio"></div>' +
+          '<input class="li-poll-other-input" id="li-poll-other-' + poll.id + '" placeholder="Alta idee - scrie aici..." value="' + escH(otherVal) + '" oninput="pollUpdateOtherText(\'' + poll.id + '\', this.value)" onclick="event.stopPropagation();pollSelectOther(\'' + poll.id + '\')" />' +
+        '</div>';
+      }
+
+      var total = opts.reduce(function(sum, o) { return sum + Number(o.votes_count || 0); }, 0);
+      var maxVotes = 0;
+      opts.forEach(function(o) { if (Number(o.votes_count || 0) > maxVotes) maxVotes = Number(o.votes_count || 0); });
+      var resultsHtml = opts.map(function(o) {
+        var ov = Number(o.votes_count || 0);
+        var pct = total ? Math.round((ov / total) * 100) : 0;
+        var win = maxVotes > 0 && ov === maxVotes;
+        return '<div class="li-poll-res-row">' +
+          '<div class="li-poll-res-top"><span class="li-poll-res-label">' + escH(o.label || '') + '</span><span class="li-poll-res-pct">' + pct + '%</span></div>' +
+          '<div class="li-poll-bar-wrap"><div class="li-poll-bar' + (win ? ' win' : '') + '" style="width:' + pct + '%"></div></div>' +
+        '</div>';
+      }).join('') + '<div class="li-poll-total">' + total + ' voturi total</div>';
+
+      var canVote = !voted && !!selected && (selected.kind !== 'other' || (selected.text && selected.text.trim().length > 0));
+      var navHtml = '';
+      if (activePolls.length > 1) {
+        var prevBtn = idx > 0 ? '<button class="li-poll-nav-btn" onclick="pollShowIndex(' + (idx - 1) + ')">&#8249; Anterior</button>' : '';
+        var nextBtn = idx < activePolls.length - 1
+          ? '<button class="li-poll-nav-btn" onclick="pollShowIndex(' + (idx + 1) + ')">Urmator &#8250;</button>'
+          : '<button class="li-poll-nav-btn" onclick="pollShowIndex(0)">&#8250; Primul</button>';
+        navHtml = '<div class="li-poll-nav">' + prevBtn + '<span class="li-poll-count">' + (idx + 1) + ' / ' + activePolls.length + '</span>' + nextBtn + '</div>';
+      }
+
+      return '<div class="li-poll-card" id="li-poll-card-' + idx + '" style="display:' + (idx === activePollIndex ? 'block' : 'none') + ';">' +
+        '<div class="li-poll-top"><div class="li-poll-title">' + escH(poll.question || '') + '</div><span class="li-ann-badge type-notice">Activ</span></div>' +
+        (poll.description ? '<div class="li-poll-desc">' + escH(poll.description) + '</div>' : '') +
+        '<div class="li-poll-msg" id="li-poll-msg-' + poll.id + '"></div>' +
+        (voted
+          ? '<div class="li-poll-results">' + resultsHtml + '</div>'
+          : '<div class="li-poll-opt-list">' + optionsHtml + '</div>') +
+        '<div class="li-poll-footer">' +
+          '<div>' + (voted ? '<span style="font-size:13px;color:var(--gold-m);font-style:italic;">Multumim pentru vot!</span>' : '<button class="li-poll-vote-btn" onclick="pollVote(\'' + poll.id + '\')"' + (canVote ? '' : ' disabled') + '>Voteaza</button>') + '</div>' +
+          '<div style="display:flex;align-items:center;gap:10px;">' + navHtml + '<span class="li-poll-exp">' + pollDaysText(poll.expires_at) + '</span></div>' +
+        '</div>' +
+      '</div>';
+    }).join('');
+  }
+
+  async function loadActivePolls(userId) {
+    if (!window.supabase || !userId) { hidePollSection(); return; }
+    try {
+      var nowIso = new Date().toISOString();
+      var pollsRes = await supabase
+        .from('polls')
+        .select('id,question,description,allow_other,expires_at,status,poll_options(id,label,votes_count,position)')
+        .eq('status', 'active')
+        .gt('expires_at', nowIso)
+        .order('created_at', { ascending: true })
+        .limit(10);
+      var polls = (pollsRes && pollsRes.data) ? pollsRes.data : [];
+      if (!polls.length) { hidePollSection(); return; }
+
+      var ids = polls.map(function(p) { return p.id; });
+      var votesRes = await supabase
+        .from('poll_votes')
+        .select('poll_id,option_id,suggestion')
+        .eq('user_id', userId)
+        .in('poll_id', ids);
+
+      activePollVotes = {};
+      activePollSelected = {};
+      if (votesRes && Array.isArray(votesRes.data)) {
+        votesRes.data.forEach(function(v) {
+          activePollVotes[v.poll_id] = v;
+        });
+      }
+      activePolls = polls;
+      activePollIndex = 0;
+      renderPollSection();
+    } catch (_e) {
+      hidePollSection();
+    }
+  }
+
+  window.pollShowIndex = function(idx) {
+    if (!activePolls.length) return;
+    if (idx < 0) idx = 0;
+    if (idx > activePolls.length - 1) idx = activePolls.length - 1;
+    activePollIndex = idx;
+    renderPollSection();
+  };
+
+  window.pollSelectOption = function(pollId, optionId) {
+    if (activePollVotes[pollId]) return;
+    activePollSelected[pollId] = { kind: 'option', optionId: optionId };
+    renderPollSection();
+  };
+
+  window.pollSelectOther = function(pollId) {
+    if (activePollVotes[pollId]) return;
+    var current = activePollSelected[pollId];
+    activePollSelected[pollId] = {
+      kind: 'other',
+      text: current && current.kind === 'other' ? (current.text || '') : ''
+    };
+    renderPollSection();
+  };
+
+  window.pollUpdateOtherText = function(pollId, text) {
+    if (activePollVotes[pollId]) return;
+    var current = activePollSelected[pollId];
+    if (!current || current.kind !== 'other') {
+      current = { kind: 'other', text: '' };
+    }
+    current.text = String(text || '');
+    activePollSelected[pollId] = current;
+  };
+
+  window.pollVote = async function(pollId) {
+    var poll = activePolls.find(function(p) { return p.id === pollId; });
+    var sel = activePollSelected[pollId];
+    if (!poll || !sel || activePollVotes[pollId]) return;
+    var sessionRes = await supabase.auth.getSession();
+    var user = sessionRes && sessionRes.data && sessionRes.data.session && sessionRes.data.session.user;
+    if (!user) return;
+
+    var payload = {
+      poll_id: pollId,
+      user_id: user.id,
+      option_id: null,
+      suggestion: null
+    };
+
+    if (sel.kind === 'option') {
+      payload.option_id = sel.optionId;
+    } else if (sel.kind === 'other') {
+      var txt = String(sel.text || '').trim();
+      if (!txt) {
+        var m = document.getElementById('li-poll-msg-' + pollId);
+        if (m) m.textContent = 'Completeaza campul \"Alta idee\" inainte de vot.';
+        return;
+      }
+      payload.suggestion = txt;
+    }
+
+    var msgEl = document.getElementById('li-poll-msg-' + pollId);
+    if (msgEl) msgEl.textContent = 'Se trimite votul...';
+
+    try {
+      var ins = await supabase.from('poll_votes').insert(payload).select('poll_id,option_id,suggestion').single();
+      if (ins && ins.error) {
+        if (msgEl) msgEl.textContent = 'Nu am putut salva votul. Reincarca pagina si incearca din nou.';
+        return;
+      }
+      if (payload.option_id) {
+        var opt = pollSortedOptions(poll).find(function(o) { return o.id === payload.option_id; });
+        if (opt) opt.votes_count = Number(opt.votes_count || 0) + 1;
+      }
+      activePollVotes[pollId] = { poll_id: pollId, option_id: payload.option_id, suggestion: payload.suggestion };
+      renderPollSection();
+    } catch (_e) {
+      if (msgEl) msgEl.textContent = 'Nu am putut salva votul. Verifica accesul si incearca din nou.';
+    }
+  };
 
   function renderAnnouncements(announcements) {
     var section = document.getElementById('li-ann-section');
@@ -1587,6 +1847,8 @@ if (window.supabase) { checkAdminNavLink(); } else { document.addEventListener('
         /* announcements table may not exist yet — silently hide */
         document.getElementById('li-ann-section').style.display = 'none';
       });
+
+    loadActivePolls(session.user.id);
   }
 
   /* ── boot: wait for supabase, then check session ── */
@@ -1610,5 +1872,10 @@ if (window.supabase) { checkAdminNavLink(); } else { document.addEventListener('
 <script src="js/transitions.js" defer></script>
 </body>
 </html>
+
+
+
+
+
 
 

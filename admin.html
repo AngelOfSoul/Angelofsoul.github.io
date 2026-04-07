@@ -846,9 +846,11 @@ left:23px;
         <div class="sb-item" onclick="nav(this,'badges')"><span class="sb-item-ic">&#127942;</span> Badge-uri</div>
         <div class="sb-group">Continut</div>
         <div class="sb-item" onclick="nav(this,'ann')"><span class="sb-item-ic">&#128204;</span> Anunturi</div>
+        <div class="sb-item" onclick="nav(this,'polls')"><span class="sb-item-ic">&#128202;</span> Sondaje</div>
         <div class="sb-item" onclick="nav(this,'families')"><span class="sb-item-ic">&#128106;</span> Familii</div>
         <div class="sb-group">Comunicare</div>
         <div class="sb-item" onclick="nav(this,'msg')"><span class="sb-item-ic">&#9993;</span> Mesaje</div>
+        <div class="sb-item" onclick="nav(this,'chat')"><span class="sb-item-ic">&#128172;</span> Chat</div>
         <div class="sb-item" onclick="nav(this,'contact')"><span class="sb-item-ic">&#128172;</span> Contact</div>
         <div class="sb-group">Istoric</div>
         <div class="sb-item" onclick="nav(this,'logs')"><span class="sb-item-ic">&#128196;</span> Jurnale</div>
@@ -1145,6 +1147,44 @@ left:23px;
         <div id="ann-list"><div style="color:var(--gold-m);font-style:italic;font-size:13px;">Se incarca anunturile...</div></div>
       </div>
 
+      <!-- ══ POLLS ══ -->
+      <div class="sec" id="sec-polls">
+        <div class="sec-hdr">
+          <div class="ct-title">Sondaje</div>
+          <div class="tip-wrap"><div class="tip-btn" onclick="tip('t-polls',event)">?</div><div class="tip-box" id="t-polls"><strong>Sondaje</strong>Creezi intrebari pentru comunitate, urmaresti rezultate si sugestii text trimise la optiunea "Alta idee".</div></div>
+        </div>
+        <div class="ct-sub">Administrare completa pentru poll-uri active si inchise.</div>
+
+        <div class="form-box">
+          <div style="font-size:14px;color:var(--gold);font-family:'Playfair Display',serif;margin-bottom:14px;">Sondaj nou</div>
+          <div style="margin-bottom:14px;"><label class="fl">Intrebare</label><input class="fi" id="poll-question" maxlength="200" placeholder="Ex: Ce functionalitate vrei sa adaugam urmatoarea?"/></div>
+          <div style="margin-bottom:14px;"><label class="fl">Descriere (optional)</label><input class="fi" id="poll-description" maxlength="300" placeholder="Detalii scurte pentru contextul sondajului"/></div>
+          <div style="margin-bottom:14px;">
+            <label class="fl">Optiuni (minim 2, maxim 5)</label>
+            <div id="poll-options-wrap" style="display:flex;flex-direction:column;gap:8px;">
+              <input class="fi poll-opt-input" maxlength="120" placeholder="Optiunea 1"/>
+              <input class="fi poll-opt-input" maxlength="120" placeholder="Optiunea 2"/>
+            </div>
+            <div style="display:flex;gap:8px;margin-top:8px;">
+              <button class="adm-btn-sec" onclick="pollAddOptionInput()">+ Adauga optiune</button>
+              <button class="adm-btn-sec" onclick="pollRemoveOptionInput()">- Scoate ultima</button>
+            </div>
+          </div>
+          <div style="margin-bottom:14px;">
+            <label class="fl"><input type="checkbox" id="poll-allow-other" style="width:14px;height:14px;accent-color:var(--gold-d);margin-right:6px;vertical-align:middle;"/>Permite "Alta idee" (text liber)</label>
+          </div>
+          <div style="margin-bottom:14px;"><label class="fl">Expira la</label><input class="fi" type="datetime-local" id="poll-expires"/></div>
+          <div id="poll-msg"></div>
+          <button class="adm-btn" onclick="createPoll()">Creeaza sondaj</button>
+        </div>
+
+        <div class="section-label" style="margin-bottom:10px;">Sondaje</div>
+        <div id="polls-admin-list"><div style="color:var(--gold-m);font-style:italic;font-size:13px;">Se incarca sondajele...</div></div>
+
+        <div class="section-label" style="margin-top:16px;margin-bottom:10px;">Sugestii primite</div>
+        <div id="poll-suggestions-list"><div style="color:var(--gold-m);font-style:italic;font-size:13px;">Se incarca sugestiile...</div></div>
+      </div>
+
       <!-- â•â• FAMILIES â•â• -->
       <div class="sec" id="sec-families">
         <div class="sec-hdr">
@@ -1172,9 +1212,17 @@ left:23px;
             <button class="adm-btn-sec" onclick="doPreviewMsg()">Previzualizeaza</button>
           </div>
         </div>
+      </div>
 
+      <!-- ══ CHAT ══ -->
+      <div class="sec" id="sec-chat">
+        <div class="sec-hdr">
+          <div class="ct-title">Moderare chat "Vatra satului"</div>
+          <div class="tip-wrap"><div class="tip-btn" onclick="tip('t-chat',event)">?</div><div class="tip-box" id="t-chat"><strong>Moderare chat</strong>Vezi mesajele raportate, aproba sau sterge continut, si fixeaza un mesaj important in partea de sus.</div></div>
+        </div>
+        <div class="ct-sub">Control dedicat pentru moderarea mesajelor din chat.</div>
         <div class="chatm-wrap">
-          <div class="section-label" style="margin-bottom:10px;">Moderare chat "Vatra satului"</div>
+          <div class="section-label" style="margin-bottom:10px;">Mesaje chat</div>
           <div class="chatm-top">
             <select class="fs chatm-select" id="chatm-filter" onchange="loadChatModeration()">
               <option value="reported">Raportate</option>
@@ -1341,6 +1389,8 @@ function initAdminAuth() {
           logAccess();
           loadDashboard();
           loadAnnouncements();
+          loadPollsAdmin();
+          loadPollSuggestions();
           loadFamilies();
           loadUsers();
           loadContactMessages();
@@ -1387,7 +1437,8 @@ function nav(el, id) {
   if (el && el.classList) el.classList.add('active');
   var sec = document.getElementById('sec-' + id);
   if (sec) sec.classList.add('active');
-  if (id === 'msg') loadChatModeration();
+  if (id === 'msg' || id === 'chat') loadChatModeration();
+  if (id === 'polls') { loadPollsAdmin(); loadPollSuggestions(); }
   closeTips();
 }
 
@@ -1950,6 +2001,215 @@ function deleteAnn(id) {
   supabase.from('announcements').delete().eq('id', id).then(function(){
     logAction('ann-delete', 'Anunt sters: ' + id);
     loadAnnouncements();
+  });
+}
+
+/* ── POLLS ── */
+function pollAddOptionInput() {
+  var wrap = document.getElementById('poll-options-wrap');
+  if (!wrap) return;
+  var inputs = wrap.querySelectorAll('.poll-opt-input');
+  if (inputs.length >= 5) return;
+  var input = document.createElement('input');
+  input.className = 'fi poll-opt-input';
+  input.maxLength = 120;
+  input.placeholder = 'Optiunea ' + (inputs.length + 1);
+  wrap.appendChild(input);
+}
+
+function pollRemoveOptionInput() {
+  var wrap = document.getElementById('poll-options-wrap');
+  if (!wrap) return;
+  var inputs = wrap.querySelectorAll('.poll-opt-input');
+  if (inputs.length <= 2) return;
+  wrap.removeChild(inputs[inputs.length - 1]);
+}
+
+function pollExpiresText(expiresAt, status) {
+  if (status === 'closed') return 'Inchis';
+  var d = new Date(expiresAt);
+  if (isNaN(d.getTime())) return 'Activ';
+  var days = Math.ceil((d - new Date()) / 86400000);
+  if (days <= 1) return 'Expira astazi';
+  if (days === 2) return 'Expira maine';
+  return 'Expira in ' + (days - 1) + ' zile';
+}
+
+function renderPollResultsInline(poll) {
+  var opts = (poll.poll_options || []).slice().sort(function(a, b) {
+    return Number(a.position || 0) - Number(b.position || 0);
+  });
+  var total = opts.reduce(function(sum, o) { return sum + Number(o.votes_count || 0); }, 0);
+  if (!opts.length) return '<div style="font-size:12px;color:var(--gold-m);font-style:italic;">Sondaj fara optiuni.</div>';
+  var maxVotes = 0;
+  opts.forEach(function(o) { if (Number(o.votes_count || 0) > maxVotes) maxVotes = Number(o.votes_count || 0); });
+  return opts.map(function(o) {
+    var ov = Number(o.votes_count || 0);
+    var pct = total ? Math.round((ov / total) * 100) : 0;
+    var win = maxVotes > 0 && ov === maxVotes;
+    return '<div style="display:flex;justify-content:space-between;gap:10px;font-size:12px;color:var(--muted);margin-top:4px;">' +
+      '<span>' + escH(o.label || '') + '</span>' +
+      '<span style="color:' + (win ? 'var(--gold)' : 'var(--gold-m)') + ';white-space:nowrap;">' + pct + '% (' + ov + ')</span>' +
+    '</div>';
+  }).join('') + '<div style="font-size:11px;color:var(--gold-m);font-style:italic;margin-top:6px;">' + total + ' voturi total</div>';
+}
+
+function loadPollsAdmin() {
+  if (!window.supabase) return;
+  var list = document.getElementById('polls-admin-list');
+  if (!list) return;
+  list.innerHTML = '<div style="color:var(--gold-m);font-style:italic;font-size:13px;">Se incarca sondajele...</div>';
+  supabase
+    .from('polls')
+    .select('id,question,description,status,allow_other,expires_at,created_at,poll_options(id,label,votes_count,position)')
+    .order('created_at', { ascending: false })
+    .then(function(r) {
+      if (r && r.error) {
+        list.innerHTML = '<div style="color:var(--red);font-size:13px;">Eroare: ' + escH(r.error.message) + '</div>';
+        return;
+      }
+      var rows = (r && r.data) ? r.data : [];
+      if (!rows.length) {
+        list.innerHTML = '<div style="color:var(--gold-m);font-style:italic;font-size:13px;">Nu exista sondaje create.</div>';
+        return;
+      }
+      list.innerHTML = rows.map(function(p) {
+        var totalVotes = (p.poll_options || []).reduce(function(sum, o) { return sum + Number(o.votes_count || 0); }, 0);
+        var statusBadge = p.status === 'active'
+          ? '<span class="badge ok">ACTIV</span>'
+          : '<span class="badge warn">INCHIS</span>';
+        var closeBtn = p.status === 'active'
+          ? '<button class="tbtn" onclick="closePoll(\'' + p.id + '\')">Inchide</button>'
+          : '';
+        return '<div style="border:1px solid var(--b1);background:var(--s2);padding:12px;border-radius:2px;margin-bottom:10px;">' +
+          '<div style="display:flex;justify-content:space-between;gap:10px;align-items:flex-start;flex-wrap:wrap;">' +
+            '<div>' +
+              '<div style="display:flex;align-items:center;gap:8px;margin-bottom:4px;">' + statusBadge + '<span style="font-size:11px;color:var(--gold-m);">' + escH(pollExpiresText(p.expires_at, p.status)) + '</span></div>' +
+              '<div style="font-family:\'Playfair Display\',serif;font-size:16px;color:var(--text);">' + escH(p.question || '') + '</div>' +
+              (p.description ? '<div style="font-size:13px;color:var(--muted);margin-top:3px;">' + escH(p.description) + '</div>' : '') +
+              '<div style="font-size:11px;color:var(--gold-m);margin-top:4px;">' + totalVotes + ' voturi' + (p.allow_other ? ' · cu "Alta idee"' : '') + '</div>' +
+            '</div>' +
+            '<div style="display:flex;gap:6px;flex-wrap:wrap;">' +
+              closeBtn +
+              '<button class="tbtn red" onclick="deletePoll(\'' + p.id + '\')">Sterge</button>' +
+            '</div>' +
+          '</div>' +
+          '<div style="border-top:1px solid var(--b1);margin-top:8px;padding-top:8px;">' + renderPollResultsInline(p) + '</div>' +
+        '</div>';
+      }).join('');
+    })
+    .catch(function() {
+      list.innerHTML = '<div style="color:var(--red);font-size:13px;">Tabelul polls nu exista inca. Ruleaza scriptul SQL pentru polls.</div>';
+    });
+}
+
+function loadPollSuggestions() {
+  if (!window.supabase) return;
+  var list = document.getElementById('poll-suggestions-list');
+  if (!list) return;
+  list.innerHTML = '<div style="color:var(--gold-m);font-style:italic;font-size:13px;">Se incarca sugestiile...</div>';
+  supabase
+    .from('poll_votes')
+    .select('id,poll_id,suggestion,created_at,polls(question)')
+    .not('suggestion', 'is', null)
+    .neq('suggestion', '')
+    .order('created_at', { ascending: false })
+    .limit(100)
+    .then(function(r) {
+      if (r && r.error) {
+        list.innerHTML = '<div style="color:var(--red);font-size:13px;">Eroare: ' + escH(r.error.message) + '</div>';
+        return;
+      }
+      var rows = (r && r.data) ? r.data : [];
+      if (!rows.length) {
+        list.innerHTML = '<div style="color:var(--gold-m);font-style:italic;font-size:13px;">Nu exista sugestii inca.</div>';
+        return;
+      }
+      list.innerHTML = rows.map(function(s) {
+        var q = s.polls && s.polls.question ? s.polls.question : 'Sondaj';
+        return '<div style="border-left:2px solid var(--gold-d);padding:9px 12px;background:var(--s2);margin-bottom:8px;">' +
+          '<div style="font-size:10px;letter-spacing:1px;color:var(--gold-m);text-transform:uppercase;">' + escH(q) + ' · ' + escH(fmtDate(s.created_at)) + '</div>' +
+          '<div style="font-size:14px;color:var(--text);margin-top:4px;">' + escH(s.suggestion || '') + '</div>' +
+        '</div>';
+      }).join('');
+    })
+    .catch(function() {
+      list.innerHTML = '<div style="color:var(--red);font-size:13px;">Nu am putut incarca sugestiile.</div>';
+    });
+}
+
+function createPoll() {
+  var qEl = document.getElementById('poll-question');
+  var dEl = document.getElementById('poll-description');
+  var xEl = document.getElementById('poll-expires');
+  var oEl = document.getElementById('poll-options-wrap');
+  var allowEl = document.getElementById('poll-allow-other');
+  if (!qEl || !xEl || !oEl || !allowEl) return;
+  var question = qEl.value.trim();
+  var description = dEl ? dEl.value.trim() : '';
+  var expiresRaw = xEl.value;
+  var options = Array.from(oEl.querySelectorAll('.poll-opt-input'))
+    .map(function(i) { return i.value.trim(); })
+    .filter(function(v) { return !!v; });
+
+  if (!question) { showMsg('poll-msg', 'Completeaza intrebarea sondajului.', 'error'); return; }
+  if (options.length < 2) { showMsg('poll-msg', 'Adauga cel putin 2 optiuni.', 'error'); return; }
+  if (options.length > 5) { showMsg('poll-msg', 'Sunt permise maxim 5 optiuni.', 'error'); return; }
+  if (!expiresRaw) { showMsg('poll-msg', 'Seteaza data de expirare.', 'error'); return; }
+
+  var expiresIso = new Date(expiresRaw).toISOString();
+  if (!expiresIso || expiresIso === 'Invalid Date') { showMsg('poll-msg', 'Data de expirare este invalida.', 'error'); return; }
+
+  supabase.from('polls').insert({
+    question: question,
+    description: description || null,
+    status: 'active',
+    allow_other: !!allowEl.checked,
+    expires_at: expiresIso
+  }).select('id').single().then(function(r) {
+    if (r && r.error) { showMsg('poll-msg', 'Eroare: ' + r.error.message, 'error'); return; }
+    if (!r || !r.data || !r.data.id) { showMsg('poll-msg', 'Eroare la crearea sondajului.', 'error'); return; }
+    var pollId = r.data.id;
+    var rows = options.map(function(label, idx) {
+      return { poll_id: pollId, label: label, position: idx };
+    });
+    supabase.from('poll_options').insert(rows).then(function(or) {
+      if (or && or.error) { showMsg('poll-msg', 'Sondaj creat, dar opțiunile au eșuat: ' + or.error.message, 'error'); return; }
+      showMsg('poll-msg', 'Sondaj creat cu succes.', 'success');
+      logAction('poll-create', 'Sondaj creat: ' + question);
+      qEl.value = '';
+      if (dEl) dEl.value = '';
+      xEl.value = '';
+      allowEl.checked = false;
+      var inputs = oEl.querySelectorAll('.poll-opt-input');
+      inputs.forEach(function(i, idx) { i.value = ''; i.placeholder = 'Optiunea ' + (idx + 1); });
+      while (oEl.querySelectorAll('.poll-opt-input').length > 2) {
+        oEl.removeChild(oEl.lastElementChild);
+      }
+      loadPollsAdmin();
+      loadPollSuggestions();
+    });
+  });
+}
+
+function closePoll(id) {
+  if (!id) return;
+  if (!confirm('Inchizi acest sondaj? Utilizatorii nu vor mai putea vota.')) return;
+  supabase.from('polls').update({ status: 'closed' }).eq('id', id).then(function(r) {
+    if (r && r.error) { alert('Eroare: ' + r.error.message); return; }
+    logAction('poll-close', 'Sondaj inchis: ' + id);
+    loadPollsAdmin();
+  });
+}
+
+function deletePoll(id) {
+  if (!id) return;
+  if (!confirm('Stergi definitiv acest sondaj si toate voturile lui?')) return;
+  supabase.from('polls').delete().eq('id', id).then(function(r) {
+    if (r && r.error) { alert('Eroare: ' + r.error.message); return; }
+    logAction('poll-delete', 'Sondaj sters: ' + id);
+    loadPollsAdmin();
+    loadPollSuggestions();
   });
 }
 

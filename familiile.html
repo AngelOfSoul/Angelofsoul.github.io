@@ -1137,6 +1137,10 @@ if (window.supabase) { checkFamiliiNavSession(); } else { document.addEventListe
     var cfg = String(window.ADMIN_EMAIL || '').trim().toLowerCase();
     return !!cfg && e === cfg;
   }
+  function vcDisplayName(authorType, rawName) {
+    if (authorType === 'admin') return 'Administrator';
+    return String(rawName || 'Anonim');
+  }
   async function vcIsAdminUser(user) {
     if (!user) return false;
     if (vcIsAdminEmail(user.email)) return true;
@@ -1199,6 +1203,13 @@ if (window.supabase) { checkFamiliiNavSession(); } else { document.addEventListe
       document.addEventListener('keydown', keyHandler, true);
     });
   }
+  function vcRefreshEmptyState() {
+    var list = $id('vc-msgs');
+    var empty = $id('vc-empty');
+    if (!list || !empty) return;
+    var hasMsg = !!list.querySelector('.vc-msg');
+    empty.style.display = hasMsg ? 'none' : 'block';
+  }
 
   /* ── Init după ce supabase e gata ── */
   function vcInit() {
@@ -1215,11 +1226,15 @@ if (window.supabase) { checkFamiliiNavSession(); } else { document.addEventListe
       var sess = await supabase.auth.getSession();
       var user = sess && sess.data && sess.data.session && sess.data.session.user;
       if (user) {
-        /* Încearcă să ia numele familiei din tabelul families */
-        var res = await supabase.from('families').select('name').eq('created_by', user.id).maybeSingle();
-        var name = (res && res.data && res.data.name) ? res.data.name : (user.email || 'Membru');
         var isAdmin = await vcIsAdminUser(user);
-        vcCurrentUser = { name: name, type: isAdmin ? 'admin' : 'member', userId: user.id };
+        if (isAdmin) {
+          vcCurrentUser = { name: 'Administrator', type: 'admin', userId: user.id };
+        } else {
+          /* Încearcă să ia numele familiei din tabelul families */
+          var res = await supabase.from('families').select('name').eq('created_by', user.id).maybeSingle();
+          var name = (res && res.data && res.data.name) ? res.data.name : (user.email || 'Membru');
+          vcCurrentUser = { name: name, type: 'member', userId: user.id };
+        }
       }
     } catch(e) {}
 
@@ -1326,10 +1341,12 @@ if (window.supabase) { checkFamiliiNavSession(); } else { document.addEventListe
         }, function(payload) {
           var updated = payload.new;
           var el = document.querySelector('[data-msg-id="' + updated.id + '"]');
-          if (updated.status === 'deleted' || updated.status === 'reported') {
+          if (updated.status === 'deleted' || updated.status === 'reported' || updated.status === 'pinned') {
             if (el) el.remove();
-          } else if (updated.status === 'pinned') {
-            vcShowPinned(updated.body);
+            if (updated.status === 'pinned') vcShowPinned(updated.body);
+            vcRefreshEmptyState();
+          } else if (updated.status === 'active') {
+            if (!el) vcRenderMessage(updated);
           }
         })
         .subscribe();
@@ -1343,7 +1360,8 @@ if (window.supabase) { checkFamiliiNavSession(); } else { document.addEventListe
     /* Evită duplicate */
     if (document.querySelector('[data-msg-id="' + msg.id + '"]')) return;
 
-    var initial = (msg.author_display_name || '?').charAt(0).toUpperCase();
+    var displayName = vcDisplayName(msg.author_type, msg.author_display_name);
+    var initial = (displayName || '?').charAt(0).toUpperCase();
     var avatarClass = msg.author_type === 'guest' ? ' vc-guest' : '';
     var badgeClass = 'vc-badge-' + (msg.author_type || 'guest');
     var badgeText = msg.author_type === 'member' ? 'Membru' : msg.author_type === 'admin' ? 'Admin' : 'Vizitator';
@@ -1372,7 +1390,7 @@ if (window.supabase) { checkFamiliiNavSession(); } else { document.addEventListe
     d.innerHTML =
       '<div class="vc-head">' +
         '<div class="vc-avatar' + avatarClass + '">' + vcEsc(initial) + '</div>' +
-        '<span class="vc-author">' + vcEsc(msg.author_display_name) + '</span>' +
+        '<span class="vc-author">' + vcEsc(displayName) + '</span>' +
         '<span class="vc-badge ' + badgeClass + '">' + badgeText + '</span>' +
         '<span class="vc-time">' + time + '</span>' +
       '</div>' +
@@ -1380,10 +1398,11 @@ if (window.supabase) { checkFamiliiNavSession(); } else { document.addEventListe
       '<div class="vc-body">' + vcEsc(msg.body) + '</div>' +
       '<div class="vc-actions">' +
         '<button class="vc-act" onclick="vcSetReply(\'' + vcEsc(msg.id) + '\',\'' +
-          vcEsc(msg.author_display_name) + '\',\'' + vcEsc(msg.body.substring(0,60)) + '\')">↩ Răspunde</button>' +
+          vcEsc(displayName) + '\',\'' + vcEsc(msg.body.substring(0,60)) + '\')">↩ Răspunde</button>' +
         reportBtn + deleteBtn + pinBtn +
       '</div>';
     list.appendChild(d);
+    vcRefreshEmptyState();
   }
 
   /* ── Helpers ── */
@@ -1464,7 +1483,7 @@ if (window.supabase) { checkFamiliiNavSession(); } else { document.addEventListe
     var payload = {
       body: body,
       author_type: vcCurrentUser.type,
-      author_display_name: vcCurrentUser.name,
+      author_display_name: vcDisplayName(vcCurrentUser.type, vcCurrentUser.name),
       user_id: vcCurrentUser.userId || null,
       guest_id: vcCurrentUser.type === 'guest' ? (localStorage.getItem('vc_guest_id') || vcMakeGuestId()) : null,
       status: 'active',
@@ -1500,18 +1519,79 @@ if (window.supabase) { checkFamiliiNavSession(); } else { document.addEventListe
     });
     if (!ok) return;
     try {
-      await supabase.from('chat_messages').update({ status: 'deleted' }).eq('id', id);
+      var r = await supabase
+        .from('chat_messages')
+        .update({ status: 'deleted' })
+        .eq('id', id)
+        .select('id');
+      if (r && r.error) {
+        await vcDialogOpen({
+          title: 'Ștergere eșuată',
+          message: 'Nu am putut șterge mesajul: ' + r.error.message,
+          hideCancel: true
+        });
+        return;
+      }
+      if (!r || !Array.isArray(r.data) || !r.data.length) {
+        await vcDialogOpen({
+          title: 'Ștergere blocată',
+          message: 'Mesajul nu a fost modificat. Verifică politicile RLS pentru chat_messages (admin update).',
+          hideCancel: true
+        });
+        return;
+      }
       var el = document.querySelector('[data-msg-id="' + id + '"]');
       if (el) el.remove();
-    } catch(e) {}
+      vcRefreshEmptyState();
+    } catch(e) {
+      await vcDialogOpen({
+        title: 'Ștergere eșuată',
+        message: 'Eroare neașteptată: ' + ((e && e.message) ? e.message : 'necunoscută'),
+        hideCancel: true
+      });
+    }
   };
   window.vcPinMsg = async function(id) {
     if (!vcCurrentUser || vcCurrentUser.type !== 'admin') return;
     try {
       /* Desprinde pinul vechi */
-      await supabase.from('chat_messages').update({ status: 'active' }).eq('status', 'pinned');
-      await supabase.from('chat_messages').update({ status: 'pinned' }).eq('id', id);
-    } catch(e) {}
+      var clearRes = await supabase.from('chat_messages').update({ status: 'active' }).eq('status', 'pinned').select('id');
+      if (clearRes && clearRes.error) {
+        await vcDialogOpen({
+          title: 'Fixare eșuată',
+          message: 'Nu am putut curăța pinul anterior: ' + clearRes.error.message,
+          hideCancel: true
+        });
+        return;
+      }
+      var pinRes = await supabase.from('chat_messages').update({ status: 'pinned' }).eq('id', id).select('id, body');
+      if (pinRes && pinRes.error) {
+        await vcDialogOpen({
+          title: 'Fixare eșuată',
+          message: 'Nu am putut fixa mesajul: ' + pinRes.error.message,
+          hideCancel: true
+        });
+        return;
+      }
+      if (!pinRes || !Array.isArray(pinRes.data) || !pinRes.data.length) {
+        await vcDialogOpen({
+          title: 'Fixare blocată',
+          message: 'Mesajul nu a fost fixat. Verifică politicile RLS pentru chat_messages (admin update).',
+          hideCancel: true
+        });
+        return;
+      }
+      vcShowPinned(pinRes.data[0].body || '');
+      var el = document.querySelector('[data-msg-id="' + id + '"]');
+      if (el) el.remove();
+      vcRefreshEmptyState();
+    } catch(e) {
+      await vcDialogOpen({
+        title: 'Fixare eșuată',
+        message: 'Eroare neașteptată: ' + ((e && e.message) ? e.message : 'necunoscută'),
+        hideCancel: true
+      });
+    }
   };
   window.vcReportMsg = async function(id) {
     var ok = await vcDialogOpen({
@@ -1521,10 +1601,37 @@ if (window.supabase) { checkFamiliiNavSession(); } else { document.addEventListe
     });
     if (!ok) return;
     try {
-      await supabase.from('chat_messages').update({ status: 'reported' }).eq('id', id);
+      var r = await supabase
+        .from('chat_messages')
+        .update({ status: 'reported' })
+        .eq('id', id)
+        .select('id');
+      if (r && r.error) {
+        await vcDialogOpen({
+          title: 'Raportare eșuată',
+          message: 'Nu am putut raporta mesajul: ' + r.error.message,
+          hideCancel: true
+        });
+        return;
+      }
+      if (!r || !Array.isArray(r.data) || !r.data.length) {
+        await vcDialogOpen({
+          title: 'Raportare blocată',
+          message: 'Mesajul nu a fost raportat din cauza politicilor de acces.',
+          hideCancel: true
+        });
+        return;
+      }
       var el = document.querySelector('[data-msg-id="' + id + '"]');
       if (el) el.remove();
-    } catch(e) {}
+      vcRefreshEmptyState();
+    } catch(e) {
+      await vcDialogOpen({
+        title: 'Raportare eșuată',
+        message: 'Eroare neașteptată: ' + ((e && e.message) ? e.message : 'necunoscută'),
+        hideCancel: true
+      });
+    }
   };
 
   /* ── Start ── */
