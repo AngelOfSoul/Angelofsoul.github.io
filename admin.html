@@ -4,7 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <meta name="robots" content="noindex, nofollow">
-<title>Admin â€” Calnic Online</title>
+<title>Admin - Calnic Online</title>
 <script src="js/config.js" defer></script>
 <script src="js/supabase.js" defer></script>
 <script src="js/utils.js" defer></script>
@@ -486,6 +486,52 @@ background:var(--s3);border:1px solid var(--b2);color:var(--text);padding:8px 12
 
 .ft:focus {
 border-color:var(--gold-d);
+}
+
+.composer-wrap {
+position:relative;
+}
+
+.composer-toolbar {
+display:flex; align-items:center; gap:6px; flex-wrap:wrap;
+padding:6px 8px; margin-bottom:6px;
+background:#141007; border:1px solid #5e4421; border-radius:2px;
+}
+
+.composer-btn {
+min-width:26px; height:24px; padding:0 7px;
+background:#0f0c07; border:1px solid #6a4c22; color:#e6c98c;
+font-family:'Playfair Display',serif; font-size:12px; cursor:pointer;
+border-radius:2px; transition:all .15s;
+}
+
+.composer-btn:hover {
+background:#2a1a08; border-color:var(--gold); color:var(--gold);
+}
+
+.composer-btn.icon {
+font-family:'Times New Roman',serif;
+font-weight:700;
+}
+
+.composer-emoji {
+position:absolute; right:0; top:34px; z-index:60;
+display:none; width:280px; max-height:180px; overflow:auto;
+padding:8px; background:#0f0d08; border:1px solid #6a4c22; border-radius:2px;
+box-shadow:0 10px 18px rgba(0,0,0,.45);
+}
+
+.composer-emoji.show {
+display:grid; grid-template-columns:repeat(8,1fr); gap:6px;
+}
+
+.composer-emoji button {
+height:26px; background:#161108; border:1px solid #6a4c22; border-radius:2px;
+cursor:pointer; font-size:15px; line-height:1;
+}
+
+.composer-emoji button:hover {
+background:#2a1a08; border-color:var(--gold);
 }
 
 .fs {
@@ -1250,8 +1296,8 @@ left:23px;
 
         <div class="form-box">
           <div style="font-size:14px;color:var(--gold);font-family:'Playfair Display',serif;margin-bottom:14px;">Sondaj nou</div>
-          <div style="margin-bottom:14px;"><label class="fl">Intrebare</label><input class="fi" id="poll-question" maxlength="200" placeholder="Ex: Ce functionalitate vrei sa adaugam urmatoarea?"/></div>
-          <div style="margin-bottom:14px;"><label class="fl">Descriere (optional)</label><input class="fi" id="poll-description" maxlength="300" placeholder="Detalii scurte pentru contextul sondajului"/></div>
+          <div style="margin-bottom:14px;"><label class="fl">Intrebare</label><textarea class="ft" id="poll-question" maxlength="200" style="min-height:64px;" placeholder="Ex: Ce functionalitate vrei sa adaugam urmatoarea?"></textarea></div>
+          <div style="margin-bottom:14px;"><label class="fl">Descriere (optional)</label><textarea class="ft" id="poll-description" maxlength="300" style="min-height:64px;" placeholder="Detalii scurte pentru contextul sondajului"></textarea></div>
           <div style="margin-bottom:14px;">
             <label class="fl">Optiuni (minim 2, maxim 5)</label>
             <div id="poll-options-wrap" style="display:flex;flex-direction:column;gap:8px;">
@@ -1523,6 +1569,8 @@ function initAdminAuth() {
       .then(function(r) {
         if (r.data && r.data.is_admin) {
           showScreen('admin');
+          document.title = 'Admin - Calnic Online';
+          setupComposerEditors();
           document.getElementById('admin-email').textContent = ADMIN_EMAIL;
           logAccess();
           loadDashboard();
@@ -2076,6 +2124,137 @@ function runSQL() {
     res.style.color = '#e08080';
     res.textContent = 'Functia SQL Runner nu este inca configurata in Supabase.\nRuleaza mai intai SQL-ul de setup din documentatie.';
   });
+}
+
+/* Composer toolbar for announcements/messages/polls */
+var ADMIN_COMPOSER_EMOJIS = ['😀','😁','😂','🙂','😉','😍','🙏','👏','🔥','⭐','✅','❗','⚠️','📌','📢','💡','🎉','🤝','🛠️','📅','📩','🏆','❤️','👍'];
+
+function setupComposerEditors() {
+  ['ann-body', 'msg-body', 'poll-question', 'poll-description'].forEach(function(id) {
+    attachComposerToolbar(id);
+  });
+  document.addEventListener('click', function() {
+    document.querySelectorAll('.composer-emoji.show').forEach(function(p){ p.classList.remove('show'); });
+  });
+}
+
+function attachComposerToolbar(fieldId) {
+  var field = document.getElementById(fieldId);
+  if (!field || field.dataset.composerInit === '1') return;
+  field.dataset.composerInit = '1';
+
+  var wrap = document.createElement('div');
+  wrap.className = 'composer-wrap';
+  field.parentNode.insertBefore(wrap, field);
+
+  var toolbar = document.createElement('div');
+  toolbar.className = 'composer-toolbar';
+  toolbar.innerHTML = '' +
+    '<button type="button" class="composer-btn icon" data-a="bold" title="Bold"><b>B</b></button>' +
+    '<button type="button" class="composer-btn icon" data-a="italic" title="Italic"><i>I</i></button>' +
+    '<button type="button" class="composer-btn icon" data-a="underline" title="Underline"><u>U</u></button>' +
+    '<button type="button" class="composer-btn icon" data-a="strike" title="Strike"><s>S</s></button>' +
+    '<button type="button" class="composer-btn" data-a="list" title="Lista">•</button>' +
+    '<button type="button" class="composer-btn" data-a="link" title="Link">🔗</button>' +
+    '<button type="button" class="composer-btn" data-a="image" title="Imagine">🖼</button>' +
+    '<button type="button" class="composer-btn" data-a="quote" title="Citat">❝</button>' +
+    '<button type="button" class="composer-btn" data-a="code" title="Cod">&lt;/&gt;</button>' +
+    '<button type="button" class="composer-btn" data-a="emoji" title="Emoji">😊</button>';
+
+  var palette = document.createElement('div');
+  palette.className = 'composer-emoji';
+  palette.innerHTML = ADMIN_COMPOSER_EMOJIS.map(function(e) {
+    return '<button type="button" data-e="' + e + '" title="' + e + '">' + e + '</button>';
+  }).join('');
+
+  wrap.appendChild(toolbar);
+  wrap.appendChild(palette);
+  wrap.appendChild(field);
+
+  toolbar.addEventListener('click', function(ev) {
+    var btn = ev.target.closest('button[data-a]');
+    if (!btn) return;
+    ev.preventDefault();
+    ev.stopPropagation();
+    var action = btn.getAttribute('data-a');
+    if (action === 'emoji') {
+      document.querySelectorAll('.composer-emoji.show').forEach(function(p){ if (p !== palette) p.classList.remove('show'); });
+      palette.classList.toggle('show');
+      return;
+    }
+    palette.classList.remove('show');
+    composerApply(field, action);
+  });
+
+  palette.addEventListener('click', function(ev) {
+    var btn = ev.target.closest('button[data-e]');
+    if (!btn) return;
+    ev.preventDefault();
+    ev.stopPropagation();
+    palette.classList.remove('show');
+    composerInsert(field, btn.getAttribute('data-e') + ' ');
+  });
+
+  palette.addEventListener('click', function(ev){ ev.stopPropagation(); });
+}
+
+function composerGetSel(el) {
+  var start = typeof el.selectionStart === 'number' ? el.selectionStart : el.value.length;
+  var end = typeof el.selectionEnd === 'number' ? el.selectionEnd : el.value.length;
+  return { start: start, end: end, text: el.value.slice(start, end) };
+}
+
+function composerSetValue(el, nextValue, cursorPos) {
+  el.value = nextValue;
+  el.focus();
+  if (typeof el.setSelectionRange === 'function') {
+    el.setSelectionRange(cursorPos, cursorPos);
+  }
+}
+
+function composerInsert(el, insertText) {
+  var sel = composerGetSel(el);
+  var next = el.value.slice(0, sel.start) + insertText + el.value.slice(sel.end);
+  composerSetValue(el, next, sel.start + insertText.length);
+}
+
+function composerWrap(el, left, right, placeholder) {
+  var sel = composerGetSel(el);
+  var mid = sel.text || placeholder || '';
+  var ins = left + mid + right;
+  var next = el.value.slice(0, sel.start) + ins + el.value.slice(sel.end);
+  var cursor = sel.text ? (sel.start + ins.length) : (sel.start + left.length + mid.length);
+  composerSetValue(el, next, cursor);
+}
+
+function composerPrefixLines(el, prefix) {
+  var sel = composerGetSel(el);
+  var selected = sel.text || '';
+  if (!selected) selected = 'text';
+  var changed = selected.split('\n').map(function(line) { return prefix + line; }).join('\n');
+  var next = el.value.slice(0, sel.start) + changed + el.value.slice(sel.end);
+  composerSetValue(el, next, sel.start + changed.length);
+}
+
+function composerApply(el, action) {
+  if (!el) return;
+  if (action === 'bold') return composerWrap(el, '**', '**', 'text');
+  if (action === 'italic') return composerWrap(el, '*', '*', 'text');
+  if (action === 'underline') return composerWrap(el, '__', '__', 'text');
+  if (action === 'strike') return composerWrap(el, '~~', '~~', 'text');
+  if (action === 'list') return composerPrefixLines(el, '- ');
+  if (action === 'quote') return composerPrefixLines(el, '> ');
+  if (action === 'code') return composerWrap(el, '`', '`', 'cod');
+  if (action === 'link') {
+    var url = prompt('Link URL:', 'https://');
+    if (!url) return;
+    return composerWrap(el, '[', '](' + url.trim() + ')', 'text link');
+  }
+  if (action === 'image') {
+    var imageUrl = prompt('URL imagine:', 'https://');
+    if (!imageUrl) return;
+    return composerInsert(el, '\n[Imagine: ' + imageUrl.trim() + ']\n');
+  }
 }
 
 /* â”€â”€ ANNOUNCEMENTS â”€â”€ */
