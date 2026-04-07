@@ -1351,27 +1351,88 @@ if (window.supabase) { checkAdminNavLink(); } else { document.addEventListener('
     var rainEl  = document.getElementById('li-weather-rain');
     if (!tempEl || !descEl || !timeEl || !rangeEl || !feelEl || !windEl || !rainEl) return;
 
-    var url = 'https://api.open-meteo.com/v1/forecast?latitude=45.91&longitude=23.67&current=temperature_2m,apparent_temperature,precipitation,weather_code,wind_speed_10m&daily=temperature_2m_max,temperature_2m_min&timezone=auto&forecast_days=1';
+    var openMeteoUrl = 'https://api.open-meteo.com/v1/forecast?latitude=45.91&longitude=23.67&current=temperature_2m,apparent_temperature,precipitation,weather_code,wind_speed_10m&daily=temperature_2m_max,temperature_2m_min&timezone=auto&forecast_days=1';
+    var wttrUrl = 'https://wttr.in/Calnic?format=j1';
 
-    fetch(url).then(function(r){ return r.json(); }).then(function(data){
-      if (!data || !data.current) throw new Error('no weather data');
-      var cur = data.current;
-      tempEl.textContent = Math.round(Number(cur.temperature_2m)) + '째C';
-      descEl.textContent = weatherCodeLabel(Number(cur.weather_code));
-      feelEl.textContent = Math.round(Number(cur.apparent_temperature)) + '째C';
-      windEl.textContent = Math.round(Number(cur.wind_speed_10m)) + ' km/h';
-      rainEl.textContent = Number(cur.precipitation || 0).toFixed(1) + ' mm';
-      if (data.daily && data.daily.temperature_2m_max && data.daily.temperature_2m_min) {
-        rangeEl.textContent = Math.round(data.daily.temperature_2m_max[0]) + '째C / ' + Math.round(data.daily.temperature_2m_min[0]) + '째C';
-      }
-      var now = new Date();
-      timeEl.textContent = now.toLocaleTimeString('ro-RO', {hour:'2-digit', minute:'2-digit'});
-    }).catch(function(){
+    function nowLabel() {
+      return new Date().toLocaleTimeString('ro-RO', { hour:'2-digit', minute:'2-digit' });
+    }
+
+    function setUnavailable() {
       descEl.textContent = 'Date meteo indisponibile momentan';
       timeEl.textContent = '--:--';
+    }
+
+    function parseNum(v) {
+      var n = Number(v);
+      return isNaN(n) ? null : n;
+    }
+
+    function fetchJson(url, timeoutMs) {
+      var ctrl = (typeof AbortController !== 'undefined') ? new AbortController() : null;
+      var timer = null;
+      if (ctrl) timer = setTimeout(function () { ctrl.abort(); }, timeoutMs || 9000);
+      return fetch(url, {
+        cache: 'no-store',
+        signal: ctrl ? ctrl.signal : undefined
+      }).then(function (r) {
+        if (!r || !r.ok) throw new Error('http ' + (r && r.status));
+        return r.json();
+      }).finally(function () {
+        if (timer) clearTimeout(timer);
+      });
+    }
+
+    function applyWeather(v) {
+      if (!v) return false;
+      if (v.temp != null) tempEl.textContent = Math.round(v.temp) + '캜';
+      if (v.desc) descEl.textContent = v.desc;
+      if (v.feels != null) feelEl.textContent = Math.round(v.feels) + '캜';
+      if (v.wind != null) windEl.textContent = Math.round(v.wind) + ' km/h';
+      if (v.rain != null) rainEl.textContent = Number(v.rain).toFixed(1) + ' mm';
+      if (v.max != null && v.min != null) rangeEl.textContent = Math.round(v.max) + '캜 / ' + Math.round(v.min) + '캜';
+      timeEl.textContent = nowLabel();
+      return true;
+    }
+
+    fetchJson(openMeteoUrl, 9000).then(function (data) {
+      if (!data || !data.current) throw new Error('open-meteo no current');
+      var cur = data.current || {};
+      var daily = data.daily || {};
+      var ok = applyWeather({
+        temp: parseNum(cur.temperature_2m),
+        desc: weatherCodeLabel(Number(cur.weather_code)),
+        feels: parseNum(cur.apparent_temperature),
+        wind: parseNum(cur.wind_speed_10m),
+        rain: parseNum(cur.precipitation) || 0,
+        max: daily.temperature_2m_max && daily.temperature_2m_max.length ? parseNum(daily.temperature_2m_max[0]) : null,
+        min: daily.temperature_2m_min && daily.temperature_2m_min.length ? parseNum(daily.temperature_2m_min[0]) : null
+      });
+      if (!ok) throw new Error('open-meteo invalid');
+    }).catch(function () {
+      return fetchJson(wttrUrl, 9000).then(function (data) {
+        var cur = data && data.current_condition && data.current_condition[0];
+        var day = data && data.weather && data.weather[0];
+        if (!cur) throw new Error('wttr no current');
+        var desc = (cur.weatherDesc && cur.weatherDesc[0] && cur.weatherDesc[0].value) || 'Conditii variabile';
+        var max = day && day.maxtempC != null ? parseNum(day.maxtempC) : null;
+        var min = day && day.mintempC != null ? parseNum(day.mintempC) : null;
+        var rainMm = cur.precipMM != null ? parseNum(cur.precipMM) : 0;
+        var ok = applyWeather({
+          temp: parseNum(cur.temp_C),
+          desc: desc,
+          feels: parseNum(cur.FeelsLikeC),
+          wind: parseNum(cur.windspeedKmph),
+          rain: rainMm,
+          max: max,
+          min: min
+        });
+        if (!ok) throw new Error('wttr invalid');
+      });
+    }).catch(function () {
+      setUnavailable();
     });
   }
-
   function showMemberView(session) {
     /* swap views */
     document.getElementById('guest-view').style.display  = 'none';
