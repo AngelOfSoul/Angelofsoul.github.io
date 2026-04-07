@@ -2944,12 +2944,11 @@ function loadContactMessages() {
         return '<div class="contact-card">' +
           '<div class="contact-top">' +
           '<div class="contact-name">' + escH(m.name || 'Anonim') + ' &nbsp;<span style="font-size:12px;color:var(--muted);font-family:\'EB Garamond\',serif;">' + escH(m.email || '') + '</span></div>' +
-          '<div class="contact-meta"><span class="badge ' + (resolved?'ok':'new') + '">' + (resolved?'Rezolvat':'Nou') + '</span><span style="font-size:11px;color:var(--gold-m);">' + fmtDate(m.created_at) + '</span></div>' +
+          '<div class="contact-meta"><span class="badge ' + (resolved?'ok':'new') + '">' + (resolved?'Rezolvat':'Nou') + '</span><span style="font-size:11px;color:var(--gold-m);">' + fmtDate(m.created_at) + '</span><button class="tbtn red" onclick="deleteContactMessage(\''+m.id+'\')">Sterge</button></div>' +
           '</div>' +
           '<div class="contact-msg">"' + escH(m.message || '') + '"</div>' +
           '<div class="contact-actions">' +
           (!resolved ? '<button class="tbtn green" onclick="resolveContact(\''+m.id+'\')">Marcheaza rezolvat</button>' : '') +
-          '<button class="tbtn red" onclick="deleteContactMessage(\''+m.id+'\')">Sterge mesaj</button>' +
           '</div></div>';
       }).join('');
     }).catch(function(){ document.getElementById('contact-list').innerHTML = '<div style="color:var(--gold-m);font-style:italic;font-size:13px;">Tabelul contact_messages nu exista inca.</div>'; });
