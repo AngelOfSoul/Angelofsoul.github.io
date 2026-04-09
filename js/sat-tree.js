@@ -92,6 +92,7 @@
     var shellW = shell.clientWidth || 900;
     var pad = 14;
     var gap = 18;
+    var nodeHalfW = 76;
     var px = currentTransform.applyX(node.x);
     var py = currentTransform.applyY(node.y);
     var modalW = modal.offsetWidth || Math.min(360, shellW - pad * 2);
@@ -104,8 +105,8 @@
     var svgBottom = svgTop + (svgEl.clientHeight || 760);
 
     // Horizontal rule: right of node if it fits, otherwise left of node.
-    var rightCandidate = px + gap;
-    var leftCandidate = px - modalW - gap;
+    var rightCandidate = px + nodeHalfW + gap;
+    var leftCandidate = px - nodeHalfW - gap - modalW;
     var left = (rightCandidate + modalW <= svgRight - pad) ? rightCandidate : leftCandidate;
     left = clamp(left, svgLeft + pad, Math.max(svgLeft + pad, svgRight - modalW - pad));
 
@@ -183,7 +184,8 @@
     var node = nodeById(nodeId);
     if (!node || !isFinite(node.x) || !isFinite(node.y)) return;
     var w = shell.clientWidth || 900, h = 760;
-    var tr = d3.zoomIdentity.translate(w / 2 - node.x * 1.25, h / 2 - node.y * 1.25).scale(1.25);
+    var k = (currentTransform && isFinite(currentTransform.k)) ? currentTransform.k : 1;
+    var tr = d3.zoomIdentity.translate(w / 2 - node.x * k, h / 2 - node.y * k).scale(k);
     svg
       .transition()
       .duration(duration || 650)
@@ -282,50 +284,7 @@
         }));
   }
 
-  function positionAndShowModal(node, event) {
-    if (!node) return;
-    openFamilyDetails(node);
-
-    requestAnimationFrame(function() {
-      /* D3 transform → coordonate în pixeli CSS față de shell (1:1 pentru că viewBox=clientWidth) */
-      var transform = d3.zoomTransform(svgEl);
-      var nx = transform.applyX(node.x);
-      var ny = transform.applyY(node.y);
-
-      var popW = modal.offsetWidth  || 280;
-      var popH = modal.offsetHeight || 220;
-      var shellW = shell.clientWidth || 900;
-      var margin = 14;
-      var nodeHalfW = 76;
-
-      /* orizontal: dreapta dacă încape, altfel stânga */
-      var left = nx + nodeHalfW + margin;
-      if (left + popW > shellW - margin) {
-        left = nx - nodeHalfW - margin - popW;
-      }
-      left = Math.max(margin, Math.min(left, shellW - popW - margin));
-
-      /* vertical: plasează popup-ul relativ la viewport, nu la shell
-         Convertim ny (față de shell) → față de viewport, poziționăm, reconvertim */
-      var shellRect = shell.getBoundingClientRect();
-      var nyViewport = shellRect.top + ny; /* ny față de viewport */
-
-      /* dorim popup centrat pe nod, dar în zona vizibilă a viewport-ului */
-      var vpMargin = 10;
-      var topViewport = nyViewport - popH / 2;
-      topViewport = Math.max(vpMargin, Math.min(topViewport, window.innerHeight - popH - vpMargin));
-
-      /* convertim înapoi la coordonate față de shell */
-      var top = topViewport - shellRect.top;
-
-      modal.style.left   = Math.round(left) + 'px';
-      modal.style.top    = Math.round(top)  + 'px';
-      modal.style.right  = 'auto';
-      modal.style.bottom = 'auto';
-    });
-  }
-
-  /* ── Draggable popup ── */
+    /* Draggable popup */
   function initModalDrag() {
     var isDragging = false, startX, startY, origLeft, origTop;
 
