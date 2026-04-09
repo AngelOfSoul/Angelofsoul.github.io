@@ -237,23 +237,16 @@
     openFamilyDetails(node);
 
     requestAnimationFrame(function() {
+      /* D3 transform → coordonate în pixeli CSS față de shell (1:1 pentru că viewBox=clientWidth) */
       var transform = d3.zoomTransform(svgEl);
       var nx = transform.applyX(node.x);
       var ny = transform.applyY(node.y);
 
-      var popW = modal.offsetWidth || 280;
+      var popW = modal.offsetWidth  || 280;
       var popH = modal.offsetHeight || 220;
       var shellW = shell.clientWidth || 900;
-      var margin = 12;
-      var nodeHalfW = 72;
-
-      /* limita verticală: cât din SVG e vizibil în viewport */
-      var shellRect = shell.getBoundingClientRect();
-      var viewportH = window.innerHeight;
-      /* zona vizibilă a SVG în coordonate relative la shell */
-      var visibleTop = Math.max(0, -shellRect.top);
-      var visibleBottom = Math.min(shell.clientHeight || 760, viewportH - shellRect.top);
-      var visibleH = visibleBottom - visibleTop;
+      var margin = 14;
+      var nodeHalfW = 76;
 
       /* orizontal: dreapta dacă încape, altfel stânga */
       var left = nx + nodeHalfW + margin;
@@ -262,15 +255,22 @@
       }
       left = Math.max(margin, Math.min(left, shellW - popW - margin));
 
-      /* vertical: centrat pe nod, limitat la zona VIZIBILĂ */
-      var top = ny - popH / 2;
-      var minTop = visibleTop + margin;
-      var maxTop = visibleBottom - popH - margin;
-      top = Math.max(minTop, Math.min(top, maxTop));
+      /* vertical: plasează popup-ul relativ la viewport, nu la shell
+         Convertim ny (față de shell) → față de viewport, poziționăm, reconvertim */
+      var shellRect = shell.getBoundingClientRect();
+      var nyViewport = shellRect.top + ny; /* ny față de viewport */
 
-      modal.style.left = left + 'px';
-      modal.style.top = top + 'px';
-      modal.style.right = 'auto';
+      /* dorim popup centrat pe nod, dar în zona vizibilă a viewport-ului */
+      var vpMargin = 10;
+      var topViewport = nyViewport - popH / 2;
+      topViewport = Math.max(vpMargin, Math.min(topViewport, window.innerHeight - popH - vpMargin));
+
+      /* convertim înapoi la coordonate față de shell */
+      var top = topViewport - shellRect.top;
+
+      modal.style.left   = Math.round(left) + 'px';
+      modal.style.top    = Math.round(top)  + 'px';
+      modal.style.right  = 'auto';
       modal.style.bottom = 'auto';
     });
   }
