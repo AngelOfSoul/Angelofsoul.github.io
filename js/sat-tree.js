@@ -80,15 +80,38 @@
     var isPublic = node.visibility === 'public';
     modal.classList.remove('hidden');
     modalTitle.textContent = node.label;
+
+    var subEl = document.getElementById('modal-sub');
+    if (subEl) subEl.textContent = (node.village || 'Călnic') + ' · Alba · Transilvania';
+
+    var badgeEl = document.getElementById('modal-badge');
+    if (badgeEl) {
+      badgeEl.textContent = isPublic ? t('FAMILIE PUBLICĂ', 'PUBLIC FAMILY') : t('FAMILIE PRIVATĂ', 'PRIVATE FAMILY');
+      badgeEl.className = 'overlay-badge ' + (isPublic ? 'pub' : 'prv');
+    }
+
+    var fleurEl = modal.querySelector('.overlay-fleur');
+    if (fleurEl) {
+      if (!isPublic) {
+        fleurEl.innerHTML = '<rect x="5" y="9" width="18" height="14" rx="2" fill="#303540" stroke="#505860" stroke-width="0.8"/><path d="M8,9 V6 Q8,1 14,1 Q20,1 20,6 V9" fill="none" stroke="#505860" stroke-width="1.5"/><circle cx="14" cy="16" r="2.5" fill="#252830"/>';
+        fleurEl.setAttribute('viewBox','0 0 28 24');
+        fleurEl.setAttribute('height','20');
+      } else {
+        fleurEl.innerHTML = '<ellipse cx="14" cy="5" rx="3" ry="5.5" fill="#8a6818"/><ellipse cx="8" cy="9" rx="2.2" ry="4" fill="#7a5810" transform="rotate(-25,8,9)"/><ellipse cx="20" cy="9" rx="2.2" ry="4" fill="#7a5810" transform="rotate(25,20,9)"/><rect x="10" y="12" width="8" height="3" rx="1" fill="#6a4e10"/>';
+        fleurEl.setAttribute('viewBox','0 0 28 18');
+        fleurEl.setAttribute('height','18');
+      }
+    }
+
     modalText.innerHTML = isPublic
-      ? esc(t('Familie publica din ' + (node.village || 'Calnic') + '. Poti deschide direct arborele familiei sau poti reveni la lista genealogica.', 'Public family from ' + (node.village || 'Calnic') + '. You can open the family tree directly or return to the genealogy list.'))
-      : esc(t('Familie privata. Numele apare in arborele satului, dar detaliile publice raman ascunse.', 'Private family. The name appears in the village tree, but public details remain hidden.'));
+      ? esc(t('Familie publică din ' + (node.village || 'Calnic') + '. Poți deschide direct arborele familiei sau reveni la lista genealogică.', 'Public family from ' + (node.village || 'Calnic') + '. You can open the family tree directly or return to the genealogy list.'))
+      : esc(t('Numele apare în arborele satului, dar detaliile rămân ascunse pentru familiile private.', 'The name appears in the village tree, but details remain hidden for private families.'));
     modalFamilyLink.href = isPublic ? ('genealogie-familie.html?family=' + encodeURIComponent(node.id)) : '#';
     modalFamilyLink.style.pointerEvents = isPublic ? 'auto' : 'none';
-    modalFamilyLink.style.opacity = isPublic ? '1' : '.55';
-    modalFamilyLink.textContent = isPublic ? t('Deschide arborele familiei', 'Open family tree') : t('Familie privata', 'Private family');
+    modalFamilyLink.style.opacity = isPublic ? '1' : '.45';
+    modalFamilyLink.textContent = isPublic ? t('Arborele familiei', 'Family tree') : t('Familie privată', 'Private family');
     modalGenealogyLink.href = 'genealogie.html';
-    modalGenealogyLink.textContent = t('Vezi in Genealogie', 'See in Genealogy');
+    modalGenealogyLink.textContent = t('Vezi Genealogie', 'See Genealogy');
   }
 
   function hideFamilyDetails() { modal.classList.add('hidden'); }
@@ -150,18 +173,40 @@
 
   function redrawStyles() {
     g.selectAll('.tree-link')
-      .attr('stroke', function (d) { return highlightedPathKeys[linkKey(d.source.id || d.source, d.target.id || d.target)] ? '#f4d88a' : '#59667a'; })
-      .attr('stroke-width', function (d) { return highlightedPathKeys[linkKey(d.source.id || d.source, d.target.id || d.target)] ? 3.4 : 1.7; })
-      .attr('stroke-opacity', function (d) { return highlightedPathKeys[linkKey(d.source.id || d.source, d.target.id || d.target)] ? 1 : 0.72; });
+      .attr('stroke', function (d) { return highlightedPathKeys[linkKey(d.source.id || d.source, d.target.id || d.target)] ? '#c8a030' : '#3a4448'; })
+      .attr('stroke-width', function (d) { return highlightedPathKeys[linkKey(d.source.id || d.source, d.target.id || d.target)] ? 2.2 : 1.1; })
+      .attr('stroke-opacity', function (d) { return highlightedPathKeys[linkKey(d.source.id || d.source, d.target.id || d.target)] ? 0.9 : 0.4; });
 
-    g.selectAll('.tree-node circle')
-      .attr('fill', function (d) { return d.visibility === 'public' ? '#d4a84a' : '#6f7884'; })
+    g.selectAll('.tree-node rect.node-frame')
       .attr('stroke', function (d) {
-        if (String(d.id) === String(selectedNodeId)) return '#f4d88a';
-        return d.visibility === 'public' ? '#f0d596' : '#9aa4b4';
+        if (String(d.id) === String(selectedNodeId)) return '#f0d060';
+        return d.visibility === 'public' ? '#9a7218' : '#585048';
       })
-      .attr('stroke-width', function (d) { return String(d.id) === String(selectedNodeId) ? 4 : 2; })
-      .attr('r', function (d) { return String(d.id) === String(selectedNodeId) ? 28 : 24; });
+      .attr('stroke-width', function (d) { return String(d.id) === String(selectedNodeId) ? 2.2 : 1.6; });
+
+    g.selectAll('.tree-node rect.node-bg')
+      .attr('fill', function (d) {
+        var onPath = false;
+        for (var k in highlightedPathKeys) {
+          var parts = k.split('::');
+          if (parts[0] === String(d.id) || parts[1] === String(d.id)) { onPath = true; break; }
+        }
+        if (String(d.id) === String(selectedNodeId)) return '#1e1608';
+        if (onPath) return d.visibility === 'public' ? '#1a1408' : '#111418';
+        return d.visibility === 'public' ? '#0e0c06' : '#090a0c';
+      });
+
+    g.selectAll('.tree-node text.node-label')
+      .attr('fill', function (d) {
+        if (String(d.id) === String(selectedNodeId)) return '#f0d040';
+        var onPath = false;
+        for (var k in highlightedPathKeys) {
+          var parts = k.split('::');
+          if (parts[0] === String(d.id) || parts[1] === String(d.id)) { onPath = true; break; }
+        }
+        if (onPath) return d.visibility === 'public' ? '#c8a030' : '#8090a0';
+        return d.visibility === 'public' ? '#6a5018' : '#404850';
+      });
   }
 
   function attachEvents(nodeSel) {
@@ -214,9 +259,94 @@
       .enter().append('g')
       .attr('class', 'tree-node');
 
-    node.append('circle');
+    /* ── Nod heraldic: dreptunghi cu fleur-de-lis ── */
+    var isPub = function(d){ return d.visibility === 'public'; };
+
+    /* 1. Cadru exterior (gradient simulat cu fill) */
+    node.append('rect')
+      .attr('class', 'node-frame')
+      .attr('x', -66).attr('y', -23)
+      .attr('width', 132).attr('height', 46)
+      .attr('rx', 2)
+      .attr('fill', function(d){ return isPub(d) ? '#7a5818' : '#484038'; })
+      .attr('stroke', function(d){ return isPub(d) ? '#9a7218' : '#585048'; })
+      .attr('stroke-width', 1.6);
+
+    /* 2. Inel interior întunecat */
+    node.append('rect')
+      .attr('x', -63).attr('y', -20)
+      .attr('width', 126).attr('height', 40)
+      .attr('rx', 1)
+      .attr('fill', function(d){ return isPub(d) ? '#181308' : '#131518'; });
+
+    /* 3. Fundal interior */
+    node.append('rect')
+      .attr('class', 'node-bg')
+      .attr('x', -61).attr('y', -18)
+      .attr('width', 122).attr('height', 36)
+      .attr('rx', 1)
+      .attr('fill', function(d){ return isPub(d) ? '#0e0c06' : '#090a0c'; });
+
+    /* 4. Linie interioară fină */
+    node.append('rect')
+      .attr('x', -56).attr('y', -13)
+      .attr('width', 112).attr('height', 26)
+      .attr('rx', 0)
+      .attr('fill', 'none')
+      .attr('stroke', function(d){ return isPub(d) ? '#3a2a08' : '#252830'; })
+      .attr('stroke-width', 0.45);
+
+    /* 5. Fleur-de-lis pe colțuri și ornamente laterale */
+    var corners = [[-64,-21],[64,-21],[-64,21],[64,21]];
+    corners.forEach(function(c){
+      /* petală centrală */
+      node.append('ellipse')
+        .attr('cx', c[0]).attr('cy', c[1])
+        .attr('rx', 2.2).attr('ry', 4.2)
+        .attr('fill', function(d){ return isPub(d) ? '#8a6818' : '#585050'; });
+      /* petale laterale stânga */
+      node.append('ellipse')
+        .attr('cx', c[0] + (c[0]<0?-3:3))
+        .attr('cy', c[1] + (c[1]<0?3:-3))
+        .attr('rx', 1.4).attr('ry', 2.8)
+        .attr('transform', 'rotate(' + (c[0]<0 ? (c[1]<0?-28:28) : (c[1]<0?-28:28)) + ',' + (c[0]+(c[0]<0?-3:3)) + ',' + (c[1]+(c[1]<0?3:-3)) + ')')
+        .attr('fill', function(d){ return isPub(d) ? '#7a5810' : '#484848'; });
+      /* petale laterale dreapta */
+      node.append('ellipse')
+        .attr('cx', c[0] + (c[0]<0?3:-3))
+        .attr('cy', c[1] + (c[1]<0?3:-3))
+        .attr('rx', 1.4).attr('ry', 2.8)
+        .attr('transform', 'rotate(' + (c[0]<0 ? (c[1]<0?28:-28) : (c[1]<0?28:-28)) + ',' + (c[0]+(c[0]<0?3:-3)) + ',' + (c[1]+(c[1]<0?3:-3)) + ')')
+        .attr('fill', function(d){ return isPub(d) ? '#7a5810' : '#484848'; });
+      /* baza fleur */
+      node.append('rect')
+        .attr('x', c[0]-2).attr('y', c[1]+(c[1]<0?1.5:-3.5))
+        .attr('width', 4).attr('height', 1.8).attr('rx', 0.4)
+        .attr('fill', function(d){ return isPub(d) ? '#6a4e10' : '#383838'; });
+    });
+
+    /* ornamente laterale stânga */
+    [-66, 66].forEach(function(lx){
+      node.append('ellipse').attr('cx', lx).attr('cy', -7).attr('rx', 1.7).attr('ry', 3.4)
+        .attr('fill', function(d){ return isPub(d) ? '#8a6818' : '#505050'; });
+      node.append('ellipse').attr('cx', lx).attr('cy', 7).attr('rx', 1.7).attr('ry', 3.4)
+        .attr('fill', function(d){ return isPub(d) ? '#8a6818' : '#505050'; });
+      node.append('circle').attr('cx', lx).attr('cy', 0).attr('r', 2.1)
+        .attr('fill', function(d){ return isPub(d) ? '#7a5818' : '#484848'; });
+    });
+
+    /* 6. Text nume */
     node.append('text')
-      .attr('dy', 4)
+      .attr('class', 'node-label')
+      .attr('dy', 0)
+      .attr('text-anchor', 'middle')
+      .attr('dominant-baseline', 'middle')
+      .attr('font-family', 'Cinzel, serif')
+      .attr('font-size', function(d){ return (d.label && d.label.length > 7) ? 10 : 12; })
+      .attr('font-weight', '500')
+      .attr('letter-spacing', '1')
+      .attr('fill', function(d){ return isPub(d) ? '#6a5018' : '#404850'; })
+      .attr('pointer-events', 'none')
       .text(function (d) { return d.label; });
 
     attachEvents(node);
