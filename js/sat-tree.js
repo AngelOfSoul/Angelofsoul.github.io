@@ -184,9 +184,11 @@
     if (!node || !isFinite(node.x) || !isFinite(node.y)) return;
     var w = shell.clientWidth || 900, h = 760;
     var tr = d3.zoomIdentity.translate(w / 2 - node.x * 1.25, h / 2 - node.y * 1.25).scale(1.25);
-    svg.transition().duration(duration || 650).call(zoom.transform, tr);
-    /* poziționează popup-ul după ce zoom-ul s-a terminat */
-    setTimeout(function() { positionAndShowModal(node, null); }, (duration || 650) + 50);
+    svg
+      .transition()
+      .duration(duration || 650)
+      .call(zoom.transform, tr)
+      .on('end', function () { openFamilyDetails(node); });
   }
 
   function linkKey(a, b) { return [String(a), String(b)].sort().join('::'); }
@@ -266,7 +268,7 @@
       .on('click', function (event, d) {
         selectedNodeId = d.id;
         redrawStyles();
-        positionAndShowModal(d, event);
+        openFamilyDetails(d);
       })
       .call(d3.drag()
         .on('start', function (event, d) {
