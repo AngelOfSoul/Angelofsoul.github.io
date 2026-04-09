@@ -235,38 +235,36 @@
   function positionAndShowModal(node, event) {
     if (!node) return;
     openFamilyDetails(node);
-    var shellRect = shell.getBoundingClientRect();
-    var svgRect = svgEl.getBoundingClientRect();
-    var scaleX = svgRect.width / (shell.clientWidth || 900);
 
-    /* coordonate nod în px relativ la shell */
-    var transform = d3.zoomTransform(svgEl);
-    var nx = transform.applyX(node.x);
-    var ny = transform.applyY(node.y);
+    /* așteaptă un frame ca browser-ul să calculeze dimensiunile popup-ului */
+    requestAnimationFrame(function() {
+      var transform = d3.zoomTransform(svgEl);
+      var nx = transform.applyX(node.x);
+      var ny = transform.applyY(node.y);
 
-    var popW = modal.offsetWidth || 280;
-    var popH = modal.offsetHeight || 200;
-    var shellW = shell.clientWidth || 900;
-    var shellH = shell.clientHeight || 760;
-    var margin = 14;
-    var nodeHalfW = 70;
+      var popW = modal.offsetWidth || 280;
+      var popH = modal.offsetHeight || 220;
+      var shellW = shell.clientWidth || 900;
+      var shellH = shell.clientHeight || 760;
+      var margin = 12;
+      var nodeHalfW = 72;
 
-    /* încearcă dreapta, altfel stânga */
-    var left = nx + nodeHalfW + margin;
-    if (left + popW > shellW - margin) {
-      left = nx - nodeHalfW - margin - popW;
-    }
-    /* limitează să nu iasă din shell */
-    left = Math.max(margin, Math.min(left, shellW - popW - margin));
+      /* orizontal: dreapta dacă încape, altfel stânga */
+      var left = nx + nodeHalfW + margin;
+      if (left + popW > shellW - margin) {
+        left = nx - nodeHalfW - margin - popW;
+      }
+      left = Math.max(margin, Math.min(left, shellW - popW - margin));
 
-    /* vertical: centrat pe nod, cu limitare */
-    var top = ny - popH / 2;
-    top = Math.max(margin, Math.min(top, shellH - popH - margin));
+      /* vertical: centrat pe nod, limitat în interiorul SVG */
+      var top = ny - popH / 2;
+      top = Math.max(margin, Math.min(top, shellH - popH - margin));
 
-    modal.style.left = left + 'px';
-    modal.style.top = top + 'px';
-    modal.style.right = 'auto';
-    modal.style.bottom = 'auto';
+      modal.style.left = left + 'px';
+      modal.style.top = top + 'px';
+      modal.style.right = 'auto';
+      modal.style.bottom = 'auto';
+    });
   }
 
   /* ── Draggable popup ── */
