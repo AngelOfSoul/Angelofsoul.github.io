@@ -137,7 +137,8 @@
     var w = shell.clientWidth || 900, h = 760;
     var tr = d3.zoomIdentity.translate(w / 2 - node.x * 1.25, h / 2 - node.y * 1.25).scale(1.25);
     svg.transition().duration(duration || 650).call(zoom.transform, tr);
-    openFamilyDetails(node);
+    /* poziționează popup-ul după ce zoom-ul s-a terminat */
+    setTimeout(function() { positionAndShowModal(node, null); }, (duration || 650) + 50);
   }
 
   function linkKey(a, b) { return [String(a), String(b)].sort().join('::'); }
@@ -211,20 +212,13 @@
 
   function attachEvents(nodeSel) {
     nodeSel
-      .on('mouseenter', function (event, d) {
-        tooltip.style.display = 'block';
-        tooltip.innerHTML = '<strong>' + esc(d.label) + '</strong><br>' + esc(d.village || 'Calnic');
-      })
-      .on('mousemove', function (event) {
-        var rect = shell.getBoundingClientRect();
-        tooltip.style.left = (event.clientX - rect.left + 16) + 'px';
-        tooltip.style.top = (event.clientY - rect.top + 16) + 'px';
-      })
-      .on('mouseleave', function () { tooltip.style.display = 'none'; })
+      .on('mouseenter', null)
+      .on('mousemove', null)
+      .on('mouseleave', null)
       .on('click', function (event, d) {
         selectedNodeId = d.id;
         redrawStyles();
-        focusNode(d.id, 450);
+        positionAndShowModal(d, event);
       })
       .call(d3.drag()
         .on('start', function (event, d) {
@@ -236,6 +230,74 @@
           if (!event.active) simulation.alphaTarget(0);
           d.fx = null; d.fy = null;
         }));
+  }
+
+  function positionAndShowModal(node, event) {
+    if (!node) return;
+    openFamilyDetails(node);
+    var shellRect = shell.getBoundingClientRect();
+    var svgRect = svgEl.getBoundingClientRect();
+    var scaleX = svgRect.width / (shell.clientWidth || 900);
+
+    /* coordonate nod în px relativ la shell */
+    var transform = d3.zoomTransform(svgEl);
+    var nx = transform.applyX(node.x);
+    var ny = transform.applyY(node.y);
+
+    var popW = modal.offsetWidth || 280;
+    var popH = modal.offsetHeight || 200;
+    var shellW = shell.clientWidth || 900;
+    var shellH = shell.clientHeight || 760;
+    var margin = 14;
+    var nodeHalfW = 70;
+
+    /* încearcă dreapta, altfel stânga */
+    var left = nx + nodeHalfW + margin;
+    if (left + popW > shellW - margin) {
+      left = nx - nodeHalfW - margin - popW;
+    }
+    /* limitează să nu iasă din shell */
+    left = Math.max(margin, Math.min(left, shellW - popW - margin));
+
+    /* vertical: centrat pe nod, cu limitare */
+    var top = ny - popH / 2;
+    top = Math.max(margin, Math.min(top, shellH - popH - margin));
+
+    modal.style.left = left + 'px';
+    modal.style.top = top + 'px';
+    modal.style.right = 'auto';
+    modal.style.bottom = 'auto';
+  }
+
+  /* ── Draggable popup ── */
+  function initModalDrag() {
+    var isDragging = false, startX, startY, origLeft, origTop;
+
+    function onMouseDown(e) {
+      if (e.target.closest('a') || e.target.closest('button')) return;
+      isDragging = true;
+      startX = e.clientX; startY = e.clientY;
+      origLeft = parseInt(modal.style.left) || 0;
+      origTop = parseInt(modal.style.top) || 0;
+      document.addEventListener('mousemove', onMouseMove);
+      document.addEventListener('mouseup', onMouseUp);
+      e.preventDefault();
+    }
+
+    function onMouseMove(e) {
+      if (!isDragging) return;
+      var dx = e.clientX - startX, dy = e.clientY - startY;
+      modal.style.left = (origLeft + dx) + 'px';
+      modal.style.top = (origTop + dy) + 'px';
+    }
+
+    function onMouseUp() {
+      isDragging = false;
+      document.removeEventListener('mousemove', onMouseMove);
+      document.removeEventListener('mouseup', onMouseUp);
+    }
+
+    modal.addEventListener('mousedown', onMouseDown);
   }
 
   function renderGraph() {
@@ -411,6 +473,15 @@
   async function bootstrap() {
     try {
       resizeSvg();
+      initModalDrag();
+      var closeBtn = document.getElementById('modal-close-btn');
+      if (closeBtn) {
+        closeBtn.addEventListener('click', function () {
+          hideFamilyDetails();
+          selectedNodeId = null;
+          redrawStyles();
+        });
+      }
       if (!window.VillageTreeAdapter || !window.VillageTreeAdapter.fetchVillageTreeData) {
         throw new Error('Adapterul pentru arborele satului lipseste.');
       }
