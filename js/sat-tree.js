@@ -184,7 +184,8 @@
     var node = nodeById(nodeId);
     if (!node || !isFinite(node.x) || !isFinite(node.y)) return;
     var w = shell.clientWidth || 900, h = 760;
-    var k = (currentTransform && isFinite(currentTransform.k)) ? currentTransform.k : 1;
+    var liveTransform = d3.zoomTransform(svgEl);
+    var k = (liveTransform && isFinite(liveTransform.k)) ? liveTransform.k : 1;
     var tr = d3.zoomIdentity.translate(w / 2 - node.x * k, h / 2 - node.y * k).scale(k);
     svg
       .transition()
