@@ -236,7 +236,6 @@
     if (!node) return;
     openFamilyDetails(node);
 
-    /* așteaptă un frame ca browser-ul să calculeze dimensiunile popup-ului */
     requestAnimationFrame(function() {
       var transform = d3.zoomTransform(svgEl);
       var nx = transform.applyX(node.x);
@@ -245,9 +244,16 @@
       var popW = modal.offsetWidth || 280;
       var popH = modal.offsetHeight || 220;
       var shellW = shell.clientWidth || 900;
-      var shellH = shell.clientHeight || 760;
       var margin = 12;
       var nodeHalfW = 72;
+
+      /* limita verticală: cât din SVG e vizibil în viewport */
+      var shellRect = shell.getBoundingClientRect();
+      var viewportH = window.innerHeight;
+      /* zona vizibilă a SVG în coordonate relative la shell */
+      var visibleTop = Math.max(0, -shellRect.top);
+      var visibleBottom = Math.min(shell.clientHeight || 760, viewportH - shellRect.top);
+      var visibleH = visibleBottom - visibleTop;
 
       /* orizontal: dreapta dacă încape, altfel stânga */
       var left = nx + nodeHalfW + margin;
@@ -256,9 +262,11 @@
       }
       left = Math.max(margin, Math.min(left, shellW - popW - margin));
 
-      /* vertical: centrat pe nod, limitat în interiorul SVG */
+      /* vertical: centrat pe nod, limitat la zona VIZIBILĂ */
       var top = ny - popH / 2;
-      top = Math.max(margin, Math.min(top, shellH - popH - margin));
+      var minTop = visibleTop + margin;
+      var maxTop = visibleBottom - popH - margin;
+      top = Math.max(minTop, Math.min(top, maxTop));
 
       modal.style.left = left + 'px';
       modal.style.top = top + 'px';
