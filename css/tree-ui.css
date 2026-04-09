@@ -57,3 +57,32 @@
   border-color: #c8a030;
   color: #c8a030;
 }
+
+#tree-container.tree-shell {
+position: relative !important;
+}
+
+#tree-container #family-modal.overlay-card {
+position: absolute !important;
+right: auto !important;
+bottom: auto !important;
+left: 14px;
+top: 14px;
+z-index: 9 !important;
+max-width: min(360px, calc(100% - 28px));
+}
+
+#tree-container #tooltip.tooltip {
+display: none;
+position: absolute;
+z-index: 10;
+pointer-events: none;
+padding: 8px 10px;
+background: rgba(12, 13, 16, 0.96);
+border: 1px solid rgba(196, 154, 75, 0.28);
+border-radius: 8px;
+font-size: 13px;
+line-height: 1.35;
+color: var(--text);
+box-shadow: 0 8px 24px rgba(0, 0, 0, 0.35);
+}

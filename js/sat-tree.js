@@ -32,7 +32,14 @@
     .scaleExtent([0.35, 3])
     // Keep page wheel scrolling active; zoom only from explicit UI actions.
     .filter(function (event) { return event.type !== 'wheel'; })
-    .on('zoom', function (event) { g.attr('transform', event.transform); });
+    .on('zoom', function (event) {
+      currentTransform = event.transform;
+      g.attr('transform', event.transform);
+      if (modal && !modal.classList.contains('hidden') && selectedNodeId != null) {
+        var selected = nodeById(selectedNodeId);
+        if (selected) positionFamilyDetails(selected);
+      }
+    });
   svg.call(zoom);
 
   var graphData = null;
@@ -40,6 +47,12 @@
   var currentTransform = d3.zoomIdentity;
   var selectedNodeId = null;
   var highlightedPathKeys = {};
+
+  function clamp(value, min, max) {
+    if (value < min) return min;
+    if (value > max) return max;
+    return value;
+  }
 
   function zoomByFactor(factor) {
     if (!factor || factor <= 0) return;
@@ -72,6 +85,35 @@
 
   function nodeById(id) {
     return (graphData && graphData.graph.nodes || []).find(function (n) { return String(n.id) === String(id); }) || null;
+  }
+
+  function positionFamilyDetails(node) {
+    if (!modal || !shell || !node || !isFinite(node.x) || !isFinite(node.y)) return;
+    var shellW = shell.clientWidth || 900;
+    var pad = 14;
+    var gap = 18;
+    var px = currentTransform.applyX(node.x);
+    var py = currentTransform.applyY(node.y);
+    var modalW = modal.offsetWidth || Math.min(360, shellW - pad * 2);
+    var modalH = modal.offsetHeight || 180;
+    var shellRect = shell.getBoundingClientRect();
+    var svgRect = svgEl.getBoundingClientRect();
+    var svgLeft = Math.max(0, svgRect.left - shellRect.left);
+    var svgTop = Math.max(0, svgRect.top - shellRect.top);
+    var svgRight = Math.min(shellW, svgLeft + (svgEl.clientWidth || shellW));
+    var svgBottom = svgTop + (svgEl.clientHeight || 760);
+
+    // Horizontal rule: right of node if it fits, otherwise left of node.
+    var rightCandidate = px + gap;
+    var leftCandidate = px - modalW - gap;
+    var left = (rightCandidate + modalW <= svgRight - pad) ? rightCandidate : leftCandidate;
+    left = clamp(left, svgLeft + pad, Math.max(svgLeft + pad, svgRight - modalW - pad));
+
+    // Vertical rule: keep card fully inside the SVG area.
+    var top = clamp(py - modalH / 2, svgTop + pad, Math.max(svgTop + pad, svgBottom - modalH - pad));
+
+    modal.style.left = Math.round(left) + 'px';
+    modal.style.top = Math.round(top) + 'px';
   }
 
   function openFamilyDetails(node) {
@@ -112,9 +154,15 @@
     modalFamilyLink.textContent = isPublic ? t('Arborele familiei', 'Family tree') : t('Familie privată', 'Private family');
     modalGenealogyLink.href = 'genealogie.html';
     modalGenealogyLink.textContent = t('Vezi Genealogie', 'See Genealogy');
+    positionFamilyDetails(node);
+    requestAnimationFrame(function () { positionFamilyDetails(node); });
   }
 
-  function hideFamilyDetails() { modal.classList.add('hidden'); }
+  function hideFamilyDetails() {
+    modal.classList.add('hidden');
+    modal.style.left = '';
+    modal.style.top = '';
+  }
 
   function fitGraph(duration) {
     if (!graphData || !graphData.graph.nodes.length) return;
