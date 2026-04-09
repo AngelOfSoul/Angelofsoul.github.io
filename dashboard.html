@@ -50,7 +50,7 @@ display:inline-block; margin-top:16px;
 }
 
 .dash-header {
-padding:24px 0 20px; border-bottom:1px solid var(--b1); margin-bottom:24px;
+padding:24px 0 20px; border-bottom:1px solid var(--b1); margin-bottom:24px; text-align:center;
 }
 
 .dash-title {
@@ -58,11 +58,11 @@ font-family:'Playfair Display',serif; font-size:26px; color:var(--gold-l); margi
 }
 
 .dash-subtitle {
-font-size:14px; color:var(--muted); margin-bottom:16px;
+font-size:14px; color:var(--muted); margin-bottom:16px; display:none;
 }
 
 .dash-actions {
-display:flex; gap:12px; flex-wrap:wrap;
+display:flex; gap:12px; flex-wrap:wrap; justify-content:center;
 }
 
 .dash-btn {
@@ -728,7 +728,7 @@ function populateForms() {
   document.getElementById('privShowPhotos').checked = true;
   document.getElementById('privShowSince').checked = true;
   document.getElementById('dashFamilyName').textContent = 'Familia ' + (familyData.display_name || familyData.name || '');
-  if (currentUser) document.getElementById('dashUserEmail').textContent = currentUser.email || '';
+  document.getElementById('dashUserEmail').textContent = '';
   var pubLink = document.getElementById('viewPublicLink');
   if (pubLink) pubLink.href = 'familiile-familie.html?family=' + encodeURIComponent((familyData && familyData.id) || familyId || '');
 }
