@@ -144,7 +144,9 @@ border-color:#d4a84a;color:#d4a84a
 }
 
 .overlay-card {
-position:absolute;right:18px;bottom:18px;width:min(320px, calc(100vw - 36px));
+position:absolute;right:18px;bottom:18px;
+width:min(300px, calc(100vw - 36px));
+max-height:340px;
 background:#0f0d07;
 border:1px solid #6a5010;
 border-top:none;
@@ -190,11 +192,11 @@ letter-spacing:3px;color:#4a3808;margin-bottom:8px;
 }
 
 .overlay-fleur {
-display:block;margin:0 auto 6px;
+display:block;width:28px !important;height:18px !important;flex-shrink:0;margin:0 auto 6px;
 }
 
 .overlay-title {
-font-family:'Cinzel',serif;font-size:17px;font-weight:600;
+font-family:'Cinzel',serif;font-size:15px;font-weight:600;
 color:#c8a030;text-align:center;letter-spacing:1px;margin-bottom:3px;
 }
 
@@ -223,7 +225,8 @@ margin:8px 0 10px;
 }
 
 .overlay-card-body {
-padding:14px 18px 16px;
+padding:10px 14px 12px;
+overflow:hidden;
 }
 
 .overlay-actions {
@@ -314,7 +317,7 @@ stroke-width:2px;cursor:pointer
         <div class="overlay-corner-br"></div>
         <div class="overlay-card-body">
           <div class="overlay-ornament">✦ &nbsp; CALNIC ONLINE &nbsp; ✦</div>
-          <svg class="overlay-fleur" width="28" height="18" viewBox="0 0 28 18">
+          <svg class="overlay-fleur" width="28" height="18" viewBox="0 0 28 18" style="display:block;width:28px;height:18px;margin:0 auto 6px;flex-shrink:0">
             <ellipse cx="14" cy="5" rx="3" ry="5.5" fill="#8a6818"/>
             <ellipse cx="8" cy="9" rx="2.2" ry="4" fill="#7a5810" transform="rotate(-25,8,9)"/>
             <ellipse cx="20" cy="9" rx="2.2" ry="4" fill="#7a5810" transform="rotate(25,20,9)"/>
