@@ -144,15 +144,86 @@ border-color:#d4a84a;color:#d4a84a
 }
 
 .overlay-card {
-position:absolute;right:18px;bottom:18px;width:min(360px, calc(100vw - 36px));background:rgba(16,22,31,.94);border:1px solid rgba(255,255,255,.08);border-radius:14px;padding:14px;box-shadow:0 16px 40px rgba(0,0,0,.35);z-index:3
+position:absolute;right:18px;bottom:18px;width:min(320px, calc(100vw - 36px));
+background:#0f0d07;
+border:1px solid #6a5010;
+border-top:none;
+border-radius:2px;
+overflow:hidden;
+box-shadow:0 16px 40px rgba(0,0,0,.5);z-index:3
 }
 
 .overlay-card.hidden {
 display:none
 }
 
+.overlay-top-bar {
+height:2px;
+background:linear-gradient(90deg,#3a2808,#c8a030,#f0d060,#c8a030,#3a2808);
+}
+
+.overlay-corner-tl {
+position:absolute;top:2px;left:0;width:12px;height:12px;
+border-top:1px solid #c8a030;border-left:1px solid #c8a030;pointer-events:none;
+}
+.overlay-corner-tr {
+position:absolute;top:2px;right:0;width:12px;height:12px;
+border-top:1px solid #c8a030;border-right:1px solid #c8a030;pointer-events:none;
+}
+.overlay-corner-bl {
+position:absolute;bottom:0;left:0;width:12px;height:12px;
+border-bottom:1px solid #6a5010;border-left:1px solid #6a5010;pointer-events:none;
+}
+.overlay-corner-br {
+position:absolute;bottom:0;right:0;width:12px;height:12px;
+border-bottom:1px solid #6a5010;border-right:1px solid #6a5010;pointer-events:none;
+}
+
 .overlay-card p {
-margin:0;color:var(--muted);line-height:1.5;font-size:14px
+margin:0;color:#9a8060;line-height:1.55;font-size:13px;
+font-family:'EB Garamond',serif;text-align:center;
+}
+
+.overlay-ornament {
+text-align:center;font-family:'Cinzel',serif;font-size:8px;
+letter-spacing:3px;color:#4a3808;margin-bottom:8px;
+}
+
+.overlay-fleur {
+display:block;margin:0 auto 6px;
+}
+
+.overlay-title {
+font-family:'Cinzel',serif;font-size:17px;font-weight:600;
+color:#c8a030;text-align:center;letter-spacing:1px;margin-bottom:3px;
+}
+
+.overlay-sub {
+font-family:'Cinzel',serif;font-size:9px;color:#5a4010;
+letter-spacing:2px;text-align:center;margin-bottom:10px;
+}
+
+.overlay-badge {
+display:block;margin:0 auto 10px;padding:2px 14px;
+font-family:'Cinzel',serif;font-size:8px;letter-spacing:1.5px;
+border-radius:1px;text-align:center;width:fit-content;
+}
+
+.overlay-badge.pub {
+border:1px solid #5a4010;color:#7a5818;background:#0e0c06;
+}
+
+.overlay-badge.prv {
+border:1px solid #252830;color:#404850;background:#0a0b0e;
+}
+
+.overlay-divider {
+height:1px;background:linear-gradient(90deg,transparent,#2e2008,transparent);
+margin:8px 0 10px;
+}
+
+.overlay-card-body {
+padding:14px 18px 16px;
 }
 
 .overlay-actions {
@@ -236,11 +307,28 @@ stroke-width:2px;cursor:pointer
       </div>
       <div id="tooltip" class="tooltip"></div>
       <div id="family-modal" class="overlay-card hidden">
-        <h3 id="modal-title">Detalii familie</h3>
-        <p id="modal-text"></p>
-        <div class="overlay-actions">
-          <a id="modal-family-link" class="btn-link" href="genealogie.html">Deschide pagina familiei</a>
-          <a id="modal-genealogy-link" class="btn-link" href="genealogie.html">Vezi in Genealogie</a>
+        <div class="overlay-top-bar"></div>
+        <div class="overlay-corner-tl"></div>
+        <div class="overlay-corner-tr"></div>
+        <div class="overlay-corner-bl"></div>
+        <div class="overlay-corner-br"></div>
+        <div class="overlay-card-body">
+          <div class="overlay-ornament">✦ &nbsp; CALNIC ONLINE &nbsp; ✦</div>
+          <svg class="overlay-fleur" width="28" height="18" viewBox="0 0 28 18">
+            <ellipse cx="14" cy="5" rx="3" ry="5.5" fill="#8a6818"/>
+            <ellipse cx="8" cy="9" rx="2.2" ry="4" fill="#7a5810" transform="rotate(-25,8,9)"/>
+            <ellipse cx="20" cy="9" rx="2.2" ry="4" fill="#7a5810" transform="rotate(25,20,9)"/>
+            <rect x="10" y="12" width="8" height="3" rx="1" fill="#6a4e10"/>
+          </svg>
+          <div class="overlay-title" id="modal-title">Detalii familie</div>
+          <div class="overlay-sub" id="modal-sub">Călnic · Alba · Transilvania</div>
+          <div class="overlay-badge pub" id="modal-badge">FAMILIE PUBLICĂ</div>
+          <div class="overlay-divider"></div>
+          <p id="modal-text"></p>
+          <div class="overlay-actions" style="margin-top:12px;display:flex;gap:8px;flex-wrap:wrap;">
+            <a id="modal-family-link" class="btn-link" href="genealogie.html" data-ro="Arborele familiei" data-en="Family tree">Arborele familiei</a>
+            <a id="modal-genealogy-link" class="btn-link" href="genealogie.html" data-ro="Vezi Genealogie" data-en="See Genealogy">Vezi Genealogie</a>
+          </div>
         </div>
       </div>
     </div>
