@@ -1,18 +1,59 @@
+/* TREE UI — Heraldic node style */
 
-/* TREE UI UPGRADE SAFE */
-.tree-node{
-transition:0.3s;
-border:1px solid rgba(212,175,55,0.3);
-padding:6px 10px;
-background:#0a0a0a;
-}
-.tree-node:hover{
-box-shadow:0 0 10px rgba(212,175,55,0.4);
-transform:scale(1.05);
+.tree-node {
+  cursor: pointer;
 }
 
-/* highlight lineage */
-.tree-node.active-line{
-border-color:#d4af37;
-box-shadow:0 0 15px rgba(212,175,55,0.5);
+.tree-node:hover rect.node-frame {
+  stroke-width: 2.2;
+}
+
+.tooltip {
+  position: absolute;
+  display: none;
+  background: #0f0d07;
+  border: 1px solid #6a5010;
+  border-top: 2px solid #c8a030;
+  color: #c8aa80;
+  font-family: 'Cinzel', serif;
+  font-size: 12px;
+  padding: 8px 12px;
+  border-radius: 2px;
+  pointer-events: none;
+  z-index: 10;
+  white-space: nowrap;
+  letter-spacing: 0.5px;
+}
+
+.tooltip strong {
+  color: #c8a030;
+  display: block;
+  margin-bottom: 2px;
+  font-size: 13px;
+}
+
+.tree-zoom-btn {
+  width: 32px;
+  height: 32px;
+  background: #0f0d08;
+  border: 1px solid #2a2a2a;
+  color: #6a5020;
+  font-size: 18px;
+  line-height: 1;
+  border-radius: 2px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: border-color 0.15s, color 0.15s;
+}
+
+.tree-zoom-btn.primary {
+  border-color: #6a5010;
+  color: #a08828;
+}
+
+.tree-zoom-btn:hover {
+  border-color: #c8a030;
+  color: #c8a030;
 }
