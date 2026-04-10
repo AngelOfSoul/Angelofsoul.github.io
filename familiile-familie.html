@@ -188,7 +188,7 @@ padding:12px;border:1px solid #6a2020;background:#230d0d;color:#e7b4b4;font-size
 }
 
 .family-gate-overlay {
-position:fixed;inset:0;background:rgba(0,0,0,.97);z-index:9200;display:none;align-items:center;justify-content:center;padding:16px;
+position:fixed;inset:0;background:rgba(0,0,0,1);z-index:9200;display:none;align-items:center;justify-content:center;padding:16px;
 }
 
 .family-gate-overlay.open {
@@ -757,20 +757,6 @@ to{transform:rotate(360deg);}
 
     <div class="side-orn">— &#10022; —</div>
 
-    <!-- Private access box -->
-    <div class="private-box">
-      <div class="pb-icon">&#128274;</div>
-      <div class="pb-title" data-ro="Acces privat" data-en="Private access">Acces privat</div>
-      <div class="pb-sub" data-ro="Membrii familiei pot accesa fotografii si date private cu PIN-ul familiei." data-en="Family members can access private photos and data with the family PIN.">Membrii familiei pot accesa fotografii si date private cu PIN-ul familiei.</div>
-      <div class="pw-wrap">
-        <input class="pb-input" id="pinInput" type="password" placeholder="PIN" maxlength="8" oninput="clearPinError()"/>
-        <button type="button" class="pw-toggle" onclick="togglePassword('pinInput', this)" aria-label="Arata PIN" tabindex="-1"><svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg></button>
-      </div>
-      <div class="pb-error" id="pinError" data-ro="PIN incorect. Incearca din nou." data-en="Incorrect PIN. Try again.">PIN incorect. Incearca din nou.</div>
-      <button class="pb-submit" id="pinSubmit" onclick="checkPin()" data-ro="Acceseaza" data-en="Access">Acceseaza</button>
-      <div class="pb-note" data-ro="PIN-ul este cunoscut doar de membrii familiei. Administratorul site-ului nu are acces la continutul privat." data-en="The PIN is known only by family members. The site administrator has no access to private content.">PIN-ul este cunoscut doar de membrii familiei. Administratorul site-ului nu are acces la continutul privat.</div>
-    </div>
-
     <div class="side-orn">— &#10022; —</div>
 
   </div>
@@ -881,6 +867,36 @@ function mapTimelineRow(t) {
   return { year: t.year, textRo: t.text_ro || t.textRo || '', textEn: t.text_en || t.textEn || '' };
 }
 
+function getFamilyVisibilityToggleLabel() {
+  if (!FAM) return currentLang === 'ro' ? 'Schimba vizibilitatea' : 'Toggle visibility';
+  var isPrivate = String(FAM.visibility || 'public').toLowerCase() === 'private';
+  return isPrivate
+    ? (currentLang === 'ro' ? 'Fa familia publica' : 'Make family public')
+    : (currentLang === 'ro' ? 'Fa familia privata' : 'Make family private');
+}
+
+function toggleFamilyVisibility() {
+  if (!window.supabase || !FAM || !isOwner) return;
+  var nextVis = String(FAM.visibility || 'public').toLowerCase() === 'private' ? 'public' : 'private';
+  window.supabase
+    .from('families')
+    .update({ visibility: nextVis })
+    .eq('id', FAM.id)
+    .then(function(res) {
+      if (res && res.error) {
+        alert((currentLang === 'ro' ? 'Nu am putut actualiza vizibilitatea familiei: ' : 'Could not update family visibility: ') + res.error.message);
+        return;
+      }
+      FAM.visibility = nextVis;
+      populateDOM();
+      var btn = document.getElementById('toggleFamilyVisibilityBtn');
+      if (btn) btn.textContent = getFamilyVisibilityToggleLabel();
+      alert(nextVis === 'private'
+        ? (currentLang === 'ro' ? 'Familia este acum privata.' : 'Family is now private.')
+        : (currentLang === 'ro' ? 'Familia este acum publica.' : 'Family is now public.'));
+    });
+}
+
 async function reloadUnlockedFamilyData(enteredPin) {
   if (!window.supabase || !familyId) return;
   var loadedFromRpc = false;
@@ -961,48 +977,53 @@ async function renderOwnerBadges() {
 /* Populate DOM from loaded data */
 function populateDOM() {
   if (!FAM) return;
+  var locked = isFamilyLockedForViewer();
+  var dash = '-';
+  var safeMembers = locked ? dash : (FAM.members || dash);
+  var safePhotos = locked ? dash : (FAM.photos || dash);
+  var safeGen = locked ? dash : (FAM.gen || dash);
+  var safeSince = locked ? dash : (FAM.since || dash);
   document.getElementById('fam-avatar').textContent = FAM.initial || (FAM.name ? FAM.name[0] : '?');
-  document.getElementById('fam-name').textContent   = FAM.name || '';
+  document.getElementById('fam-name').textContent = FAM.name || '';
   var metaParts = [escH(FAM.village || 'Calnic')];
-  if (FAM.since) metaParts.push(currentLang === 'ro' ? 'prezenti din ' + escH(FAM.since) : 'since ' + escH(FAM.since));
-  if (FAM.gen)   metaParts.push(escH(String(FAM.gen)) + ' ' + (currentLang === 'ro' ? 'generatii' : 'generations'));
-  document.getElementById('fam-meta').innerHTML = metaParts.join('  ·  ');
-  if (FAM.story) document.getElementById('fam-story').textContent = currentLang === 'ro' ? (FAM.storyRo || FAM.story) : (FAM.storyEn || FAM.story);
-  /* Update hero stats */
+  if (!locked && FAM.since) metaParts.push(currentLang === 'ro' ? 'prezenti din ' + escH(FAM.since) : 'since ' + escH(FAM.since));
+  if (!locked && FAM.gen) metaParts.push(escH(String(FAM.gen)) + ' ' + (currentLang === 'ro' ? 'generatii' : 'generations'));
+  document.getElementById('fam-meta').innerHTML = metaParts.join(' - ');
+  if (FAM.story) {
+    document.getElementById('fam-story').textContent = currentLang === 'ro' ? (FAM.storyRo || FAM.story) : (FAM.storyEn || FAM.story);
+  }
   var smEl = document.getElementById('stat-members');
   var spEl = document.getElementById('stat-photos');
   var sgEl = document.getElementById('stat-gen');
-  if (smEl) smEl.textContent = FAM.members || '—';
-  if (spEl) spEl.textContent = FAM.photos  || '—';
-  if (sgEl) sgEl.textContent = FAM.gen     || '—';
-  /* Update breadcrumb and document title */
+  if (smEl) smEl.textContent = safeMembers;
+  if (spEl) spEl.textContent = safePhotos;
+  if (sgEl) sgEl.textContent = safeGen;
   var bcEl = document.getElementById('breadcrumb-name');
   if (bcEl) bcEl.textContent = FAM.name || (currentLang === 'ro' ? 'Familie' : 'Family');
-  document.title = (FAM.name || (currentLang === 'ro' ? 'Familie' : 'Family')) + ' — Calnic Online';
-  /* Update sidebar stats */
+  document.title = (FAM.name || (currentLang === 'ro' ? 'Familie' : 'Family')) + ' - Calnic Online';
   var scv = document.getElementById('sc-village');
   var scs = document.getElementById('sc-since');
   var scg = document.getElementById('sc-gen');
   var scm = document.getElementById('sc-members');
   var scp = document.getElementById('sc-photos');
   var scc = document.getElementById('sc-connected');
-  if (scv) scv.textContent = FAM.village  || '—';
-  if (scs) scs.textContent = FAM.since    || '—';
-  if (scg) scg.textContent = FAM.gen      || '—';
-  if (scm) scm.textContent = FAM.members  || '—';
-  if (scp) scp.textContent = FAM.photos   || '—';
-  if (scc) { scc.innerHTML = FAM.connected ? '<span style="color:#82c46a;">&#10003; ' + (currentLang === 'ro' ? 'Da' : 'Yes') + '</span>' : '—'; }
-  /* Tree preview */
+  if (scv) scv.textContent = FAM.village || dash;
+  if (scs) scs.textContent = safeSince;
+  if (scg) scg.textContent = safeGen;
+  if (scm) scm.textContent = safeMembers;
+  if (scp) scp.textContent = safePhotos;
+  if (scc) {
+    scc.innerHTML = FAM.connected
+      ? '<span style="color:#82c46a;">&#10003; ' + (currentLang === 'ro' ? 'Da' : 'Yes') + '</span>'
+      : dash;
+  }
   renderTreePreview();
-  /* Connections — pass empty array; populate with real data if/when a connections table is added */
   renderConnections([]);
-  /* Photos */
   renderPhotos();
   renderMembers();
   renderTimeline();
   renderOwnerBadges();
 }
-
 /* Load from Supabase if configured */
 function loadFamilyData() {
   if (!window.supabase) {
@@ -1087,12 +1108,24 @@ function loadFamilyData() {
           editBtn.style.cssText = 'display:inline-block;margin-top:12px;padding:8px 18px;background:var(--s2);border:1px solid var(--b2);color:var(--gold);font-family:\'EB Garamond\',serif;font-size:14px;border-radius:2px;';
           var heroInfo = document.querySelector('.fam-hero-info');
           if (heroInfo) heroInfo.appendChild(editBtn);
+          var visBtn = document.createElement('button');
+          visBtn.id = 'toggleFamilyVisibilityBtn';
+          visBtn.type = 'button';
+          visBtn.textContent = getFamilyVisibilityToggleLabel();
+          visBtn.style.cssText = 'display:inline-block;margin-top:12px;margin-left:8px;padding:8px 18px;background:var(--s2);border:1px solid var(--b2);color:var(--gold);font-family:\'EB Garamond\',serif;font-size:14px;border-radius:2px;cursor:pointer;';
+          visBtn.onclick = toggleFamilyVisibility;
+          if (heroInfo) heroInfo.appendChild(visBtn);
         }
       }).catch(function() {
         isOwner = false;
       }).finally(function() {
         authStateResolved = true;
-        applyFamilyGateIfNeeded();
+        var autoPin = getStoredFamilyPin(familyId);
+        if (!isOwner && isFamilyPinProtected() && autoPin) {
+          checkPin(autoPin, true).then(function(ok){ if (!ok) applyFamilyGateIfNeeded(); });
+        } else {
+          applyFamilyGateIfNeeded();
+        }
       });
     }).catch(function(e) {
       console.warn('[Calnic] Error loading family data:', e);
@@ -1100,7 +1133,12 @@ function loadFamilyData() {
         ? 'Eroare la incarcarea datelor familiei. Incearca din nou mai tarziu.'
         : 'Error loading family data. Please try again later.');
       authStateResolved = true;
-      applyFamilyGateIfNeeded();
+        var autoPin = getStoredFamilyPin(familyId);
+        if (!isOwner && isFamilyPinProtected() && autoPin) {
+          checkPin(autoPin, true).then(function(ok){ if (!ok) applyFamilyGateIfNeeded(); });
+        } else {
+          applyFamilyGateIfNeeded();
+        }
     });
   }).catch(function(e) {
     console.warn('[Calnic] Error loading family data:', e);
@@ -1108,7 +1146,12 @@ function loadFamilyData() {
       ? 'Eroare la incarcarea datelor familiei. Incearca din nou mai tarziu.'
       : 'Error loading family data. Please try again later.');
     authStateResolved = true;
-    applyFamilyGateIfNeeded();
+        var autoPin = getStoredFamilyPin(familyId);
+        if (!isOwner && isFamilyPinProtected() && autoPin) {
+          checkPin(autoPin, true).then(function(ok){ if (!ok) applyFamilyGateIfNeeded(); });
+        } else {
+          applyFamilyGateIfNeeded();
+        }
   });
 }
 if (window.supabase) { loadFamilyData(); } else { document.addEventListener('supabase:ready', loadFamilyData); }
@@ -1139,6 +1182,29 @@ var pinUnlockUsedLocalFallback = false;
 
 var isOwner = false; // set after auth check
 var authStateResolved = false;
+
+function familyPinSessionKey(fid) {
+  return 'calnic-family-pin:' + String(fid || familyId || '');
+}
+
+function getStoredFamilyPin(fid) {
+  try {
+    return sessionStorage.getItem(familyPinSessionKey(fid)) || '';
+  } catch (_e) {
+    return '';
+  }
+}
+
+function setStoredFamilyPin(pin, fid) {
+  try {
+    if (!pin) sessionStorage.removeItem(familyPinSessionKey(fid));
+    else sessionStorage.setItem(familyPinSessionKey(fid), String(pin));
+  } catch (_e) {}
+}
+
+function isFamilyLockedForViewer() {
+  return !!(FAM && isFamilyPinProtected() && !isOwner && !privateUnlocked);
+}
 
 function isFamilyPinProtected() {
   if (!FAM) return false;
@@ -1244,6 +1310,12 @@ function resolveMemberPhotoUrl(photoPath) {
 function renderMembers() {
   var grid = document.getElementById('membersGrid');
   if (!grid) return;
+  if (isFamilyLockedForViewer()) {
+    grid.innerHTML = '<div style="padding:20px 0;color:var(--muted);font-style:italic;font-size:14px;">'
+      + (currentLang === 'ro' ? 'Membrii sunt privati. Introdu PIN-ul familiei pentru acces.' : 'Members are private. Enter the family PIN for access.')
+      + '</div>';
+    return;
+  }
   if (!MEMBERS || !MEMBERS.length) {
     grid.innerHTML = '<div style="padding:20px 0;color:var(--muted);font-style:italic;font-size:14px;" data-ro="Niciun membru inregistrat." data-en="No members registered.">' + (currentLang === 'ro' ? 'Niciun membru inregistrat.' : 'No members registered.') + '</div>';
     return;
@@ -1255,10 +1327,10 @@ function renderMembers() {
       ? '<div style="display:flex;gap:5px;justify-content:center;margin-top:8px;">'
         + '<button onclick="event.stopPropagation();openMemberEdit(\'' + escH(m.id) + '\');return false;" '
         + 'style="padding:3px 10px;background:var(--s2);border:1px solid var(--b2);color:var(--gold);font-family:\'EB Garamond\',serif;font-size:12px;border-radius:2px;cursor:pointer;transition:border-color 0.15s;" '
-        + 'onmouseover="this.style.borderColor=\'var(--gold)\'" onmouseout="this.style.borderColor=\'var(--b2)\'">✎ Editeaza</button>'
+        + 'onmouseover="this.style.borderColor=\'var(--gold)\'" onmouseout="this.style.borderColor=\'var(--b2)\'">Editeaza</button>'
         + '<button onclick="event.stopPropagation();openMemberDel(\'' + escH(m.id) + '\');return false;" '
         + 'style="padding:3px 10px;background:#1a0808;border:1px solid #6a2020;color:#c04040;font-family:\'EB Garamond\',serif;font-size:12px;border-radius:2px;cursor:pointer;transition:border-color 0.15s;" '
-        + 'onmouseover="this.style.borderColor=\'#c04040\'" onmouseout="this.style.borderColor=\'#6a2020\'">✕ Sterge</button>'
+        + 'onmouseover="this.style.borderColor=\'#c04040\'" onmouseout="this.style.borderColor=\'#6a2020\'">Sterge</button>'
         + '</div>'
       : '';
     var resolvedPhotoUrl = resolveMemberPhotoUrl(m.photo_url);
@@ -1274,7 +1346,6 @@ function renderMembers() {
       + '</div>';
   }).join('');
 }
-
 function renderTimeline() {
   var tl = document.getElementById('timeline');
   if (!tl) return;
@@ -1336,6 +1407,12 @@ function renderConnections(connections) {
 function renderPhotos() {
   var el = document.getElementById('photosGrid');
   if (!el || !FAM) return;
+  if (isFamilyLockedForViewer()) {
+    el.innerHTML = '<div style="padding:20px 0;color:var(--muted);font-style:italic;font-size:14px;grid-column:1/-1;text-align:center;">'
+      + (currentLang === 'ro' ? 'Fotografiile sunt private. Introdu PIN-ul familiei pentru acces.' : 'Photos are private. Enter the family PIN for access.')
+      + '</div>';
+    return;
+  }
   var count = FAM.photos || 0;
   if (!count) {
     el.innerHTML = '<div style="padding:20px 0;color:var(--muted);font-style:italic;font-size:14px;grid-column:1/-1;text-align:center;" data-ro="Nicio fotografie publica disponibila." data-en="No public photos available.">' + (currentLang === 'ro' ? 'Nicio fotografie publica disponibila.' : 'No public photos available.') + '</div>';
@@ -1348,24 +1425,17 @@ function renderPhotos() {
     + '<div class="photo-more-lbl" data-ro="mai multe" data-en="more">' + moreLbl + '</div>'
     + '</a>';
 }
-
-async function checkPin() {
+async function checkPin(prefilledPin, silent) {
   var gateInput = document.getElementById('familyGatePinInput');
-  var sideInput = document.getElementById('pinInput');
-  var entered = '';
-  if (gateInput && gateInput.value && gateInput.value.trim()) entered = gateInput.value.trim();
-  else if (sideInput && sideInput.value) entered = sideInput.value.trim();
-
-  var errEls = [document.getElementById('pinError'), document.getElementById('familyGatePinError')].filter(Boolean);
+  var entered = String(prefilledPin || '').trim();
+  if (!entered && gateInput && gateInput.value) entered = gateInput.value.trim();
+  var errEl = document.getElementById('familyGatePinError');
   if (!/^[0-9]{4,8}$/.test(entered)) {
-    errEls.forEach(function(el){ el.style.display = 'block'; });
-    return;
+    if (!silent && errEl) errEl.style.display = 'block';
+    return false;
   }
-
   var granted = false;
   var grantedByRpc = false;
-
-  /* Try Supabase RPC first */
   if (window.supabase && familyId) {
     try {
       var rpcRes = await window.supabase.rpc('check_family_pin', {
@@ -1375,45 +1445,30 @@ async function checkPin() {
       if (!rpcRes.error) {
         granted = !!rpcRes.data;
         grantedByRpc = !!rpcRes.data;
-      } else {
-        granted = false;
       }
-    } catch(e) {
-      granted = false;
-    }
-  } else {
-    granted = false;
+    } catch (_e) {}
   }
-
-  /* Fallback for legacy schema without RPC: compare with stored value */
   if (!granted && FAM && FAM.pinHash) {
-    try {
-      granted = (FAM.pinHash === btoa(entered));
-    } catch (_) {
-      granted = false;
-    }
+    try { granted = (FAM.pinHash === btoa(entered)); } catch (_e2) { granted = false; }
   }
-
-  if (granted) {
-    pinUnlockUsedLocalFallback = !grantedByRpc;
-    privateUnlocked = true;
-    if (gateInput) gateInput.value = '';
-    if (sideInput) sideInput.value = '';
-    document.querySelector('.private-box').innerHTML = '<div class="pb-icon">&#128275;</div>'
-      + '<div class="pb-title" style="color:#82c46a;">' + (currentLang === 'ro' ? 'Acces acordat' : 'Access granted') + '</div>'
-      + '<div class="pb-sub">' + (currentLang === 'ro' ? 'Bine ai venit! Continutul privat este acum vizibil.' : 'Welcome! Private content is now visible.') + '</div>';
-    applyFamilyGateIfNeeded();
-    await reloadUnlockedFamilyData(entered);
-  } else {
+  if (!granted) {
     pinUnlockUsedLocalFallback = false;
-    errEls.forEach(function(el){ el.style.display = 'block'; });
+    if (!silent && errEl) errEl.style.display = 'block';
+    setStoredFamilyPin('', familyId);
+    return false;
   }
+  pinUnlockUsedLocalFallback = !grantedByRpc;
+  privateUnlocked = true;
+  setStoredFamilyPin(entered, familyId);
+  if (gateInput) gateInput.value = '';
+  clearPinError();
+  await reloadUnlockedFamilyData(entered);
+  applyFamilyGateIfNeeded();
+  populateDOM();
+  return true;
 }
-
 function clearPinError() {
-  var p1 = document.getElementById('pinError');
   var p2 = document.getElementById('familyGatePinError');
-  if (p1) p1.style.display = 'none';
   if (p2) p2.style.display = 'none';
 }
 
@@ -1432,6 +1487,7 @@ function applyPageLang(lang) {
     renderTreePreview();
     renderConnections([]);
     renderPhotos();
+    renderMembers();
   }
   renderTimeline();
 }

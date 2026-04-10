@@ -1004,16 +1004,17 @@ function buildCard(f) {
     profileBadgesHtml = window.BadgeUI.compactBadgesHTML(familyBadgeMap[f.created_by], { max: 2 });
   }
 
-  var showStats = f.showMembers || f.showGenerations || f.showPhotos;
+  var isPrivateFamily = String(f.visibility || 'public').toLowerCase() === 'private' || !!f.pinHash;
+  var showStats = true;
   var statsHtml = '';
   if (showStats) {
     var lMembers = lang === 'ro' ? 'membri' : 'members';
     var lGen = lang === 'ro' ? 'generatii' : 'generations';
     var lPhotos = lang === 'ro' ? 'fotografii' : 'photos';
     statsHtml = '<div class="stats">';
-    statsHtml += '<div class="stat"><span class="stat-val">' + (f.showMembers && f.members != null ? f.members : '&mdash;') + '</span><span class="stat-lbl">' + lMembers + '</span></div>';
-    statsHtml += '<div class="stat"><span class="stat-val">' + (f.showGenerations && f.generations != null ? f.generations : '&mdash;') + '</span><span class="stat-lbl">' + lGen + '</span></div>';
-    statsHtml += '<div class="stat"><span class="stat-val">' + (f.showPhotos && f.photos != null ? f.photos : '&mdash;') + '</span><span class="stat-lbl">' + lPhotos + '</span></div>';
+    statsHtml += '<div class="stat"><span class="stat-val">' + (isPrivateFamily ? '&mdash;' : (f.showMembers && f.members != null ? f.members : '&mdash;')) + '</span><span class="stat-lbl">' + lMembers + '</span></div>';
+    statsHtml += '<div class="stat"><span class="stat-val">' + (isPrivateFamily ? '&mdash;' : (f.showGenerations && f.generations != null ? f.generations : '&mdash;')) + '</span><span class="stat-lbl">' + lGen + '</span></div>';
+    statsHtml += '<div class="stat"><span class="stat-val">' + (isPrivateFamily ? '&mdash;' : (f.showPhotos && f.photos != null ? f.photos : '&mdash;')) + '</span><span class="stat-lbl">' + lPhotos + '</span></div>';
     statsHtml += '</div>';
   }
 
@@ -1028,7 +1029,7 @@ function buildCard(f) {
     + '<div class="head">'
     +   '<div class="av">' + escH(familyInitial) + '</div>'
     +   '<div class="head-text">'
-    +     '<div class="fname">Familia ' + escH(familyName) + '</div>'
+    +     '<div class="fname">' + escH(familyName) + '</div>'
     +     '<div class="floc"><div class="loc-dot"></div>' + locText + '</div>'
     +   '</div>'
     +   '<div class="badges">' + badges + '</div>'
@@ -1159,7 +1160,7 @@ window.openFamilyWithPin = function(event, familyId, href) {
   var fam = (families || []).find(function (f) { return String(f.id) === String(familyId); });
   var isOwner = !!(fam && familiesCurrentUserId && fam.created_by && String(fam.created_by) === String(familiesCurrentUserId));
   if (isOwner) return true;
-  var isPrivateFamily = !!(fam && String(fam.visibility || 'public').toLowerCase() === 'private');
+  var isPrivateFamily = !!(fam && (String(fam.visibility || 'public').toLowerCase() === 'private' || !!fam.pinHash));
   if (!isPrivateFamily) return true;
   if (event && event.preventDefault) event.preventDefault();
   openFamilyPinModal(familyId, href);
@@ -1210,6 +1211,7 @@ applyPageLang(window.CalnicUtils ? window.CalnicUtils.lang() : currentLang);
       showErr(currentLang === 'en' ? 'Incorrect PIN. Try again.' : 'PIN incorect. Incearca din nou.');
       return;
     }
+    try { sessionStorage.setItem('calnic-family-pin:' + String(famPinTargetId), pin); } catch (_ss) {}
     var target = famPinTargetHref;
     closeFamilyPinModal();
     window.location.href = target;

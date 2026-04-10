@@ -772,6 +772,7 @@ to{transform:rotate(360deg);}
       <div class="lb-actions">
         <button class="lb-btn lb-btn-gold" onclick="downloadPhoto(currentLbIdx)" data-ro="&#8659; Descarca" data-en="&#8659; Download">&#8659; Descarca</button>
         <button class="lb-btn lb-btn-gold" onclick="sharePhoto(currentLbIdx)" data-ro="&#10548; Distribuie" data-en="&#10548; Share">&#10548; Distribuie</button>
+        <button class="lb-btn lb-btn-gold" id="lb-toggle-vis-btn" style="display:none" onclick="togglePhotoVisibility(currentLbIdx)" data-ro="Schimba vizibilitatea" data-en="Toggle visibility">Schimba vizibilitatea</button>
         <button class="lb-btn lb-btn-red" onclick="openReport()" data-ro="&#9873; Raporteaza" data-en="&#9873; Report">&#9873; Raporteaza</button>
         <button class="lb-btn lb-btn-muted" onclick="closeLbX()" data-ro="Inchide" data-en="Close">Inchide</button>
       </div>
@@ -880,6 +881,24 @@ var CATS = [
 ];
 
 var photos = [];
+var galleryCurrentUserId = null;
+var galleryOwnedFamilyIds = [];
+
+function isOwnedFamilyId(familyId) {
+  if (!familyId) return false;
+  return galleryOwnedFamilyIds.indexOf(String(familyId)) >= 0;
+}
+
+function canManagePhotoRecord(row) {
+  if (!galleryCurrentUserId || !row) return false;
+  var uid = String(galleryCurrentUserId);
+  var directOwnerFields = ['uploader_id', 'owner_id', 'created_by', 'user_id'];
+  for (var i = 0; i < directOwnerFields.length; i++) {
+    var v = row[directOwnerFields[i]];
+    if (v && String(v) === uid) return true;
+  }
+  return isOwnedFamilyId(row.family_id);
+}
 
 var SVG_SHAPES = [
   '<svg viewBox="0 0 200 140" xmlns="http://www.w3.org/2000/svg"><rect width="200" height="140" fill="#1e1608"/><rect x="55" y="25" width="90" height="80" rx="3" fill="#2a1e08" stroke="#c8983a" stroke-width="1.2"/><rect x="78" y="8" width="44" height="20" rx="2" fill="#3a2810" stroke="#c8983a" stroke-width="0.9"/><line x1="100" y1="25" x2="100" y2="8" stroke="#c8983a" stroke-width="0.9"/><rect x="82" y="70" width="36" height="35" rx="2" fill="#1a1208"/><rect x="57" y="23" width="8" height="30" rx="1" fill="#3a2810"/><rect x="135" y="23" width="8" height="30" rx="1" fill="#3a2810"/><rect x="0" y="118" width="200" height="22" fill="#0d0a04"/></svg>',
@@ -899,6 +918,12 @@ function getCatLabel(catId, lang) {
 
 function getPhotoTitle(p) {
   return currentLang === 'ro' ? p.titleRo : p.titleEn;
+}
+
+function getVisibilityToggleLabel(photo) {
+  if (!photo) return currentLang === 'ro' ? 'Schimba vizibilitatea' : 'Toggle visibility';
+  if (photo.priv) return currentLang === 'ro' ? 'Fa publica' : 'Make public';
+  return currentLang === 'ro' ? 'Fa privata' : 'Make private';
 }
 
 function buildCatBar() {
@@ -953,6 +978,9 @@ function applyFilters() {
       var catLabel = getCatLabel(p.cat, currentLang);
       var byText = currentLang === 'ro' ? p.byRo : p.byEn;
       var title = getPhotoTitle(p);
+      var manageBtn = p.canManage
+        ? '<button class="pt-dl" title="' + getVisibilityToggleLabel(p) + '" onclick="event.stopPropagation();togglePhotoVisibility(' + p.id + ')">' + (p.priv ? 'Pub' : 'Priv') + '</button>'
+        : '';
       return '<div class="photo-tile" onclick="openLb(' + p.id + ')" data-id="' + p.id + '">'+
         '<div class="pt-img">' + mediaHtml + lockHtml +
         '<div class="pt-cat">' + catLabel + '</div>' +
@@ -960,7 +988,7 @@ function applyFilters() {
         '<div class="pt-info"><div class="pt-info-left">'+
         '<div class="pt-title">' + title + '</div>'+
         '<div class="pt-by">' + (currentLang === 'ro' ? 'Donata de' : 'By') + ': <a href="familiile.html" onclick="event.stopPropagation()">' + byText + '</a></div>'+
-        '</div><button class="pt-dl" onclick="event.stopPropagation();dlPhoto(' + p.id + ')">&darr;</button></div></div>';
+        '</div>' + manageBtn + '<button class="pt-dl" onclick="event.stopPropagation();dlPhoto(' + p.id + ')">&darr;</button></div></div>';
     }).join('');
   }
 }
@@ -999,6 +1027,11 @@ function openLb(id) {
   document.getElementById('lb-cat').textContent = getCatLabel(p.cat, currentLang);
   document.getElementById('lb-vis').textContent = p.priv ? (currentLang === 'ro' ? 'Privata' : 'Private') : (currentLang === 'ro' ? 'Publica' : 'Public');
   document.getElementById('lb-lock').style.display = p.priv ? 'flex' : 'none';
+  var visBtn = document.getElementById('lb-toggle-vis-btn');
+  if (visBtn) {
+    visBtn.style.display = p.canManage ? 'inline-block' : 'none';
+    visBtn.textContent = getVisibilityToggleLabel(p);
+  }
   document.getElementById('lb-img-wrap').classList.remove('zoomed');
   zoomed = false;
   document.getElementById('lb-overlay').classList.add('open');
@@ -1091,6 +1124,36 @@ function sharePhoto(id) {
   }
 }
 
+function togglePhotoVisibility(id) {
+  var p = photos.find(function(x){ return x.id === id; });
+  if (!p || !p.canManage) {
+    alert(currentLang === 'ro' ? 'Nu ai permisiunea sa modifici vizibilitatea acestei fotografii.' : 'You do not have permission to change this photo visibility.');
+    return;
+  }
+  if (!window.supabase || !p.dbId) {
+    alert(currentLang === 'ro' ? 'Baza de date nu este disponibila.' : 'Database is not available.');
+    return;
+  }
+  var nextPrivate = !p.priv;
+  window.supabase
+    .from('photos')
+    .update({ is_private: nextPrivate })
+    .eq('id', p.dbId)
+    .then(function(res){
+      if (res && res.error) {
+        alert((currentLang === 'ro' ? 'Nu am putut actualiza vizibilitatea: ' : 'Could not update visibility: ') + res.error.message);
+        return;
+      }
+      p.priv = nextPrivate;
+      applyFilters();
+      buildRecent();
+      if (document.getElementById('lb-overlay').classList.contains('open') && currentLbIdx === id) openLb(id);
+      alert(nextPrivate
+        ? (currentLang === 'ro' ? 'Fotografia este acum privata.' : 'Photo is now private.')
+        : (currentLang === 'ro' ? 'Fotografia este acum publica.' : 'Photo is now public.'));
+    });
+}
+
 function openUpload() { document.getElementById('um-overlay').classList.add('open'); document.body.style.overflow = 'hidden'; }
 function closeUpload(e) { if (e && e.target !== document.getElementById('um-overlay')) return; closeUploadBtn(); }
 function closeUploadBtn() {
@@ -1169,6 +1232,21 @@ function resolveCurrentFamilyId(userId) {
       return null;
     })
     .catch(function() { return null; });
+}
+
+function resolveOwnedFamilyIds(userId) {
+  if (!userId || !window.supabase || typeof window.supabase.from !== 'function') return Promise.resolve([]);
+  return window.supabase
+    .from('families')
+    .select('id')
+    .or('created_by.eq.' + userId + ',owner_id.eq.' + userId)
+    .then(function(res) {
+      if (res && !res.error && Array.isArray(res.data)) {
+        return res.data.map(function(row){ return String(row.id); });
+      }
+      return [];
+    })
+    .catch(function() { return []; });
 }
 
 function savePhoto() {
@@ -1318,34 +1396,45 @@ applyPageLang(window.CalnicUtils ? window.CalnicUtils.lang() : currentLang);
 /* ── Load real photos from Supabase on ready ── */
 function loadPhotosFromSupabase() {
   if (!hasLiveSupabase()) return;
-  supabase.from('photos')
-    .select('*')
-    .eq('is_private', false)
-    .order('uploaded_at', { ascending: false })
-    .then(function(res) {
-      if (res.error || !res.data || !res.data.length) return;
-      photos = res.data.map(function(r, i) {
-        var urlRes = window.supabase.storage.from('photos').getPublicUrl(r.path);
-        var imgUrl = urlRes && urlRes.data ? urlRes.data.publicUrl : null;
-        return {
-          id: i, dbId: r.id,
-          titleRo: r.title_ro || r.caption_ro || ('Fotografie ' + (i + 1)),
-          titleEn: r.title_en || r.caption_en || ('Photo ' + (i + 1)),
-          cat: r.category || 'vechi',
-          year: r.year || 0,
-          byRo: '', byEn: '',
-          captionRo: r.caption_ro || '',
-          captionEn: r.caption_en || '',
-          dedicatieRo: r.dedicatie_ro || '',
-          dedicatieEn: r.dedicatie_en || '',
-          priv: r.is_private || false,
-          addedOrder: res.data.length - i,
-          featured: i === 0,
-          imgUrl: imgUrl
-        };
-      });
-      applyPageLang(currentLang);
+  window.supabase.auth.getUser().then(function(userRes) {
+    galleryCurrentUserId = userRes && userRes.data && userRes.data.user ? userRes.data.user.id : null;
+    return resolveOwnedFamilyIds(galleryCurrentUserId);
+  }).then(function(ownedFamilyIds) {
+    galleryOwnedFamilyIds = ownedFamilyIds || [];
+    return supabase.from('photos')
+      .select('*')
+      .order('uploaded_at', { ascending: false });
+  }).then(function(res) {
+    if (res.error || !res.data) return;
+    var visibleRows = res.data.filter(function(r) {
+      return !r.is_private || canManagePhotoRecord(r);
     });
+    photos = visibleRows.map(function(r, i) {
+      var imgUrl = null;
+      if (r.path) {
+        var urlRes = window.supabase.storage.from('photos').getPublicUrl(r.path);
+        imgUrl = urlRes && urlRes.data ? urlRes.data.publicUrl : null;
+      }
+      return {
+        id: i, dbId: r.id,
+        titleRo: r.title_ro || r.caption_ro || ('Fotografie ' + (i + 1)),
+        titleEn: r.title_en || r.caption_en || ('Photo ' + (i + 1)),
+        cat: r.category || 'vechi',
+        year: r.year || 0,
+        byRo: '', byEn: '',
+        captionRo: r.caption_ro || '',
+        captionEn: r.caption_en || '',
+        dedicatieRo: r.dedicatie_ro || '',
+        dedicatieEn: r.dedicatie_en || '',
+        priv: r.is_private || false,
+        canManage: canManagePhotoRecord(r),
+        addedOrder: visibleRows.length - i,
+        featured: i === 0,
+        imgUrl: imgUrl
+      };
+    });
+    applyPageLang(currentLang);
+  });
 }
 if (window.supabase) { loadPhotosFromSupabase(); } else { document.addEventListener('supabase:ready', loadPhotosFromSupabase); }
 
