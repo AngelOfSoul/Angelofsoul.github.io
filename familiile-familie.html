@@ -884,6 +884,7 @@ function mapTimelineRow(t) {
 async function reloadUnlockedFamilyData(enteredPin) {
   if (!window.supabase || !familyId) return;
   var loadedFromRpc = false;
+  var rpcErrorText = '';
 
   if (enteredPin) {
     try {
@@ -898,8 +899,12 @@ async function reloadUnlockedFamilyData(enteredPin) {
         MEMBERS = members.map(mapMemberRow);
         TIMELINE = timeline.map(mapTimelineRow);
         loadedFromRpc = true;
+      } else if (bundleRes && bundleRes.error) {
+        rpcErrorText = String(bundleRes.error.message || '');
       }
-    } catch (_) {}
+    } catch (e) {
+      rpcErrorText = String((e && e.message) || '');
+    }
   }
 
   if (!loadedFromRpc) {
@@ -917,6 +922,22 @@ async function reloadUnlockedFamilyData(enteredPin) {
 
   renderMembers();
   renderTimeline();
+
+  if (privateUnlocked && !isOwner && FAM && Number(FAM.members || 0) > 0 && MEMBERS.length === 0) {
+    var msg = currentLang === 'ro'
+      ? 'PIN acceptat, dar datele private nu au putut fi incarcate din baza de date.'
+      : 'PIN accepted, but private data could not be loaded from database.';
+    if (pinUnlockUsedLocalFallback) {
+      msg += currentLang === 'ro'
+        ? ' PIN-ul a fost validat local, dar serverul nu are functia SQL necesara.'
+        : ' PIN was validated locally, but server is missing the required SQL function.';
+    }
+    msg += currentLang === 'ro'
+      ? ' Ruleaza SQL-ul pentru functia get_family_bundle_with_pin.'
+      : ' Run SQL for get_family_bundle_with_pin function.';
+    if (rpcErrorText) msg += ' (' + rpcErrorText + ')';
+    showDbErrorMsg(msg);
+  }
 }
 
 async function renderOwnerBadges() {
@@ -1102,14 +1123,19 @@ function showNoFamilyMsg() {
 }
 
 function showDbErrorMsg(text) {
-  var msg = document.createElement('div');
-  msg.style.cssText = 'padding:32px;text-align:center;color:var(--muted);font-style:italic;';
+  var msg = document.getElementById('familyDbMsg');
+  if (!msg) {
+    msg = document.createElement('div');
+    msg.id = 'familyDbMsg';
+    msg.style.cssText = 'padding:32px;text-align:center;color:var(--muted);font-style:italic;';
+    document.querySelector('.fam-hero') && document.querySelector('.fam-hero').after(msg);
+  }
   msg.textContent = text;
-  document.querySelector('.fam-hero') && document.querySelector('.fam-hero').after(msg);
 }
 
 var currentLang = localStorage.getItem('calnic-lang') || 'ro';
 var privateUnlocked = false;
+var pinUnlockUsedLocalFallback = false;
 
 var isOwner = false; // set after auth check
 var authStateResolved = false;
@@ -1337,6 +1363,7 @@ async function checkPin() {
   }
 
   var granted = false;
+  var grantedByRpc = false;
 
   /* Try Supabase RPC first */
   if (window.supabase && familyId) {
@@ -1347,6 +1374,7 @@ async function checkPin() {
       });
       if (!rpcRes.error) {
         granted = !!rpcRes.data;
+        grantedByRpc = !!rpcRes.data;
       } else {
         granted = false;
       }
@@ -1367,6 +1395,7 @@ async function checkPin() {
   }
 
   if (granted) {
+    pinUnlockUsedLocalFallback = !grantedByRpc;
     privateUnlocked = true;
     if (gateInput) gateInput.value = '';
     if (sideInput) sideInput.value = '';
@@ -1376,6 +1405,7 @@ async function checkPin() {
     applyFamilyGateIfNeeded();
     await reloadUnlockedFamilyData(entered);
   } else {
+    pinUnlockUsedLocalFallback = false;
     errEls.forEach(function(el){ el.style.display = 'block'; });
   }
 }
