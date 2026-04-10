@@ -65,7 +65,16 @@
     var w = shell.clientWidth || 900;
     var h = 760;
     svg.attr('viewBox', '0 0 ' + w + ' ' + h).attr('width', w).attr('height', h);
-    if (simulation) simulation.force('center', d3.forceCenter(w / 2, h / 2)).alpha(0.3).restart();
+    if (simulation) {
+      simulation.force('center', d3.forceCenter(w / 2, h / 2));
+      if (graphData && graphData.graph && graphData.graph.nodes) {
+        applyDeterministicTargets(graphData.graph.nodes, graphData.graph.links || [], w, h);
+        simulation
+          .force('x', d3.forceX(function (d) { return isFinite(d._tx) ? d._tx : w / 2; }).strength(0.14))
+          .force('y', d3.forceY(function (d) { return isFinite(d._ty) ? d._ty : h / 2; }).strength(0.14));
+      }
+      simulation.alpha(0.3).restart();
+    }
   }
 
   function status(text) { if (statusEl) statusEl.textContent = text; }
@@ -347,17 +356,119 @@
     modal.addEventListener('mousedown', onMouseDown);
   }
 
+  function applyDeterministicTargets(nodes, links, w, h) {
+    if (!Array.isArray(nodes) || !nodes.length) return;
+    var byId = {};
+    nodes.forEach(function (n) { byId[String(n.id)] = n; });
+
+    var adj = {};
+    nodes.forEach(function (n) { adj[String(n.id)] = []; });
+    (links || []).forEach(function (l) {
+      var a = String(l && l.source && l.source.id != null ? l.source.id : (l ? l.source : ''));
+      var b = String(l && l.target && l.target.id != null ? l.target.id : (l ? l.target : ''));
+      if (!a || !b || !adj[a] || !adj[b]) return;
+      adj[a].push(b);
+      adj[b].push(a);
+    });
+
+    var seen = {};
+    var comps = [];
+    nodes.forEach(function (n) {
+      var id = String(n.id);
+      if (seen[id]) return;
+      var q = [id];
+      var comp = [];
+      seen[id] = true;
+      while (q.length) {
+        var cur = q.shift();
+        comp.push(cur);
+        (adj[cur] || []).forEach(function (nx) {
+          if (seen[nx]) return;
+          seen[nx] = true;
+          q.push(nx);
+        });
+      }
+      comps.push(comp);
+    });
+
+    comps.sort(function (a, b) {
+      if (b.length !== a.length) return b.length - a.length;
+      var la = ((byId[a[0]] && byId[a[0]].label) || '').toLowerCase();
+      var lb = ((byId[b[0]] && byId[b[0]].label) || '').toLowerCase();
+      return la.localeCompare(lb, 'ro');
+    });
+
+    var k = comps.length;
+    var cols = Math.max(1, Math.ceil(Math.sqrt(k)));
+    var rows = Math.max(1, Math.ceil(k / cols));
+    var stepX = Math.max(240, Math.min(360, (w - 120) / cols));
+    var stepY = Math.max(180, Math.min(280, (h - 120) / rows));
+    var startX = w / 2 - ((cols - 1) * stepX) / 2;
+    var startY = h / 2 - ((rows - 1) * stepY) / 2;
+
+    comps.forEach(function (comp, idx) {
+      var cx = startX + (idx % cols) * stepX;
+      var cy = startY + Math.floor(idx / cols) * stepY;
+      var n = comp.length;
+
+      if (n === 1) {
+        var one = byId[comp[0]];
+        if (one) { one._tx = cx; one._ty = cy; }
+        return;
+      }
+      if (n === 2) {
+        var a = byId[comp[0]], b = byId[comp[1]];
+        if (a) { a._tx = cx - 90; a._ty = cy; }
+        if (b) { b._tx = cx + 90; b._ty = cy; }
+        return;
+      }
+
+      if (n <= 6) {
+        var r = Math.min(120, 56 + n * 10);
+        comp.forEach(function (id, i) {
+          var node = byId[id];
+          if (!node) return;
+          var ang = (Math.PI * 2 * i) / n - Math.PI / 2;
+          node._tx = cx + Math.cos(ang) * r;
+          node._ty = cy + Math.sin(ang) * r;
+        });
+        return;
+      }
+
+      var cCols = Math.ceil(Math.sqrt(n));
+      var cRows = Math.ceil(n / cCols);
+      var cStepX = 125, cStepY = 88;
+      var cStartX = cx - ((cCols - 1) * cStepX) / 2;
+      var cStartY = cy - ((cRows - 1) * cStepY) / 2;
+      comp.forEach(function (id, i) {
+        var node = byId[id];
+        if (!node) return;
+        var gx = i % cCols, gy = Math.floor(i / cCols);
+        node._tx = cStartX + gx * cStepX;
+        node._ty = cStartY + gy * cStepY;
+      });
+    });
+
+    nodes.forEach(function (n) {
+      if (isFinite(n._tx) && isFinite(n._ty) && (!isFinite(n.x) || !isFinite(n.y))) {
+        n.x = n._tx;
+        n.y = n._ty;
+      }
+    });
+  }
+
   function renderGraph() {
     var nodes = graphData.graph.nodes;
     var links = graphData.graph.links;
     g.selectAll('*').remove();
+    applyDeterministicTargets(nodes, links, shell.clientWidth || 900, 760);
 
     simulation = d3.forceSimulation(nodes)
       .force('link', d3.forceLink(links).id(function (d) { return d.id; }).distance(130).strength(0.7))
       .force('charge', d3.forceManyBody().strength(-240))
       .force('collide', d3.forceCollide().radius(52))
-      .force('x', d3.forceX((shell.clientWidth || 900) / 2).strength(0.06))
-      .force('y', d3.forceY(760 / 2).strength(0.06))
+      .force('x', d3.forceX(function (d) { return isFinite(d._tx) ? d._tx : ((shell.clientWidth || 900) / 2); }).strength(0.14))
+      .force('y', d3.forceY(function (d) { return isFinite(d._ty) ? d._ty : (760 / 2); }).strength(0.14))
       .force('center', d3.forceCenter((shell.clientWidth || 900) / 2, 760 / 2));
 
     var link = g.append('g').selectAll('line')
