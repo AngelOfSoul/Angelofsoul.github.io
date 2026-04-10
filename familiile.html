@@ -203,6 +203,54 @@
 .vc-dialog-btn.vc-danger:hover { background:#7a2a2a; color:#f5dddd; }
 /* ── end Vatra satului ── */
 
+/* ── Family PIN gate popup ── */
+.fam-pin-overlay {
+position:fixed; inset:0; background:rgba(5,5,5,.8);
+display:none; align-items:center; justify-content:center; z-index:6500; padding:16px;
+}
+.fam-pin-overlay.open { display:flex; }
+.fam-pin-card {
+width:min(290px,100%); background:#0f0d07; border:1px solid #6a5010;
+box-shadow:0 10px 34px rgba(0,0,0,.62); padding:14px 14px 12px; position:relative;
+}
+.fam-pin-close {
+position:absolute; right:8px; top:6px; border:1px solid #3a2a08; background:#121212; color:#7a5820;
+font-size:11px; line-height:1; padding:3px 5px; cursor:pointer;
+}
+.fam-pin-close:hover { border-color:#8a6818; color:#c8a030; }
+.fam-pin-icon { text-align:center; font-size:36px; color:#c8a030; margin-top:2px; }
+.fam-pin-title {
+font-family:'Playfair Display',serif; color:#d4b060; text-align:center; font-size:33px;
+margin:8px 0 6px; letter-spacing:.4px;
+}
+.fam-pin-sub {
+font-family:'EB Garamond',serif; color:#c0a070; text-align:center; font-size:13px; line-height:1.7;
+font-style:italic; margin:0 4px 10px;
+}
+.fam-pin-input-wrap {
+display:flex; align-items:stretch; border:1px solid #3a2a08; background:#101010; margin-top:4px;
+}
+.fam-pin-input {
+flex:1; background:transparent; border:none; outline:none; color:var(--text); text-align:center;
+font-family:'Cinzel',serif; letter-spacing:8px; font-size:16px; padding:10px 8px;
+}
+.fam-pin-toggle {
+width:42px; border-left:1px solid #3a2a08; background:#151515; color:#b8b0a0; cursor:pointer;
+}
+.fam-pin-toggle:hover { color:#d4c8ac; }
+.fam-pin-submit {
+width:100%; margin-top:8px; background:#16120a; border:1px solid #9a7830; color:#e8d8b0;
+font-family:'Cinzel',serif; letter-spacing:1.8px; font-size:18px; padding:9px 10px; cursor:pointer;
+}
+.fam-pin-submit:hover { background:#1f170b; }
+.fam-pin-err {
+display:none; margin-top:9px; color:#cf8080; text-align:center; font-size:12px; font-family:'EB Garamond',serif;
+}
+.fam-pin-note {
+margin-top:10px; padding-top:9px; border-top:1px solid #2a2010; text-align:center; color:#6e6046;
+font-size:11px; font-style:italic; line-height:1.55;
+}
+
 .main-wrap {
 max-width:1080px !important; margin:0 auto; padding:32px 20px !important; display:grid; grid-template-columns:1fr 272px; gap:36px; align-items:start;
 }
@@ -652,6 +700,22 @@ to{transform:rotate(360deg);}
 <a class="scroll-top" id="scrollTop" role="button" aria-label="Inapoi sus" title="Sus">&#8679;</a>
 <a class="scroll-bottom" id="scrollBottom" role="button" aria-label="Jos" title="Jos">&#8681;</a>
 
+<div class="fam-pin-overlay" id="famPinOverlay" aria-hidden="true">
+  <div class="fam-pin-card" role="dialog" aria-modal="true" aria-labelledby="famPinTitle">
+    <button class="fam-pin-close" id="famPinClose" aria-label="Inchide">✕</button>
+    <div class="fam-pin-icon">&#128274;</div>
+    <div class="fam-pin-title" id="famPinTitle">Acces privat</div>
+    <div class="fam-pin-sub" id="famPinSub">Membrii familiei pot accesa fotografii si date private cu PIN-ul familiei.</div>
+    <div class="fam-pin-input-wrap">
+      <input class="fam-pin-input" id="famPinInput" type="password" maxlength="8" inputmode="numeric" placeholder="PIN"/>
+      <button class="fam-pin-toggle" id="famPinToggle" type="button" aria-label="Arata PIN">&#128065;</button>
+    </div>
+    <button class="fam-pin-submit" id="famPinSubmit" type="button">Acceseaza</button>
+    <div class="fam-pin-err" id="famPinErr">PIN incorect. Incearca din nou.</div>
+    <div class="fam-pin-note">PIN-ul este cunoscut doar de membrii familiei.<br>Administratorul site-ului nu are acces la continutul privat.</div>
+  </div>
+</div>
+
 <footer>
   <div style="max-width:960px;margin:0 auto;display:flex;flex-wrap:wrap;align-items:center;justify-content:center;gap:6px 16px;">
     <span><span class="g">Calnic</span> &nbsp;&#183;&nbsp; Alba &nbsp;&#183;&nbsp; Romania &nbsp;&#183;&nbsp; <span id="yr"></span></span>
@@ -770,6 +834,8 @@ var families = [];
 var supabaseLoaded = false;
 var familiesCurrentUserId = null;
 var familyBadgeMap = {};
+var famPinTargetId = null;
+var famPinTargetHref = null;
 
 /* ── SUPABASE LOAD ──
    Runs after supabase.js fires the 'supabase:ready' event.
@@ -784,6 +850,7 @@ async function loadFamiliiFromSupabase() {
       return {
         id:              r.id,
         created_by:      r.created_by || null,
+        pinHash:         r.pin_hash || null,
         name:            safeName,
         village:         r.village || 'Calnic',
         since:           r.since,
@@ -836,9 +903,9 @@ async function loadFamiliiFromSupabase() {
 
   function fetchFamiliesWithFallback() {
     var variants = [
-      'id, created_by, name, village, since, desc_ro, desc_en',
-      'id, created_by, name, village, since, members_count, generations_count, photos_count, desc_ro, desc_en',
-      'id, created_by, name, village, since, members_count, generations_count, photos_count, show_members, show_generations, show_photos, show_since, has_public_photos, has_private_photos, desc_ro, desc_en',
+      'id, created_by, name, village, since, pin_hash, desc_ro, desc_en',
+      'id, created_by, name, village, since, pin_hash, members_count, generations_count, photos_count, desc_ro, desc_en',
+      'id, created_by, name, village, since, pin_hash, members_count, generations_count, photos_count, show_members, show_generations, show_photos, show_since, has_public_photos, has_private_photos, desc_ro, desc_en',
       'id, created_by, name, village, since',
       'id, name, village, since'
     ];
@@ -954,7 +1021,7 @@ function buildCard(f) {
   var cardHref = f.id ? 'familiile-familie.html?family=' + f.id : '#';
   var familyName = f.name || (lang === 'ro' ? 'Nume indisponibil' : 'Name unavailable');
   var familyInitial = familyName[0] || '?';
-  return '<a class="fc" href="' + cardHref + '">'
+  return '<a class="fc" href="' + cardHref + '" onclick="return openFamilyWithPin(event,\'' + escH(f.id || '') + '\',\'' + escH(cardHref) + '\')">'
     + MOTIF_TOP
     + '<div class="head">'
     +   '<div class="av">' + escH(familyInitial) + '</div>'
@@ -1031,6 +1098,70 @@ function filterFamilies() {
   }
 }
 
+function famPinEls() {
+  return {
+    overlay: document.getElementById('famPinOverlay'),
+    input: document.getElementById('famPinInput'),
+    err: document.getElementById('famPinErr'),
+    submit: document.getElementById('famPinSubmit'),
+    close: document.getElementById('famPinClose'),
+    toggle: document.getElementById('famPinToggle')
+  };
+}
+
+function closeFamilyPinModal() {
+  var el = famPinEls();
+  if (!el.overlay) return;
+  el.overlay.classList.remove('open');
+  el.overlay.setAttribute('aria-hidden', 'true');
+  if (el.err) el.err.style.display = 'none';
+  if (el.input) { el.input.value = ''; el.input.type = 'password'; }
+  famPinTargetId = null;
+  famPinTargetHref = null;
+}
+
+function openFamilyPinModal(familyId, href) {
+  var el = famPinEls();
+  famPinTargetId = familyId;
+  famPinTargetHref = href;
+  if (!el.overlay) return;
+  el.overlay.classList.add('open');
+  el.overlay.setAttribute('aria-hidden', 'false');
+  if (el.err) el.err.style.display = 'none';
+  if (el.input) {
+    el.input.value = '';
+    el.input.type = 'password';
+    setTimeout(function () { el.input.focus(); }, 20);
+  }
+}
+
+async function verifyFamilyPin(familyId, pin) {
+  if (!familyId || !pin || !window.supabase) return false;
+  try {
+    var rpc = await window.supabase.rpc('check_family_pin', {
+      p_family_id: familyId,
+      p_pin: pin
+    });
+    if (rpc && !rpc.error) return !!rpc.data;
+  } catch (_e) {}
+
+  var fam = (families || []).find(function (f) { return String(f.id) === String(familyId); });
+  if (fam && fam.pinHash) {
+    try { return fam.pinHash === btoa(pin); } catch (_e2) {}
+  }
+  return false;
+}
+
+window.openFamilyWithPin = function(event, familyId, href) {
+  if (!familyId || !href) return true;
+  var fam = (families || []).find(function (f) { return String(f.id) === String(familyId); });
+  var isOwner = !!(fam && familiesCurrentUserId && fam.created_by && String(fam.created_by) === String(familiesCurrentUserId));
+  if (isOwner) return true;
+  if (event && event.preventDefault) event.preventDefault();
+  openFamilyPinModal(familyId, href);
+  return false;
+};
+
 // ── LANGUAGE ──
 function applyPageLang(lang) {
   currentLang = lang;
@@ -1050,6 +1181,52 @@ function applyPageLang(lang) {
 // ── INIT ──
 document.addEventListener('calnic:langchange', function(e) { applyPageLang(e.detail.lang); });
 applyPageLang(window.CalnicUtils ? window.CalnicUtils.lang() : currentLang);
+
+(function initFamilyPinGate() {
+  var el = famPinEls();
+  if (!el.overlay) return;
+
+  function showErr(msg) {
+    if (!el.err) return;
+    el.err.textContent = msg || 'PIN incorect. Incearca din nou.';
+    el.err.style.display = 'block';
+  }
+
+  async function submitPin() {
+    if (!famPinTargetId || !famPinTargetHref) return;
+    var pin = String((el.input && el.input.value) || '').trim();
+    if (!/^[0-9]{4,8}$/.test(pin)) {
+      showErr(currentLang === 'en' ? 'PIN must have 4-8 digits.' : 'PIN-ul trebuie sa aiba 4-8 cifre.');
+      return;
+    }
+    if (el.submit) el.submit.disabled = true;
+    var ok = await verifyFamilyPin(famPinTargetId, pin);
+    if (el.submit) el.submit.disabled = false;
+    if (!ok) {
+      showErr(currentLang === 'en' ? 'Incorrect PIN. Try again.' : 'PIN incorect. Incearca din nou.');
+      return;
+    }
+    var target = famPinTargetHref;
+    closeFamilyPinModal();
+    window.location.href = target;
+  }
+
+  if (el.close) el.close.addEventListener('click', closeFamilyPinModal);
+  if (el.overlay) el.overlay.addEventListener('click', function(e) {
+    if (e.target === el.overlay) closeFamilyPinModal();
+  });
+  if (el.toggle) el.toggle.addEventListener('click', function() {
+    if (!el.input) return;
+    el.input.type = (el.input.type === 'password') ? 'text' : 'password';
+  });
+  if (el.submit) el.submit.addEventListener('click', submitPin);
+  if (el.input) el.input.addEventListener('keydown', function(e) {
+    if (e.key === 'Enter') { e.preventDefault(); submitPin(); }
+  });
+  document.addEventListener('keydown', function(e) {
+    if (e.key === 'Escape' && el.overlay.classList.contains('open')) closeFamilyPinModal();
+  });
+})();
 
 /* ── NAV SESSION CHECK ── */
 function checkFamiliiNavSession() {
