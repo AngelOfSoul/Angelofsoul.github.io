@@ -888,6 +888,39 @@ function closeForgotModal() {
   document.getElementById('forgotModal').classList.remove('open');
 }
 
+function slugifyFamilyName(name) {
+  return String(name || '')
+    .normalize('NFD')
+    .replace(/[\u0300-\u036f]/g, '')
+    .toLowerCase()
+    .replace(/[^a-z0-9]+/g, '-')
+    .replace(/^-+|-+$/g, '')
+    .replace(/-{2,}/g, '-');
+}
+
+async function buildUniqueFamilySlug(name) {
+  var base = slugifyFamilyName(name) || ('familie-' + Date.now());
+  if (!window.supabase) return base;
+
+  try {
+    var res = await window.supabase
+      .from('families')
+      .select('slug')
+      .ilike('slug', base + '%')
+      .limit(200);
+    if (res && res.error) return base;
+    var rows = (res && res.data) || [];
+    var used = {};
+    rows.forEach(function(r) { if (r && r.slug) used[String(r.slug).toLowerCase()] = true; });
+    if (!used[base]) return base;
+    var idx = 2;
+    while (used[base + '-' + idx]) idx++;
+    return base + '-' + idx;
+  } catch (_e) {
+    return base + '-' + Math.floor(Math.random() * 10000);
+  }
+}
+
 async function doSendForgotEmail() {
   if (!window.supabase) {
     alert(currentLang === 'ro' ? 'Supabase nu este configurat.' : 'Supabase is not configured.');
@@ -976,7 +1009,8 @@ async function doFamilyProfile(e) {
   }
   setLoading('step2Btn', true);
   try {
-    var base = { name: name, village: 'Calnic', pin_hash: btoa(pin) };
+    var slug = await buildUniqueFamilySlug(name);
+    var base = { name: name, slug: slug, village: 'Calnic', pin_hash: btoa(pin) };
     if (since) base.since = since;
     if (descRo) base.desc_ro = descRo;
     if (descEn) base.desc_en = descEn;
