@@ -1289,7 +1289,7 @@ if (window.supabase) { checkFamiliiNavSession(); } else { document.addEventListe
         } else {
           /* Încearcă să ia numele familiei din tabelul families */
           var res = await supabase.from('families').select('name').eq('created_by', user.id).maybeSingle();
-          var name = (res && res.data && res.data.name) ? res.data.name : (user.email || 'Membru');
+          var name = (res && res.data && res.data.name) ? res.data.name : 'Membru';
           vcCurrentUser = { name: name, type: 'member', userId: user.id };
         }
       }

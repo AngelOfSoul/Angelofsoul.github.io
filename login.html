@@ -465,7 +465,7 @@ to{transform:rotate(360deg);}
   <!-- Already-logged-in state (shown if session exists) -->
   <div id="loggedInBox" style="display:none;" class="logged-in-box">
     <div class="li-title" data-ro="&#128100; Esti autentificat" data-en="&#128100; You are signed in">&#128100; Esti autentificat</div>
-    <div class="li-sub" id="loggedInEmail"></div>
+    <div class="li-sub" id="loggedInEmail" style="display:none;"></div>
     <div class="li-actions">
       <a class="cta-btn" href="index.html" id="profileLink" data-ro="Profilul familiei mele" data-en="My family profile">Profilul familiei mele</a>
       <button class="cta-btn-sec" id="logoutBtn" data-ro="Deconectare" data-en="Sign out">Deconectare</button>
@@ -790,7 +790,7 @@ function showLoggedIn(user) {
   document.getElementById('authBox').style.display = 'none';
   document.getElementById('loggedInBox').style.display = '';
   var emailEl = document.getElementById('loggedInEmail');
-  if (emailEl) emailEl.textContent = user.email || '';
+  if (emailEl) emailEl.textContent = '';
   var profileLink = document.getElementById('profileLink');
   if (profileLink) profileLink.href = 'index.html';
 }
