@@ -1149,52 +1149,75 @@ document.addEventListener('DOMContentLoaded',function(){
 
 // ── RELATION INFERENCE ──────────────────────────────────
 var _inferProposals=[];
+function relNorm(raw){
+  var r=String(raw||'').trim().toLowerCase();
+  r=r
+    .replace(/[ăâ]/g,'a')
+    .replace(/[î]/g,'i')
+    .replace(/[șş]/g,'s')
+    .replace(/[țţ]/g,'t');
+  var map={
+    father:'tata',mother:'mama',
+    son:'fiu',daughter:'fiica',child:'child',copil:'child',
+    husband:'sot',wife:'sotie',spouse:'spouse',
+    brother:'frate',sister:'sora',sibling:'sibling',
+    grandparent:'bunic',grandfather:'bunic',grandmother:'bunica',
+    stepfather:'step',stepmother:'step',
+    'adoptive parent':'adopted',adoptive_parent:'adopted'
+  };
+  return map[r]||r;
+}
 function _relHasBetween(idA,idB){return S.relations.some(function(r){return(r.from_member_id===idA&&r.to_member_id===idB)||(r.from_member_id===idB&&r.to_member_id===idA);});}
 function _parentChildExists(childId,parentId){
-  var PT=['tata','mama','step','adopted'],CT=['fiu','fiica'];
+  var PT=['tata','mama','step','adopted','parent'],CT=['fiu','fiica','child'];
   return S.relations.some(function(r){
-    return(r.from_member_id===childId&&r.to_member_id===parentId&&PT.indexOf(r.relation_type)!==-1)||
-           (r.from_member_id===parentId&&r.to_member_id===childId&&CT.indexOf(r.relation_type)!==-1);
+    var rt=relNorm(r.relation_type);
+    return(r.from_member_id===childId&&r.to_member_id===parentId&&PT.indexOf(rt)!==-1)||
+           (r.from_member_id===parentId&&r.to_member_id===childId&&CT.indexOf(rt)!==-1);
   });
 }
 function _getSpousesOf(memberId){
   var res=[];
   S.relations.forEach(function(r){
-    if(r.relation_type!=='sot'&&r.relation_type!=='sotie')return;
+    var rt=relNorm(r.relation_type);
+    if(rt!=='sot'&&rt!=='sotie'&&rt!=='spouse')return;
     var spId,pType;
-    if(r.from_member_id===memberId){spId=r.to_member_id;pType=r.relation_type==='sot'?'tata':'mama';}
-    else if(r.to_member_id===memberId){spId=r.from_member_id;pType=r.relation_type==='sot'?'mama':'tata';}
+    if(r.from_member_id===memberId){spId=r.to_member_id;pType=rt==='sot'?'tata':(rt==='sotie'?'mama':_guessParentType(spId));}
+    else if(r.to_member_id===memberId){spId=r.from_member_id;pType=rt==='sot'?'mama':(rt==='sotie'?'tata':_guessParentType(spId));}
     if(spId)res.push({memberId:spId,parentType:pType});
   });
   return res;
 }
 function _getParentsOf(memberId){
-  var PT=['tata','mama','step','adopted'],CT=['fiu','fiica'],res=[];
+  var PT=['tata','mama','step','adopted','parent'],CT=['fiu','fiica','child'],res=[];
   S.relations.forEach(function(r){
-    if(r.from_member_id===memberId&&PT.indexOf(r.relation_type)!==-1)res.push({memberId:r.to_member_id,relType:r.relation_type});
-    else if(r.to_member_id===memberId&&CT.indexOf(r.relation_type)!==-1)res.push({memberId:r.from_member_id,relType:null});
+    var rt=relNorm(r.relation_type);
+    if(r.from_member_id===memberId&&PT.indexOf(rt)!==-1)res.push({memberId:r.to_member_id,relType:rt});
+    else if(r.to_member_id===memberId&&CT.indexOf(rt)!==-1)res.push({memberId:r.from_member_id,relType:null});
   });
   return res;
 }
 function _getSiblingsOf(memberId){
   var res=[];
   S.relations.forEach(function(r){
-    if(r.relation_type!=='frate'&&r.relation_type!=='sora')return;
+    var rt=relNorm(r.relation_type);
+    if(rt!=='frate'&&rt!=='sora'&&rt!=='sibling')return;
     if(r.from_member_id===memberId)res.push(r.to_member_id);
     else if(r.to_member_id===memberId)res.push(r.from_member_id);
   });
   return res;
 }
 function _getChildrenOf(memberId){
-  var PT=['tata','mama','step','adopted'],CT=['fiu','fiica'],res=[];
+  var PT=['tata','mama','step','adopted','parent'],CT=['fiu','fiica','child'],res=[];
   S.relations.forEach(function(r){
+    var rt=relNorm(r.relation_type);
     // child -> parent links (tata/mama/step/adopted OR fiu/fiica) => child is "from"
-    if(r.to_member_id===memberId&&(PT.indexOf(r.relation_type)!==-1||CT.indexOf(r.relation_type)!==-1)){
-      res.push({memberId:r.from_member_id,relType:r.relation_type});
+    if(r.to_member_id===memberId&&(PT.indexOf(rt)!==-1||CT.indexOf(rt)!==-1)){
+      res.push({memberId:r.from_member_id,relType:rt});
     }
     // parent -> child links (fiu/fiica) => child is "to"
-    else if(r.from_member_id===memberId&&CT.indexOf(r.relation_type)!==-1){
-      res.push({memberId:r.to_member_id,relType:r.relation_type});
+    else if(r.from_member_id===memberId&&CT.indexOf(rt)!==-1){
+      res.push({memberId:r.to_member_id,relType:rt});
     }
   });
   return res;
@@ -1203,8 +1226,9 @@ function _getChildrenOf(memberId){
 function _guessParentType(parentId){
   var isFemale=false;
   S.relations.forEach(function(r){
-    if(r.from_member_id===parentId&&(r.relation_type==='sotie'||r.relation_type==='mama'))isFemale=true;
-    if(r.to_member_id===parentId&&r.relation_type==='sot')isFemale=true;
+    var rt=relNorm(r.relation_type);
+    if(r.from_member_id===parentId&&(rt==='sotie'||rt==='mama'))isFemale=true;
+    if(r.to_member_id===parentId&&rt==='sot')isFemale=true;
   });
   return isFemale?'mama':'tata';
 }
@@ -1219,6 +1243,7 @@ function _dedupeProposals(list){
   return out;
 }
 function inferRelations(fromId,toId,relType){
+  relType=relNorm(relType);
   var proposals=[];
 
   // ── SPOUSE inference: suggest each other's existing children ─
@@ -1659,7 +1684,7 @@ function computeLayout(){
   S.members.forEach(function(m){childrenOf[m.id]=[];parentsOf[m.id]=[];});
 
   S.relations.forEach(function(r){
-    var rt=r.relation_type, a=r.from_member_id, b=r.to_member_id;
+    var rt=relNorm(r.relation_type), a=r.from_member_id, b=r.to_member_id;
     if(LAYOUT_SPO[rt]){spousePairs[a]=b;spousePairs[b]=a;return;}
     if(LAYOUT_PAR[rt]){
       // from=child, to=parent
@@ -1707,7 +1732,8 @@ function computeLayout(){
     });
     // Align siblings (frate/sora) to the same generation as the highest-gen sibling
     S.relations.forEach(function(r){
-      if(r.relation_type!=='frate'&&r.relation_type!=='sora')return;
+      var rt=relNorm(r.relation_type);
+      if(rt!=='frate'&&rt!=='sora'&&rt!=='sibling')return;
       var ga=genOf[r.from_member_id], gb=genOf[r.to_member_id];
       if(ga===null&&gb===null)return;
       var sg=Math.max(ga!=null?ga:0, gb!=null?gb:0);
@@ -1794,6 +1820,7 @@ function computeLayout(){
 
 // ── DIRECTIONAL RELATION LABEL ────────────────────────────────
 function relLabel(relType, fromId, toId){
+  relType=relNorm(relType);
   var meta=REL_META[relType];
   var toM=S.members.find(function(m){return m.id===toId;});
   if(!toM)return relType;
@@ -1829,7 +1856,7 @@ function drawConnectors(svg,layout){
   S.members.forEach(function(m){childrenOf2[m.id]=[];});
 
   S.relations.forEach(function(r){
-    var rt=r.relation_type, a=r.from_member_id, b=r.to_member_id;
+    var rt=relNorm(r.relation_type), a=r.from_member_id, b=r.to_member_id;
     if(LAYOUT_SPO[rt]){spousePairs2[a]=b;spousePairs2[b]=a;return;}
     var par,chi,bio=r.is_biological!==false;
     if(LAYOUT_PAR[rt]){par=b;chi=a;bio=REL_META[rt]?REL_META[rt].bio!==false:bio;}
@@ -1844,8 +1871,9 @@ function drawConnectors(svg,layout){
   // Spouse lines
   var drawnSpouse={};
   S.relations.forEach(function(r){
-    var meta=REL_META[r.relation_type];
-    var isSpouse=meta?meta.isSpouse:(r.relation_type==='spouse');
+    var rt=relNorm(r.relation_type);
+    var meta=REL_META[rt];
+    var isSpouse=meta?meta.isSpouse:(rt==='spouse');
     if(!isSpouse)return;
     var k=[r.from_member_id,r.to_member_id].sort().join('|');
     if(drawnSpouse[k])return;drawnSpouse[k]=true;
@@ -1898,7 +1926,8 @@ function drawConnectors(svg,layout){
 
   // Extended family dashed green lines
   S.relations.forEach(function(r){
-    var meta=REL_META[r.relation_type];if(!meta||!meta.isExt)return;
+    var rt=relNorm(r.relation_type);
+    var meta=REL_META[rt];if(!meta||!meta.isExt)return;
     var pa=layout[r.from_member_id],pb=layout[r.to_member_id];if(!pa||!pb)return;
     addLine(svg,pa.x+CARD_W/2,pa.y+avMid(r.from_member_id),pb.x+CARD_W/2,pb.y+avMid(r.to_member_id),'#70a870',1.5,'4 3');
   });
@@ -1907,7 +1936,8 @@ function drawConnectors(svg,layout){
   // (once a parent is linked, the structural parent→child lines make it obvious)
   var drawnSib={};
   S.relations.forEach(function(r){
-    if(r.relation_type!=='frate'&&r.relation_type!=='sora')return;
+    var rt=relNorm(r.relation_type);
+    if(rt!=='frate'&&rt!=='sora'&&rt!=='sibling')return;
     var k=[r.from_member_id,r.to_member_id].sort().join('|');
     if(drawnSib[k])return; drawnSib[k]=true;
     var pa=layout[r.from_member_id],pb=layout[r.to_member_id];if(!pa||!pb)return;
