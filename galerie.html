@@ -1155,6 +1155,20 @@ function hasLiveSupabase() {
   );
 }
 
+function resolveCurrentFamilyId(userId) {
+  if (!userId || !window.supabase || typeof window.supabase.from !== 'function') return Promise.resolve(null);
+  return window.supabase
+    .from('families')
+    .select('id')
+    .or('created_by.eq.' + userId + ',owner_id.eq.' + userId)
+    .limit(1)
+    .then(function(res) {
+      if (res && !res.error && res.data && res.data[0] && res.data[0].id) return res.data[0].id;
+      return null;
+    })
+    .catch(function() { return null; });
+}
+
 function savePhoto() {
   var title = document.getElementById('um-titlu').value.trim();
   if (!title) {
@@ -1187,31 +1201,34 @@ function savePhoto() {
   compressImage(fileInput.files[0], function(blob) {
     window.supabase.auth.getUser().then(function(userRes) {
       var userId = userRes && userRes.data && userRes.data.user ? userRes.data.user.id : null;
-      var path = (userId || 'public') + '/' + Date.now() + '.jpg';
-      window.supabase.storage.from('photos').upload(path, blob, { contentType: 'image/jpeg', upsert: false })
-        .then(function(storRes) {
-          if (storRes.error) {
-            saveBtn.disabled = false;
-            saveBtn.textContent = currentLang === 'ro' ? 'Salveaza fotografia' : 'Save photo';
-            showUmMsg((currentLang === 'ro' ? 'Eroare la incarcare: ' : 'Upload error: ') + storRes.error.message, 'err');
-            return;
-          }
-          var meta = {
-            path: path, title_ro: title, title_en: title,
-            caption_ro: caption, caption_en: caption,
-            dedicatie_ro: ded, dedicatie_en: ded,
-            year: year, category: cat, is_private: isPrivate
-          };
-          if (userId) meta.uploader_id = userId;
-          supabase.from('photos').insert(meta).then(function(insRes) {
-            saveBtn.disabled = false;
-            saveBtn.textContent = currentLang === 'ro' ? 'Salveaza fotografia' : 'Save photo';
-            if (insRes.error) {
-              showUmMsg((currentLang === 'ro' ? 'Eroare la salvare: ' : 'Save error: ') + insRes.error.message, 'err');
+      resolveCurrentFamilyId(userId).then(function(familyId) {
+        var path = (userId || 'public') + '/' + Date.now() + '.jpg';
+        window.supabase.storage.from('photos').upload(path, blob, { contentType: 'image/jpeg', upsert: false })
+          .then(function(storRes) {
+            if (storRes.error) {
+              saveBtn.disabled = false;
+              saveBtn.textContent = currentLang === 'ro' ? 'Salveaza fotografia' : 'Save photo';
+              showUmMsg((currentLang === 'ro' ? 'Eroare la incarcare: ' : 'Upload error: ') + storRes.error.message, 'err');
               return;
             }
-            closeUploadBtn();
-            loadPhotosFromSupabase();
+            var meta = {
+              path: path, title_ro: title, title_en: title,
+              caption_ro: caption, caption_en: caption,
+              dedicatie_ro: ded, dedicatie_en: ded,
+              year: year, category: cat, is_private: isPrivate
+            };
+            if (userId) meta.uploader_id = userId;
+            if (familyId) meta.family_id = familyId;
+            supabase.from('photos').insert(meta).then(function(insRes) {
+              saveBtn.disabled = false;
+              saveBtn.textContent = currentLang === 'ro' ? 'Salveaza fotografia' : 'Save photo';
+              if (insRes.error) {
+                showUmMsg((currentLang === 'ro' ? 'Eroare la salvare: ' : 'Save error: ') + insRes.error.message, 'err');
+                return;
+              }
+              closeUploadBtn();
+              loadPhotosFromSupabase();
+            });
           });
         });
     });
@@ -1220,7 +1237,40 @@ function savePhoto() {
 
 function openReport() { document.getElementById('rep-overlay').classList.add('open'); }
 function closeReport(e) { if (e && e.target !== document.getElementById('rep-overlay') && e !== undefined) return; document.getElementById('rep-overlay').classList.remove('open'); }
-function sendReport() { alert(currentLang === 'ro' ? 'Raport trimis. Multumim!' : 'Report sent. Thank you!'); document.getElementById('rep-overlay').classList.remove('open'); }
+function sendReport() {
+  var p = photos.find(function(x){ return x.id === currentLbIdx; });
+  if (!p || !p.dbId) {
+    alert(currentLang === 'ro' ? 'Nu am putut identifica fotografia pentru raportare.' : 'Could not identify the photo to report.');
+    return;
+  }
+  if (!hasLiveSupabase()) {
+    alert(currentLang === 'ro' ? 'Raportarea nu este disponibila momentan (Supabase neconfigurat).' : 'Reporting is currently unavailable (Supabase not configured).');
+    return;
+  }
+  var reasonEl = document.getElementById('rep-reason');
+  var reason = reasonEl ? String(reasonEl.value || '').trim() : '';
+  if (!reason) reason = currentLang === 'ro' ? 'Raport utilizator' : 'User report';
+
+  window.supabase.auth.getUser().then(function(userRes) {
+    var userId = userRes && userRes.data && userRes.data.user ? userRes.data.user.id : null;
+    var payload = {
+      photo_id: p.dbId,
+      reason: reason
+    };
+    if (userId) payload.reporter_id = userId;
+
+    window.supabase.from('photo_reports').insert(payload).then(function(res) {
+      if (res && res.error) {
+        alert((currentLang === 'ro' ? 'Raportul nu a fost salvat: ' : 'Report could not be saved: ') + res.error.message);
+        return;
+      }
+      alert(currentLang === 'ro' ? 'Raport trimis. Multumim!' : 'Report sent. Thank you!');
+      document.getElementById('rep-overlay').classList.remove('open');
+    });
+  }).catch(function(err) {
+    alert((currentLang === 'ro' ? 'Eroare la raportare: ' : 'Reporting error: ') + ((err && err.message) || 'necunoscuta'));
+  });
+}
 
 function buildThisWeek() {
   var now = new Date();

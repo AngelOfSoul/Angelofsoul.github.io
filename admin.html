@@ -960,7 +960,7 @@ left:23px;
     <div class="topbar-title">&#9670; Calnic Admin Panel</div>
     <div class="topbar-right">
       <span class="adm-badge">ADMIN</span>
-      <span class="topbar-user" id="admin-email">â€”</span>
+  <span class="topbar-user" id="admin-email">—</span>
       <a href="index.html" class="topbar-home">&#8592; Site principal</a>
       <button class="topbar-logout" onclick="doLogout()">Deconectare</button>
     </div>
@@ -1015,10 +1015,10 @@ left:23px;
         <div class="ct-sub">Bun venit in panoul de administrare Calnic Online.</div>
 
         <div class="stat-grid">
-          <div class="stat-card"><div class="stat-val" id="dash-families">â€”</div><div class="stat-lbl">Familii</div><div class="stat-sub" id="dash-families-sub">se incarca...</div></div>
-          <div class="stat-card"><div class="stat-val" id="dash-members">â€”</div><div class="stat-lbl">Membri</div><div class="stat-sub">in arbori genealogici</div></div>
-          <div class="stat-card"><div class="stat-val" id="dash-photos">â€”</div><div class="stat-lbl">Fotografii</div><div class="stat-sub">in arhiva satului</div></div>
-          <div class="stat-card"><div class="stat-val" id="dash-score">â€”</div><div class="stat-lbl">Completitudine</div><div class="stat-sub">medie village</div></div>
+          <div class="stat-card"><div class="stat-val" id="dash-families">—</div><div class="stat-lbl">Familii</div><div class="stat-sub" id="dash-families-sub">se incarca...</div></div>
+          <div class="stat-card"><div class="stat-val" id="dash-members">—</div><div class="stat-lbl">Membri</div><div class="stat-sub">in arbori genealogici</div></div>
+          <div class="stat-card"><div class="stat-val" id="dash-photos">—</div><div class="stat-lbl">Fotografii</div><div class="stat-sub">in arhiva satului</div></div>
+          <div class="stat-card"><div class="stat-val" id="dash-score">—</div><div class="stat-lbl">Completitudine</div><div class="stat-sub">medie village</div></div>
         </div>
 
         <div class="two-col" style="margin-bottom:16px;">
@@ -3442,27 +3442,91 @@ function clearLogs(kind) {
 
 /* â”€â”€ PHOTOS â”€â”€ */
 function loadPhotos() {
-  if (!window.supabase) return;
+  var sb = getSB();
+  if (!sb) return;
   var familyId = document.getElementById('photo-filter-family') ? document.getElementById('photo-filter-family').value : '';
   var status   = document.getElementById('photo-filter-status') ? document.getElementById('photo-filter-status').value : '';
-  var query    = supabase.from('photos').select('*').limit(20);
+  var grid = document.getElementById('photo-grid');
+  var query = sb.from('photos').select('*').order('uploaded_at', { ascending: false }).limit(120);
   if (familyId) query = query.eq('family_id', familyId);
+
   query.then(function(r){
-    var photos = r.data || [];
-    var grid = document.getElementById('photo-grid');
-    if (photos.length === 0) {
+    var photos = (r && r.data) ? r.data : [];
+    if (!photos.length) {
       grid.innerHTML = '<div style="color:var(--gold-m);font-style:italic;font-size:13px;">Nu exista fotografii.</div>';
       return;
     }
-    grid.innerHTML = photos.map(function(p){
-      var thumb = p.url ? '<img src="'+p.url+'" style="width:100%;aspect-ratio:4/3;object-fit:cover;display:block;" onerror="this.style.display=\'none\'"/>' :
-        '<div style="width:100%;aspect-ratio:4/3;background:var(--s3);display:flex;align-items:center;justify-content:center;font-size:24px;color:var(--b2);">&#128247;</div>';
-      return '<div class="photo-card">' + thumb +
-        '<div class="photo-info"><div class="photo-family">' + (p.family_id ? p.family_id.slice(0,8)+'...' : 'â€”') + '</div>' +
-        '<button class="tbtn red" onclick="deletePhoto(\''+p.id+'\')" style="width:100%;margin-top:4px;font-size:11px;">Sterge</button></div></div>';
-    }).join('');
-  }).catch(function(){
-    document.getElementById('photo-grid').innerHTML = '<div style="color:var(--gold-m);font-style:italic;font-size:13px;">Tabelul photos nu exista inca sau nu are date.</div>';
+
+    var photoIds = photos.map(function(p){ return p.id; }).filter(Boolean);
+    var famReq = sb.from('families').select('id,name').limit(800);
+    var repReq = photoIds.length
+      ? sb.from('photo_reports').select('photo_id,status').in('photo_id', photoIds)
+      : Promise.resolve({ data: [], error: null });
+
+    Promise.all([famReq, repReq]).then(function(results) {
+      var famRes = results[0] || {};
+      var repRes = results[1] || {};
+
+      var famById = {};
+      (famRes.data || []).forEach(function(f) {
+        if (f && f.id) famById[f.id] = f.name || '';
+      });
+
+      var reportCount = {};
+      var reportsUnavailable = !!(repRes && repRes.error);
+      (repRes.data || []).forEach(function(rep) {
+        if (!rep || !rep.photo_id) return;
+        var st = String(rep.status || 'open').toLowerCase();
+        if (st === 'resolved' || st === 'dismissed') return;
+        reportCount[rep.photo_id] = (reportCount[rep.photo_id] || 0) + 1;
+      });
+
+      if (status === 'reported' && reportsUnavailable) {
+        grid.innerHTML = '<div style="color:var(--gold-m);font-style:italic;font-size:13px;">Lipseste tabelul <code>photo_reports</code>. Ruleaza scriptul <code>sql/photo-reports-setup.sql</code>.</div>';
+        return;
+      }
+
+      var filtered = photos.filter(function(p) {
+        if (status === 'reported') return (reportCount[p.id] || 0) > 0;
+        if (status === 'no-desc') {
+          var capRo = String(p.caption_ro || '').trim();
+          var capEn = String(p.caption_en || '').trim();
+          return !capRo && !capEn;
+        }
+        return true;
+      });
+
+      if (!filtered.length) {
+        grid.innerHTML = '<div style="color:var(--gold-m);font-style:italic;font-size:13px;">Nu exista fotografii pentru filtrul selectat.</div>';
+        return;
+      }
+
+      grid.innerHTML = filtered.map(function(p){
+        var url = '';
+        if (p.path && sb.storage && typeof sb.storage.from === 'function') {
+          var u = sb.storage.from('photos').getPublicUrl(p.path);
+          url = (u && u.data && u.data.publicUrl) ? u.data.publicUrl : '';
+        }
+        if (!url && p.url) url = p.url;
+
+        var rc = reportCount[p.id] || 0;
+        var isRep = rc > 0;
+        var famName = p.family_id && famById[p.family_id] ? famById[p.family_id] : 'Calnic';
+        var title = p.title_ro || p.title_en || 'Fotografie';
+        var repBadge = isRep ? '<div class="badge warn" style="margin-top:4px;">Raportata (' + rc + ')</div>' : '';
+        var thumb = url
+          ? '<img src="' + escAttr(url) + '" style="width:100%;aspect-ratio:4/3;object-fit:cover;display:block;" onerror="this.style.display=\'none\'"/>'
+          : '<div style="width:100%;aspect-ratio:4/3;background:var(--s3);display:flex;align-items:center;justify-content:center;font-size:24px;color:var(--b2);">&#128247;</div>';
+        return '<div class="photo-card' + (isRep ? ' reported' : '') + '">' + thumb +
+          '<div class="photo-info"><div class="photo-family' + (isRep ? ' reported' : '') + '">' + escH(famName) + '</div>' +
+          '<div style="font-size:12px;color:var(--text);margin-bottom:4px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;" title="' + escAttr(title) + '">' + escH(title) + '</div>' +
+          repBadge +
+          '<button class="tbtn red" onclick="deletePhoto(\'' + p.id + '\')" style="width:100%;margin-top:6px;font-size:11px;">Sterge</button></div></div>';
+      }).join('');
+    });
+  }).catch(function(err){
+    var msg = err && err.message ? err.message : 'necunoscuta';
+    document.getElementById('photo-grid').innerHTML = '<div style="color:var(--red);font-style:italic;font-size:13px;">Eroare la incarcare fotografii: ' + escH(msg) + '</div>';
   });
 }
 
