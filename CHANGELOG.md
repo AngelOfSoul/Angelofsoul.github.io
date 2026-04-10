@@ -4,6 +4,76 @@ Istoric generat din Git, de la inceputul proiectului pana in prezent.
 
 ## Cronologie
 
+### 2026-04-07 (Game / Kelling)
+- Adaugat pagina de joc `game.html` cu layout complet, overlay-uri de setup/final/leaderboard/help.
+- Implementat motor gameplay pe harta hex: setup, zaruri, distributie resurse, hoț, constructii, tura AI.
+- Implementat sistem de drumuri real pe muchii + calcul `Longest Road` pe graf.
+- Adaugat porturi 2:1 / 3:1 si schimb din panoul din dreapta.
+- Implementat sistem de carti (Abundenta, Mason, Caravana, Brickburst) cu efecte active.
+- Adaugata mecanica `Alchimie` (2 Caramida -> 1 resursa), pentru player si AI.
+- Adaugat balans pe 3 dificultati AI (`easy` / `normal` / `hard`) inclusiv preset economic la start.
+- Adaugat autosave, continue, export/import save JSON, si preferinte persistente (nume, VP, dificultate, sunet).
+- Adaugat quality-of-life: hotkeys, anuleaza actiune (`Esc` + buton), `Undo` in tura (`U` + buton), log de tura.
+- Adaugat status vizual pentru efecte active, badge dificultate AI, tooltip pe hex-uri, log detaliat distributie resurse.
+
+### 2026-04-08 (Game / Kelling)
+- Stabilizat runtime pentru rulare locala `file://` (fara erori JS la load).
+- Adaugat validare extinsa la `loadSaveToState()` pentru compatibilitate cu save-uri mai vechi.
+- Adaugat `Export Save` / `Import Save` JSON in ecranul de start.
+- Adaugat persistenta preferinte joc (`nume`, `VP`, `dificultate AI`, `sunet`) intre sesiuni.
+- Adaugat `Reset Complet` (save + preferinte + clasament).
+- Reparat reguli de plasare a asezarilor (distanta minima fata de orice asezare/oras, inclusiv pentru AI).
+- Adaugat `Undo` in tura (buton + hotkey `U`), plus fallback sigur la autosave.
+- Adaugat smoke test automat `npm run test:game` pentru fluxul principal al jocului.
+- Upgrade `Undo` la multi-step (stack) cu indicator vizual al pasilor disponibili.
+- Fix gameplay critic: construire asezare functionala in faza principala (nu mai blocheaza progresia).
+- Extins smoke test-ul `test:game` ca sa valideze si actiunea de construire asezare.
+- Extins smoke test-ul `test:game` pentru validare `Undo` pe stare reala (VP restore).
+- Hardening import save: rollback automat la save anterior daca fisierul importat este invalid.
+- Fix autosave badge: afisaj corect dupa load/refresh + persistenta starii in UI.
+- Hardening UX: anulare actiune (`Esc`/buton) salveaza imediat starea curenta.
+- Stabilizat smoke test-ul de `Undo` cu scenariu determinist (build + card + undo stack).
+- Adaugat test automat `npm run test:game-save` pentru import valid si rollback la import invalid.
+- Hardening tură: blocare `double-roll` / spam click pe zaruri prin `diceRolling` guard.
+- UX build actions: butoanele Asezare/Drum verifica acum si existenta unei mutari legale pe harta.
+- Smoke test actualizat pentru validare anti-spam la `Roll` (triple-click controlat).
+- Adaugat test automat `npm run test:game-prefs` pentru preferinte persistente + `Reset Complet`.
+- Adaugat `npm run test:game:all` (runner unificat pentru toate testele de joc).
+- Fix critic `Joc nou`: reset complet de state/board la pornirea unei partide noi dupa un save existent.
+- Adaugat test automat `npm run test:game-new` pentru fluxul `Joc nou` peste save existent.
+- UX polish `Oraș (upgrade)`: buton activ doar cand este selectata o asezare proprie valida pentru upgrade.
+- Extins `test:game` cu verificari explicite pentru starea butonului `Undo` (disabled initial, enabled dupa actiuni, disabled cand stack-ul devine gol).
+- Adaugat test automat `npm run test:game-ai` pentru validarea tuturor dificultatilor AI (`easy`, `normal`, `hard`) si includerea lui in `test:game:all`.
+- Adaugat suport `testDiceTotals` in `game.html` (query param pentru teste deterministe de zaruri, fara impact pe joc normal).
+- Adaugat test automat `npm run test:game-robber` pentru fluxul complet de `7` (faza hoț, mutare, revenire la actiuni) si integrare in `test:game:all`.
+- UX hardening: hotkeys sunt acum blocate cand overlay-urile sunt deschise; `Esc` inchide contextual `Reguli`/`Clasament`.
+- UX safety: `Reset Complet` cere confirmare explicita inainte de stergerea datelor locale.
+- Input polish: nickname-ul este curatat/sanitizat consistent (spatii compacte + fallback `Jucător`).
+- UI polish: focus vizibil pentru navigare tastatura + suport `prefers-reduced-motion` in `game.css`.
+- Stabilizat testele automate: `test:game` nu mai confunda logul de discard la `7` cu un al doilea roll al jucatorului.
+- Hardening tura AI: introdus guard explicit `aiThinking` pentru a preveni reentrant/race conditions.
+- Adaugat test automat `npm run test:game-ai-lock` pentru validarea anti-duplicate AI turn la spam de input.
+- Hardening restore: save-urile prinse in timpul turei AI sunt auto-normalizate la tură validă de player la `Continue`.
+- Adaugat test automat `npm run test:game-load-normalize` pentru validarea recovery dupa load din snapshot AI incomplet.
+- Release packaging: adaugat `GAME_RELEASE_CHECKLIST.md`, comanda `npm run test:game:release` si update `RELEASE_NOTES.md` pentru `v1.3.0`.
+- Adaugat test automat `npm run test:game-long` pentru stabilitate pe sesiune extinsa (mai multe ture consecutive in acelasi meci).
+- Hardening AI: adaugat watchdog timeout + recovery automat daca tura AI se blocheaza.
+- Adaugat test automat `npm run test:game-ai-watchdog` pentru validarea mecanismului de auto-recovery AI.
+- UX gameplay: adaugata actiune `Capitulează` (buton + hotkey `Q`) pentru incheiere controlata a partidei.
+- Adaugat test automat `npm run test:game-surrender` pentru fluxul complet de capitulare (confirmare, end state, clear save).
+- Adaugat test automat `npm run test:game-surrender-lb` pentru validarea scorului de clasament dupa capitulare (`defeat`, `0` puncte).
+- Adaugat test automat `npm run test:game-overlay-hotkeys` pentru validarea blocarii hotkeys in overlay-uri si inchidere `Esc`.
+- Hardening end-state: `endGame` este acum idempotent (previne inregistrari duplicate la click repetat).
+- Adaugat test automat `npm run test:game-endgame-idempotent` pentru validarea anti-duplicate in leaderboard.
+- Adaugat test automat `npm run test:game-data-integrity` pentru validarea consistentei save-ului dupa sesiuni extinse.
+- CI automation: adaugat workflow GitHub Actions `.github/workflows/game-tests.yml` pentru rulare automata `test:game:release` pe push/PR.
+- UI consistency: actualizat overlay-ul de reguli cu hotkey-ul `Q` (capitulare) si clarificare `Esc` pentru overlay-uri.
+- Hardening persistenta: autosave declansat si pe `visibilitychange/pagehide` pentru protectie suplimentara la inchidere/minimizare tab.
+- Adaugat test automat `npm run test:game-lifecycle-autosave` pentru validarea autosave pe lifecycle si excluderea setup phase.
+- Adaugat test automat `npm run test:game-surrender-hotkey` pentru validarea capitularii prin hotkey `Q`.
+- Graphics polish pass: imbunatatit vizual topbar/panouri/butoane/modal-uri (profunzime, glow, animatie usoara de intrare).
+- Graphics polish pass 2: bar vizual pentru board controls, butoane header imbunatatite, scrollbar theming si comportament mai bun pe mobil.
+
 ### 2026-03-22
 - Delete translation_test.html (`9ee53fc`)
 
@@ -320,3 +390,25 @@ Istoric generat din Git, de la inceputul proiectului pana in prezent.
 - Update pages and chat setup; ignore temp/testing folders (`e780359`)
 - Refine admin chat moderation: reported-only review, themed UI, and per-user link permissions (`78318f3`)
 - Allow editing active polls directly from admin panel (`efff39e`)
+
+### 2026-04-08
+- Polish game HUD and cards to match medieval site style (ornate topbar frame, upgraded badges, styled selects, refined hint panel, responsive card grid).
+- Add robber sprite rendering from provided sprite sheet with graceful fallback in file:// mode.
+- Stabilize smoke flow where settlement build is conditional; keep deterministic undo validation when build is unavailable.
+
+- Refine board visuals (token medallions, owner badges, stronger selection highlight) and ensure decorative SVG layers do not block hex clicks.
+- Add visual polish pass for game HUD: resource icons, pulse feedback on gains/spends, dice result flash, board flash for build/robber actions, and extra mobile compact tuning.
+- Add contextual onboarding hint (setup + first turns) and improve action tooltips (controls, cards, ports) for clearer UX without changing game balance.
+- Rebalance AI profiles for all 3 difficulties (build pacing, trade pressure, reserves, late-game closing behavior) and improve AI trade selection to avoid sacrificing critical resources.
+- Improve microcopy/hints and add dynamic tooltips on disabled controls so players see exactly why actions are unavailable.
+
+### 2026-04-09 (Game / Kelling)
+- Claims-first hardening final: sincronizare automata `board.owner/level` din `vertexClaims` dupa `setVertexClaim`, `load`, `undo`.
+- Curatare suplimentara runtime pentru a reduce dependenta de modelul legacy in deciziile de ownership/tooltip.
+- Stabilizat smoke tests (eliminata dependenta de text localizat `phaseLabel`; validare pe starea controalelor).
+- Balancing final pass:
+  - AI `easy` mai permisiv (build/trade/card usage reduse, rezerva mai mare)
+  - AI `normal` usor temperat pentru meciuri mai consistente
+  - AI `hard` mai putin spike-y, dar in continuare agresiv
+  - ritm carte jucator ajustat la 1 carte / 4 ture pentru economie mai stabila.
+

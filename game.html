@@ -1,0 +1,315 @@
+﻿<!DOCTYPE html>
+<html lang="ro">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<meta name="description" content="Kelling: Origins of Calnic - joc strategic pe hexagoane" />
+<title>Kelling: Origins of Calnic</title>
+<link rel="icon" type="image/svg+xml" href="favicon.svg" />
+<link rel="icon" type="image/x-icon" href="favicon.ico" />
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@500;700&family=EB+Garamond:wght@400;600&family=Playfair+Display:wght@600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="css/game.css" />
+</head>
+<body>
+  <div class="game-bg"></div>
+  <div class="game-shell">
+    <header class="topbar h1-header">
+      <div class="top-left-meta">
+        <span id="turnLabel">Tura 1</span>
+        <span id="phaseLabel" class="badge">Setup</span>
+        <span id="aiModeBadge" class="badge">AI: Normal</span>
+        <span id="saveBadge" class="badge">Autosave OFF</span>
+      </div>
+      <div class="logo-wrap">
+        <div class="logo-main">KELLING</div>
+        <div class="logo-sub">Origins of Calnic</div>
+      </div>
+      <div class="top-right-settings">
+        <button id="settingsToggleBtn" class="home-btn settings-main" type="button">Settings</button>
+        <div id="settingsMenu" class="settings-menu" hidden>
+          <button id="helpBtn" class="home-btn" type="button" title="Deschide regulile rapide și hotkeys">Reguli</button>
+          <button id="startTutorialBtn" class="home-btn" type="button" title="Pornește tutorialul interactiv">Tutorial</button>
+          <button id="soundToggleBtn" class="home-btn" type="button" title="Activează/dezactivează efectele audio">Sunet: ON</button>
+          <a class="home-btn" href="index.html">Site principal</a>
+        </div>
+      </div>
+    </header>
+
+    <main class="layout layout-spec">
+      <aside class="panel left-panel spec-left">
+        <section class="wood-block l1">
+          <h3>Scoruri</h3>
+          <div class="score-box score-compact">
+            <div><strong>Jucător:</strong> <span id="playerVp">0</span> VP</div>
+            <div><strong>AI:</strong> <span id="aiVp">0</span> VP</div>
+            <div><strong>Țintă:</strong> <span id="targetVp">9</span> VP</div>
+          </div>
+        </section>
+        <section class="wood-block l2">
+          <h3>Profil Jucător</h3>
+          <div class="score-box profile-box">
+            <div><strong>Nume:</strong> <span id="playerNickname">Jucător</span></div>
+            <div><strong>Dificultate:</strong> <span id="profileAiMode">Echilibrat</span></div>
+            <button id="openAchievementsBtn" class="action-btn profile-btn" type="button">Achievements</button>
+          </div>
+        </section>
+        <section class="wood-block l3">
+          <h3>Slot Liber</h3>
+          <div class="hint">Spațiu modular (momentan jurnal evenimente).</div>
+          <div id="eventLog" class="event-log"></div>
+        </section>
+        <section class="wood-block l4">
+          <h3>Cărți</h3>
+          <div id="cardHand" class="card-row"></div>
+          <div id="cardHint" class="hint">Poți juca o carte pe tură.</div>
+          <div id="effectsStatus" class="effects-status"></div>
+          <div id="coachHint" class="coach-hint"></div>
+        </section>
+      </aside>
+
+      <section class="board-wrap panel spec-center">
+        <div class="board-frame">
+          <svg id="boardSvg" viewBox="0 0 1200 780" preserveAspectRatio="xMidYMid meet" aria-label="Harta jocului"></svg>
+        </div>
+        <div class="center-meta">
+          <div id="boardHint" class="hint">Alege două hexagoane pentru setup inițial.</div>
+          <div id="tutorialHint" class="tutorial-hint" hidden></div>
+        </div>
+      </section>
+
+      <aside class="panel right-panel spec-right">
+        <section class="wood-block r2">
+          <h3>Resurse</h3>
+          <div id="playerResources" class="res-grid"></div>
+        </section>
+        <section class="wood-block r1">
+          <h3>Construcții</h3>
+          <button id="buildSettlementBtn" class="action-btn" title="B - construiește o așezare (+1 VP)">Așezare</button>
+          <div class="cost">Cost: lemn 1 • caramida 1 • grâu 1 • lână 1</div>
+          <button id="buildCityBtn" class="action-btn" title="C - upgrade la oraș (+2 VP total pe hex)">Oraș (upgrade)</button>
+          <div class="cost">Cost: minereu 3 • grâu 2</div>
+          <button id="buildRoadBtn" class="action-btn" title="D - construiește drum între două hex-uri vecine">Drum comercial</button>
+          <div class="cost">Cost: lemn 1 • caramida 1</div>
+        </section>
+        <section class="wood-block r3">
+          <h3>Schimb</h3>
+          <div class="trade-box trade-box-compact">
+            <button id="tradeBtn" class="action-btn" title="T - deschide schimbul de resurse">Schimb resurse</button>
+          </div>
+        </section>
+      </aside>
+    </main>
+
+    <section class="bottom-action-row panel">
+      <div class="round-progress">
+        <span class="progress-label">Progres rundă</span>
+        <div class="progress-track"><span class="progress-fill"></span></div>
+      </div>
+      <div class="core-actions">
+        <button id="rollBtn" class="cta primary-large" title="R - aruncă zarurile pentru tura curentă">Roll Dice</button>
+        <div id="diceResult" class="dice">-</div>
+        <button id="endTurnBtn" class="cta primary-large" title="E - finalizează tura și începe tura AI">End Turn</button>
+      </div>
+      <div class="aux-actions">
+        <button id="undoBtn" class="cta secondary" title="U - anulează ultima acțiune">Undo</button>
+        <button id="cancelActionBtn" class="cta secondary" title="Esc - anulează acțiunea selectată">Anulează</button>
+        <button id="surrenderBtn" class="cta secondary" title="Q - încheie imediat partida curentă">Capitulează</button>
+      </div>
+    </section>
+    <div id="achievementToast" class="achievement-toast" aria-live="polite"></div>
+    <aside id="tutorialFlow" class="tutorial-flow" hidden>
+      <div class="tutorial-flow-head">
+        <strong id="tutorialFlowTitle">Tutorial</strong>
+        <span id="tutorialFlowProgress">Pas 1/1</span>
+      </div>
+      <p id="tutorialFlowText" class="tutorial-flow-text"></p>
+      <div id="tutorialFlowGoal" class="tutorial-flow-goal"></div>
+      <div class="tutorial-flow-actions">
+        <button id="tutorialPrevBtn" class="cta secondary" type="button">Înapoi</button>
+        <button id="tutorialSkipBtn" class="cta secondary" type="button">Sari</button>
+        <button id="tutorialNextBtn" class="cta" type="button">Următorul</button>
+        <button id="tutorialCloseBtn" class="cta secondary" type="button">Închide</button>
+      </div>
+    </aside>
+  </div>
+
+  <div id="startOverlay" class="overlay show">
+    <div class="modal">
+      <h1>Kelling: Origins of Calnic</h1>
+      <p>Joc strategic pe hexagoane, inspirat din satul Câlnic.</p>
+      <div class="choice-row" style="justify-content:center;">
+        <button id="startBtn" class="cta">Joc nou</button>
+        <button id="continueBtn" class="cta secondary" style="display:none;">Continuă</button>
+        <button id="leaderboardBtn" class="cta secondary">Clasament</button>
+        <button id="startTutorialFromStartBtn" class="cta secondary">Tutorial interactiv</button>
+        <button id="exportSaveBtn" class="cta secondary">Export Save</button>
+        <button id="importSaveBtn" class="cta secondary">Import Save</button>
+        <button id="resetAllBtn" class="cta secondary">Reset Complet</button>
+        <input id="importSaveInput" type="file" accept=".json,application/json" style="display:none;" />
+      </div>
+    </div>
+  </div>
+
+  <div id="setupOverlay" class="overlay">
+    <div class="modal setup-modal">
+      <h2>Setup Partidă</h2>
+      <p class="setup-lead">Alege ritmul și dificultatea pentru noua campanie Kelling.</p>
+
+      <label>Țintă Victorie (VP)</label>
+      <div class="choice-row setup-grid" id="vpChoices">
+        <button class="setup-card" data-vp="8">
+          <span class="setup-card-title">Rapid</span>
+          <span class="setup-card-main">8 VP</span>
+          <span class="setup-card-sub">10-15 min • +2 sezon</span>
+        </button>
+        <button class="setup-card active" data-vp="9">
+          <span class="setup-card-title">Standard</span>
+          <span class="setup-card-main">9 VP</span>
+          <span class="setup-card-sub">15-20 min • +3 sezon</span>
+        </button>
+        <button class="setup-card" data-vp="10">
+          <span class="setup-card-title">Epic</span>
+          <span class="setup-card-main">10 VP</span>
+          <span class="setup-card-sub">20-30 min • +4 sezon</span>
+        </button>
+      </div>
+
+      <label>Dificultate AI</label>
+      <div class="choice-row setup-grid" id="aiChoices">
+        <button class="setup-card" data-ai="easy">
+          <span class="setup-card-title">Prietenos</span>
+          <span class="setup-card-main">Relaxat</span>
+          <span class="setup-card-sub">Win rate estimat: 75-85%</span>
+        </button>
+        <button class="setup-card active" data-ai="normal">
+          <span class="setup-card-title">Echilibrat</span>
+          <span class="setup-card-main">Standard</span>
+          <span class="setup-card-sub">Win rate estimat: 50-60%</span>
+        </button>
+        <button class="setup-card" data-ai="hard">
+          <span class="setup-card-title">Strateg</span>
+          <span class="setup-card-main">Avansat</span>
+          <span class="setup-card-sub">Win rate estimat: 40-50%</span>
+        </button>
+      </div>
+
+      <label for="nicknameInput">Nume jucător</label>
+      <input id="nicknameInput" type="text" maxlength="20" placeholder="Numele tău" />
+      <button id="beginGameBtn" class="cta">Începe partida</button>
+    </div>
+  </div>
+
+  <div id="endOverlay" class="overlay">
+    <div class="modal">
+      <h2 id="endTitle">Partida s-a încheiat</h2>
+      <p id="endSub"></p>
+      <div id="endStats" class="score-box" style="text-align:left;margin:10px 0;"></div>
+      <div class="choice-row" style="justify-content:center;">
+        <button id="showLeaderboardFromEndBtn" class="cta secondary">Clasament sezon</button>
+        <button id="restartBtn" class="cta">Partidă nouă</button>
+      </div>
+    </div>
+  </div>
+
+  <div id="leaderboardOverlay" class="overlay">
+    <div class="modal" style="width:min(760px,94vw);">
+      <h2>Clasament sezon local</h2>
+      <p id="seasonLabel" class="setup-lead" style="text-align:center;"></p>
+      <div id="leaderboardTable" class="score-box" style="max-height:380px;overflow:auto;text-align:left;"></div>
+      <div class="choice-row" style="justify-content:center;">
+        <button id="closeLeaderboardBtn" class="cta secondary">Închide</button>
+        <button id="clearLeaderboardBtn" class="cta secondary">Resetează clasament</button>
+      </div>
+    </div>
+  </div>
+
+  <div id="helpOverlay" class="overlay">
+    <div class="modal" style="width:min(860px,95vw);text-align:left;">
+      <h2>Reguli rapide - Kelling</h2>
+      <div class="score-box" style="max-height:420px;overflow:auto;">
+        <p><strong>1.</strong> În setup plasezi 2 așezări inițiale pe hex-uri libere și neadiacente.</p>
+        <p><strong>2.</strong> Pe tură: arunci zarurile, primești resurse, construiești/schimbi/joci carte, apoi închei tura.</p>
+        <p><strong>3.</strong> Dacă dai <strong>7</strong>, muți hoțul și blochezi producția pe acel hex.</p>
+        <p><strong>4.</strong> Construcții:</p>
+        <p style="margin-left:14px;">Așezare = +1 VP, Oraș = +2 VP, Drumurile ajută la Longest Road (+2 VP).</p>
+        <p style="margin-left:14px;">Largest Army = +2 VP când joci cei mai mulți cavaleri (minim 3).</p>
+        <p><strong>5.</strong> Schimburi:</p>
+        <p style="margin-left:14px;">4:1 fără port, 3:1 cu port general, 2:1 cu port de resursă.</p>
+        <p><strong>6.</strong> Cărți:</p>
+        <p style="margin-left:14px;">Poți juca o carte pe tură. Unele oferă resurse, altele efecte tactice (ex: Cavaler mută hoțul).</p>
+        <p><strong>7.</strong> Câștigă primul care ajunge la ținta VP aleasă la setup.</p>
+        <p><strong>8.</strong> Hotkeys rapide: <strong>R</strong> zaruri, <strong>E</strong> încheie tura, <strong>U</strong> undo, <strong>B</strong> așezare, <strong>C</strong> oraș, <strong>D</strong> drum, <strong>T</strong> schimb, <strong>Q</strong> capitulează, <strong>Esc</strong> anulează acțiunea curentă / închide overlay-uri.</p>
+      </div>
+      <div class="choice-row" style="justify-content:center;">
+        <button id="closeHelpBtn" class="cta secondary">Închide</button>
+        <button id="launchTutorialFromHelpBtn" class="cta">Tutorial interactiv</button>
+      </div>
+    </div>
+  </div>
+
+  <div id="achievementsOverlay" class="overlay">
+    <div class="modal" style="width:min(860px,95vw);text-align:left;">
+      <h2>Achievements & Control Live</h2>
+      <div id="achievementsSummary" class="score-box" style="line-height:1.6;"></div>
+      <div id="achievementsTotals" class="score-box" style="line-height:1.6;"></div>
+      <div id="achievementsBadges" class="achievements-grid"></div>
+      <div class="score-box" style="max-height:280px;overflow:auto;">
+        <p><strong>Longest Road:</strong> bonus +2 VP când un jucător are lanțul cel mai lung (minim 5).</p>
+        <p><strong>Largest Army:</strong> bonus +2 VP când un jucător are cei mai mulți cavaleri jucați (minim 3).</p>
+        <p><strong>VP Race:</strong> monitorizează permanent progresul către ținta partidei.</p>
+      </div>
+      <div class="choice-row" style="justify-content:center;">
+        <button id="closeAchievementsBtn" class="cta secondary">Închide</button>
+      </div>
+    </div>
+  </div>
+
+  <div id="tradeOverlay" class="overlay">
+    <div class="modal trade-modal" role="dialog" aria-modal="true" aria-labelledby="tradeModalTitle">
+      <h2 id="tradeModalTitle">Schimb Resurse</h2>
+      <p id="tradeModeLabel" class="setup-lead">Bancă - schimb 4:1</p>
+
+      <div class="trade-tabs" role="tablist" aria-label="Tip schimb">
+        <button id="tradeTabAi" class="trade-tab" type="button" data-trade-mode="ai" role="tab" aria-selected="false">Cu AI</button>
+        <button id="tradeTabBank" class="trade-tab active" type="button" data-trade-mode="bank" role="tab" aria-selected="true">Bancă</button>
+        <button id="tradeTabPort" class="trade-tab" type="button" data-trade-mode="port" role="tab" aria-selected="false">Port</button>
+      </div>
+
+      <div class="trade-modal-row">
+        <label for="tradeGive">Dai</label>
+        <select id="tradeGive" class="trade-select">
+          <option value="wood">Lemn</option>
+          <option value="brick">Caramida</option>
+          <option value="grain">Grâu</option>
+          <option value="wool">Lână</option>
+          <option value="ore">Minereu</option>
+        </select>
+      </div>
+      <div class="trade-modal-row">
+        <label for="tradeGet">Primești</label>
+        <select id="tradeGet" class="trade-select">
+          <option value="wood">Lemn</option>
+          <option value="brick">Caramida</option>
+          <option value="grain">Grâu</option>
+          <option value="wool">Lână</option>
+          <option value="ore">Minereu</option>
+        </select>
+      </div>
+      <div class="trade-modal-row">
+        <label>Rată activă</label>
+        <div id="tradeRateInfo" class="trade-rate-badge">4:1 (bancă)</div>
+      </div>
+      <div id="tradeModalHint" class="hint trade-modal-hint">Selectează ce dai și ce primești.</div>
+
+      <div class="choice-row trade-modal-actions" style="justify-content:center;">
+        <button id="confirmTradeBtn" class="cta">Confirmă</button>
+        <button id="cancelTradeBtn" class="cta secondary">Anulează</button>
+      </div>
+    </div>
+  </div>
+
+  <script src="js/game.js"></script>
+</body>
+</html>

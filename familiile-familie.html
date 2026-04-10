@@ -188,11 +188,20 @@ padding:12px;border:1px solid #6a2020;background:#230d0d;color:#e7b4b4;font-size
 }
 
 .family-gate-overlay {
-position:fixed;inset:0;background:rgba(0,0,0,.82);z-index:9200;display:none;align-items:center;justify-content:center;padding:16px;
+position:fixed;inset:0;background:rgba(0,0,0,.97);z-index:9200;display:none;align-items:center;justify-content:center;padding:16px;
 }
 
 .family-gate-overlay.open {
 display:flex;
+}
+
+body.pre-auth .breadcrumb,
+body.pre-auth .fam-hero,
+body.pre-auth .main-wrap,
+body.pre-auth .scroll-top,
+body.pre-auth .scroll-bottom,
+body.pre-auth footer {
+visibility:hidden;
 }
 
 .family-gate-card {
@@ -560,7 +569,7 @@ to{transform:rotate(360deg);}
 <link rel="stylesheet" href="css/tree-ui.css">
 <link rel="stylesheet" href="css/badges.css">
 </head>
-<body>
+<body class="pre-auth">
 
 <div class="lang-bar">
   <span class="lang-label">LIMBA / LANGUAGE</span>
@@ -844,6 +853,72 @@ var FAM     = null;
 var MEMBERS = [];
 var TIMELINE = [];
 
+function mapMemberRow(m) {
+  var birthStr = m.birth_year ? String(m.birth_year) : '';
+  var deathStr = m.death_year ? String(m.death_year) : '';
+  var years = birthStr + (deathStr ? ' — ' + deathStr : (birthStr ? ' —' : ''));
+  return {
+    id: m.id,
+    name: m.name,
+    initial: m.initial || (m.name ? m.name[0] : '?'),
+    role: m.role || '',
+    years: years,
+    deceased: !!m.is_deceased,
+    birth_year: m.birth_year || null,
+    death_year: m.death_year || null,
+    profession: m.profession || '',
+    location: m.location || '',
+    biography: m.biography || '',
+    story: m.story || '',
+    visibility: m.visibility || 'public',
+    is_living: m.is_living != null ? m.is_living : !m.is_deceased,
+    confidence: m.confidence != null ? m.confidence : 100,
+    photo_url: m.photo_url || null
+  };
+}
+
+function mapTimelineRow(t) {
+  return { year: t.year, textRo: t.text_ro || t.textRo || '', textEn: t.text_en || t.textEn || '' };
+}
+
+async function reloadUnlockedFamilyData(enteredPin) {
+  if (!window.supabase || !familyId) return;
+  var loadedFromRpc = false;
+
+  if (enteredPin) {
+    try {
+      var bundleRes = await window.supabase.rpc('get_family_bundle_with_pin', {
+        p_family_id: familyId,
+        p_pin: enteredPin
+      });
+      if (!bundleRes.error && bundleRes.data) {
+        var bundle = bundleRes.data || {};
+        var members = Array.isArray(bundle.members) ? bundle.members : [];
+        var timeline = Array.isArray(bundle.timeline) ? bundle.timeline : [];
+        MEMBERS = members.map(mapMemberRow);
+        TIMELINE = timeline.map(mapTimelineRow);
+        loadedFromRpc = true;
+      }
+    } catch (_) {}
+  }
+
+  if (!loadedFromRpc) {
+    try {
+      var results = await Promise.all([
+        supabase.from('members').select('*').eq('family_id', familyId).order('birth_year'),
+        supabase.from('timeline').select('*').eq('family_id', familyId).order('year')
+      ]);
+      var mRes = results[0];
+      var tRes = results[1];
+      if (!mRes.error && Array.isArray(mRes.data)) MEMBERS = mRes.data.map(mapMemberRow);
+      if (!tRes.error && Array.isArray(tRes.data)) TIMELINE = tRes.data.map(mapTimelineRow);
+    } catch (_) {}
+  }
+
+  renderMembers();
+  renderTimeline();
+}
+
 async function renderOwnerBadges() {
   var host = document.getElementById('fam-profile-badges');
   if (!host) return;
@@ -942,6 +1017,7 @@ function loadFamilyData() {
 
     var r = famRes.data;
     familyId = r.id;
+    privateUnlocked = false;
 
     Promise.all([
       supabase.from('members').select('*').eq('family_id', familyId).order('birth_year'),
@@ -968,34 +1044,10 @@ function loadFamilyData() {
         story:     r.desc_ro || '',
         ownerId:   r.created_by || null
       };
+      applyFamilyGateIfNeeded();
 
-      MEMBERS = (membersRes.data || []).map(function(m) {
-        var birthStr = m.birth_year ? String(m.birth_year) : '';
-        var deathStr = m.death_year ? String(m.death_year) : '';
-        var years = birthStr + (deathStr ? ' — ' + deathStr : (birthStr ? ' —' : ''));
-        return {
-          id: m.id,
-          name: m.name,
-          initial: m.initial || (m.name ? m.name[0] : '?'),
-          role: m.role || '',
-          years: years,
-          deceased: !!m.is_deceased,
-          birth_year: m.birth_year || null,
-          death_year: m.death_year || null,
-          profession: m.profession || '',
-          location: m.location || '',
-          biography: m.biography || '',
-          story: m.story || '',
-          visibility: m.visibility || 'public',
-          is_living: m.is_living != null ? m.is_living : !m.is_deceased,
-          confidence: m.confidence != null ? m.confidence : 100,
-          photo_url: m.photo_url || null
-        };
-      });
-
-      TIMELINE = (timelineRes.data || []).map(function(t) {
-        return { year: t.year, textRo: t.text_ro || '', textEn: t.text_en || '' };
-      });
+      MEMBERS = (membersRes.data || []).map(mapMemberRow);
+      TIMELINE = (timelineRes.data || []).map(mapTimelineRow);
 
       document.title = FAM.name + ' — Calnic Online';
       populateDOM();
@@ -1015,6 +1067,10 @@ function loadFamilyData() {
           var heroInfo = document.querySelector('.fam-hero-info');
           if (heroInfo) heroInfo.appendChild(editBtn);
         }
+      }).catch(function() {
+        isOwner = false;
+      }).finally(function() {
+        authStateResolved = true;
         applyFamilyGateIfNeeded();
       });
     }).catch(function(e) {
@@ -1022,12 +1078,16 @@ function loadFamilyData() {
       showDbErrorMsg(currentLang === 'ro'
         ? 'Eroare la incarcarea datelor familiei. Incearca din nou mai tarziu.'
         : 'Error loading family data. Please try again later.');
+      authStateResolved = true;
+      applyFamilyGateIfNeeded();
     });
   }).catch(function(e) {
     console.warn('[Calnic] Error loading family data:', e);
     showDbErrorMsg(currentLang === 'ro'
       ? 'Eroare la incarcarea datelor familiei. Incearca din nou mai tarziu.'
       : 'Error loading family data. Please try again later.');
+    authStateResolved = true;
+    applyFamilyGateIfNeeded();
   });
 }
 if (window.supabase) { loadFamilyData(); } else { document.addEventListener('supabase:ready', loadFamilyData); }
@@ -1052,6 +1112,7 @@ var currentLang = localStorage.getItem('calnic-lang') || 'ro';
 var privateUnlocked = false;
 
 var isOwner = false; // set after auth check
+var authStateResolved = false;
 
 function isFamilyPinProtected() {
   if (!FAM) return false;
@@ -1063,9 +1124,16 @@ function isFamilyPinProtected() {
 function applyFamilyGateIfNeeded() {
   var gate = document.getElementById('familyGateOverlay');
   if (!gate) return;
+  if (!authStateResolved) {
+    gate.classList.remove('open');
+    gate.setAttribute('aria-hidden', 'true');
+    document.body.style.overflow = '';
+    return;
+  }
   var mustGate = !!(FAM && isFamilyPinProtected() && !isOwner && !privateUnlocked);
   gate.classList.toggle('open', mustGate);
   gate.setAttribute('aria-hidden', mustGate ? 'false' : 'true');
+  document.body.classList.remove('pre-auth');
   if (mustGate) {
     document.body.style.overflow = 'hidden';
     var pinIn = document.getElementById('familyGatePinInput');
@@ -1306,7 +1374,7 @@ async function checkPin() {
       + '<div class="pb-title" style="color:#82c46a;">' + (currentLang === 'ro' ? 'Acces acordat' : 'Access granted') + '</div>'
       + '<div class="pb-sub">' + (currentLang === 'ro' ? 'Bine ai venit! Continutul privat este acum vizibil.' : 'Welcome! Private content is now visible.') + '</div>';
     applyFamilyGateIfNeeded();
-    renderMembers();
+    await reloadUnlockedFamilyData(entered);
   } else {
     errEls.forEach(function(el){ el.style.display = 'block'; });
   }

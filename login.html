@@ -353,6 +353,10 @@ padding-right: 42px;
 @keyframes calnic-spin {
 to{transform:rotate(360deg);}
 }
+
+body.pre-auth .login-wrap {
+visibility:hidden;
+}
 </style>
 
 <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -364,7 +368,7 @@ to{transform:rotate(360deg);}
 <link rel="stylesheet" href="css/navbar-heraldic.css">
 <link rel="stylesheet" href="css/tree-ui.css">
 </head>
-<body>
+<body class="pre-auth">
 
 <div class="lang-bar">
   <span class="lang-label">LIMB&#258; / LANGUAGE</span>
@@ -692,6 +696,7 @@ function showTab(tab) {
 
 /* ── SCROLL BUTTONS ── */
 var pendingUserId = null;
+var loginRedirectInProgress = false;
 
 function showMsg(id, text, type) {
   var el = document.getElementById(id);
@@ -751,20 +756,33 @@ async function routeAuthenticatedUser(user) {
   if (!user || !user.id) return;
   var famCheck = await findFamilyForUser(user.id);
   if (famCheck && famCheck.id) {
-    showLoggedIn(user);
+    loginRedirectInProgress = true;
+    window.location.replace('index.html');
   } else {
     showStep2Panel(user.id);
   }
 }
 
+function resolveAuthRender() {
+  if (loginRedirectInProgress) return;
+  document.body.classList.remove('pre-auth');
+}
+
 /* Check session on page load */
 function initLoginAuth() {
-  if (!window.supabase) return;
-  window.supabase.auth.getUser().then(function(res) {
+  if (!window.supabase) {
+    resolveAuthRender();
+    return;
+  }
+  window.supabase.auth.getSession().then(function(res) {
     var session = res && res.data ? res.data.session : null;
     if (session && session.user) {
-      routeAuthenticatedUser(session.user);
+      return routeAuthenticatedUser(session.user);
     }
+  }).catch(function() {
+    /* keep default auth form on transient errors */
+  }).finally(function() {
+    resolveAuthRender();
   });
   /* Handle email-confirmation redirect: Supabase sets the session after
      processing the URL hash token, which may happen after supabase:ready */
@@ -838,11 +856,13 @@ async function doLogin(e) {
       if (userId) {
         var famCheck = await findFamilyForUser(userId);
         if (famCheck && famCheck.id) {
+          loginRedirectInProgress = true;
           setTimeout(function() { window.location.href = 'index.html'; }, 1200);
         } else {
           setTimeout(function() { showStep2Panel(userId); }, 500);
         }
       } else {
+        loginRedirectInProgress = true;
         setTimeout(function() { window.location.href = 'index.html'; }, 1200);
       }
     }

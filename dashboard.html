@@ -574,6 +574,15 @@ display:flex;gap:10px;justify-content:flex-end;flex-wrap:wrap;margin-top:18px
       </div>
       <div class="dash-section-body" id="body-privacy" style="display:none;">
         <div id="privacyForm">
+          <div class="df-subsection-title" data-ro="Acces la familie" data-en="Family access">Acces la familie</div>
+          <div class="df-group">
+            <label class="df-label" for="familyVisibilitySelect" data-ro="Vizibilitate familie" data-en="Family visibility">Vizibilitate familie</label>
+            <select class="df-select" id="familyVisibilitySelect">
+              <option value="public" data-ro="Publica (fara PIN)" data-en="Public (no PIN)">Publica (fara PIN)</option>
+              <option value="private" data-ro="Privata (acces cu PIN)" data-en="Private (PIN access)">Privata (acces cu PIN)</option>
+            </select>
+          </div>
+          <hr class="df-divider"/>
           <div class="df-subsection-title" data-ro="Vizibilitate informatii" data-en="Information visibility">Vizibilitate informatii</div>
           <div class="df-check-group">
             <label class="df-check-label"><input type="checkbox" id="privShowMembers"/> <span data-ro="Afiseaza membrii" data-en="Show members">Afiseaza membrii</span></label>
@@ -796,10 +805,12 @@ function populateForms() {
   document.getElementById('storySince').value = familyData.since || '';
   document.getElementById('storyDescRo').value = familyData.desc_ro || familyData.notes || '';
   document.getElementById('storyDescEn').value = familyData.desc_en || '';
-  document.getElementById('privShowMembers').checked = familyData.visibility !== 'private';
-  document.getElementById('privShowGenerations').checked = true;
-  document.getElementById('privShowPhotos').checked = true;
-  document.getElementById('privShowSince').checked = true;
+  var visSel = document.getElementById('familyVisibilitySelect');
+  if (visSel) visSel.value = (familyData.visibility === 'private') ? 'private' : 'public';
+  document.getElementById('privShowMembers').checked = familyData.show_members !== false;
+  document.getElementById('privShowGenerations').checked = familyData.show_generations !== false;
+  document.getElementById('privShowPhotos').checked = familyData.show_photos !== false;
+  document.getElementById('privShowSince').checked = familyData.show_since !== false;
   document.getElementById('dashFamilyName').textContent = 'Familia ' + (familyData.display_name || familyData.name || '');
   document.getElementById('dashUserEmail').textContent = '';
   var pubLink = document.getElementById('viewPublicLink');
@@ -1168,10 +1179,23 @@ async function deletePhoto(photoId, storagePath) {
 async function savePrivacy() {
   var btn = document.getElementById('privacyBtn');
   btn.disabled = true;
+  var familyVisibilityEl = document.getElementById('familyVisibilitySelect');
   var updates = {
-    visibility: document.getElementById('privShowMembers').checked ? 'public' : 'private'
+    visibility: familyVisibilityEl ? familyVisibilityEl.value : 'public',
+    show_members: !!document.getElementById('privShowMembers').checked,
+    show_generations: !!document.getElementById('privShowGenerations').checked,
+    show_photos: !!document.getElementById('privShowPhotos').checked,
+    show_since: !!document.getElementById('privShowSince').checked
   };
   var res = await supabase.from('families').update(updates).eq('id', familyId);
+  if (res.error) {
+    var msg = String(res.error.message || '');
+    if (/column .* does not exist|Could not find/i.test(msg)) {
+      var fallback = { visibility: updates.visibility };
+      res = await supabase.from('families').update(fallback).eq('id', familyId);
+      if (!res.error) updates = fallback;
+    }
+  }
   if (res.error) {
     showMsg('privacyMsg', res.error.message, 'error');
   } else {

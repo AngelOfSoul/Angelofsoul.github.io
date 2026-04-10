@@ -2,6 +2,29 @@
 
 Acest document sumarizeaza livrarile importante ale proiectului Calnic Online.
 
+## v1.3.0 - 2026-04-08
+
+### Kelling Game (major update)
+- Livrata experienta completa `game.html`:
+  - setup, zaruri, distributie resurse, hoț, constructii, carti, alchimie, end-game
+  - AI pe 3 dificultati (`easy`, `normal`, `hard`)
+  - autosave + continue + export/import save
+- Hardening gameplay:
+  - protectie anti double-roll
+  - `Undo` multi-step in tura
+  - blocare input/hotkeys in overlay-uri
+  - confirmare explicita la `Reset Complet`
+  - guard anti-race pentru tura AI (`aiThinking`)
+  - auto-recovery la load pentru snapshot-uri prinse in timpul turei AI
+- QA automat extins:
+  - `test:game`, `test:game-save`, `test:game-prefs`, `test:game-new`
+  - `test:game-ai`, `test:game-robber`, `test:game-ai-lock`, `test:game-load-normalize`
+  - runner unificat: `test:game:all`
+  - pre-flight release: `test:game:release`
+
+### Note
+- Pentru lansarea jocului vezi `GAME_RELEASE_CHECKLIST.md`.
+
 ## v1.2.0 - 2026-04-07
 
 ### Nou
@@ -67,3 +90,30 @@ Acest document sumarizeaza livrarile importante ale proiectului Calnic Online.
 ## Note de upgrade (recomandat)
 - Ruleaza scripturile SQL cele mai recente din `sql/` (in special pentru chat/polls/admin) dupa fiecare release major.
 - Pentru functionalitati noi de moderare chat, verifica cheia `chat_moderation` in `site_settings`.
+
+## v1.3.1 - 2026-04-08 (polish pass)
+
+### Kelling Game polish
+- onboarding contextual in setup + primele ture
+- tooltips dinamice pe controale dezactivate (motiv explicit pentru indisponibilitate)
+- polish board/HUD: token medallions, owner badges, icon-uri resurse, feedback animat (dice/build/robber)
+- rebalansare AI pe toate cele 3 dificultati cu trade logic mai inteligenta
+- validare automata completa: 
+npm run test:game:release PASS
+
+## v1.3.2 - 2026-04-09 (stability + balance)
+
+### Kelling Game
+- Finalizat hardening claims-first:
+  - sincronizare automata intre `vertexClaims` si campurile legacy `board.owner/level`
+  - comportament mai predictibil dupa `Load Save` / `Undo`
+- Stabilizat pachetul de smoke tests:
+  - eliminata dependenta de textul fazei in testele sensibile (timing/localizare)
+  - validare bazata pe starea butoanelor/flow-ului de joc
+- Balancing final:
+  - AI retunat pe `easy` / `normal` / `hard` pentru progresie mai clara intre dificultati
+  - ritm carte player ajustat la 1 la 4 ture pentru economie mai controlata
+
+### QA
+- `npm run test:game:release` PASS (toate suite-urile game).
+
