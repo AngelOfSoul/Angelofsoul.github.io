@@ -851,6 +851,7 @@ async function loadFamiliiFromSupabase() {
         id:              r.id,
         created_by:      r.created_by || null,
         pinHash:         r.pin_hash || null,
+        visibility:      r.visibility || 'public',
         name:            safeName,
         village:         r.village || 'Calnic',
         since:           r.since,
@@ -903,9 +904,10 @@ async function loadFamiliiFromSupabase() {
 
   function fetchFamiliesWithFallback() {
     var variants = [
-      'id, created_by, name, village, since, pin_hash, desc_ro, desc_en',
-      'id, created_by, name, village, since, pin_hash, members_count, generations_count, photos_count, desc_ro, desc_en',
-      'id, created_by, name, village, since, pin_hash, members_count, generations_count, photos_count, show_members, show_generations, show_photos, show_since, has_public_photos, has_private_photos, desc_ro, desc_en',
+      'id, created_by, name, village, since, visibility, pin_hash, desc_ro, desc_en',
+      'id, created_by, name, village, since, visibility, pin_hash, members_count, generations_count, photos_count, desc_ro, desc_en',
+      'id, created_by, name, village, since, visibility, pin_hash, members_count, generations_count, photos_count, show_members, show_generations, show_photos, show_since, has_public_photos, has_private_photos, desc_ro, desc_en',
+      'id, created_by, name, village, since, visibility, pin_hash',
       'id, created_by, name, village, since',
       'id, name, village, since'
     ];
@@ -1157,6 +1159,8 @@ window.openFamilyWithPin = function(event, familyId, href) {
   var fam = (families || []).find(function (f) { return String(f.id) === String(familyId); });
   var isOwner = !!(fam && familiesCurrentUserId && fam.created_by && String(fam.created_by) === String(familiesCurrentUserId));
   if (isOwner) return true;
+  var isPrivateFamily = !!(fam && String(fam.visibility || 'public').toLowerCase() === 'private');
+  if (!isPrivateFamily) return true;
   if (event && event.preventDefault) event.preventDefault();
   openFamilyPinModal(familyId, href);
   return false;

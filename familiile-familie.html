@@ -147,6 +147,46 @@ background:var(--s1);border:1px solid var(--b1);border-radius:2px;padding:14px 1
 border-color:var(--gold-d);
 }
 
+.member-card.clickable {
+cursor:pointer;
+}
+
+.member-overlay {
+position:fixed;inset:0;background:rgba(0,0,0,.72);z-index:9050;display:none;align-items:center;justify-content:center;padding:16px;
+}
+
+.member-overlay.open {
+display:flex;
+}
+
+.member-modal {
+width:100%;max-width:520px;background:#111;border:1px solid var(--gold-d);border-radius:3px;
+}
+
+.member-modal-head {
+display:flex;align-items:center;justify-content:space-between;padding:14px 18px;border-bottom:1px solid var(--b2);background:var(--s2);
+}
+
+.member-modal-title {
+font-family:'Playfair Display',serif;font-size:18px;color:var(--gold);
+}
+
+.member-modal-close {
+background:none;border:none;color:var(--muted);font-size:24px;cursor:pointer;line-height:1;
+}
+
+.member-modal-body {
+padding:16px 18px;
+}
+
+.member-detail-line {
+font-size:15px;color:#e6d6b2;line-height:1.7;margin:0 0 8px;
+}
+
+.member-private-msg {
+padding:12px;border:1px solid #6a2020;background:#230d0d;color:#e7b4b4;font-size:14px;border-radius:2px;
+}
+
 .members-grid {
 display:grid;grid-template-columns:repeat(auto-fill,minmax(135px,1fr));gap:12px;
 }
@@ -710,6 +750,16 @@ to{transform:rotate(360deg);}
 <a class="scroll-top" id="scrollTop" role="button" aria-label="Inapoi sus" title="Sus">&#8679;</a>
 <a class="scroll-bottom" id="scrollBottom" role="button" aria-label="Jos" title="Jos">&#8681;</a>
 
+<div id="memberViewOverlay" class="member-overlay" aria-hidden="true">
+  <div class="member-modal" role="dialog" aria-modal="true" aria-labelledby="memberViewTitle">
+    <div class="member-modal-head">
+      <div id="memberViewTitle" class="member-modal-title">Detalii membru</div>
+      <button class="member-modal-close" type="button" onclick="closeMemberDetails()" aria-label="Inchide">&times;</button>
+    </div>
+    <div id="memberViewBody" class="member-modal-body"></div>
+  </div>
+</div>
+
 <footer>
   <div style="max-width:960px;margin:0 auto;display:flex;flex-wrap:wrap;align-items:center;justify-content:center;gap:6px 16px;">
     <span><span class="g">Calnic</span> &nbsp;&#183;&nbsp; Alba &nbsp;&#183;&nbsp; Romania &nbsp;&#183;&nbsp; <span id="yr"></span></span>
@@ -966,6 +1016,62 @@ var privateUnlocked = false;
 
 var isOwner = false; // set after auth check
 
+function isPrivateMember(member) {
+  return String((member && member.visibility) || 'public').toLowerCase() === 'private';
+}
+
+function canSeeMemberDetails(member) {
+  if (!member) return false;
+  if (isOwner) return true;
+  return !isPrivateMember(member);
+}
+
+function memberDetailsLabel(ro, en) {
+  return currentLang === 'ro' ? ro : en;
+}
+
+function openMemberDetails(id) {
+  var overlay = document.getElementById('memberViewOverlay');
+  var titleEl = document.getElementById('memberViewTitle');
+  var bodyEl = document.getElementById('memberViewBody');
+  var m = MEMBERS.find(function(x){ return x.id === id; });
+  if (!overlay || !titleEl || !bodyEl || !m) return;
+
+  titleEl.textContent = m.name || memberDetailsLabel('Membru', 'Member');
+
+  if (!canSeeMemberDetails(m)) {
+    bodyEl.innerHTML = '<div class="member-private-msg">'
+      + memberDetailsLabel('Acest membru este privat. Doar owner-ul poate vedea detaliile complete.', 'This member is private. Only the owner can view full details.')
+      + '</div>';
+  } else {
+    var lines = [];
+    if (m.role) lines.push('<p class="member-detail-line"><strong>' + memberDetailsLabel('Rol:', 'Role:') + '</strong> ' + escH(m.role) + '</p>');
+    if (m.years) lines.push('<p class="member-detail-line"><strong>' + memberDetailsLabel('Ani:', 'Years:') + '</strong> ' + escH(m.years) + '</p>');
+    if (m.location) lines.push('<p class="member-detail-line"><strong>' + memberDetailsLabel('Locatie:', 'Location:') + '</strong> ' + escH(m.location) + '</p>');
+    if (m.profession) lines.push('<p class="member-detail-line"><strong>' + memberDetailsLabel('Profesie:', 'Profession:') + '</strong> ' + escH(m.profession) + '</p>');
+    if (m.biography) lines.push('<p class="member-detail-line"><strong>' + memberDetailsLabel('Biografie:', 'Biography:') + '</strong> ' + escH(m.biography) + '</p>');
+    if (m.story) lines.push('<p class="member-detail-line"><strong>' + memberDetailsLabel('Poveste:', 'Story:') + '</strong> ' + escH(m.story) + '</p>');
+    if (!lines.length) {
+      lines.push('<p class="member-detail-line">' + memberDetailsLabel('Nu exista detalii suplimentare pentru acest membru.', 'There are no extra details for this member.') + '</p>');
+    }
+    bodyEl.innerHTML = lines.join('');
+  }
+
+  overlay.classList.add('open');
+  overlay.setAttribute('aria-hidden', 'false');
+  document.body.style.overflow = 'hidden';
+}
+
+function closeMemberDetails() {
+  var overlay = document.getElementById('memberViewOverlay');
+  if (!overlay) return;
+  overlay.classList.remove('open');
+  overlay.setAttribute('aria-hidden', 'true');
+  if (!document.getElementById('memEditOverlay').classList.contains('open') && document.getElementById('memDelOverlay').style.display !== 'flex') {
+    document.body.style.overflow = '';
+  }
+}
+
 function resolveMemberPhotoUrl(photoPath) {
   if (!photoPath) return '';
   var raw = String(photoPath).trim();
@@ -992,10 +1098,10 @@ function renderMembers() {
     var showRole = m.role && SYS_ROLES.indexOf(m.role.toLowerCase()) === -1 ? m.role : '';
     var ownerBtns = isOwner
       ? '<div style="display:flex;gap:5px;justify-content:center;margin-top:8px;">'
-        + '<button onclick="openMemberEdit(\'' + escH(m.id) + '\')" '
+        + '<button onclick="event.stopPropagation();openMemberEdit(\'' + escH(m.id) + '\');return false;" '
         + 'style="padding:3px 10px;background:var(--s2);border:1px solid var(--b2);color:var(--gold);font-family:\'EB Garamond\',serif;font-size:12px;border-radius:2px;cursor:pointer;transition:border-color 0.15s;" '
         + 'onmouseover="this.style.borderColor=\'var(--gold)\'" onmouseout="this.style.borderColor=\'var(--b2)\'">✎ Editeaza</button>'
-        + '<button onclick="openMemberDel(\'' + escH(m.id) + '\')" '
+        + '<button onclick="event.stopPropagation();openMemberDel(\'' + escH(m.id) + '\');return false;" '
         + 'style="padding:3px 10px;background:#1a0808;border:1px solid #6a2020;color:#c04040;font-family:\'EB Garamond\',serif;font-size:12px;border-radius:2px;cursor:pointer;transition:border-color 0.15s;" '
         + 'onmouseover="this.style.borderColor=\'#c04040\'" onmouseout="this.style.borderColor=\'#6a2020\'">✕ Sterge</button>'
         + '</div>'
@@ -1004,7 +1110,7 @@ function renderMembers() {
     var avInner = resolvedPhotoUrl
       ? '<img src="' + escH(resolvedPhotoUrl) + '" alt="" style="width:100%;height:100%;object-fit:cover;border-radius:50%;display:block;">'
       : escH(m.initial);
-    return '<div class="member-card' + (m.deceased ? ' deceased' : '') + '">'
+    return '<div class="member-card clickable' + (m.deceased ? ' deceased' : '') + '" onclick="openMemberDetails(\'' + escH(m.id) + '\')">'
       + '<div class="mem-avatar">' + avInner + '</div>'
       + '<div class="mem-name">' + escH(m.name) + '</div>'
       + (showRole ? '<div class="mem-role">' + escH(showRole) + '</div>' : '')
@@ -1131,6 +1237,7 @@ async function checkPin() {
     document.querySelector('.private-box').innerHTML = '<div class="pb-icon">&#128275;</div>'
       + '<div class="pb-title" style="color:#82c46a;">' + (currentLang === 'ro' ? 'Acces acordat' : 'Access granted') + '</div>'
       + '<div class="pb-sub">' + (currentLang === 'ro' ? 'Bine ai venit! Continutul privat este acum vizibil.' : 'Welcome! Private content is now visible.') + '</div>';
+    renderMembers();
   } else {
     errEl.style.display = 'block';
   }
@@ -1362,6 +1469,7 @@ if (window.supabase) { checkFamilieFamilieNavSession(); } else { document.addEve
 <script>
 // ── ADD MEMBER ────────────────────────────────────────────
 function openAddMember() {
+  if (!isOwner) return;
   ['am-name','am-birth','am-death','am-loc','am-prof','am-bio'].forEach(function(id){ var el=document.getElementById(id); if(el)el.value=''; });
   var msg=document.getElementById('am-msg'); if(msg){msg.className='m-msg';msg.textContent='';}
   document.getElementById('addMemberOverlay').classList.add('open');
@@ -1373,6 +1481,7 @@ function closeAddMember() {
   document.body.style.overflow='';
 }
 function saveAddMember() {
+  if (!isOwner) return;
   if (!window.supabase || !familyId) return;
   var name = (document.getElementById('am-name').value||'').trim();
   if (!name || name.length < 2) {
@@ -1475,6 +1584,7 @@ function fmeSetVis(v) {
 }
 
 function openMemberEdit(id) {
+  if (!isOwner) return;
   var m = MEMBERS.find(function(x){ return x.id === id; });
   if (!m) return;
   _memEditId = id;
@@ -1583,6 +1693,7 @@ document.getElementById('fme-discard-btn').addEventListener('click', function() 
 
 // Save dates
 document.getElementById('fme-save-btn').addEventListener('click', function() {
+  if (!isOwner) return;
   var id = _memEditId; if (!id || !window.supabase) return;
   var name = document.getElementById('fme-name').value.trim();
   if (!name || name.length < 2) { fmeShowMsg(0, 'err', 'Numele este obligatoriu (min 2 caractere).'); return; }
@@ -1630,6 +1741,7 @@ document.getElementById('fme-conf').addEventListener('input', function(){
 
 // Save visibility
 document.getElementById('fme-vis-save').addEventListener('click', function() {
+  if (!isOwner) return;
   var id = _memEditId; if (!id || !window.supabase) return;
   var btn = this; btn.disabled = true;
   var isLiving = document.getElementById('fme-living').value === 'yes';
@@ -1662,6 +1774,7 @@ document.getElementById('fmePhotoInput').addEventListener('change', function() {
 });
 
 document.getElementById('fme-photo-save').addEventListener('click', function() {
+  if (!isOwner) return;
   var id = _memEditId; if (!id || !window.supabase || !_fmePhotoFile) { fmeShowMsg(1,'err','Selecteaza o poza mai intai.'); return; }
   var btn = this; btn.disabled = true; btn.textContent = 'Se incarca...';
   var ext = _fmePhotoFile.name.split('.').pop() || 'jpg';
@@ -1683,6 +1796,7 @@ document.getElementById('fme-photo-save').addEventListener('click', function() {
 });
 
 document.getElementById('fme-photo-del').addEventListener('click', function() {
+  if (!isOwner) return;
   var id = _memEditId; if (!id || !window.supabase) return;
   if (!confirm('Stergi poza acestei persoane?')) return;
   supabase.from('members').update({photo_url: null}).eq('id', id).then(function(r) {
@@ -1699,6 +1813,7 @@ document.getElementById('fme-photo-del').addEventListener('click', function() {
 
 // Delete member modal
 function openMemberDel(id) {
+  if (!isOwner) return;
   var m = MEMBERS.find(function(x){ return x.id === id; });
   if (!m) return;
   _memDelId = id;
@@ -1715,6 +1830,7 @@ function closeMemberDel() {
 }
 
 function execMemberDel() {
+  if (!isOwner) return;
   if (!_memDelId || !window.supabase) return;
   var btn = document.getElementById('me-del-confirm');
   var msg = document.getElementById('me-del-msg');
@@ -1730,12 +1846,14 @@ function execMemberDel() {
 
 document.addEventListener('keydown', function(e) {
   if (e.key === 'Escape') {
-    if (document.getElementById('memDelOverlay').style.display === 'flex') closeMemberDel();
+    if (document.getElementById('memberViewOverlay').classList.contains('open')) closeMemberDetails();
+    else if (document.getElementById('memDelOverlay').style.display === 'flex') closeMemberDel();
     else if (document.getElementById('memEditOverlay').classList.contains('open')) closeMemberEdit();
   }
 });
 document.getElementById('memEditOverlay').addEventListener('click', function(e){ if(e.target===this) closeMemberEdit(); });
 document.getElementById('memDelOverlay').addEventListener('click', function(e){ if(e.target===this) closeMemberDel(); });
+document.getElementById('memberViewOverlay').addEventListener('click', function(e){ if(e.target===this) closeMemberDetails(); });
 </script>
 
 <!-- Load Supabase client -->
