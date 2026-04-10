@@ -187,6 +187,26 @@ font-size:15px;color:#e6d6b2;line-height:1.7;margin:0 0 8px;
 padding:12px;border:1px solid #6a2020;background:#230d0d;color:#e7b4b4;font-size:14px;border-radius:2px;
 }
 
+.family-gate-overlay {
+position:fixed;inset:0;background:rgba(0,0,0,.82);z-index:9200;display:none;align-items:center;justify-content:center;padding:16px;
+}
+
+.family-gate-overlay.open {
+display:flex;
+}
+
+.family-gate-card {
+width:100%;max-width:420px;background:#101010;border:1px solid var(--gold-d);border-radius:3px;padding:18px;
+}
+
+.family-gate-title {
+font-family:'Playfair Display',serif;font-size:22px;color:var(--gold);text-align:center;margin-bottom:8px;
+}
+
+.family-gate-sub {
+font-size:14px;color:var(--muted);line-height:1.7;text-align:center;margin-bottom:14px;
+}
+
 .members-grid {
 display:grid;grid-template-columns:repeat(auto-fill,minmax(135px,1fr));gap:12px;
 }
@@ -760,6 +780,19 @@ to{transform:rotate(360deg);}
   </div>
 </div>
 
+<div id="familyGateOverlay" class="family-gate-overlay" aria-hidden="true">
+  <div class="family-gate-card" role="dialog" aria-modal="true" aria-labelledby="familyGateTitle">
+    <div id="familyGateTitle" class="family-gate-title" data-ro="Acces privat" data-en="Private access">Acces privat</div>
+    <div class="family-gate-sub" data-ro="Aceasta familie este protejata cu PIN. Introdu PIN-ul pentru a continua." data-en="This family is PIN-protected. Enter PIN to continue.">Aceasta familie este protejata cu PIN. Introdu PIN-ul pentru a continua.</div>
+    <div class="pw-wrap">
+      <input class="pb-input" id="familyGatePinInput" type="password" placeholder="PIN" maxlength="8" oninput="clearPinError()"/>
+      <button type="button" class="pw-toggle" onclick="togglePassword('familyGatePinInput', this)" aria-label="Arata PIN" tabindex="-1"><svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg></button>
+    </div>
+    <div class="pb-error" id="familyGatePinError" data-ro="PIN incorect. Incearca din nou." data-en="Incorrect PIN. Try again.">PIN incorect. Incearca din nou.</div>
+    <button class="pb-submit" type="button" onclick="checkPin()" data-ro="Acceseaza" data-en="Access">Acceseaza</button>
+  </div>
+</div>
+
 <footer>
   <div style="max-width:960px;margin:0 auto;display:flex;flex-wrap:wrap;align-items:center;justify-content:center;gap:6px 16px;">
     <span><span class="g">Calnic</span> &nbsp;&#183;&nbsp; Alba &nbsp;&#183;&nbsp; Romania &nbsp;&#183;&nbsp; <span id="yr"></span></span>
@@ -929,6 +962,7 @@ function loadFamilyData() {
         connected: true,
         pin:       null,
         pinHash:   r.pin_hash,
+        visibility: r.visibility || (r.show_members === false ? 'private' : 'public'),
         storyRo:   r.desc_ro || '',
         storyEn:   r.desc_en || '',
         story:     r.desc_ro || '',
@@ -965,8 +999,10 @@ function loadFamilyData() {
 
       document.title = FAM.name + ' — Calnic Online';
       populateDOM();
+      applyFamilyGateIfNeeded();
 
       window.supabase.auth.getUser().then(function(res) {
+        isOwner = false;
         if (res.data && res.data.user && res.data.user.id === FAM.ownerId) {
           isOwner = true;
           renderMembers();
@@ -979,6 +1015,7 @@ function loadFamilyData() {
           var heroInfo = document.querySelector('.fam-hero-info');
           if (heroInfo) heroInfo.appendChild(editBtn);
         }
+        applyFamilyGateIfNeeded();
       });
     }).catch(function(e) {
       console.warn('[Calnic] Error loading family data:', e);
@@ -1015,6 +1052,30 @@ var currentLang = localStorage.getItem('calnic-lang') || 'ro';
 var privateUnlocked = false;
 
 var isOwner = false; // set after auth check
+
+function isFamilyPinProtected() {
+  if (!FAM) return false;
+  var vis = String(FAM.visibility || '').toLowerCase();
+  if (vis === 'private') return true;
+  return !!FAM.pinHash;
+}
+
+function applyFamilyGateIfNeeded() {
+  var gate = document.getElementById('familyGateOverlay');
+  if (!gate) return;
+  var mustGate = !!(FAM && isFamilyPinProtected() && !isOwner && !privateUnlocked);
+  gate.classList.toggle('open', mustGate);
+  gate.setAttribute('aria-hidden', mustGate ? 'false' : 'true');
+  if (mustGate) {
+    document.body.style.overflow = 'hidden';
+    var pinIn = document.getElementById('familyGatePinInput');
+    if (pinIn) setTimeout(function(){ pinIn.focus(); }, 40);
+  } else if (!document.getElementById('memEditOverlay').classList.contains('open')
+      && document.getElementById('memDelOverlay').style.display !== 'flex'
+      && !document.getElementById('memberViewOverlay').classList.contains('open')) {
+    document.body.style.overflow = '';
+  }
+}
 
 function isPrivateMember(member) {
   return String((member && member.visibility) || 'public').toLowerCase() === 'private';
@@ -1195,10 +1256,15 @@ function renderPhotos() {
 }
 
 async function checkPin() {
-  var entered = document.getElementById('pinInput').value.trim();
-  var errEl = document.getElementById('pinError');
+  var gateInput = document.getElementById('familyGatePinInput');
+  var sideInput = document.getElementById('pinInput');
+  var entered = '';
+  if (gateInput && gateInput.value && gateInput.value.trim()) entered = gateInput.value.trim();
+  else if (sideInput && sideInput.value) entered = sideInput.value.trim();
+
+  var errEls = [document.getElementById('pinError'), document.getElementById('familyGatePinError')].filter(Boolean);
   if (!/^[0-9]{4,8}$/.test(entered)) {
-    errEl.style.display = 'block';
+    errEls.forEach(function(el){ el.style.display = 'block'; });
     return;
   }
 
@@ -1234,17 +1300,23 @@ async function checkPin() {
 
   if (granted) {
     privateUnlocked = true;
+    if (gateInput) gateInput.value = '';
+    if (sideInput) sideInput.value = '';
     document.querySelector('.private-box').innerHTML = '<div class="pb-icon">&#128275;</div>'
       + '<div class="pb-title" style="color:#82c46a;">' + (currentLang === 'ro' ? 'Acces acordat' : 'Access granted') + '</div>'
       + '<div class="pb-sub">' + (currentLang === 'ro' ? 'Bine ai venit! Continutul privat este acum vizibil.' : 'Welcome! Private content is now visible.') + '</div>';
+    applyFamilyGateIfNeeded();
     renderMembers();
   } else {
-    errEl.style.display = 'block';
+    errEls.forEach(function(el){ el.style.display = 'block'; });
   }
 }
 
 function clearPinError() {
-  document.getElementById('pinError').style.display = 'none';
+  var p1 = document.getElementById('pinError');
+  var p2 = document.getElementById('familyGatePinError');
+  if (p1) p1.style.display = 'none';
+  if (p2) p2.style.display = 'none';
 }
 
 function applyPageLang(lang) {
@@ -1854,6 +1926,12 @@ document.addEventListener('keydown', function(e) {
 document.getElementById('memEditOverlay').addEventListener('click', function(e){ if(e.target===this) closeMemberEdit(); });
 document.getElementById('memDelOverlay').addEventListener('click', function(e){ if(e.target===this) closeMemberDel(); });
 document.getElementById('memberViewOverlay').addEventListener('click', function(e){ if(e.target===this) closeMemberDetails(); });
+var gatePinInputEl = document.getElementById('familyGatePinInput');
+if (gatePinInputEl) {
+  gatePinInputEl.addEventListener('keydown', function(e) {
+    if (e.key === 'Enter') { e.preventDefault(); checkPin(); }
+  });
+}
 </script>
 
 <!-- Load Supabase client -->
