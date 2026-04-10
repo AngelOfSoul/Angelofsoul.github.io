@@ -948,13 +948,15 @@ function applyFilters() {
       var svgIdx = p.id % SVG_SHAPES.length;
       var mediaHtml = p.imgUrl ? '<img src="' + p.imgUrl.replace(/"/g, '&quot;') + '" alt="" style="width:100%;height:100%;object-fit:contain;background:#0f0f0f;" />' : SVG_SHAPES[svgIdx];
       var lockHtml = p.priv ? '<div class="pt-lock">&#128274; ' + (currentLang === 'ro' ? 'Privata' : 'Private') + '</div>' : '';
+      var yearVal = parseInt(p.year, 10);
+      var yearHtml = (yearVal && yearVal > 0) ? '<div class="pt-year">' + yearVal + '</div>' : '';
       var catLabel = getCatLabel(p.cat, currentLang);
       var byText = currentLang === 'ro' ? p.byRo : p.byEn;
       var title = getPhotoTitle(p);
       return '<div class="photo-tile" onclick="openLb(' + p.id + ')" data-id="' + p.id + '">'+
         '<div class="pt-img">' + mediaHtml + lockHtml +
         '<div class="pt-cat">' + catLabel + '</div>' +
-        '<div class="pt-year">' + p.year + '</div></div>'+
+        yearHtml + '</div>'+
         '<div class="pt-info"><div class="pt-info-left">'+
         '<div class="pt-title">' + title + '</div>'+
         '<div class="pt-by">' + (currentLang === 'ro' ? 'Donata de' : 'By') + ': <a href="familiile.html" onclick="event.stopPropagation()">' + byText + '</a></div>'+
