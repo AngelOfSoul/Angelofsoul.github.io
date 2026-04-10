@@ -1292,26 +1292,19 @@ function inferRelations(fromId,toId,relType){
   // Works even if surname changed after marriage, because it uses relation graph.
   var GRAND_LINK=['nepot','nepoata','bunic','bunica','strabunic','strabunica'];
   if(GRAND_LINK.indexOf(relType)!==-1){
-    var grandChildId,grandParentId;
-    // relation_type describes TARGET relative to ANCHOR:
-    // - bunica/bunic/strabunic/strabunica => target is grandparent of anchor
-    // - nepot/nepoata => target is grandchild of anchor
-    if(relType==='bunic'||relType==='bunica'||relType==='strabunic'||relType==='strabunica'){
-      grandChildId=fromId;grandParentId=toId;
-    } else {
-      grandChildId=toId;grandParentId=fromId;
-    }
-    var gcm=S.members.find(function(m){return m.id===grandChildId;});
-    if(gcm){
-      // Spouse of known grandparent is very likely the co-grandparent.
+    function pushGrandparentProposals(descendantId, grandParentId, out){
+      var dm=S.members.find(function(m){return m.id===descendantId;});
+      if(!dm)return;
+
+      // Co-grandparent via spouse.
       _getSpousesOf(grandParentId).forEach(function(sp){
         if(!sp||!sp.memberId)return;
-        if(_relHasBetween(grandChildId,sp.memberId))return;
+        if(_relHasBetween(descendantId,sp.memberId))return;
         var spM=S.members.find(function(m){return m.id===sp.memberId;});
         if(!spM)return;
         var gpType=(sp.parentType==='mama')?'bunica':'bunic';
         var gpLbl=REL_META[gpType]?REL_META[gpType].l:gpType;
-        proposals.push({from:grandChildId,to:sp.memberId,type:gpType,bio:true,text:spM.name+' este '+gpLbl+' lui '+gcm.name});
+        out.push({from:descendantId,to:sp.memberId,type:gpType,bio:true,text:spM.name+' este '+gpLbl+' lui '+dm.name});
       });
 
       var candParents=[],seenP={};
@@ -1320,35 +1313,71 @@ function inferRelations(fromId,toId,relType){
         seenP[pid]=1;
         candParents.push(pid);
       }
-      // Direct children of grandparent
       _getChildrenOf(grandParentId).forEach(function(ch){addCand(ch.memberId);});
-      // Children known only via spouse of grandparent
       _getSpousesOf(grandParentId).forEach(function(sp){
         _getChildrenOf(sp.memberId).forEach(function(ch){addCand(ch.memberId);});
       });
 
       candParents.forEach(function(parentCandidateId){
-        if(parentCandidateId===grandChildId)return;
-        if(parentCandidateId===grandParentId)return;
-        var childOfGp=S.members.find(function(m){return m.id===parentCandidateId;});
-        if(!childOfGp)return;
-        // Parent candidate: child of grandparent
-        if(!_parentChildExists(grandChildId,parentCandidateId)){
+        if(parentCandidateId===descendantId||parentCandidateId===grandParentId)return;
+        var parentM=S.members.find(function(m){return m.id===parentCandidateId;});
+        if(!parentM)return;
+
+        if(!_parentChildExists(descendantId,parentCandidateId)){
           var pType=_guessParentType(parentCandidateId);
           var pLbl=REL_META[pType]?REL_META[pType].l:pType;
-          proposals.push({from:grandChildId,to:parentCandidateId,type:pType,bio:true,text:childOfGp.name+' este '+pLbl+' lui '+gcm.name});
+          out.push({from:descendantId,to:parentCandidateId,type:pType,bio:true,text:parentM.name+' este '+pLbl+' lui '+dm.name});
         }
-        // Other parent candidate: spouse of the above
+
         _getSpousesOf(parentCandidateId).forEach(function(sp){
-          if(_parentChildExists(grandChildId,sp.memberId))return;
+          if(_parentChildExists(descendantId,sp.memberId))return;
           var spM=S.members.find(function(m){return m.id===sp.memberId;});
           if(!spM)return;
           var spType=sp.parentType||_guessParentType(sp.memberId);
           var spLbl=REL_META[spType]?REL_META[spType].l:spType;
-          proposals.push({from:grandChildId,to:sp.memberId,type:spType,bio:true,text:spM.name+' este '+spLbl+' lui '+gcm.name});
+          out.push({from:descendantId,to:sp.memberId,type:spType,bio:true,text:spM.name+' este '+spLbl+' lui '+dm.name});
         });
       });
     }
+
+    function inferByDepth(descendantId,ancestorId,depth){
+      var out=[];
+      if(depth===2){
+        pushGrandparentProposals(descendantId,ancestorId,out);
+        return _dedupeProposals(out);
+      }
+
+      // depth 3 (strabunic): find candidate grandparents as descendants of ancestor at distance 2
+      var lvl1=[],seen1={};
+      function addL1(id){if(!id||seen1[id])return;seen1[id]=1;lvl1.push(id);}
+      _getChildrenOf(ancestorId).forEach(function(ch){addL1(ch.memberId);});
+      _getSpousesOf(ancestorId).forEach(function(sp){
+        _getChildrenOf(sp.memberId).forEach(function(ch){addL1(ch.memberId);});
+      });
+
+      var lvl2=[],seen2={};
+      function addL2(id){if(!id||seen2[id])return;seen2[id]=1;lvl2.push(id);}
+      lvl1.forEach(function(p1){
+        _getChildrenOf(p1).forEach(function(ch){addL2(ch.memberId);});
+        _getSpousesOf(p1).forEach(function(sp){
+          _getChildrenOf(sp.memberId).forEach(function(ch){addL2(ch.memberId);});
+        });
+      });
+
+      lvl2.forEach(function(gpId){pushGrandparentProposals(descendantId,gpId,out);});
+      return _dedupeProposals(out);
+    }
+
+    var isAncestorLabel=(relType==='bunic'||relType==='bunica'||relType==='strabunic'||relType==='strabunica');
+    var depth=(relType==='strabunic'||relType==='strabunica')?3:2;
+    var primaryDesc=isAncestorLabel?fromId:toId;
+    var primaryAnc=isAncestorLabel?toId:fromId;
+    var altDesc=primaryAnc,altAnc=primaryDesc;
+
+    var p1=inferByDepth(primaryDesc,primaryAnc,depth);
+    var p2=inferByDepth(altDesc,altAnc,depth);
+    proposals=(p2.length>p1.length)?p2:p1;
+
     proposals=_dedupeProposals(proposals);
     if(!proposals.length)return;
     _showInferModal(proposals);

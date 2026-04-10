@@ -1091,6 +1091,10 @@ function renderPhotos() {
 async function checkPin() {
   var entered = document.getElementById('pinInput').value.trim();
   var errEl = document.getElementById('pinError');
+  if (!/^[0-9]{4,8}$/.test(entered)) {
+    errEl.style.display = 'block';
+    return;
+  }
 
   var granted = false;
 
@@ -1111,6 +1115,15 @@ async function checkPin() {
     }
   } else {
     granted = false;
+  }
+
+  /* Fallback for legacy schema without RPC: compare with stored value */
+  if (!granted && FAM && FAM.pinHash) {
+    try {
+      granted = (FAM.pinHash === btoa(entered));
+    } catch (_) {
+      granted = false;
+    }
   }
 
   if (granted) {

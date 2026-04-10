@@ -585,6 +585,18 @@ display:flex;gap:10px;justify-content:flex-end;flex-wrap:wrap;margin-top:18px
           <div id="pinMsg" class="df-msg"></div>
           <button class="dash-btn" id="pinBtn" data-ro="Schimba PIN" data-en="Change PIN">Schimba PIN</button>
         </div>
+        <hr class="df-divider"/>
+        <div class="df-subsection-title" data-ro="Zona periculoasa" data-en="Danger zone">Zona periculoasa</div>
+        <p style="font-size:13px;color:#c89a9a;margin-top:6px;"
+           data-ro="Stergerea familiei elimina membrii, cronologia si legaturile asociate. Actiunea este ireversibila."
+           data-en="Deleting the family removes associated members, timeline and links. This action is irreversible.">
+          Stergerea familiei elimina membrii, cronologia si legaturile asociate. Actiunea este ireversibila.
+        </p>
+        <div id="deleteFamilyMsg" class="df-msg"></div>
+        <button class="dash-btn-sec" id="deleteFamilyBtn"
+                style="border-color:#8f2a2a;color:#f0b0b0;background:rgba(110,20,20,.18);"
+                data-ro="Sterge familia"
+                data-en="Delete family">Sterge familia</button>
       </div>
     </div>
 
@@ -1097,7 +1109,171 @@ async function savePrivacy() {
 }
 
 async function changePIN() {
-  showMsg('pinMsg', currentLang === 'ro' ? 'PIN-ul nu este configurat in schema actuala.' : 'PIN is not configured in the current schema.', 'error');
+  var pinEl = document.getElementById('newPinInput');
+  var confEl = document.getElementById('confirmPinInput');
+  var btn = document.getElementById('pinBtn');
+  var pin = String((pinEl && pinEl.value) || '').trim();
+  var conf = String((confEl && confEl.value) || '').trim();
+
+  if (!/^[0-9]{4,8}$/.test(pin)) {
+    showMsg('pinMsg', currentLang === 'ro' ? 'PIN-ul trebuie sa fie 4-8 cifre.' : 'PIN must be 4-8 digits.', 'error');
+    return;
+  }
+  if (pin !== conf) {
+    showMsg('pinMsg', currentLang === 'ro' ? 'PIN-ul si confirmarea nu coincid.' : 'PIN and confirmation do not match.', 'error');
+    return;
+  }
+  if (!window.supabase || !familyId) {
+    showMsg('pinMsg', currentLang === 'ro' ? 'Sesiune invalida. Reincarca pagina.' : 'Invalid session. Please reload the page.', 'error');
+    return;
+  }
+
+  if (btn) btn.disabled = true;
+  var updated = false;
+
+  try {
+    var rpcRes = await window.supabase.rpc('set_family_pin', {
+      p_family_id: familyId,
+      p_pin: pin
+    });
+    if (!rpcRes.error) updated = true;
+  } catch (_) {}
+
+  if (!updated) {
+    var encodedPin = btoa(pin);
+    var upd = await window.supabase.from('families').update({ pin_hash: encodedPin }).eq('id', familyId);
+    if (upd.error) {
+      var msg = String(upd.error.message || '');
+      if (/column .* does not exist|Could not find/i.test(msg)) {
+        showMsg('pinMsg', currentLang === 'ro'
+          ? 'PIN-ul nu este disponibil in schema bazei de date. Ruleaza SQL-ul pentru coloana pin_hash.'
+          : 'PIN is not available in the database schema. Run the SQL for the pin_hash column.', 'error');
+      } else {
+        showMsg('pinMsg', msg, 'error');
+      }
+      if (btn) btn.disabled = false;
+      return;
+    }
+    updated = true;
+  }
+
+  if (updated) {
+    if (familyData) familyData.pin_hash = btoa(pin);
+    if (pinEl) pinEl.value = '';
+    if (confEl) confEl.value = '';
+    showMsg('pinMsg', currentLang === 'ro' ? 'PIN actualizat cu succes.' : 'PIN updated successfully.', 'success');
+  }
+  if (btn) btn.disabled = false;
+}
+
+function isMissingSchemaError(err) {
+  var msg = String((err && err.message) || '');
+  var code = String((err && err.code) || '');
+  return /column .* does not exist|Could not find|relation .* does not exist|does not exist/i.test(msg)
+    || code === '42703' || code === '42P01';
+}
+
+async function deleteCurrentFamily() {
+  if (!window.supabase || !familyId || !familyData) {
+    showMsg('deleteFamilyMsg', currentLang === 'ro' ? 'Nu exista o familie selectata.' : 'No selected family.', 'error');
+    return;
+  }
+
+  var familyName = String(familyData.name || familyData.display_name || '').trim();
+  var typed = prompt(
+    currentLang === 'ro'
+      ? ('Pentru confirmare, scrie exact numele familiei: ' + familyName)
+      : ('To confirm, type the exact family name: ' + familyName)
+  );
+  if (typed === null) return;
+  if (String(typed).trim() !== familyName) {
+    showMsg('deleteFamilyMsg', currentLang === 'ro' ? 'Numele introdus nu coincide.' : 'Typed name does not match.', 'error');
+    return;
+  }
+
+  var confirmed = confirm(currentLang === 'ro'
+    ? 'Sigur vrei sa stergi familia? Actiunea este ireversibila.'
+    : 'Are you sure you want to delete this family? This cannot be undone.');
+  if (!confirmed) return;
+
+  var btn = document.getElementById('deleteFamilyBtn');
+  if (btn) btn.disabled = true;
+
+  try {
+    var rpcRes = await window.supabase.rpc('delete_family_cascade', { p_family_id: familyId });
+    if (!rpcRes.error) {
+      localStorage.removeItem('selectedFamily');
+      showMsg('deleteFamilyMsg', currentLang === 'ro' ? 'Familia a fost stearsa.' : 'Family deleted.', 'success');
+      setTimeout(function() { window.location.href = 'familiile.html'; }, 900);
+      return;
+    }
+
+    // Fallback path if RPC is not present yet.
+    var photosRes = await window.supabase
+      .from('photos')
+      .select('id,path')
+      .eq('family_id', familyId);
+    var photoIds = [];
+    var storagePaths = [];
+    if (!photosRes.error && Array.isArray(photosRes.data)) {
+      photoIds = photosRes.data.map(function(p) { return p.id; }).filter(Boolean);
+      storagePaths = photosRes.data.map(function(p) { return extractStoragePath(p.path || ''); }).filter(Boolean);
+    }
+
+    if (storagePaths.length) {
+      await window.supabase.storage.from('photos').remove(storagePaths);
+    }
+
+    if (photoIds.length) {
+      try {
+        await window.supabase.from('photo_reports').delete().in('photo_id', photoIds);
+      } catch (_) {}
+    }
+
+    try { await window.supabase.from('photos').delete().eq('family_id', familyId); } catch (_) {}
+    try { await window.supabase.from('timeline').delete().eq('family_id', familyId); } catch (_) {}
+    try {
+      await window.supabase.from('family_links').delete().eq('family_a_id', familyId);
+      await window.supabase.from('family_links').delete().eq('family_b_id', familyId);
+    } catch (_) {}
+
+    var mRes = await window.supabase.from('members').select('id').eq('family_id', familyId);
+    var memberIds = (!mRes.error && Array.isArray(mRes.data))
+      ? mRes.data.map(function(m) { return m.id; }).filter(Boolean)
+      : [];
+
+    if (memberIds.length) {
+      try {
+        await window.supabase.from('member_relations').delete().in('from_member_id', memberIds);
+        await window.supabase.from('member_relations').delete().in('to_member_id', memberIds);
+      } catch (_) {}
+      try {
+        await window.supabase.from('member_history').delete().in('member_id', memberIds);
+      } catch (_) {}
+    }
+
+    try { await window.supabase.from('members').delete().eq('family_id', familyId); } catch (_) {}
+
+    var delFamily = await window.supabase.from('families').delete().eq('id', familyId);
+    if (delFamily.error) {
+      if (isMissingSchemaError(delFamily.error) || isMissingSchemaError(rpcRes.error)) {
+        showMsg('deleteFamilyMsg', currentLang === 'ro'
+          ? 'Stergerea completa necesita SQL-ul delete_family_cascade in Supabase.'
+          : 'Full deletion requires delete_family_cascade SQL in Supabase.', 'error');
+      } else {
+        showMsg('deleteFamilyMsg', delFamily.error.message, 'error');
+      }
+      if (btn) btn.disabled = false;
+      return;
+    }
+
+    localStorage.removeItem('selectedFamily');
+    showMsg('deleteFamilyMsg', currentLang === 'ro' ? 'Familia a fost stearsa.' : 'Family deleted.', 'success');
+    setTimeout(function() { window.location.href = 'familiile.html'; }, 900);
+  } catch (e) {
+    showMsg('deleteFamilyMsg', (e && e.message) ? e.message : (currentLang === 'ro' ? 'Eroare la stergere.' : 'Delete failed.'), 'error');
+    if (btn) btn.disabled = false;
+  }
 }
 
 /* Logout */
@@ -1224,6 +1400,9 @@ document.addEventListener('DOMContentLoaded', function() {
 
   var sb_pin = document.getElementById('pinBtn');
   if (sb_pin) sb_pin.addEventListener('click', function() { changePIN(); });
+
+  var sb_del_family = document.getElementById('deleteFamilyBtn');
+  if (sb_del_family) sb_del_family.addEventListener('click', function() { deleteCurrentFamily(); });
 
   // Scroll buttons
   var stb = document.getElementById('scrollTop');

@@ -960,11 +960,17 @@ async function doFamilyProfile(e) {
     if (since) base.since = since;
     if (descRo) base.desc_ro = descRo;
     if (descEn) base.desc_en = descEn;
+    var baseNoPin = Object.assign({}, base);
+    delete baseNoPin.pin_hash;
     var payloads = [
       Object.assign({}, base, { owner_id: userId, created_by: userId }),
       Object.assign({}, base, { created_by: userId }),
       Object.assign({}, base, { owner_id: userId }),
-      Object.assign({}, base)
+      Object.assign({}, base),
+      Object.assign({}, baseNoPin, { owner_id: userId, created_by: userId }),
+      Object.assign({}, baseNoPin, { created_by: userId }),
+      Object.assign({}, baseNoPin, { owner_id: userId }),
+      Object.assign({}, baseNoPin)
     ];
     var insRes = null;
     for (var pi = 0; pi < payloads.length; pi++) {
