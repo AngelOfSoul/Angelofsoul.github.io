@@ -1108,6 +1108,15 @@ function compressImage(file, callback) {
   reader.readAsDataURL(file);
 }
 
+function hasLiveSupabase() {
+  return !!(
+    window.supabase &&
+    typeof window.supabase.from === 'function' &&
+    typeof window.supabase.storage === 'object' &&
+    (!window.isSupabaseConfigured || window.isSupabaseConfigured())
+  );
+}
+
 function savePhoto() {
   var title = document.getElementById('um-titlu').value.trim();
   if (!title) {
@@ -1115,9 +1124,17 @@ function savePhoto() {
     return;
   }
   var fileInput = document.getElementById('fileInput');
-  if (!window.supabase || !window.true || !fileInput.files || !fileInput.files[0]) {
-    alert(currentLang === 'ro' ? 'Fotografia a fost salvata! (Demo \u2014 conecteaza Supabase pentru stocare reala)' : 'Photo saved! (Demo \u2014 connect Supabase for real storage)');
-    closeUploadBtn();
+  if (!fileInput.files || !fileInput.files[0]) {
+    showUmMsg(currentLang === 'ro' ? 'Te rugam sa selectezi o fotografie.' : 'Please select a photo.', 'err');
+    return;
+  }
+  if (!hasLiveSupabase()) {
+    showUmMsg(
+      currentLang === 'ro'
+        ? 'Supabase nu este configurat corect. Fotografia nu poate fi salvata.'
+        : 'Supabase is not configured correctly. Photo cannot be saved.',
+      'err'
+    );
     return;
   }
   var saveBtn = document.getElementById('um-save-btn');
@@ -1210,7 +1227,7 @@ applyPageLang(window.CalnicUtils ? window.CalnicUtils.lang() : currentLang);
 
 /* ── Load real photos from Supabase on ready ── */
 function loadPhotosFromSupabase() {
-  if (!window.supabase || !window.true) return;
+  if (!hasLiveSupabase()) return;
   supabase.from('photos')
     .select('*')
     .eq('is_private', false)
