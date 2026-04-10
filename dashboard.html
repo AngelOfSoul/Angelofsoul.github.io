@@ -289,6 +289,26 @@ width:100%; background:none; border:none; border-top:1px solid var(--b1); color:
 background:#3a1818; color:#e08080;
 }
 
+.dash-photo-vis {
+width:100%; background:none; border:none; border-top:1px solid var(--b1); font-size:12px; padding:5px; cursor:pointer; font-family:'EB Garamond',serif; transition:all 0.15s;
+}
+
+.dash-photo-vis.make-public {
+color:#82c46a;
+}
+
+.dash-photo-vis.make-public:hover {
+background:#132514; color:#b8e6b0;
+}
+
+.dash-photo-vis.make-private {
+color:#d8b46b;
+}
+
+.dash-photo-vis.make-private:hover {
+background:#2a200f; color:#f4da9a;
+}
+
 .pw-wrap .df-input {
 padding-right: 38px;
 }
@@ -414,6 +434,7 @@ display:flex;gap:10px;justify-content:flex-end;flex-wrap:wrap;margin-top:18px
       <div class="dash-actions">
         <a id="viewPublicLink" href="familiile-familie.html?family=" class="dash-btn-sec" data-ro="Profil public" data-en="Public profile">Profil public</a>
         <a id="viewVillageTreeLink" href="arborele-satului.html" class="dash-btn-sec" data-ro="Arborele satului" data-en="Village tree">Arborele satului</a>
+        <button id="openDeleteFamilyZoneBtn" class="dash-btn-sec" style="border-color:#8f2a2a;color:#f0b0b0;background:rgba(110,20,20,.18);" data-ro="Sterge familia" data-en="Delete family">Sterge familia</button>
         <button id="logoutBtn" class="dash-btn-sec" data-ro="Deconectare" data-en="Sign out">Deconectare</button>
       </div>
     </div>
@@ -691,6 +712,7 @@ applyPageLang(window.CalnicUtils ? window.CalnicUtils.lang() : currentLang);
 
 /* Toggle sections */
 function toggleSection(name) {
+  if (!name) return;
   var body = document.getElementById('body-' + name);
   var tog = document.getElementById('toggle-' + name);
   if (!body) return;
@@ -702,6 +724,45 @@ function toggleSection(name) {
   }
   body.style.display = open ? 'block' : 'none';
   if (tog) tog.textContent = open ? '\u2212' : '+';
+}
+
+function setSectionOpen(name, open) {
+  var body = document.getElementById('body-' + name);
+  var tog = document.getElementById('toggle-' + name);
+  if (!body) return;
+  body.style.display = open ? 'block' : 'none';
+  if (tog) tog.textContent = open ? '\u2212' : '+';
+}
+
+function parseDashboardSectionFromLocation() {
+  var hash = String(window.location.hash || '').replace(/^#/, '').toLowerCase();
+  var section = hash;
+  if (!section) {
+    var qs = new URLSearchParams(window.location.search || '');
+    section = String(qs.get('section') || '').toLowerCase();
+  }
+  var allowed = ['story', 'members', 'timeline', 'privacy', 'photos'];
+  return allowed.indexOf(section) !== -1 ? section : '';
+}
+
+function applySectionFromLocation() {
+  var section = parseDashboardSectionFromLocation();
+  if (!section) return;
+  setSectionOpen(section, true);
+  var secEl = document.getElementById('sec-' + section);
+  if (secEl && window.requestAnimationFrame) {
+    window.requestAnimationFrame(function() {
+      secEl.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    });
+  }
+}
+
+function openDeleteFamilyZone() {
+  setSectionOpen('privacy', true);
+  var secEl = document.getElementById('sec-privacy');
+  if (secEl) secEl.scrollIntoView({ behavior: 'smooth', block: 'start' });
+  var delBtn = document.getElementById('deleteFamilyBtn');
+  if (delBtn) setTimeout(function(){ delBtn.focus(); }, 220);
 }
 
 /* Show/hide states */
@@ -1040,6 +1101,15 @@ function renderPhotos(photos) {
     var meta = [cat, year].filter(Boolean).join(' · ');
     var storagePath = extractStoragePath(p.path || '');
     var imgSrc = resolvePhotoUrl(p.path || '');
+    var isPrivate = !!p.is_private;
+    var toggleToPrivate = !isPrivate;
+    var visBtnClass = toggleToPrivate ? 'make-private' : 'make-public';
+    var visBtnLabel = toggleToPrivate
+      ? (currentLang === 'ro' ? 'Fa privata' : 'Make private')
+      : (currentLang === 'ro' ? 'Fa publica' : 'Make public');
+    var visState = isPrivate
+      ? (currentLang === 'ro' ? '&#128274; Privata' : '&#128274; Private')
+      : (currentLang === 'ro' ? '&#127760; Publica' : '&#127760; Public');
     var imgHtml = imgSrc
       ? '<img class="dash-photo-thumb" src="' + escHtml(imgSrc) + '" alt="' + escHtml(title) + '" onerror="this.style.display=\'none\';this.nextElementSibling.style.display=\'flex\'">'
         + '<div class="dash-photo-thumb-placeholder" style="display:none">&#128247;</div>'
@@ -1049,7 +1119,10 @@ function renderPhotos(photos) {
       + '<div class="dash-photo-info">'
       + '<div class="dash-photo-title" title="' + escHtml(title) + '">' + escHtml(title) + '</div>'
       + (meta ? '<div class="dash-photo-meta">' + escHtml(meta) + '</div>' : '')
+      + '<div class="dash-photo-meta">' + visState + '</div>'
       + '</div>'
+      + '<button class="dash-photo-vis ' + visBtnClass + '" onclick="togglePhotoPrivacy(\'' + p.id + '\',' + (toggleToPrivate ? 'true' : 'false') + ')">'
+      + visBtnLabel + '</button>'
       + '<button class="dash-photo-del" onclick="deletePhoto(\'' + p.id + '\',\'' + (storagePath||'').replace(/'/g,"\\'") + '\')">'
       + (currentLang === 'ro' ? 'Sterge' : 'Delete') + '</button>'
       + '</div>';
@@ -1164,6 +1237,23 @@ async function changePIN() {
     showMsg('pinMsg', currentLang === 'ro' ? 'PIN actualizat cu succes.' : 'PIN updated successfully.', 'success');
   }
   if (btn) btn.disabled = false;
+}
+
+async function togglePhotoPrivacy(photoId, makePrivate) {
+  if (!window.supabase || !photoId || !currentUser) return;
+  var upd = await window.supabase
+    .from('photos')
+    .update({ is_private: !!makePrivate })
+    .eq('id', photoId)
+    .eq('uploader_id', currentUser.id);
+  if (upd.error) {
+    showMsg('photosMsg', upd.error.message, 'error');
+    return;
+  }
+  showMsg('photosMsg', makePrivate
+    ? (currentLang === 'ro' ? 'Fotografia a fost setata ca privata.' : 'Photo set to private.')
+    : (currentLang === 'ro' ? 'Fotografia a fost setata ca publica.' : 'Photo set to public.'), 'success');
+  await loadPhotos();
 }
 
 function isMissingSchemaError(err) {
@@ -1378,6 +1468,7 @@ function initDashboard() {
     loadPhotos();
     loadDashboardBadges();
     showMain();
+    applySectionFromLocation();
   }).catch(function() { window.location.href = 'login.html'; });
 }
 if (window.supabase) { initDashboard(); } else { document.addEventListener('supabase:ready', initDashboard); }
@@ -1404,11 +1495,18 @@ document.addEventListener('DOMContentLoaded', function() {
   var sb_del_family = document.getElementById('deleteFamilyBtn');
   if (sb_del_family) sb_del_family.addEventListener('click', function() { deleteCurrentFamily(); });
 
+  var sb_open_delete_zone = document.getElementById('openDeleteFamilyZoneBtn');
+  if (sb_open_delete_zone) sb_open_delete_zone.addEventListener('click', function() { openDeleteFamilyZone(); });
+
   // Scroll buttons
   var stb = document.getElementById('scrollTop');
   var sbb = document.getElementById('scrollBottom');
   if (stb) { stb.removeAttribute('onclick'); stb.addEventListener('click', function() { window.scrollTo({top:0, behavior:'smooth'}); }); }
   if (sbb) { sbb.removeAttribute('onclick'); sbb.addEventListener('click', function() { window.scrollTo({top:document.body.scrollHeight, behavior:'smooth'}); }); }
+});
+
+window.addEventListener('hashchange', function() {
+  applySectionFromLocation();
 });
 
 // escHtml helper for renderMembers
