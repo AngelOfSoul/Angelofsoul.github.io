@@ -69,6 +69,18 @@
   }
 
   function status(text) { if (statusEl) statusEl.textContent = text; }
+  function pulseRecenterButton() {
+    if (!fitBtn) return;
+    fitBtn.style.transition = 'transform 180ms ease, box-shadow 220ms ease, border-color 220ms ease';
+    fitBtn.style.transform = 'translateY(-1px) scale(1.04)';
+    fitBtn.style.borderColor = '#c8a030';
+    fitBtn.style.boxShadow = '0 0 0 1px rgba(200,160,48,.35), 0 0 14px rgba(200,160,48,.28)';
+    window.setTimeout(function () {
+      fitBtn.style.transform = '';
+      fitBtn.style.borderColor = '';
+      fitBtn.style.boxShadow = '';
+    }, 240);
+  }
 
   function populateSelectors(nodes) {
     var sorted = nodes.slice().sort(function (a, b) { return (a.label || '').localeCompare(b.label || '', 'ro'); });
@@ -188,6 +200,7 @@
       status(t('Nu exista familii pentru recentrare.', 'No families available to recenter.'));
       return;
     }
+    pulseRecenterButton();
 
     // If user dragged nodes around, let the simulation settle briefly,
     // then apply a fresh "fit to all families" transform.
