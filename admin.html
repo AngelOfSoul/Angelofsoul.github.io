@@ -3649,18 +3649,33 @@ function replyPhotoReporter(photoId) {
   if (!msg || !String(msg).trim()) return;
 
   var reporterEmail = rep.reporter_id ? (PHOTO_REPORT_EMAIL_MAP[String(rep.reporter_id)] || '') : '';
-  if (reporterEmail) {
-    var subject = 'Raspuns raport foto - Calnic Online';
-    var body = String(msg).trim();
-    var mailto = 'mailto:' + encodeURIComponent(reporterEmail) +
-      '?subject=' + encodeURIComponent(subject) +
-      '&body=' + encodeURIComponent(body);
-    window.location.href = mailto;
-  } else {
-    alert('Raportorul nu are email disponibil in sistem. Salvez raspunsul in moderare.');
+  var subject = 'Raspuns raport foto - Calnic Online';
+  var body = String(msg).trim();
+  var clipText = [
+    'EMAIL: ' + (reporterEmail || '(email indisponibil)'),
+    'SUBIECT: ' + subject,
+    '',
+    body
+  ].join('\n');
+
+  function saveAndNotify() {
+    resolvePhotoReports(photoId, 'dismissed', body);
+    if (reporterEmail) {
+      alert('Raspuns salvat in admin si copiat in clipboard. Acum poti da paste in email catre: ' + reporterEmail);
+    } else {
+      alert('Raspuns salvat in admin. Emailul raportorului nu este disponibil; textul a fost copiat in clipboard.');
+    }
   }
 
-  resolvePhotoReports(photoId, 'dismissed', String(msg).trim());
+  if (navigator.clipboard && typeof navigator.clipboard.writeText === 'function') {
+    navigator.clipboard.writeText(clipText).then(saveAndNotify).catch(function() {
+      resolvePhotoReports(photoId, 'dismissed', body);
+      alert('Raspuns salvat in admin. Nu am putut copia automat in clipboard.');
+    });
+  } else {
+    resolvePhotoReports(photoId, 'dismissed', body);
+    alert('Raspuns salvat in admin. Browserul nu permite copiere automata in clipboard.');
+  }
 }
 
 /* â”€â”€ HELPER: show message â”€â”€ */
