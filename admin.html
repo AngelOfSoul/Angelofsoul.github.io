@@ -1782,7 +1782,7 @@ function loadUsers() {
         '<th></th>' +
       '</tr>' +
       profiles.map(function(p) {
-        var fam = famByOwner[p.id];
+        var fam = famByOwner[String(p.id)];
         var emailRaw = (p.email || p.user_email || p.contact_email || emailMap[String(p.id)] || '').trim();
         var emailSafe = emailRaw
           ? escH(emailRaw)
@@ -1815,9 +1815,6 @@ function loadUsers() {
 
 function resetUserPassword(userId) {
   if (!window.supabase) return;
-  var fam = document.querySelector('#users-list table');
-  // We can't get email from profiles directly - use families created_by match
-  // Instead show a confirmation and use admin API if available, else inform
   if (!confirm('Trimiti un email de resetare parola acestui utilizator?')) return;
   // Supabase admin.generateLink requires service key - not available client-side.
   // Best we can do from client: inform admin to use Supabase dashboard.

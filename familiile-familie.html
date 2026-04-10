@@ -460,10 +460,6 @@ color:var(--text);
 text-align:center;color:var(--b2);font-size:14px;margin:14px 0;letter-spacing:5px;
 }
 
-.private-box {
-background:#0e0d08;border:1px solid var(--gold-m);border-radius:2px;padding:18px;text-align:center;
-}
-
 .pb-icon {
 font-size:26px;margin-bottom:8px;
 }
@@ -1091,7 +1087,7 @@ function loadFamilyData() {
       MEMBERS = (membersRes.data || []).map(mapMemberRow);
       TIMELINE = (timelineRes.data || []).map(mapTimelineRow);
 
-      document.title = FAM.name + ' — Calnic Online';
+      document.title = FAM.name + ' - Calnic Online';
       populateDOM();
       applyFamilyGateIfNeeded();
 
@@ -1104,7 +1100,7 @@ function loadFamilyData() {
           if (addBtn) addBtn.style.display = 'inline-block';
           var editBtn = document.createElement('a');
           editBtn.href = 'dashboard.html?family=' + familyId;
-          editBtn.textContent = currentLang === 'ro' ? '✎ Editeaza familia' : '✎ Edit family';
+          editBtn.textContent = currentLang === 'ro' ? 'Editeaza familia' : 'Edit family';
           editBtn.style.cssText = 'display:inline-block;margin-top:12px;padding:8px 18px;background:var(--s2);border:1px solid var(--b2);color:var(--gold);font-family:\'EB Garamond\',serif;font-size:14px;border-radius:2px;';
           var heroInfo = document.querySelector('.fam-hero-info');
           if (heroInfo) heroInfo.appendChild(editBtn);
@@ -1119,39 +1115,21 @@ function loadFamilyData() {
       }).catch(function() {
         isOwner = false;
       }).finally(function() {
-        authStateResolved = true;
-        var autoPin = getStoredFamilyPin(familyId);
-        if (!isOwner && isFamilyPinProtected() && autoPin) {
-          checkPin(autoPin, true).then(function(ok){ if (!ok) applyFamilyGateIfNeeded(); });
-        } else {
-          applyFamilyGateIfNeeded();
-        }
+        finalizeFamilyAuthState();
       });
     }).catch(function(e) {
       console.warn('[Calnic] Error loading family data:', e);
       showDbErrorMsg(currentLang === 'ro'
         ? 'Eroare la incarcarea datelor familiei. Incearca din nou mai tarziu.'
         : 'Error loading family data. Please try again later.');
-      authStateResolved = true;
-        var autoPin = getStoredFamilyPin(familyId);
-        if (!isOwner && isFamilyPinProtected() && autoPin) {
-          checkPin(autoPin, true).then(function(ok){ if (!ok) applyFamilyGateIfNeeded(); });
-        } else {
-          applyFamilyGateIfNeeded();
-        }
+      finalizeFamilyAuthState();
     });
   }).catch(function(e) {
     console.warn('[Calnic] Error loading family data:', e);
     showDbErrorMsg(currentLang === 'ro'
       ? 'Eroare la incarcarea datelor familiei. Incearca din nou mai tarziu.'
       : 'Error loading family data. Please try again later.');
-    authStateResolved = true;
-        var autoPin = getStoredFamilyPin(familyId);
-        if (!isOwner && isFamilyPinProtected() && autoPin) {
-          checkPin(autoPin, true).then(function(ok){ if (!ok) applyFamilyGateIfNeeded(); });
-        } else {
-          applyFamilyGateIfNeeded();
-        }
+    finalizeFamilyAuthState();
   });
 }
 if (window.supabase) { loadFamilyData(); } else { document.addEventListener('supabase:ready', loadFamilyData); }
@@ -1160,8 +1138,8 @@ function showNoFamilyMsg() {
   var msg = document.createElement('div');
   msg.style.cssText = 'padding:32px;text-align:center;color:var(--muted);font-style:italic;';
   msg.innerHTML = currentLang === 'ro'
-    ? 'Nicio familie specificata. <a href="familiile.html">Vezi toate familiile →</a>'
-    : 'No family specified. <a href="familiile.html">View all families →</a>';
+    ? 'Nicio familie specificata. <a href="familiile.html">Vezi toate familiile -></a>'
+    : 'No family specified. <a href="familiile.html">View all families -></a>';
   document.querySelector('.fam-hero') && document.querySelector('.fam-hero').after(msg);
 }
 
@@ -1204,6 +1182,18 @@ function setStoredFamilyPin(pin, fid) {
 
 function isFamilyLockedForViewer() {
   return !!(FAM && isFamilyPinProtected() && !isOwner && !privateUnlocked);
+}
+
+function finalizeFamilyAuthState() {
+  authStateResolved = true;
+  var autoPin = getStoredFamilyPin(familyId);
+  if (!isOwner && isFamilyPinProtected() && autoPin) {
+    checkPin(autoPin, true).then(function(ok) {
+      if (!ok) applyFamilyGateIfNeeded();
+    });
+  } else {
+    applyFamilyGateIfNeeded();
+  }
 }
 
 function isFamilyPinProtected() {
