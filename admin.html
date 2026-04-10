@@ -1754,7 +1754,7 @@ function loadUsers() {
   if (!el) return;
   Promise.all([
     sb.from('profiles').select('*').order('created_at', {ascending: false}),
-    sb.from('families').select('created_by, name, village, created_at'),
+    sb.from('families').select('id, created_by, owner_id, name, village, created_at'),
     loadAdminEmailMap()
   ]).then(function(results) {
     var profiles = results[0].data || [];
@@ -1768,7 +1768,10 @@ function loadUsers() {
 
     // Map created_by -> family info
     var famByOwner = {};
-    families.forEach(function(f) { famByOwner[f.created_by] = f; });
+    families.forEach(function(f) {
+      if (f.created_by) famByOwner[String(f.created_by)] = f;
+      if (f.owner_id) famByOwner[String(f.owner_id)] = f;
+    });
 
     el.innerHTML = '<div class="tbl-wrap"><table class="adm-tbl">' +
       '<tr>' +
@@ -1794,12 +1797,13 @@ function loadUsers() {
           ? '<span class="badge info">Admin</span>'
           : '<span class="badge low">Utilizator</span>';
         var resetBtn = '<button class="tbtn" onclick="resetUserPassword(\'' + p.id + '\')" title="Trimite email resetare parola">&#128274; Reset</button>';
+        var delBtn = '<button class="tbtn red" onclick="deleteUserAccount(\'' + p.id + '\',\'' + escAttr(emailRaw || '') + '\',\'' + escAttr(fam ? fam.name : '') + '\')" title="Sterge contul complet">Sterge cont</button>';
         return '<tr>' +
           '<td>' + famOrEmail + '</td>' +
           '<td>' + village + '</td>' +
           '<td>' + since + '</td>' +
           '<td>' + adminBadge + '</td>' +
-          '<td style="white-space:nowrap;">' + resetBtn + '</td>' +
+          '<td style="white-space:nowrap;">' + resetBtn + ' ' + delBtn + '</td>' +
           '</tr>';
       }).join('') +
       '</table></div>' +
@@ -1818,6 +1822,33 @@ function resetUserPassword(userId) {
   // Supabase admin.generateLink requires service key - not available client-side.
   // Best we can do from client: inform admin to use Supabase dashboard.
   alert('Pentru resetarea parolei, mergi in Supabase Dashboard -> Authentication -> Users, gaseste utilizatorul si apasa "Send password reset".\n\nAceasta actiune necesita cheia de serviciu (service key) care nu trebuie expusa in frontend.');
+}
+
+function deleteUserAccount(userId, email, familyName) {
+  if (!window.supabase || !userId) return;
+  var label = (email && email.trim()) || (familyName && familyName.trim()) || ('ID: ' + String(userId).slice(0, 8) + '...');
+  var ok1 = confirm('Stergi complet acest cont?\n\n' + label + '\n\nActiunea este permanenta: cont, familie si datele asociate vor fi sterse.');
+  if (!ok1) return;
+  var typed = prompt('Pentru confirmare finala, tasteaza exact:\nSTERGE CONT');
+  if (typed !== 'STERGE CONT') {
+    alert('Confirmare invalida. Operatiunea a fost anulata.');
+    return;
+  }
+
+  var payload = { p_user_id: userId };
+  supabase.rpc('admin_delete_user_account', payload).then(function(r) {
+    if (r && r.error) {
+      alert('Eroare la stergerea contului: ' + r.error.message + '\n\nRuleaza SQL-ul admin pentru functia public.admin_delete_user_account(uuid).');
+      return;
+    }
+    logAction('user-delete', 'Cont sters complet: ' + label);
+    loadUsers();
+    loadFamilies();
+    loadDashboard();
+    alert('Contul a fost sters complet: ' + label);
+  }).catch(function(err) {
+    alert('Eroare la stergerea contului: ' + (err && err.message ? err.message : 'necunoscuta'));
+  });
 }
 
 /* â”€â”€ BACKUP â”€â”€ */
@@ -2920,11 +2951,40 @@ function deleteFamily(id, name) {
   if (!confirm1) return;
   var typed = prompt('Pentru confirmare, tasteaza exact numele familiei:\n' + name);
   if (typed !== name) { alert('Numele nu se potriveste. Stergerea a fost anulata.'); return; }
-  supabase.from('families').delete().eq('id', id).then(function(){
+  if (!window.supabase || !id) return;
+
+  function onDeleted() {
     logAction('family-delete', 'Familie stearsa: ' + name);
     loadFamilies();
     loadDashboard();
     alert('Familia "' + name + '" a fost stearsa.');
+  }
+
+  supabase.rpc('admin_delete_family_cascade', { p_family_id: id }).then(function(rpcRes){
+    if (!rpcRes || !rpcRes.error) {
+      onDeleted();
+      return;
+    }
+
+    supabase.from('families').delete().eq('id', id).then(function(delRes){
+      if (delRes && delRes.error) {
+        alert('Eroare la stergerea familiei: ' + delRes.error.message + '\n\nRuleaza SQL-ul pentru functia public.admin_delete_family_cascade(uuid).');
+        return;
+      }
+      onDeleted();
+    }).catch(function(err){
+      alert('Eroare la stergerea familiei: ' + (err && err.message ? err.message : 'necunoscuta'));
+    });
+  }).catch(function(){
+    supabase.from('families').delete().eq('id', id).then(function(delRes){
+      if (delRes && delRes.error) {
+        alert('Eroare la stergerea familiei: ' + delRes.error.message + '\n\nRuleaza SQL-ul pentru functia public.admin_delete_family_cascade(uuid).');
+        return;
+      }
+      onDeleted();
+    }).catch(function(err){
+      alert('Eroare la stergerea familiei: ' + (err && err.message ? err.message : 'necunoscuta'));
+    });
   });
 }
 
