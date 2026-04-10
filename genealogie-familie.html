@@ -1151,19 +1151,16 @@ document.addEventListener('DOMContentLoaded',function(){
 var _inferProposals=[];
 function relNorm(raw){
   var r=String(raw||'').trim().toLowerCase();
-  r=r
-    .replace(/[ăâ]/g,'a')
-    .replace(/[î]/g,'i')
-    .replace(/[șş]/g,'s')
-    .replace(/[țţ]/g,'t');
+  try{r=r.normalize('NFD').replace(/[\u0300-\u036f]/g,'');}catch(_e){}
   var map={
-    father:'tata',mother:'mama',
+    father:'tata',mother:'mama',parent:'parent',parinte:'parent',
     son:'fiu',daughter:'fiica',child:'child',copil:'child',
+    'fiu vitreg':'child','fiica vitrega':'child','copil vitreg':'child',
     husband:'sot',wife:'sotie',spouse:'spouse',
     brother:'frate',sister:'sora',sibling:'sibling',
     grandparent:'bunic',grandfather:'bunic',grandmother:'bunica',
-    stepfather:'step',stepmother:'step',
-    'adoptive parent':'adopted',adoptive_parent:'adopted'
+    stepfather:'step',stepmother:'step','parinte vitreg':'step',
+    'adoptive parent':'adopted',adoptive_parent:'adopted','parinte adoptiv':'adopted'
   };
   return map[r]||r;
 }
@@ -1433,7 +1430,7 @@ document.addEventListener('DOMContentLoaded',function(){
 });
 
 // ── STATE ────────────────────────────────────────────────
-var S={familyId:null,family:null,members:[],relations:[],sessionUid:null,zoom:.88,panX:0,panY:0,panning:false,lastMouse:{x:0,y:0},selectedId:null,editingId:null,addVis:'public',editVis:'public',ttTimer:null,reqId:0,undoTimer:null,resizeObs:null,realtimeCh:null,origVals:{}};
+var S={familyId:null,family:null,members:[],relations:[],sessionUid:null,isOwner:false,relationsLoadError:null,zoom:.88,panX:0,panY:0,panning:false,lastMouse:{x:0,y:0},selectedId:null,editingId:null,addVis:'public',editVis:'public',ttTimer:null,reqId:0,undoTimer:null,resizeObs:null,realtimeCh:null,origVals:{}};
 var CARD_W=110,GEN_Y={3:30,2:180,1:340,0:490},GEN_GAP_X=28;
 var _layoutBounds=null;
 
@@ -1462,10 +1459,24 @@ function isMissingColumnError(err){
   return /column .* does not exist|Could not find/i.test(msg);
 }
 
+function isOwnerView(){
+  if(!S.sessionUid||!S.family)return false;
+  return S.family.created_by===S.sessionUid||S.family.owner_id===S.sessionUid;
+}
+
+function applyOwnerModeUI(){
+  S.isOwner=isOwnerView();
+  var addBtn=document.getElementById('addPersonBtn');
+  var villageBtn=document.getElementById('connectVillageBtn');
+  if(addBtn){addBtn.style.display=S.isOwner?'':'none';addBtn.disabled=!S.isOwner;}
+  if(villageBtn){villageBtn.style.display=S.isOwner?'':'none';villageBtn.disabled=!S.isOwner;}
+}
+
 function loadFamilyRecord(identifier){
   var fields=isUuidValue(identifier)?['id','slug']:['slug','id'];
   var selectVariants=[
-    // Start with the broadest-compatible shape to avoid noisy 400s in console.
+    // Try owner_id first (newer schema), then fall back without it.
+    'id,name,village,created_by,owner_id,since',
     'id,name,village,created_by,since'
   ];
 
@@ -1499,8 +1510,29 @@ function loadFamily(){
     if(rid!==S.reqId||!mr)return;
     if(mr.error){showNetErr(mr.error.message||'members query failed');return;}
     S.members=mr.data||[];
+    applyOwnerModeUI();
     loadRelations(rid);
   }).catch(function(err){if(rid!==S.reqId)return;showNetErr(err.message);});
+}
+
+function deriveRelationsFromMembers(){
+  var idx={};S.members.forEach(function(m){idx[m.id]=true;});
+  var seen={},derived=[];
+  function pushRel(a,b,t){
+    if(!a||!b||a===b||!idx[a]||!idx[b])return;
+    var key=[a,b,t].join('|');
+    if(seen[key])return;
+    seen[key]=1;
+    derived.push({id:'derived_'+Object.keys(seen).length,from_member_id:a,to_member_id:b,relation_type:t,is_biological:true});
+  }
+  S.members.forEach(function(m){
+    if(m.father_id)pushRel(m.id,m.father_id,'tata');
+    if(m.mother_id)pushRel(m.id,m.mother_id,'mama');
+    if(m.parent_id)pushRel(m.id,m.parent_id,'parent');
+    if(m.spouse_id){pushRel(m.id,m.spouse_id,'spouse');pushRel(m.spouse_id,m.id,'spouse');}
+    if(Array.isArray(m.child_ids)){m.child_ids.forEach(function(cid){pushRel(m.id,cid,'child');});}
+  });
+  return derived;
 }
 
 function loadRelations(rid){
@@ -1512,20 +1544,44 @@ function loadRelations(rid){
     supabase.from('member_relations').select('*').in('to_member_id',ids)
   ]).then(function(results){
     if(rid!==S.reqId)return;
-    var fromRels = results[0].data||[];
-    var toRels   = results[1].data||[];
+    var fromErr = results[0]&&results[0].error;
+    var toErr   = results[1]&&results[1].error;
+    var fromRels = (results[0]&&results[0].data)||[];
+    var toRels   = (results[1]&&results[1].data)||[];
     var seen={}, all=[];
     fromRels.concat(toRels).forEach(function(r){
       if(!seen[r.id]){seen[r.id]=true;all.push(r);}
     });
+    S.relationsLoadError=(fromErr||toErr)?(fromErr||toErr).message:null;
+    if(!all.length){
+      var derived=deriveRelationsFromMembers();
+      if(derived.length)all=derived;
+    }
     S.relations=all;
     afterLoad(rid);
-  }).catch(function(){if(rid!==S.reqId)return;S.relations=[];afterLoad(rid);});
+  }).catch(function(err){
+    if(rid!==S.reqId)return;
+    S.relations=deriveRelationsFromMembers();
+    S.relationsLoadError=err&&err.message?err.message:'relations load failed';
+    afterLoad(rid);
+  });
 }
 
 function afterLoad(rid){
   if(rid!==S.reqId)return;
   updateTitle();render();if(S.members.length)fitTree();
+  var oldWarn=document.getElementById('tree-rel-warn');
+  if(oldWarn)oldWarn.remove();
+  if(S.members.length>1&&!S.relations.length){
+    var st=document.getElementById('treeStage');
+    if(st){
+      var w=document.createElement('div');
+      w.id='tree-rel-warn';
+      w.style.cssText='position:absolute;top:8px;left:8px;right:8px;z-index:25;background:#211507;border:1px solid #7a5828;color:#d4a84a;padding:8px 10px;border-radius:2px;font-size:12px;line-height:1.45;';
+      w.textContent=t('Nu s-au putut incarca legaturile genealogice pentru aceasta vizualizare publica. Ruleaza SQL-ul fix pentru member_relations din proiect (sql/fix-relation-types.sql).','Could not load genealogy relations for this public view. Run the member_relations fix SQL from the project (sql/fix-relation-types.sql).');
+      st.appendChild(w);
+    }
+  }
   if(S.members.length===0){
     var cv=document.getElementById('treeCanvas');
     if(cv){
@@ -1602,7 +1658,7 @@ function render(){
   svg.setAttribute('width',mxX);svg.setAttribute('height',mxY);svg.style.width=mxX+'px';svg.style.height=mxY+'px';
   drawConnectors(svg,layout);
   S.members.forEach(function(m){if(layout[m.id])cv.appendChild(buildNode(m,layout[m.id]));});
-  cv.appendChild(buildGhost(layout,mxX));
+  if(S.isOwner)cv.appendChild(buildGhost(layout,mxX));
   buildGenLabels(layout,mxX);
   applyXform(); // also calls updateGenLabels + drawMinimap
 }
@@ -2848,7 +2904,7 @@ function initKeyboard(){
     switch(e.key){
       case 'Escape':if(document.getElementById('inferModal').classList.contains('open'))closeInferModal();else if(document.getElementById('confirmModal').classList.contains('open'))_closeConfirm(false);else if(document.getElementById('deleteModal').classList.contains('open'))closeDeleteModal();else if(document.getElementById('editorOverlay').classList.contains('open'))closeEditor();else if(document.getElementById('addOverlay').classList.contains('open'))closeAddModal();else if(document.getElementById('guideOverlay').classList.contains('open'))closeGuide();else closeDetail();break;
       case ' ':e.preventDefault();center();break;
-      case 'n':case 'N':openAddModal();break;
+      case 'n':case 'N':if(S.isOwner)openAddModal();break;
       case '?':showGuide();break;
     }
   });
@@ -2865,7 +2921,10 @@ function initUI(){
   document.getElementById('dpEdit').addEventListener('click',function(){if(S.selectedId){openEditor(S.selectedId);switchTab(0);}});
   document.getElementById('dpPhotoBtn').addEventListener('click',function(){if(S.selectedId){openEditor(S.selectedId);switchTab(2);}});
   document.getElementById('dpHighlight').addEventListener('click',function(){highlightFamily(S.selectedId);});
-  document.getElementById('addPersonBtn').addEventListener('click',openAddModal);
+  document.getElementById('addPersonBtn').addEventListener('click',function(){
+    if(!S.isOwner){alert(t('Doar proprietarul familiei poate adauga persoane.','Only the family owner can add people.'));return;}
+    openAddModal();
+  });
   document.getElementById('hlFamilyBtn').addEventListener('click',function(){highlightFamily(S.selectedId);});
   document.getElementById('helpBtn').addEventListener('click',showGuide);
   document.querySelectorAll('.dp-sc').forEach(function(el){el.style.webkitOverflowScrolling='touch';});
@@ -2912,6 +2971,7 @@ window.addEventListener('load',function(){if(S.members.length)center();});
 <script src="js/transitions.js" defer></script>
 </body>
 </html>
+
 
 
 
