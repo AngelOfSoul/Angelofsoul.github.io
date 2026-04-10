@@ -999,7 +999,7 @@ left:23px;
       <div class="sb-footer">
         <a href="index.html" class="sb-help-btn" style="display:block;text-align:center;background:var(--b1);border-color:var(--b2);color:var(--muted);">&#8592; Site principal</a>
         <button class="sb-help-btn" onclick="nav(null,'help')">? Ghid complet</button>
-        <div class="sb-ver">v1.0 Â· Calnic Online 2026</div>
+        <div class="sb-ver">v1.0 - Calnic Online 2026</div>
       </div>
     </div>
 
@@ -1444,7 +1444,7 @@ left:23px;
           <div class="ct-title">Manager fotografii</div>
           <div class="tip-wrap"><div class="tip-btn" onclick="tip('t-ph',event)">?</div><div class="tip-box" id="t-ph"><strong>Fotografii</strong>Vizualizeaza, filtreaza si sterge fotografii nepotrivite. Stergerea este permanenta si cere confirmare â€” fotografiile dispar si din Supabase Storage.</div></div>
         </div>
-        <div class="ct-sub">Toate fotografiile din arhiva satului â€” modereaza si gestioneaza.</div>
+        <div class="ct-sub">Toate fotografiile din arhiva satului - modereaza si gestioneaza.</div>
         <div style="display:flex;gap:10px;margin-bottom:16px;flex-wrap:wrap;">
           <select class="fs" id="photo-filter-family" style="width:200px;" onchange="loadPhotos()">
             <option value="">Toate familiile</option>
@@ -3460,12 +3460,14 @@ function loadPhotos() {
     var photoIds = photos.map(function(p){ return p.id; }).filter(Boolean);
     var famReq = sb.from('families').select('id,name').limit(800);
     var repReq = photoIds.length
-      ? sb.from('photo_reports').select('photo_id,status').in('photo_id', photoIds)
+      ? sb.from('photo_reports').select('id,photo_id,status,reason,details,reporter_id,created_at,admin_reply').in('photo_id', photoIds)
       : Promise.resolve({ data: [], error: null });
+    var emailReq = loadAdminEmailMap();
 
-    Promise.all([famReq, repReq]).then(function(results) {
+    Promise.all([famReq, repReq, emailReq]).then(function(results) {
       var famRes = results[0] || {};
       var repRes = results[1] || {};
+      var emailMap = results[2] || {};
 
       var famById = {};
       (famRes.data || []).forEach(function(f) {
@@ -3473,9 +3475,13 @@ function loadPhotos() {
       });
 
       var reportCount = {};
+      PHOTO_REPORTS_BY_PHOTO = {};
+      PHOTO_REPORT_EMAIL_MAP = emailMap;
       var reportsUnavailable = !!(repRes && repRes.error);
       (repRes.data || []).forEach(function(rep) {
         if (!rep || !rep.photo_id) return;
+        if (!PHOTO_REPORTS_BY_PHOTO[String(rep.photo_id)]) PHOTO_REPORTS_BY_PHOTO[String(rep.photo_id)] = [];
+        PHOTO_REPORTS_BY_PHOTO[String(rep.photo_id)].push(rep);
         var st = String(rep.status || 'open').toLowerCase();
         if (st === 'resolved' || st === 'dismissed') return;
         reportCount[rep.photo_id] = (reportCount[rep.photo_id] || 0) + 1;
@@ -3514,6 +3520,25 @@ function loadPhotos() {
         var famName = p.family_id && famById[p.family_id] ? famById[p.family_id] : 'Calnic';
         var title = p.title_ro || p.title_en || 'Fotografie';
         var repBadge = isRep ? '<div class="badge warn" style="margin-top:4px;">Raportata (' + rc + ')</div>' : '';
+        var latestReport = getLatestOpenPhotoReport(p.id);
+        var repInfo = '';
+        var repActions = '';
+        if (latestReport) {
+          var repReason = escH(latestReport.reason || 'Raport fara motiv');
+          var repAt = latestReport.created_at ? fmtDate(latestReport.created_at) : '-';
+          var repEmail = latestReport.reporter_id ? (emailMap[String(latestReport.reporter_id)] || '') : '';
+          var repWho = repEmail ? escH(repEmail) : (latestReport.reporter_id ? ('User ' + escH(String(latestReport.reporter_id).slice(0,8)) + '...') : 'Vizitator');
+          repInfo =
+            '<div style="font-size:11px;color:var(--gold-m);line-height:1.45;margin-top:6px;">' +
+              '<div><strong>Motiv:</strong> ' + repReason + '</div>' +
+              '<div><strong>De la:</strong> ' + repWho + '</div>' +
+              '<div><strong>Data:</strong> ' + escH(repAt) + '</div>' +
+            '</div>';
+          repActions =
+            '<button class="tbtn green" onclick="markPhotoOk(\'' + p.id + '\')" style="width:100%;margin-top:6px;font-size:11px;">Poza e OK</button>' +
+            '<button class="tbtn" onclick="replyPhotoReporter(\'' + p.id + '\')" style="width:100%;margin-top:4px;font-size:11px;">Raspunde raportorului</button>' +
+            '<button class="tbtn" onclick="markPhotoReportResolved(\'' + p.id + '\')" style="width:100%;margin-top:4px;font-size:11px;">Marcheaza rezolvat</button>';
+        }
         var thumb = url
           ? '<img src="' + escAttr(url) + '" style="width:100%;aspect-ratio:4/3;object-fit:cover;display:block;" onerror="this.style.display=\'none\'"/>'
           : '<div style="width:100%;aspect-ratio:4/3;background:var(--s3);display:flex;align-items:center;justify-content:center;font-size:24px;color:var(--b2);">&#128247;</div>';
@@ -3521,6 +3546,8 @@ function loadPhotos() {
           '<div class="photo-info"><div class="photo-family' + (isRep ? ' reported' : '') + '">' + escH(famName) + '</div>' +
           '<div style="font-size:12px;color:var(--text);margin-bottom:4px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;" title="' + escAttr(title) + '">' + escH(title) + '</div>' +
           repBadge +
+          repInfo +
+          repActions +
           '<button class="tbtn red" onclick="deletePhoto(\'' + p.id + '\')" style="width:100%;margin-top:6px;font-size:11px;">Sterge</button></div></div>';
       }).join('');
     });
@@ -3536,6 +3563,104 @@ function deletePhoto(id) {
     logAction('photo-delete', 'Fotografie stearsa: ' + id);
     loadPhotos();
   });
+}
+
+var PHOTO_REPORTS_BY_PHOTO = {};
+var PHOTO_REPORT_EMAIL_MAP = {};
+
+function getCurrentAuthUid() {
+  var sb = getSB();
+  if (!sb || !sb.auth || typeof sb.auth.getUser !== 'function') return Promise.resolve(null);
+  return sb.auth.getUser().then(function(res){
+    return res && res.data && res.data.user ? res.data.user.id : null;
+  }).catch(function(){ return null; });
+}
+
+function getLatestOpenPhotoReport(photoId) {
+  var list = PHOTO_REPORTS_BY_PHOTO[String(photoId)] || [];
+  if (!list.length) return null;
+  var open = list.filter(function(r){
+    var st = String(r.status || 'open').toLowerCase();
+    return st !== 'resolved' && st !== 'dismissed';
+  });
+  if (!open.length) return null;
+  open.sort(function(a,b){
+    return new Date(b.created_at || 0).getTime() - new Date(a.created_at || 0).getTime();
+  });
+  return open[0];
+}
+
+function resolvePhotoReports(photoId, status, adminNote) {
+  var sb = getSB();
+  if (!sb || !photoId) return;
+  var st = String(status || '').trim().toLowerCase();
+  if (st !== 'resolved' && st !== 'dismissed' && st !== 'reviewed') return;
+
+  getCurrentAuthUid().then(function(uid){
+    var payload = {
+      status: st,
+      reviewed_at: new Date().toISOString()
+    };
+    if (uid) payload.reviewed_by = uid;
+    if (adminNote && String(adminNote).trim()) payload.admin_reply = String(adminNote).trim();
+
+    sb.from('photo_reports')
+      .update(payload)
+      .eq('photo_id', photoId)
+      .in('status', ['open','reviewed'])
+      .then(function(r){
+        if (r && r.error) {
+          // Compatibility when admin_reply column is not yet added.
+          if (/column .*admin_reply.* does not exist/i.test(String(r.error.message || ''))) {
+            delete payload.admin_reply;
+            sb.from('photo_reports')
+              .update(payload)
+              .eq('photo_id', photoId)
+              .in('status', ['open','reviewed'])
+              .then(function(rr){
+                if (rr && rr.error) { alert('Eroare: ' + rr.error.message); return; }
+                logAction('photo-report-' + st, 'Raport actualizat pentru poza: ' + photoId);
+                loadPhotos();
+              });
+            return;
+          }
+          alert('Eroare: ' + r.error.message);
+          return;
+        }
+        logAction('photo-report-' + st, 'Raport actualizat pentru poza: ' + photoId);
+        loadPhotos();
+      });
+  });
+}
+
+function markPhotoOk(photoId) {
+  if (!confirm('Marchezi raportul ca nefondat si pastrezi poza?')) return;
+  resolvePhotoReports(photoId, 'dismissed');
+}
+
+function markPhotoReportResolved(photoId) {
+  resolvePhotoReports(photoId, 'resolved');
+}
+
+function replyPhotoReporter(photoId) {
+  var rep = getLatestOpenPhotoReport(photoId);
+  if (!rep) { alert('Nu exista raport activ pentru aceasta fotografie.'); return; }
+  var msg = prompt('Mesaj catre raportor (motivul pentru care poza este OK):', 'Multumim pentru raportare. Am verificat fotografia si este conforma regulilor.');
+  if (!msg || !String(msg).trim()) return;
+
+  var reporterEmail = rep.reporter_id ? (PHOTO_REPORT_EMAIL_MAP[String(rep.reporter_id)] || '') : '';
+  if (reporterEmail) {
+    var subject = 'Raspuns raport foto - Calnic Online';
+    var body = String(msg).trim();
+    var mailto = 'mailto:' + encodeURIComponent(reporterEmail) +
+      '?subject=' + encodeURIComponent(subject) +
+      '&body=' + encodeURIComponent(body);
+    window.location.href = mailto;
+  } else {
+    alert('Raportorul nu are email disponibil in sistem. Salvez raspunsul in moderare.');
+  }
+
+  resolvePhotoReports(photoId, 'dismissed', String(msg).trim());
 }
 
 /* â”€â”€ HELPER: show message â”€â”€ */
