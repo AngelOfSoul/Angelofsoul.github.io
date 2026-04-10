@@ -166,7 +166,10 @@
   }
 
   function fitGraph(duration) {
-    if (!graphData || !graphData.graph.nodes.length) return;
+    if (!graphData || !graphData.graph.nodes.length) {
+      svg.transition().duration(duration || 300).call(zoom.transform, d3.zoomIdentity);
+      return;
+    }
     var w = shell.clientWidth || 900, h = 760;
     var nodes = graphData.graph.nodes.filter(function (n) { return isFinite(n.x) && isFinite(n.y); });
     if (!nodes.length) return;
@@ -178,6 +181,21 @@
     var ty = h / 2 - ((minY + maxY) / 2) * scale;
     var tr = d3.zoomIdentity.translate(tx, ty).scale(scale);
     svg.transition().duration(duration || 500).call(zoom.transform, tr);
+  }
+
+  function recenterGraph() {
+    if (!graphData || !graphData.graph.nodes.length) {
+      status(t('Nu exista familii pentru recentrare.', 'No families available to recenter.'));
+      return;
+    }
+
+    // If user dragged nodes around, let the simulation settle briefly,
+    // then apply a fresh "fit to all families" transform.
+    if (simulation) simulation.alpha(0.35).restart();
+    window.setTimeout(function () {
+      fitGraph(480);
+      status(t('Arbore recentrat.', 'Tree recentered.'));
+    }, 180);
   }
 
   function focusNode(nodeId, duration) {
@@ -521,10 +539,10 @@
     hideFamilyDetails();
     applyPath(null);
     redrawStyles();
-    fitGraph(450);
+    recenterGraph();
     history.replaceState({}, '', 'arborele-satului.html');
   });
-  if (fitBtn) fitBtn.addEventListener('click', function () { fitGraph(450); });
+  if (fitBtn) fitBtn.addEventListener('click', function () { recenterGraph(); });
   if (zoomInBtn) zoomInBtn.addEventListener('click', function () { zoomByFactor(1.14); });
   if (zoomOutBtn) zoomOutBtn.addEventListener('click', function () { zoomByFactor(1 / 1.14); });
   if (findBtn) findBtn.addEventListener('click', function () {
