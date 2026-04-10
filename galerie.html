@@ -770,7 +770,7 @@ to{transform:rotate(360deg);}
         <div class="lb-row"><span class="lb-label" data-ro="Vizibilitate" data-en="Visibility">Vizibilitate</span><span class="lb-val" id="lb-vis"></span></div>
       </div>
       <div class="lb-actions">
-        <button class="lb-btn lb-btn-gold" onclick="downloadPhoto(currentPhotoTitle())" data-ro="&#8659; Descarca" data-en="&#8659; Download">&#8659; Descarca</button>
+        <button class="lb-btn lb-btn-gold" onclick="downloadPhoto(currentLbIdx)" data-ro="&#8659; Descarca" data-en="&#8659; Download">&#8659; Descarca</button>
         <button class="lb-btn lb-btn-gold" onclick="sharePhoto(currentLbIdx)" data-ro="&#10548; Distribuie" data-en="&#10548; Share">&#10548; Distribuie</button>
         <button class="lb-btn lb-btn-red" onclick="openReport()" data-ro="&#9873; Raporteaza" data-en="&#9873; Report">&#9873; Raporteaza</button>
         <button class="lb-btn lb-btn-muted" onclick="closeLbX()" data-ro="Inchide" data-en="Close">Inchide</button>
@@ -1034,10 +1034,48 @@ function currentPhotoTitle() {
   return p ? getPhotoTitle(p) : 'fotografie';
 }
 
-function dlPhoto(id) { var p = photos.find(function(x){ return x.id === id; }); if(p) downloadPhoto(getPhotoTitle(p)); }
+function dlPhoto(id) { downloadPhoto(id); }
 
-function downloadPhoto(title) {
-  alert((currentLang === 'ro' ? 'Descarcand: ' : 'Downloading: ') + title + '\n\n' + (currentLang === 'ro' ? '(Functie disponibila dupa conectarea la baza de date)' : '(Feature available after database connection)'));
+function safeFileName(name) {
+  return (name || 'fotografie')
+    .replace(/[\\/:*?"<>|]+/g, '-')
+    .replace(/\s+/g, ' ')
+    .trim();
+}
+
+function downloadPhoto(id) {
+  var p = photos.find(function(x){ return x.id === id; });
+  if (!p || !p.imgUrl) {
+    alert(currentLang === 'ro' ? 'Aceasta fotografie nu are fisier disponibil pentru descarcare.' : 'This photo has no downloadable file.');
+    return;
+  }
+
+  var fileName = safeFileName(getPhotoTitle(p)) + '.jpg';
+  fetch(p.imgUrl)
+    .then(function(res) {
+      if (!res.ok) throw new Error('HTTP ' + res.status);
+      return res.blob();
+    })
+    .then(function(blob) {
+      var objectUrl = URL.createObjectURL(blob);
+      var a = document.createElement('a');
+      a.href = objectUrl;
+      a.download = fileName;
+      document.body.appendChild(a);
+      a.click();
+      a.remove();
+      setTimeout(function(){ URL.revokeObjectURL(objectUrl); }, 1000);
+    })
+    .catch(function() {
+      var a = document.createElement('a');
+      a.href = p.imgUrl;
+      a.target = '_blank';
+      a.rel = 'noopener';
+      a.download = fileName;
+      document.body.appendChild(a);
+      a.click();
+      a.remove();
+    });
 }
 
 function sharePhoto(id) {
