@@ -29,7 +29,7 @@
   var svg = d3.select(svgEl);
   var g = svg.append('g');
   var zoom = d3.zoom()
-    .scaleExtent([0.35, 3])
+    .scaleExtent([0.1, 3])
     // Keep page wheel scrolling active; zoom only from explicit UI actions.
     .filter(function (event) { return event.type !== 'wheel'; })
     .on('zoom', function (event) {
@@ -188,7 +188,7 @@
     var minX = d3.min(nodes, function (n) { return n.x; }), maxX = d3.max(nodes, function (n) { return n.x; });
     var minY = d3.min(nodes, function (n) { return n.y; }), maxY = d3.max(nodes, function (n) { return n.y; });
     var dx = Math.max(200, maxX - minX + 140), dy = Math.max(200, maxY - minY + 140);
-    var scale = Math.max(0.45, Math.min(1.35, 0.92 / Math.max(dx / w, dy / h)));
+    var scale = Math.max(0.12, Math.min(1.25, 0.92 / Math.max(dx / w, dy / h)));
     var tx = w / 2 - ((minX + maxX) / 2) * scale;
     var ty = h / 2 - ((minY + maxY) / 2) * scale;
     var tr = d3.zoomIdentity.translate(tx, ty).scale(scale);
@@ -354,8 +354,10 @@
 
     simulation = d3.forceSimulation(nodes)
       .force('link', d3.forceLink(links).id(function (d) { return d.id; }).distance(130).strength(0.7))
-      .force('charge', d3.forceManyBody().strength(-700))
+      .force('charge', d3.forceManyBody().strength(-240))
       .force('collide', d3.forceCollide().radius(52))
+      .force('x', d3.forceX((shell.clientWidth || 900) / 2).strength(0.06))
+      .force('y', d3.forceY(760 / 2).strength(0.06))
       .force('center', d3.forceCenter((shell.clientWidth || 900) / 2, 760 / 2));
 
     var link = g.append('g').selectAll('line')
