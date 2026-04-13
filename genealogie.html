@@ -554,7 +554,7 @@ display:block;
 function escH(s){return String(s==null?'':s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;').replace(/'/g,'&#39;');}
 function lang(){return localStorage.getItem('calnic-lang')||'ro';}
 function t(ro,en){return lang()==='en'?en:ro;}
-function norm(s){return String(s||'').toLowerCase().normalize('NFD').replace(/[Ì€-Í¯]/g,'').trim();}
+function norm(s){return String(s||'').toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g,'').trim();}
 
 var families=[];
 var villageConnections=[];

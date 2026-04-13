@@ -848,7 +848,7 @@ async function saveStory() {
   var nameV = document.getElementById('storyName').value.trim();
   if (!nameV) { showMsg('storyMsg', currentLang==='ro'?'Numele familiei este obligatoriu.':'Family name is required.', 'error'); return; }
   btn.disabled = true;
-  var slug = nameV.toLowerCase().normalize('NFD').replace(/[Ì€-Í¯]/g, '').replace(/[^a-z0-9]+/g, '-').replace(/^-+|-+$/g, '');
+  var slug = nameV.toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '').replace(/[^a-z0-9]+/g, '-').replace(/^-+|-+$/g, '');
   var updates = {
     name: nameV,
     display_name: nameV,
@@ -1545,7 +1545,7 @@ function escHtml(s) {
   function slugify(text) {
     return String(text || '')
       .toLowerCase()
-      .normalize('NFD').replace(/[Ì€-Í¯]/g, '')
+      .normalize('NFD').replace(/[\u0300-\u036f]/g, '')
       .replace(/[^a-z0-9]+/g, '-')
       .replace(/^-+|-+$/g, '');
   }

@@ -71,6 +71,36 @@ font-size:14px;color:var(--muted);font-style:italic;margin-bottom:10px;
 display:flex;gap:8px;flex-wrap:wrap;
 }
 
+.fam-owner-actions {
+display:flex;
+gap:8px;
+flex-wrap:wrap;
+margin-top:12px;
+}
+
+.fam-owner-btn {
+display:inline-flex;
+align-items:center;
+justify-content:center;
+padding:8px 16px;
+background:var(--s2);
+border:1px solid var(--b2);
+color:var(--text);
+font-family:'EB Garamond',serif;
+font-size:14px;
+letter-spacing:.4px;
+border-radius:2px;
+text-decoration:none;
+cursor:pointer;
+transition:border-color .15s, color .15s, background .15s;
+}
+
+.fam-owner-btn:hover {
+border-color:var(--gold);
+color:var(--gold-l);
+background:var(--s3);
+}
+
 .fam-badge {
 font-size:10px;padding:3px 10px;border-radius:10px;letter-spacing:1px;
 }
@@ -664,9 +694,9 @@ to{transform:rotate(360deg);}
 <!-- Breadcrumb -->
 <div class="breadcrumb">
   <a href="index.html" data-ro="Acasa" data-en="Home">Acasa</a>
-  <span>â€º</span>
+  <span>&rsaquo;</span>
   <a href="familiile.html" data-ro="Familiile" data-en="Families">Familiile</a>
-  <span>â€º</span>
+  <span>&rsaquo;</span>
   <span id="breadcrumb-name" data-ro="Familie" data-en="Family">Familie</span>
 </div>
 
@@ -684,9 +714,9 @@ to{transform:rotate(360deg);}
     </div>
   </div>
   <div class="fam-hero-stats">
-    <div class="fam-stat"><span class="fam-stat-num" id="stat-members">â€”</span><span class="fam-stat-lbl" data-ro="membri" data-en="members">membri</span></div>
-    <div class="fam-stat"><span class="fam-stat-num" id="stat-photos">â€”</span><span class="fam-stat-lbl" data-ro="poze" data-en="photos">poze</span></div>
-    <div class="fam-stat"><span class="fam-stat-num" id="stat-gen">â€”</span><span class="fam-stat-lbl" data-ro="generatii" data-en="generations">generatii</span></div>
+    <div class="fam-stat"><span class="fam-stat-num" id="stat-members">&mdash;</span><span class="fam-stat-lbl" data-ro="membri" data-en="members">membri</span></div>
+    <div class="fam-stat"><span class="fam-stat-num" id="stat-photos">&mdash;</span><span class="fam-stat-lbl" data-ro="poze" data-en="photos">poze</span></div>
+    <div class="fam-stat"><span class="fam-stat-num" id="stat-gen">&mdash;</span><span class="fam-stat-lbl" data-ro="generatii" data-en="generations">generatii</span></div>
   </div>
 </div>
 
@@ -1098,19 +1128,22 @@ function loadFamilyData() {
           renderMembers();
           var addBtn = document.getElementById('addMemberBtn');
           if (addBtn) addBtn.style.display = 'inline-block';
+          var heroInfo = document.querySelector('.fam-hero-info');
+          var actionsRow = document.createElement('div');
+          actionsRow.className = 'fam-owner-actions';
           var editBtn = document.createElement('a');
           editBtn.href = 'dashboard.html?family=' + familyId;
           editBtn.textContent = currentLang === 'ro' ? 'Editeaza familia' : 'Edit family';
-          editBtn.style.cssText = 'display:inline-block;margin-top:12px;padding:8px 18px;background:var(--s2);border:1px solid var(--b2);color:var(--gold);font-family:\'EB Garamond\',serif;font-size:14px;border-radius:2px;';
-          var heroInfo = document.querySelector('.fam-hero-info');
-          if (heroInfo) heroInfo.appendChild(editBtn);
+          editBtn.className = 'fam-owner-btn';
           var visBtn = document.createElement('button');
           visBtn.id = 'toggleFamilyVisibilityBtn';
           visBtn.type = 'button';
           visBtn.textContent = getFamilyVisibilityToggleLabel();
-          visBtn.style.cssText = 'display:inline-block;margin-top:12px;margin-left:8px;padding:8px 18px;background:var(--s2);border:1px solid var(--b2);color:var(--gold);font-family:\'EB Garamond\',serif;font-size:14px;border-radius:2px;cursor:pointer;';
+          visBtn.className = 'fam-owner-btn';
           visBtn.onclick = toggleFamilyVisibility;
-          if (heroInfo) heroInfo.appendChild(visBtn);
+          actionsRow.appendChild(editBtn);
+          actionsRow.appendChild(visBtn);
+          if (heroInfo) heroInfo.appendChild(actionsRow);
         }
       }).catch(function() {
         isOwner = false;
