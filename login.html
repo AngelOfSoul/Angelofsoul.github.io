@@ -999,6 +999,10 @@ async function doFamilyProfile(e) {
     return;
   }
   var name   = document.getElementById('s2Name').value.trim();
+  if (!name) {
+    showMsg('step2Msg', currentLang === 'ro' ? 'Numele familiei este obligatoriu.' : 'Family name is required.', 'error');
+    return;
+  }
   var since  = document.getElementById('s2Since').value ? parseInt(document.getElementById('s2Since').value, 10) : null;
   var descRo = document.getElementById('s2DescRo').value.trim();
   var descEn = document.getElementById('s2DescEn').value.trim();
@@ -1010,21 +1014,33 @@ async function doFamilyProfile(e) {
   setLoading('step2Btn', true);
   try {
     var slug = await buildUniqueFamilySlug(name);
-    var base = { name: name, slug: slug, village: 'Calnic', pin_hash: btoa(pin) };
+    var base = { name: name, display_name: name, slug: slug, village: 'Calnic', pin_hash: btoa(pin) };
     if (since) base.since = since;
     if (descRo) base.desc_ro = descRo;
     if (descEn) base.desc_en = descEn;
+    var baseLegacy = Object.assign({}, base);
+    delete baseLegacy.display_name;
     var baseNoPin = Object.assign({}, base);
     delete baseNoPin.pin_hash;
+    var baseNoPinLegacy = Object.assign({}, baseLegacy);
+    delete baseNoPinLegacy.pin_hash;
     var payloads = [
       Object.assign({}, base, { owner_id: userId, created_by: userId }),
       Object.assign({}, base, { created_by: userId }),
       Object.assign({}, base, { owner_id: userId }),
       Object.assign({}, base),
+      Object.assign({}, baseLegacy, { owner_id: userId, created_by: userId }),
+      Object.assign({}, baseLegacy, { created_by: userId }),
+      Object.assign({}, baseLegacy, { owner_id: userId }),
+      Object.assign({}, baseLegacy),
       Object.assign({}, baseNoPin, { owner_id: userId, created_by: userId }),
       Object.assign({}, baseNoPin, { created_by: userId }),
       Object.assign({}, baseNoPin, { owner_id: userId }),
-      Object.assign({}, baseNoPin)
+      Object.assign({}, baseNoPin),
+      Object.assign({}, baseNoPinLegacy, { owner_id: userId, created_by: userId }),
+      Object.assign({}, baseNoPinLegacy, { created_by: userId }),
+      Object.assign({}, baseNoPinLegacy, { owner_id: userId }),
+      Object.assign({}, baseNoPinLegacy)
     ];
     var insRes = null;
     for (var pi = 0; pi < payloads.length; pi++) {
@@ -1069,6 +1085,3 @@ document.addEventListener('keydown', function(e) {
 <script src="js/transitions.js" defer></script>
 </body>
 </html>
-
-
-
