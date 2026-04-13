@@ -252,6 +252,18 @@
 
   async function boot() {
     cache(); bind(); $('yr').textContent = String(new Date().getFullYear()); switchTab('family');
+    if (el.familySearch) {
+      el.familySearch.value = '';
+      st.q = '';
+      // Some browsers apply autofill after initial paint; clear once more.
+      setTimeout(function () {
+        if (el.familySearch && /@/.test(String(el.familySearch.value || ''))) {
+          el.familySearch.value = '';
+          st.q = '';
+          drawFamilyCards();
+        }
+      }, 250);
+    }
     if (typeof window.setLang === 'function') {
       try { window.setLang(localStorage.getItem('calnic-lang') || 'ro'); } catch (err) {}
     }
