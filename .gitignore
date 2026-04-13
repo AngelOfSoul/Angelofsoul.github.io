@@ -3,3 +3,7 @@ backup/
 reports/
 tmp_review_zip/
 scripts/testing/
+
+# Local game/prototype files (keep local, do not publish unless explicitly requested)
+Anyela_UI_Concept_v*.html
+assets/game/
