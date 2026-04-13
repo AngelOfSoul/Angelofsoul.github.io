@@ -17,7 +17,7 @@
   function tr(ro, en) { return isEn() ? en : ro; }
   function status(msg, bad) { if (!el.status) return; el.status.textContent = msg || ''; el.status.style.color = bad ? '#d39a9a' : '#b9a175'; }
   function famName(f) { return (f && (f.display_name || f.name)) || 'Familie'; }
-  function famPrivate(f) { return !!(f && (f.is_private === true || f.visibility === 'private' || f.show_members === false || f.show_photos === false)); }
+  function famPrivate(f) { return !!(f && (f.is_private === true || f.visibility === 'private')); }
   function ownFam(familyId) { return st.ownFam.indexOf(String(familyId)) >= 0; }
   function canManageFam(id) { return st.isAdmin || ownFam(id); }
   function canManagePhoto(p) { return !!(st.user && p && p.uploader_id && String(p.uploader_id) === String(st.user.id)); }
@@ -34,6 +34,21 @@
   function famPhotos(id) { return st.photos.filter(function (p) { return String(p.family_id || '') === String(id); }); }
   function visFamPhotos(id) { return famPhotos(id).filter(canViewPhoto); }
   function archPhotos() { return st.photos.filter(function (p) { return !p.family_id; }).filter(canViewPhoto); }
+  async function loadPinAccess() {
+    if (!okSb() || !st.user) return;
+    try {
+      var r = await sb().from('family_pin_access').select('family_id,expires_at').eq('user_id', st.user.id);
+      if (r && !r.error && Array.isArray(r.data)) {
+        var now = Date.now();
+        r.data.forEach(function (row) {
+          var exp = row && row.expires_at ? Date.parse(row.expires_at) : NaN;
+          if (row && row.family_id && (!isNaN(exp) ? exp > now : true)) {
+            st.pinByFam[String(row.family_id)] = true;
+          }
+        });
+      }
+    } catch (e) {}
+  }
 
   function switchTab(tab) {
     st.tab = tab === 'archive' ? 'archive' : 'family';
@@ -60,7 +75,7 @@
     if (!rows.length) { container.innerHTML = '<div class="gal2-status">' + tr('Nu exista materiale in aceasta selectie.', 'No items in this selection.') + '</div>'; return; }
     container.innerHTML = rows.map(function (p) {
       var img = imgUrl(p.path) || 'data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="600" height="360"><rect width="600" height="360" fill="%23130f0b"/><text x="50%" y="50%" fill="%23c8a65d" dominant-baseline="middle" text-anchor="middle" font-size="22">Calnic Online</text></svg>';
-      return '<article class="gal2-media-card" data-id="' + esc(p.id) + '"><div class="gal2-media-img-wrap"><img src="' + esc(img) + '" alt=""></div><div class="gal2-media-body"><h4 class="gal2-media-title">' + esc(p.title_ro || p.title_en || tr('Material', 'Item')) + '</h4><div class="gal2-media-meta">' + esc(mediaTypeLabel(mediaType(p))) + ' • ' + esc(p.year || '-') + '</div></div></article>';
+      return '<article class="gal2-media-card" data-id="' + esc(p.id) + '"><div class="gal2-media-img-wrap"><img src="' + esc(img) + '" alt=""></div><div class="gal2-media-body"><h4 class="gal2-media-title">' + esc(p.title_ro || p.title_en || tr('Material', 'Item')) + '</h4><div class="gal2-media-meta">' + esc(mediaTypeLabel(mediaType(p))) + ' &middot; ' + esc(p.year || '-') + '</div></div></article>';
     }).join('');
     Array.prototype.forEach.call(container.querySelectorAll('.gal2-media-card'), function (c) { c.addEventListener('click', function () { openMedia(c.getAttribute('data-id'), rows); }); });
   }
@@ -176,9 +191,20 @@
     var id = st.pinPending, pin = String(el.pinInput.value || '').trim(); if (!id || !pin) { el.pinMsg.textContent = tr('Introdu PIN-ul.', 'Enter PIN.'); return; }
     el.pinMsg.textContent = tr('Verific PIN...', 'Checking PIN...');
     try {
-      var r = await sb().rpc('check_family_pin', { p_family_id: id, p_pin: pin }); if (r.error) throw r.error;
-      if (!r.data) { el.pinMsg.textContent = tr('PIN invalid.', 'Invalid PIN.'); return; }
+      var ok = false;
+      var g = await sb().rpc('grant_family_pin_access', { p_family_id: id, p_pin: pin });
+      if (!g.error) ok = !!g.data;
+      if (g.error) {
+        var chk = await sb().rpc('check_family_pin', { p_family_id: id, p_pin: pin });
+        if (chk.error) throw chk.error;
+        ok = !!chk.data;
+      }
+      if (!ok) { el.pinMsg.textContent = tr('PIN invalid.', 'Invalid PIN.'); return; }
       st.pinByFam[String(id)] = true; closePin(); openFamily(id); status(tr('Acces privat acordat pentru aceasta familie.', 'Private access granted for this family.'));
+      await loadPhotos();
+      drawFamilyCards();
+      drawFamilyDetail();
+      drawArchive();
     } catch (e) { el.pinMsg.textContent = tr('PIN invalid sau functie SQL lipsa.', 'Invalid PIN or missing SQL function.'); }
   }
 
@@ -231,7 +257,7 @@
     }
     if (!okSb()) { status(tr('Supabase nu este configurat. Pagina ruleaza in mod UI.', 'Supabase is not configured. Page is running in UI mode.')); return; }
     status(tr('Incarc datele...', 'Loading data...'));
-    try { await loadAuth(); await loadFamilies(); await loadPhotos(); drawFamilyCards(); drawFamilyDetail(); drawArchive(); el.addArchiveBtn.classList.toggle('hidden', !st.isAdmin); status(''); }
+    try { await loadAuth(); await loadPinAccess(); await loadFamilies(); await loadPhotos(); drawFamilyCards(); drawFamilyDetail(); drawArchive(); el.addArchiveBtn.classList.toggle('hidden', !st.isAdmin); status(''); }
     catch (e) { status(tr('Nu am putut incarca datele: ', 'Could not load data: ') + ((e && e.message) || tr('eroare necunoscuta', 'unknown error')), true); }
 
     try {

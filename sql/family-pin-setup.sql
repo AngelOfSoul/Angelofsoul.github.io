@@ -1,7 +1,7 @@
 -- Family PIN setup (Supabase / Postgres)
 -- Run this in Supabase SQL Editor.
 
-create extension if not exists pgcrypto;
+create extension if not exists pgcrypto with schema extensions;
 
 alter table public.families
   add column if not exists pin_hash text;
@@ -31,7 +31,7 @@ begin
   -- Supports both:
   -- 1) new secure hash via crypt()
   -- 2) legacy base64 PIN values from older frontend flow
-  return (v_hash = crypt(p_pin, v_hash))
+  return (v_hash = extensions.crypt(p_pin, v_hash))
       or (v_hash = encode(convert_to(p_pin, 'UTF8'), 'base64'));
 end;
 $$;
@@ -64,7 +64,7 @@ begin
   end if;
 
   update public.families
-  set pin_hash = crypt(p_pin, gen_salt('bf'))
+  set pin_hash = extensions.crypt(p_pin, extensions.gen_salt('bf'))
   where id = p_family_id;
 
   return true;
@@ -73,4 +73,3 @@ $$;
 
 grant execute on function public.check_family_pin(uuid, text) to anon, authenticated, service_role;
 grant execute on function public.set_family_pin(uuid, text) to authenticated, service_role;
-
