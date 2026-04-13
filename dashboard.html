@@ -4,7 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <meta name="robots" content="noindex, nofollow">
-<title>Tabloul de bord â€” Calnic Online</title>
+<title>Tabloul de bord — Calnic Online</title>
 
 <link rel="icon" type="image/svg+xml" href="favicon.svg">
 <link rel="icon" type="image/x-icon" href="favicon.ico">
@@ -1109,7 +1109,7 @@ function renderPhotos(photos) {
     var title = (currentLang === 'en' && p.title_en) ? p.title_en : (p.title_ro || (currentLang === 'ro' ? 'Fara titlu' : 'Untitled'));
     var cat = CAT_LABELS[p.category] || p.category || '';
     var year = p.year ? p.year : '';
-    var meta = [cat, year].filter(Boolean).join(' Â· ');
+    var meta = [cat, year].filter(Boolean).join(' · ');
     var storagePath = extractStoragePath(p.path || '');
     var imgSrc = resolvePhotoUrl(p.path || '');
     var isPrivate = !!p.is_private;
@@ -1700,6 +1700,7 @@ function escHtml(s) {
 <script src="js/transitions.js" defer></script>
 </body>
 </html>
+
 
 
 

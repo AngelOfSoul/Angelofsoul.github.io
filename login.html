@@ -1,4 +1,4 @@
-﻿<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="ro" style="background:#0a0a0a;">
 <head>
 <meta charset="UTF-8">
@@ -6,11 +6,11 @@
 <meta name="description" content="Autentificare si inregistrare familie Calnic Online.">
 <meta name="author" content="Calnic Online">
 <meta name="robots" content="noindex, nofollow">
-<meta property="og:title" content="Contul Familiei â€” Calnic Online">
+<meta property="og:title" content="Contul Familiei — Calnic Online">
 <meta property="og:type" content="website">
 <meta property="og:url" content="https://calniconline.ro/login.html">
 <meta property="og:locale" content="ro_RO">
-<title>Contul Familiei â€” Calnic Online</title>
+<title>Contul Familiei — Calnic Online</title>
 
 <link rel="icon" type="image/svg+xml" href="favicon.svg">
 <link rel="icon" type="image/x-icon" href="favicon.ico">
@@ -493,7 +493,7 @@ visibility:hidden;
       </button>
     </div>
 
-    <!-- â”€â”€ LOGIN FORM â”€â”€ -->
+    <!-- LOGIN FORM -->
     <div id="panelLogin">
       <form class="auth-form" id="loginForm" onsubmit="doLogin(event)">
         <div class="form-group">
@@ -505,7 +505,7 @@ visibility:hidden;
           <label class="form-label" for="loginPassword" data-ro="Parola" data-en="Password">Parola</label>
           <div class="pw-wrap">
             <input class="pb-input" type="password" id="loginPassword" autocomplete="current-password" required
-                   placeholder="â€¢â€¢â€¢â€¢â€¢â€¢â€¢â€¢"/>
+                   placeholder="********"/>
             <button type="button" class="pw-toggle" onclick="togglePassword('loginPassword', this)" aria-label="Arata parola" tabindex="-1"><svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg></button>
           </div>
         </div>
@@ -517,7 +517,7 @@ visibility:hidden;
       </form>
     </div>
 
-    <!-- â”€â”€ REGISTER FORM â”€â”€ -->
+    <!-- REGISTER FORM -->
     <div id="panelRegister" style="display:none;">
       <form class="auth-form" id="registerForm" onsubmit="doRegister(event)">
         <div class="form-group">
@@ -529,7 +529,7 @@ visibility:hidden;
           <label class="form-label" for="regPassword" data-ro="Parola (min. 6 caractere)" data-en="Password (min. 6 characters)">Parola (min. 6 caractere)</label>
           <div class="pw-wrap">
             <input class="pb-input" type="password" id="regPassword" autocomplete="new-password" required minlength="6"
-                   placeholder="â€¢â€¢â€¢â€¢â€¢â€¢â€¢â€¢"/>
+                   placeholder="********"/>
             <button type="button" class="pw-toggle" onclick="togglePassword('regPassword', this)" aria-label="Arata parola" tabindex="-1"><svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg></button>
           </div>
         </div>
@@ -537,7 +537,7 @@ visibility:hidden;
           <label class="form-label" for="regPasswordConfirm" data-ro="Confirma parola" data-en="Confirm password">Confirma parola</label>
           <div class="pw-wrap">
             <input class="pb-input" type="password" id="regPasswordConfirm" autocomplete="new-password" required
-                   placeholder="â€¢â€¢â€¢â€¢â€¢â€¢â€¢â€¢"/>
+                   placeholder="********"/>
             <button type="button" class="pw-toggle" onclick="togglePassword('regPasswordConfirm', this)" aria-label="Arata parola" tabindex="-1"><svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg></button>
           </div>
         </div>
@@ -548,15 +548,15 @@ visibility:hidden;
       </form>
     </div>
 
-    <!-- â”€â”€ STEP 1b: EMAIL CONFIRMATION NOTICE â”€â”€ -->
+    <!-- STEP 1b: EMAIL CONFIRMATION NOTICE -->
     <div id="panelEmailConfirm" style="display:none;">
       <div class="login-hero">
-        <div class="login-hero-title" data-ro="âœ‰ï¸ Verifica email-ul" data-en="âœ‰ï¸ Check your email">âœ‰ï¸ Verifica email-ul</div>
+      <div class="login-hero-title" data-ro="✉️ Verifica email-ul" data-en="✉️ Check your email">✉️ Verifica email-ul</div>
         <div class="login-hero-sub" data-ro="Contul tau a fost creat!" data-en="Your account has been created!">Contul tau a fost creat!</div>
       </div>
       <div style="background:var(--s1);border:1px solid var(--b1);border-left:3px solid var(--gold-d);border-radius:2px;padding:24px 28px;text-align:center;">
         <p style="color:var(--text);font-size:16px;margin-bottom:14px;" data-ro="Ti-am trimis un email de confirmare. Dupa ce confirmi adresa, revino aici si autentifica-te pentru a-ti crea profilul familiei." data-en="We sent you a confirmation email. After confirming your address, come back here and sign in to create your family profile.">Ti-am trimis un email de confirmare. Dupa ce confirmi adresa, revino aici si autentifica-te pentru a-ti crea profilul familiei.</p>
-        <p style="color:var(--muted);font-size:14px;font-style:italic;" data-ro="âš ï¸ Nu ai primit emailul? Verifica dosarul Spam sau fila Promotii (Gmail)." data-en="âš ï¸ Didn't receive the email? Check your Spam folder or Promotions tab (Gmail).">âš ï¸ Nu ai primit emailul? Verifica dosarul Spam sau fila Promotii (Gmail).</p>
+        <p style="color:var(--muted);font-size:14px;font-style:italic;" data-ro="⚠️ Nu ai primit emailul? Verifica dosarul Spam sau fila Promotii (Gmail)." data-en="⚠️ Didn't receive the email? Check your Spam folder or Promotions tab (Gmail).">⚠️ Nu ai primit emailul? Verifica dosarul Spam sau fila Promotii (Gmail).</p>
         <div style="margin-top:20px;">
           <button class="cta-btn" onclick="showTab('login')" style="margin-top:8px;">
             <span data-ro="MERGI LA AUTENTIFICARE" data-en="GO TO SIGN IN">MERGI LA AUTENTIFICARE</span>
@@ -565,7 +565,7 @@ visibility:hidden;
       </div>
     </div>
 
-    <!-- â”€â”€ STEP 2: FAMILY PROFILE â”€â”€ -->
+    <!-- STEP 2: FAMILY PROFILE -->
     <div id="panelStep2" style="display:none;">
     <form class="auth-form" id="step2Form" onsubmit="doFamilyProfile(event)">
       <div class="login-hero">
@@ -592,7 +592,7 @@ visibility:hidden;
         <label class="form-label" for="s2Pin">
           <span data-ro="PIN familie (4&#8211;8 cifre)" data-en="Family PIN (4&#8211;8 digits)">PIN familie (4&#8211;8 cifre)</span>
           <span class="pin-info"
-            data-tip="PIN-ul familiei este un cod numeric de 4-8 cifre pe care membrii familiei il vor folosi pentru a accesa continut privat. Nu este parola contului â€” este separat si mai simplu de retinut.">i</span>
+            data-tip="PIN-ul familiei este un cod numeric de 4-8 cifre pe care membrii familiei il vor folosi pentru a accesa continut privat. Nu este parola contului — este separat si mai simplu de retinut.">i</span>
         </label>
         <div class="pw-wrap">
           <input class="pb-input" type="password" id="s2Pin" inputmode="numeric" pattern="[0-9]{4,8}" required
@@ -626,7 +626,7 @@ visibility:hidden;
   </div>
 </footer>
 
-<!-- â”€â”€ FORGOT PASSWORD MODAL â”€â”€ -->
+<!-- FORGOT PASSWORD MODAL -->
 <div id="forgotModal" role="dialog" aria-modal="true" aria-labelledby="forgotModalTitle">
   <div class="forgot-modal-box">
     <div class="forgot-modal-title" id="forgotModalTitle" data-ro="Resetare parola" data-en="Reset password">Resetare parola</div>
@@ -651,7 +651,7 @@ visibility:hidden;
 <script>
 document.getElementById('yr').textContent = new Date().getFullYear();
 
-/* â”€â”€ PASSWORD TOGGLE â”€â”€ */
+/* PASSWORD TOGGLE */
 var EYE_ON  = '<svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>';
 var EYE_OFF = '<svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19m-6.72-1.07a3 3 0 1 1-4.24-4.24"/><line x1="1" y1="1" x2="23" y2="23"/></svg>';
 function togglePassword(inputId, btn) {
@@ -667,7 +667,7 @@ function togglePassword(inputId, btn) {
   }
 }
 
-/* â”€â”€ LANGUAGE â”€â”€ */
+/* LANGUAGE */
 var currentLang = localStorage.getItem('calnic-lang') || 'ro';
 function applyPageLang(lang) {
   currentLang = lang;
@@ -679,7 +679,7 @@ function applyPageLang(lang) {
 document.addEventListener('calnic:langchange', function(e) { applyPageLang(e.detail.lang); });
 applyPageLang(window.CalnicUtils ? window.CalnicUtils.lang() : currentLang);
 
-/* â”€â”€ TAB SWITCHER â”€â”€ */
+/* TAB SWITCHER */
 function showTab(tab) {
   var isLogin = (tab === 'login');
   document.getElementById('panelLogin').style.display    = isLogin ? '' : 'none';
@@ -694,7 +694,7 @@ function showTab(tab) {
   if (params.get('tab') === 'register') { showTab('register'); }
 })();
 
-/* â”€â”€ SCROLL BUTTONS â”€â”€ */
+/* SCROLL BUTTONS */
 var pendingUserId = null;
 var loginRedirectInProgress = false;
 
@@ -799,7 +799,7 @@ if (window.supabase) { initLoginAuth(); } else { document.addEventListener('supa
 window.addEventListener('load', function() {
   setTimeout(function() {
     if (!window.supabase) {
-      console.info('[Calnic] Supabase not available â€” auth features disabled.');
+      console.info('[Calnic] Supabase not available — auth features disabled.');
     }
   }, 3000);
 });
@@ -1085,3 +1085,4 @@ document.addEventListener('keydown', function(e) {
 <script src="js/transitions.js" defer></script>
 </body>
 </html>
+

@@ -1,5 +1,5 @@
 ﻿/*
-admin-nav.js â€” Calnic Online v2 (FIXED)
+admin-nav.js — Calnic Online v2 (FIXED)
 */
 (function () {
 document.documentElement.style.background = '#0a0a0a';
@@ -36,6 +36,8 @@ stickyStyle.textContent = [
   '.calnic-admin-link.show { display:flex!important;color:#c04040!important;border-left:1px solid #3a1010!important; }',
   '.calnic-admin-mobile-link { display:none!important; }',
   '.calnic-admin-mobile-link.show { display:flex!important;color:#c04040!important;border-left:3px solid #c04040!important; }',
+  '.admin-nav-badge { margin-left:6px; display:none; min-width:16px; height:16px; padding:0 4px; border-radius:999px; align-items:center; justify-content:center; font-size:10px; font-weight:700; line-height:1; color:#ffb6b6; background:#2a0c0c; border:1px solid #5a1c1c; }',
+  '.admin-nav-badge.show { display:inline-flex; }',
   '.co-guest-hide-gallery { display:none!important; }',
   '.nav-lang { display:flex;align-items:center;gap:4px;padding:0 10px;border-left:1px solid var(--b1,#2a2a2a); }',
   '.nav-lang-btn { background:none;border:1px solid #585040;color:var(--text,#f5eed8);padding:2px 8px;cursor:pointer;font-family:"EB Garamond",serif;font-size:11px;letter-spacing:1px;transition:all 0.2s;border-radius:1px; }',
@@ -284,14 +286,43 @@ function injectAdminLink() {
 }
 function showAdminLink() {
   document.querySelectorAll('.calnic-admin-link').forEach(function(el){
-    el.innerHTML = '&#9670; Admin';
+    el.innerHTML = '&#9670; Admin <span class="admin-nav-badge" data-admin-badge>0</span>';
     el.title = 'Panou Admin';
   });
   document.querySelectorAll('.calnic-admin-mobile-link').forEach(function(el){
-    el.innerHTML = '&#9670; Admin';
+    el.innerHTML = '&#9670; Admin <span class="admin-nav-badge" data-admin-badge>0</span>';
   });
   document.querySelectorAll('.calnic-admin-link').forEach(function(el){ el.classList.add('show'); });
   document.querySelectorAll('.calnic-admin-mobile-link').forEach(function(el){ el.classList.add('show'); });
+}
+
+function setAdminNavBadge(total) {
+  var n = Math.max(0, parseInt(total || 0, 10) || 0);
+  document.querySelectorAll('[data-admin-badge]').forEach(function(el) {
+    el.textContent = n > 99 ? '99+' : String(n);
+    el.classList.toggle('show', n > 0);
+  });
+}
+
+function refreshAdminNavPendingBadge() {
+  var client = window.supabaseClient || window.appSupabase || window.supabase;
+  if (!client || !client.from) return;
+  var qContact = client.from('contact_messages').select('id', { count: 'exact', head: true }).eq('resolved', false);
+  var qReports = client.from('photo_reports').select('id', { count: 'exact', head: true }).in('status', ['open', 'reviewed']);
+  var qVideos = client.from('video_submission_requests').select('status,read_by_admin').order('created_at', { ascending: false }).limit(400);
+  Promise.all([qContact, qReports, qVideos]).then(function(results) {
+    var contact = (results[0] && !results[0].error) ? (results[0].count || 0) : 0;
+    var reports = (results[1] && !results[1].error) ? (results[1].count || 0) : 0;
+    var videosRows = (results[2] && !results[2].error && Array.isArray(results[2].data)) ? results[2].data : [];
+    var videos = videosRows.filter(function(row) {
+      var st = String((row && row.status) || 'new').toLowerCase();
+      var actionable = (st === 'new' || st === 'in_progress' || st === 'file_received' || st === 'approved');
+      return actionable || !(row && row.read_by_admin);
+    }).length;
+    setAdminNavBadge(contact + reports + videos);
+  }).catch(function() {
+    setAdminNavBadge(0);
+  });
 }
 
 async function isAdminUser(userId) {
@@ -358,7 +389,10 @@ function initAdminNav() {
         return checkNotifications(familyId).then(function(hasNotif) {
           buildProfileButton(fakeSession, familyName, hasNotif, admin);
           injectAdminLink();
-          if (admin) showAdminLink();
+          if (admin) {
+            showAdminLink();
+            refreshAdminNavPendingBadge();
+          }
         });
       })
       .catch(function() {
@@ -397,6 +431,10 @@ window.addEventListener('calnic:maintenance-changed', function(e) {
   var enabled = !!(e && e.detail && e.detail.enabled);
   renderMaintenanceBanner(enabled);
 });
+window.addEventListener('calnic:admin-pending', function(e) {
+  var total = (e && e.detail && typeof e.detail.total !== 'undefined') ? e.detail.total : 0;
+  setAdminNavBadge(total);
+});
 
 /* Re-init when index switches between guest/member views. */
 function watchViewSwitches() {
@@ -414,6 +452,7 @@ if (document.readyState === 'loading') {
 }
 
 })();
+
 
 
 

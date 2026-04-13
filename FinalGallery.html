@@ -96,7 +96,7 @@
     <div class="gal2-panel-head">
       <p class="gal2-panel-intro" data-ro="Exploreaza familiile, albumele si amintirile pastrate de fiecare ramura." data-en="Explore families, albums, and memories preserved by each branch.">Exploreaza familiile, albumele si amintirile pastrate de fiecare ramura.</p>
       <div class="gal2-search-wrap">
-        <input id="gal2-family-search" class="gal2-input" type="search" name="family-search-q" autocomplete="off" autocapitalize="off" autocorrect="off" spellcheck="false" placeholder="Cauta familie..." data-ro="Cauta familie..." data-en="Search family...">
+        <input id="gal2-family-search" class="gal2-input" type="search" name="family_search_q" autocomplete="new-password" autocapitalize="off" autocorrect="off" spellcheck="false" inputmode="search" placeholder="Cauta familie..." data-ro="Cauta familie..." data-en="Search family...">
       </div>
     </div>
 
@@ -110,6 +110,8 @@
         <div id="gal2-detail-badges" class="gal2-detail-badges"></div>
         <div id="gal2-family-actions" class="gal2-modal-actions">
           <button id="gal2-add-family-btn" class="gal2-btn hidden" type="button" data-ro="Adauga media" data-en="Add media">Adauga media</button>
+          <button id="gal2-video-request-btn" class="gal2-btn secondary hidden" type="button" data-ro="Trimite request video admin" data-en="Send video request to admin">Trimite request video admin</button>
+          <button id="gal2-new-album-btn" class="gal2-btn secondary hidden" type="button" data-ro="Album nou" data-en="New album">Album nou</button>
           <button id="gal2-set-all-public" class="gal2-btn secondary hidden" type="button" data-ro="Fa tot public" data-en="Set all public">Fa tot public</button>
           <button id="gal2-set-all-private" class="gal2-btn secondary hidden" type="button" data-ro="Fa tot privat" data-en="Set all private">Fa tot privat</button>
         </div>
@@ -191,9 +193,16 @@
         <label class="gal2-label">Categorie</label>
         <input id="gal2-form-category-input" class="gal2-input" type="text" placeholder="ex. Cetatea Calnic">
       </div>
-      <div class="gal2-field gal2-field-full">
-        <label class="gal2-label">Imagine *</label>
+      <div id="gal2-form-file-wrap" class="gal2-field gal2-field-full">
+        <label id="gal2-form-file-label" class="gal2-label">Imagine *</label>
         <input id="gal2-form-file-input" class="gal2-input" type="file" accept="image/*">
+      </div>
+      <div id="gal2-video-preview-wrap" class="gal2-field gal2-field-full hidden">
+        <label class="gal2-label">Preview video</label>
+        <div class="gal2-video-preview-box">
+          <img id="gal2-video-preview-img" alt="">
+          <div id="gal2-video-preview-msg" class="gal2-video-preview-msg">Adauga un link YouTube pentru preview.</div>
+        </div>
       </div>
       <div class="gal2-field gal2-field-full">
         <label class="gal2-label">Descriere</label>
@@ -213,6 +222,53 @@
       <button id="gal2-form-save" class="gal2-btn" type="button">Salveaza</button>
     </div>
     <div id="gal2-form-msg" class="gal2-form-msg" aria-live="polite"></div>
+  </div>
+</div>
+
+<div id="gal2-vreq-overlay" class="gal2-overlay" role="dialog" aria-modal="true">
+  <div class="gal2-modal gal2-modal-form">
+    <button id="gal2-vreq-close" class="gal2-modal-close" type="button">&#10005;</button>
+    <h3 id="gal2-vreq-title">Request video personal</h3>
+    <p class="gal2-modal-sub">Trimiti cerere catre admin, apoi primesti pasii pentru trimiterea fisierului video pe canal extern.</p>
+    <div class="gal2-form-grid">
+      <div class="gal2-field">
+        <label class="gal2-label">Titlu video *</label>
+        <input id="gal2-vreq-video-title" class="gal2-input" type="text" placeholder="Ex. Nunta in Calnic 1998">
+      </div>
+      <div class="gal2-field">
+        <label class="gal2-label">Canal preferat pentru trimitere *</label>
+        <select id="gal2-vreq-channel" class="gal2-input">
+          <option value="whatsapp">WhatsApp</option>
+          <option value="telegram">Telegram</option>
+          <option value="wetransfer">WeTransfer</option>
+          <option value="google_drive">Google Drive</option>
+          <option value="email">Email</option>
+        </select>
+      </div>
+      <div class="gal2-field">
+        <label class="gal2-label">Date contact *</label>
+        <input id="gal2-vreq-contact" class="gal2-input" type="text" placeholder="Telefon / @user / email">
+      </div>
+      <div class="gal2-field">
+        <label class="gal2-label">Familie</label>
+        <input id="gal2-vreq-family" class="gal2-input" type="text" disabled>
+      </div>
+      <div class="gal2-field gal2-field-full">
+        <label class="gal2-label">Descriere</label>
+        <textarea id="gal2-vreq-desc" class="gal2-input gal2-textarea" placeholder="Detalii despre video, perioada, persoane, context"></textarea>
+      </div>
+      <div class="gal2-field gal2-field-full">
+        <label style="display:flex;align-items:center;gap:8px;font-size:13px;color:var(--muted);">
+          <input id="gal2-vreq-terms" type="checkbox">
+          Confirm ca am dreptul sa trimit acest material si sunt de acord cu moderarea inainte de publicare.
+        </label>
+      </div>
+    </div>
+    <div class="gal2-modal-actions">
+      <button id="gal2-vreq-cancel" class="gal2-btn secondary" type="button">Anuleaza</button>
+      <button id="gal2-vreq-submit" class="gal2-btn" type="button">Trimite request</button>
+    </div>
+    <div id="gal2-vreq-msg" class="gal2-form-msg" aria-live="polite"></div>
   </div>
 </div>
 
