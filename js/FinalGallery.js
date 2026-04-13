@@ -13,6 +13,8 @@
   function sb() { return window.supabaseClient || window.appSupabase || window.supabase; }
   function okSb() { var c = sb(); return !!(c && c.from && c.storage && (!window.isSupabaseConfigured || window.isSupabaseConfigured())); }
   function esc(s) { return String(s == null ? '' : s).replace(/[&<>"']/g, function (m) { return ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' })[m]; }); }
+  function isEn() { return (localStorage.getItem('calnic-lang') || 'ro') === 'en'; }
+  function tr(ro, en) { return isEn() ? en : ro; }
   function status(msg, bad) { if (!el.status) return; el.status.textContent = msg || ''; el.status.style.color = bad ? '#d39a9a' : '#b9a175'; }
   function famName(f) { return (f && (f.display_name || f.name)) || 'Familie'; }
   function famPrivate(f) { return !!(f && (f.is_private === true || f.visibility === 'private' || f.show_members === false || f.show_photos === false)); }
@@ -21,6 +23,11 @@
   function canManagePhoto(p) { return !!(st.user && p && p.uploader_id && String(p.uploader_id) === String(st.user.id)); }
   function canViewPhoto(p) { return !p.is_private || canManagePhoto(p) || (p.family_id && st.pinByFam[String(p.family_id)]); }
   function mediaType(p) { var c = String(p.category || '').toLowerCase(); if (c.indexOf('document') >= 0) return 'document'; if (c.indexOf('video') >= 0 || p.video_url) return 'video'; return 'photo'; }
+  function mediaTypeLabel(type) {
+    if (type === 'document') return tr('Document', 'Document');
+    if (type === 'video') return tr('Video', 'Video');
+    return tr('Poza', 'Photo');
+  }
   function imgUrl(path) { if (!path || !okSb()) return ''; try { var u = sb().storage.from('photos').getPublicUrl(path); return (u && u.data && u.data.publicUrl) || ''; } catch (e) { return ''; } }
 
   function parseVideo(p) { var c = String(p.caption_ro || p.caption_en || ''); var m = c.match(/\[VIDEO_EXTERN\]\s+(\S+)/); return m ? m[1] : ''; }
@@ -39,21 +46,21 @@
   function drawFamilyCards() {
     var q = st.q.trim().toLowerCase();
     var rows = st.fam.filter(function (f) { var n = (famName(f) + ' ' + (f.village || '')).toLowerCase(); return !q || n.indexOf(q) >= 0; });
-    if (!rows.length) { el.familyGrid.innerHTML = '<div class="gal2-status">Nu exista familii pentru acest filtru.</div>'; return; }
+    if (!rows.length) { el.familyGrid.innerHTML = '<div class="gal2-status">' + tr('Nu exista familii pentru acest filtru.', 'No families for this filter.') + '</div>'; return; }
     el.familyGrid.innerHTML = rows.map(function (f) {
       var all = famPhotos(f.id), pub = all.filter(function (p) { return !p.is_private; }).length;
       return '<article class="gal2-family-card" data-id="' + esc(f.id) + '"><div class="gal2-family-cover">' + esc(famName(f).charAt(0).toUpperCase()) +
-        '</div><h3 class="gal2-family-name">' + esc(famName(f)) + '</h3><p class="gal2-family-desc">' + esc((f.description_short_ro || f.description_ro || f.description || 'Profil de familie Calnic.')) +
-        '</p><div class="gal2-family-stats"><span class="gal2-chip">Total: ' + all.length + '</span><span class="gal2-chip">Publice: ' + pub + '</span><span class="gal2-chip">Private: ' + (all.length - pub) + '</span><span class="gal2-chip">' + (famPrivate(f) ? 'Privata (PIN)' : 'Publica') + '</span></div></article>';
+        '</div><h3 class="gal2-family-name">' + esc(famName(f)) + '</h3><p class="gal2-family-desc">' + esc((f.description_short_ro || f.description_ro || f.description || tr('Profil de familie Calnic.', 'Calnic family profile.'))) +
+        '</p><div class="gal2-family-stats"><span class="gal2-chip">' + tr('Total', 'Total') + ': ' + all.length + '</span><span class="gal2-chip">' + tr('Publice', 'Public') + ': ' + pub + '</span><span class="gal2-chip">' + tr('Private', 'Private') + ': ' + (all.length - pub) + '</span><span class="gal2-chip">' + (famPrivate(f) ? tr('Privata (PIN)', 'Private (PIN)') : tr('Publica', 'Public')) + '</span></div></article>';
     }).join('');
     Array.prototype.forEach.call(el.familyGrid.querySelectorAll('.gal2-family-card'), function (c) { c.addEventListener('click', function () { openFamily(c.getAttribute('data-id')); }); });
   }
 
   function drawMediaGrid(container, rows) {
-    if (!rows.length) { container.innerHTML = '<div class="gal2-status">Nu exista materiale in aceasta selectie.</div>'; return; }
+    if (!rows.length) { container.innerHTML = '<div class="gal2-status">' + tr('Nu exista materiale in aceasta selectie.', 'No items in this selection.') + '</div>'; return; }
     container.innerHTML = rows.map(function (p) {
       var img = imgUrl(p.path) || 'data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="600" height="360"><rect width="600" height="360" fill="%23130f0b"/><text x="50%" y="50%" fill="%23c8a65d" dominant-baseline="middle" text-anchor="middle" font-size="22">Calnic Online</text></svg>';
-      return '<article class="gal2-media-card" data-id="' + esc(p.id) + '"><div class="gal2-media-img-wrap"><img src="' + esc(img) + '" alt=""></div><div class="gal2-media-body"><h4 class="gal2-media-title">' + esc(p.title_ro || p.title_en || 'Material') + '</h4><div class="gal2-media-meta">' + esc(mediaType(p)) + ' • ' + esc(p.year || '-') + '</div></div></article>';
+      return '<article class="gal2-media-card" data-id="' + esc(p.id) + '"><div class="gal2-media-img-wrap"><img src="' + esc(img) + '" alt=""></div><div class="gal2-media-body"><h4 class="gal2-media-title">' + esc(p.title_ro || p.title_en || tr('Material', 'Item')) + '</h4><div class="gal2-media-meta">' + esc(mediaTypeLabel(mediaType(p))) + ' • ' + esc(p.year || '-') + '</div></div></article>';
     }).join('');
     Array.prototype.forEach.call(container.querySelectorAll('.gal2-media-card'), function (c) { c.addEventListener('click', function () { openMedia(c.getAttribute('data-id'), rows); }); });
   }
@@ -69,18 +76,18 @@
     var pub = all.filter(function (p) { return !p.is_private; }).length;
     if (el.detailBadges) {
       el.detailBadges.innerHTML =
-        '<span class="gal2-chip">Total: ' + all.length + '</span>' +
-        '<span class="gal2-chip">Publice: ' + pub + '</span>' +
-        '<span class="gal2-chip">Private: ' + (all.length - pub) + '</span>' +
-        '<span class="gal2-chip">' + (famPrivate(f) ? 'Familie privata' : 'Familie publica') + '</span>';
+        '<span class="gal2-chip">' + tr('Total', 'Total') + ': ' + all.length + '</span>' +
+        '<span class="gal2-chip">' + tr('Publice', 'Public') + ': ' + pub + '</span>' +
+        '<span class="gal2-chip">' + tr('Private', 'Private') + ': ' + (all.length - pub) + '</span>' +
+        '<span class="gal2-chip">' + (famPrivate(f) ? tr('Familie privata', 'Private family') : tr('Familie publica', 'Public family')) + '</span>';
     }
     if (famPrivate(f) && !can && !st.pinByFam[String(f.id)]) vis = [];
     el.addFamilyBtn.classList.toggle('hidden', !can);
     el.setAllPublicBtn.classList.toggle('hidden', !canBulk);
     el.setAllPrivateBtn.classList.toggle('hidden', !canBulk);
 
-    var map = { all: { k: 'all', l: 'Toate', c: vis.length } };
-    vis.forEach(function (p) { var k = String((p.category || 'fara-categorie')).toLowerCase(); if (!map[k]) map[k] = { k: k, l: p.category || 'Fara categorie', c: 0 }; map[k].c += 1; });
+    var map = { all: { k: 'all', l: tr('Toate', 'All'), c: vis.length } };
+    vis.forEach(function (p) { var k = String((p.category || 'fara-categorie')).toLowerCase(); if (!map[k]) map[k] = { k: k, l: p.category || tr('Fara categorie', 'No category'), c: 0 }; map[k].c += 1; });
     if (!map[st.selAlbum]) st.selAlbum = 'all';
     el.albumBar.innerHTML = Object.keys(map).map(function (k) { var a = map[k]; return '<button class="gal2-album-btn ' + (st.selAlbum === a.k ? 'active' : '') + '" data-a="' + esc(a.k) + '">' + esc(a.l) + ' (' + a.c + ')</button>'; }).join('');
     Array.prototype.forEach.call(el.albumBar.querySelectorAll('.gal2-album-btn'), function (b) { b.addEventListener('click', function () { st.selAlbum = b.getAttribute('data-a') || 'all'; drawFamilyDetail(); }); });
@@ -108,13 +115,13 @@
     var p = st.media[st.mediaIdx]; if (!p) return;
     var type = mediaType(p), f = p.family_id ? st.fam.find(function (x) { return String(x.id) === String(p.family_id); }) : null;
     el.mediaImage.src = imgUrl(p.path) || '';
-    el.mediaTitle.textContent = p.title_ro || p.title_en || 'Material';
+    el.mediaTitle.textContent = p.title_ro || p.title_en || tr('Material', 'Item');
     el.mediaDesc.textContent = p.caption_ro || p.caption_en || p.dedicatie_ro || p.dedicatie_en || '';
-    el.mediaBadges.innerHTML = '<span class="gal2-chip">' + esc(type) + '</span><span class="gal2-chip">' + (p.is_private ? 'Privat' : 'Public') + '</span>';
-    el.mediaMeta.innerHTML = '<div class="gal2-meta-item"><span class="gal2-meta-label">An</span><span class="gal2-meta-value">' + esc(p.year || '-') + '</span></div><div class="gal2-meta-item"><span class="gal2-meta-label">Categorie</span><span class="gal2-meta-value">' + esc(p.category || '-') + '</span></div><div class="gal2-meta-item"><span class="gal2-meta-label">Familie</span><span class="gal2-meta-value">' + esc(f ? famName(f) : '-') + '</span></div>';
+    el.mediaBadges.innerHTML = '<span class="gal2-chip">' + esc(mediaTypeLabel(type)) + '</span><span class="gal2-chip">' + (p.is_private ? tr('Privat', 'Private') : tr('Public', 'Public')) + '</span>';
+    el.mediaMeta.innerHTML = '<div class="gal2-meta-item"><span class="gal2-meta-label">' + tr('An', 'Year') + '</span><span class="gal2-meta-value">' + esc(p.year || '-') + '</span></div><div class="gal2-meta-item"><span class="gal2-meta-label">' + tr('Categorie', 'Category') + '</span><span class="gal2-meta-value">' + esc(p.category || '-') + '</span></div><div class="gal2-meta-item"><span class="gal2-meta-label">' + tr('Familie', 'Family') + '</span><span class="gal2-meta-value">' + esc(f ? famName(f) : '-') + '</span></div>';
     if (type === 'video' && p.video_url) { el.mediaVideoLink.href = p.video_url; el.mediaVideoLink.classList.remove('hidden'); } else { el.mediaVideoLink.classList.add('hidden'); }
     el.mediaEditVisibility.classList.toggle('hidden', !canManagePhoto(p));
-    el.mediaEditVisibility.textContent = p.is_private ? 'Fa publica' : 'Fa privata';
+    el.mediaEditVisibility.textContent = p.is_private ? tr('Fa publica', 'Set public') : tr('Fa privata', 'Set private');
   }
 
   function closeMedia() { el.mediaOverlay.classList.remove('open'); document.body.style.overflow = ''; }
@@ -123,60 +130,60 @@
 
   async function toggleMediaVis() {
     var p = st.media[st.mediaIdx]; if (!p || !okSb() || !canManagePhoto(p)) return;
-    status('Actualizez vizibilitatea...'); var v = !p.is_private;
-    var r = await sb().from('photos').update({ is_private: v }).eq('id', p.id); if (r.error) { status('Eroare: ' + r.error.message, true); return; }
+    status(tr('Actualizez vizibilitatea...', 'Updating visibility...')); var v = !p.is_private;
+    var r = await sb().from('photos').update({ is_private: v }).eq('id', p.id); if (r.error) { status(tr('Eroare', 'Error') + ': ' + r.error.message, true); return; }
     p.is_private = v; st.photos = st.photos.map(function (x) { if (x.id === p.id) x.is_private = v; return x; });
-    drawMediaModal(); drawFamilyCards(); drawFamilyDetail(); drawArchive(); status('Vizibilitatea a fost actualizata.');
+    drawMediaModal(); drawFamilyCards(); drawFamilyDetail(); drawArchive(); status(tr('Vizibilitatea a fost actualizata.', 'Visibility updated.'));
   }
 
-  function openForm(ctx) { st.formCtx = ctx; el.formOverlay.classList.add('open'); document.body.style.overflow = 'hidden'; el.formTitle.textContent = ctx.scope === 'family' ? 'Adauga media in familia curenta' : 'Adauga media in Arhiva satului'; el.formMsg.textContent = ''; el.formType.value = 'photo'; formTypeUi(); }
+  function openForm(ctx) { st.formCtx = ctx; el.formOverlay.classList.add('open'); document.body.style.overflow = 'hidden'; el.formTitle.textContent = ctx.scope === 'family' ? tr('Adauga media in familia curenta', 'Add media to current family') : tr('Adauga media in Arhiva satului', 'Add media to village archive'); el.formMsg.textContent = ''; el.formType.value = 'photo'; formTypeUi(); }
   function closeForm() { el.formOverlay.classList.remove('open'); document.body.style.overflow = ''; }
   function formTypeUi() { el.formUrlWrap.classList.toggle('hidden', el.formType.value !== 'video'); }
   function yr(v) { var n = parseInt(String(v || '').trim(), 10); var y = new Date().getFullYear(); return (n >= 1000 && n <= y) ? n : null; }
   function toBlob(file) { return new Promise(function (res, rej) { var r = new FileReader(); r.onerror = rej; r.onload = function (e) { var i = new Image(); i.onerror = rej; i.onload = function () { var c = document.createElement('canvas'); var w = i.width, h = i.height, m = 1500; if (w > m || h > m) { if (w >= h) { h = Math.round(h * m / w); w = m; } else { w = Math.round(w * m / h); h = m; } } c.width = w; c.height = h; c.getContext('2d').drawImage(i, 0, 0, w, h); c.toBlob(function (b) { if (!b) rej(new Error('Compresie esuata')); else res(b); }, 'image/jpeg', 0.84); }; i.src = e.target.result; }; r.readAsDataURL(file); }); }
 
   async function saveForm() {
-    if (!okSb()) { el.formMsg.textContent = 'Supabase nu este configurat.'; return; }
-    if (!st.user) { el.formMsg.textContent = 'Trebuie sa fii autentificat.'; return; }
+    if (!okSb()) { el.formMsg.textContent = tr('Supabase nu este configurat.', 'Supabase is not configured.'); return; }
+    if (!st.user) { el.formMsg.textContent = tr('Trebuie sa fii autentificat.', 'You must be logged in.'); return; }
     var t = String(el.formTitleInput.value || '').trim(), f = el.formFile.files && el.formFile.files[0], type = el.formType.value, url = String(el.formUrlInput.value || '').trim();
-    if (!t) { el.formMsg.textContent = 'Titlul este obligatoriu.'; return; }
-    if (!f) { el.formMsg.textContent = 'Imaginea este obligatorie.'; return; }
-    if (type === 'video' && !url) { el.formMsg.textContent = 'Pentru video extern trebuie link.'; return; }
-    if (st.formCtx.scope === 'archive' && !st.isAdmin) { el.formMsg.textContent = 'Doar admin poate adauga in arhiva.'; return; }
-    if (st.formCtx.scope === 'family' && !canManageFam(st.formCtx.familyId)) { el.formMsg.textContent = 'Nu ai drepturi pentru aceasta familie.'; return; }
-    el.formSave.disabled = true; el.formMsg.textContent = 'Se incarca...';
+    if (!t) { el.formMsg.textContent = tr('Titlul este obligatoriu.', 'Title is required.'); return; }
+    if (!f) { el.formMsg.textContent = tr('Imaginea este obligatorie.', 'Image is required.'); return; }
+    if (type === 'video' && !url) { el.formMsg.textContent = tr('Pentru video extern trebuie link.', 'External video link is required.'); return; }
+    if (st.formCtx.scope === 'archive' && !st.isAdmin) { el.formMsg.textContent = tr('Doar admin poate adauga in arhiva.', 'Only admin can add to archive.'); return; }
+    if (st.formCtx.scope === 'family' && !canManageFam(st.formCtx.familyId)) { el.formMsg.textContent = tr('Nu ai drepturi pentru aceasta familie.', 'You do not have rights for this family.'); return; }
+    el.formSave.disabled = true; el.formMsg.textContent = tr('Se incarca...', 'Uploading...');
     try {
       var b = await toBlob(f), pref = st.formCtx.scope === 'archive' ? 'archive' : String(st.formCtx.familyId), path = String(st.user.id) + '/' + pref + '/' + Date.now() + '.jpg';
       var up = await sb().storage.from('photos').upload(path, b, { contentType: 'image/jpeg', upsert: false }); if (up.error) throw up.error;
       var cap = String(el.formDescInput.value || '').trim(); if (type === 'video') cap = '[VIDEO_EXTERN] ' + url + '\\n' + cap;
       var ins = await sb().from('photos').insert({ family_id: st.formCtx.scope === 'family' ? st.formCtx.familyId : null, uploader_id: st.user.id, path: path, title_ro: t, title_en: t, caption_ro: cap, caption_en: cap, dedicatie_ro: '', dedicatie_en: '', year: yr(el.formYearInput.value), category: String(el.formCategoryInput.value || '').trim() || (type === 'document' ? 'Documente' : (type === 'video' ? 'Video extern' : 'Galerie')), is_private: el.formVisibility.value === 'private' });
       if (ins.error) throw ins.error;
-      await loadPhotos(); drawFamilyCards(); drawFamilyDetail(); drawArchive(); closeForm(); status('Material adaugat cu succes.');
-    } catch (e) { el.formMsg.textContent = 'Nu am putut salva: ' + ((e && e.message) || 'eroare'); } finally { el.formSave.disabled = false; }
+      await loadPhotos(); drawFamilyCards(); drawFamilyDetail(); drawArchive(); closeForm(); status(tr('Material adaugat cu succes.', 'Item added successfully.'));
+    } catch (e) { el.formMsg.textContent = tr('Nu am putut salva: ', 'Could not save: ') + ((e && e.message) || tr('eroare', 'error')); } finally { el.formSave.disabled = false; }
   }
 
   async function setAllVis(v) {
     var f = st.fam.find(function (x) { return String(x.id) === String(st.selFam); }); if (!f || !okSb() || !canManageFam(f.id)) return;
-    var ids = famPhotos(f.id).filter(canManagePhoto).map(function (p) { return p.id; }); if (!ids.length) { status('Nu ai drepturi de modificare pentru materialele acestei familii.', true); return; }
-    var r = await sb().from('photos').update({ is_private: !!v }).in('id', ids); if (r.error) { status('Eroare: ' + r.error.message, true); return; }
-    await loadPhotos(); drawFamilyCards(); drawFamilyDetail(); drawArchive(); status(v ? 'Toate materialele au fost trecute pe privat.' : 'Toate materialele au fost trecute pe public.');
+    var ids = famPhotos(f.id).filter(canManagePhoto).map(function (p) { return p.id; }); if (!ids.length) { status(tr('Nu ai drepturi de modificare pentru materialele acestei familii.', 'You do not have rights to update this family media.'), true); return; }
+    var r = await sb().from('photos').update({ is_private: !!v }).in('id', ids); if (r.error) { status(tr('Eroare', 'Error') + ': ' + r.error.message, true); return; }
+    await loadPhotos(); drawFamilyCards(); drawFamilyDetail(); drawArchive(); status(v ? tr('Toate materialele au fost trecute pe privat.', 'All items were set to private.') : tr('Toate materialele au fost trecute pe public.', 'All items were set to public.'));
   }
 
   function openPin(famId) { st.pinPending = famId; el.pinInput.value = ''; el.pinMsg.textContent = ''; el.pinOverlay.classList.add('open'); document.body.style.overflow = 'hidden'; setTimeout(function () { el.pinInput.focus(); }, 20); }
   function closePin() { st.pinPending = null; el.pinOverlay.classList.remove('open'); document.body.style.overflow = ''; }
   async function submitPin() {
-    if (!okSb()) { el.pinMsg.textContent = 'PIN indisponibil.'; return; }
-    var id = st.pinPending, pin = String(el.pinInput.value || '').trim(); if (!id || !pin) { el.pinMsg.textContent = 'Introdu PIN-ul.'; return; }
-    el.pinMsg.textContent = 'Verific PIN...';
+    if (!okSb()) { el.pinMsg.textContent = tr('PIN indisponibil.', 'PIN unavailable.'); return; }
+    var id = st.pinPending, pin = String(el.pinInput.value || '').trim(); if (!id || !pin) { el.pinMsg.textContent = tr('Introdu PIN-ul.', 'Enter PIN.'); return; }
+    el.pinMsg.textContent = tr('Verific PIN...', 'Checking PIN...');
     try {
       var r = await sb().rpc('check_family_pin', { p_family_id: id, p_pin: pin }); if (r.error) throw r.error;
-      if (!r.data) { el.pinMsg.textContent = 'PIN invalid.'; return; }
-      st.pinByFam[String(id)] = true; closePin(); openFamily(id); status('Acces privat acordat pentru aceasta familie.');
-    } catch (e) { el.pinMsg.textContent = 'PIN invalid sau functie SQL lipsa.'; }
+      if (!r.data) { el.pinMsg.textContent = tr('PIN invalid.', 'Invalid PIN.'); return; }
+      st.pinByFam[String(id)] = true; closePin(); openFamily(id); status(tr('Acces privat acordat pentru aceasta familie.', 'Private access granted for this family.'));
+    } catch (e) { el.pinMsg.textContent = tr('PIN invalid sau functie SQL lipsa.', 'Invalid PIN or missing SQL function.'); }
   }
 
   function openFamily(id) {
-    var f = st.fam.find(function (x) { return String(x.id) === String(id); }); if (!f) { status('Familia selectata nu exista.', true); return; }
+    var f = st.fam.find(function (x) { return String(x.id) === String(id); }); if (!f) { status(tr('Familia selectata nu exista.', 'Selected family does not exist.'), true); return; }
     if (famPrivate(f) && !canManageFam(f.id) && !st.pinByFam[String(f.id)]) { openPin(f.id); return; }
     st.selFam = String(f.id); st.selAlbum = 'all'; drawFamilyDetail(); status('');
   }
@@ -219,10 +226,13 @@
 
   async function boot() {
     cache(); bind(); $('yr').textContent = String(new Date().getFullYear()); switchTab('family');
-    if (!okSb()) { status('Supabase nu este configurat. Pagina ruleaza in mod UI.'); return; }
-    status('Incarc datele...');
+    if (typeof window.setLang === 'function') {
+      try { window.setLang(localStorage.getItem('calnic-lang') || 'ro'); } catch (err) {}
+    }
+    if (!okSb()) { status(tr('Supabase nu este configurat. Pagina ruleaza in mod UI.', 'Supabase is not configured. Page is running in UI mode.')); return; }
+    status(tr('Incarc datele...', 'Loading data...'));
     try { await loadAuth(); await loadFamilies(); await loadPhotos(); drawFamilyCards(); drawFamilyDetail(); drawArchive(); el.addArchiveBtn.classList.toggle('hidden', !st.isAdmin); status(''); }
-    catch (e) { status('Nu am putut incarca datele: ' + ((e && e.message) || 'eroare necunoscuta'), true); }
+    catch (e) { status(tr('Nu am putut incarca datele: ', 'Could not load data: ') + ((e && e.message) || tr('eroare necunoscuta', 'unknown error')), true); }
 
     try {
       var qp = new URLSearchParams(window.location.search || '');

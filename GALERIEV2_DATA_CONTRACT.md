@@ -1,4 +1,4 @@
-# galeriev2 data contract
+# FinalGallery data contract
 
 ## used tables
 - `families` (read): `id`, `name`, `display_name`, `village`, `description_short_ro`, `description_ro`, `description`, `is_private`, `visibility`, `show_members`, `show_photos`, `owner_id`, `created_by`

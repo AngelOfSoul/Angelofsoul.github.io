@@ -10,7 +10,7 @@
     'genealogie.html': true,
     'genealogie-familie.html': true,
     'arborele-satului.html': true,
-    'galerie.html': true
+    'finalgallery.html': true
   };
   if (!protectedPages[file]) return;
 
