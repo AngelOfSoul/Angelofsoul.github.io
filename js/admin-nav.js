@@ -1,5 +1,5 @@
-/*
-admin-nav.js — Calnic Online v2 (FIXED)
+﻿/*
+admin-nav.js â€” Calnic Online v2 (FIXED)
 */
 (function () {
 document.documentElement.style.background = '#0a0a0a';
@@ -156,7 +156,7 @@ function buildProfileButton(session, familyName, hasNotif, isAdmin) {
   if (!navRights.length) return;
 
   function setGuestGalleryVisibility(isGuest) {
-    document.querySelectorAll('a[href="galerie.html"], a[href="./galerie.html"]').forEach(function (a) {
+    document.querySelectorAll('a[href="FinalGallery.html"], a[href="./FinalGallery.html"]').forEach(function (a) {
       a.classList.toggle('co-guest-hide-gallery', !!isGuest);
     });
   }
@@ -414,5 +414,6 @@ if (document.readyState === 'loading') {
 }
 
 })();
+
 
 

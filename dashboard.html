@@ -1,10 +1,10 @@
-<!DOCTYPE html>
+﻿<!DOCTYPE html>
 <html lang="ro" style="background:#0a0a0a;">
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <meta name="robots" content="noindex, nofollow">
-<title>Tabloul de bord — Calnic Online</title>
+<title>Tabloul de bord â€” Calnic Online</title>
 
 <link rel="icon" type="image/svg+xml" href="favicon.svg">
 <link rel="icon" type="image/x-icon" href="favicon.ico">
@@ -383,7 +383,7 @@ display:flex;gap:10px;justify-content:flex-end;flex-wrap:wrap;margin-top:18px
   <a class="nav-link" href="genealogie.html">
   <svg viewBox="0 0 32 32" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" width="22" height="22"><circle cx="16" cy="5" r="3"/><circle cx="8" cy="16" r="3"/><circle cx="24" cy="16" r="3"/><line x1="16" y1="8" x2="16" y2="12"/><line x1="16" y1="12" x2="8" y2="13"/><line x1="16" y1="12" x2="24" y2="13"/></svg>
   <span class="nl" data-ro="Genealogie" data-en="Genealogy">Genealogie</span></a>
-  <a class="nav-link" href="galerie.html">
+  <a class="nav-link" href="FinalGallery.html">
   <svg viewBox="0 0 32 32" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" width="22" height="22"><rect x="4" y="5" width="24" height="22" rx="1.5"/><rect x="7" y="8" width="18" height="13" rx="1"/><circle cx="10.5" cy="11.5" r="2"/><path d="M7 18 L12 13.5 L16 17 L19 14.5 L25 19"/></svg>
   <span class="nl" data-ro="Galerie" data-en="Gallery">Galerie</span></a>
   <a class="nav-link" href="contact.html">
@@ -403,7 +403,7 @@ display:flex;gap:10px;justify-content:flex-end;flex-wrap:wrap;margin-top:18px
   <a class="nav-mobile-link" href="istorie.html">&#128506; Istoria Satului</a>
   <a class="nav-mobile-link" href="familiile.html">&#128106; Familiile</a>
   <a class="nav-mobile-link" href="genealogie.html">&#127803; Genealogie</a>
-  <a class="nav-mobile-link" href="galerie.html">&#128248; Galerie</a>
+  <a class="nav-mobile-link" href="FinalGallery.html">&#128248; Galerie</a>
   <a class="nav-mobile-link" href="contact.html">&#9993; Contact</a>
   <a class="nav-mobile-link" href="intrebari.html">&#10067; Intrebari</a>
   <a class="nav-mobile-login active" href="login.html">&#128274; Contul Familiei</a>
@@ -641,7 +641,7 @@ display:flex;gap:10px;justify-content:flex-end;flex-wrap:wrap;margin-top:18px
         <div id="photosMsg" class="df-msg"></div>
         <hr class="df-divider"/>
         <p style="font-size:13px; color:var(--muted);" data-ro="Pentru a adauga fotografii noi, mergi la pagina Galerie." data-en="To add new photos, go to the Gallery page.">Pentru a adauga fotografii noi, mergi la pagina Galerie.</p>
-        <a class="dash-btn-sec" href="galerie.html" style="margin-top:10px; display:inline-block;" data-ro="&#127747; Mergi la Galerie" data-en="&#127747; Go to Gallery">&#127747; Mergi la Galerie</a>
+        <a class="dash-btn-sec" href="FinalGallery.html" style="margin-top:10px; display:inline-block;" data-ro="&#127747; Mergi la Galerie" data-en="&#127747; Go to Gallery">&#127747; Mergi la Galerie</a>
       </div>
     </div>
 
@@ -688,7 +688,7 @@ display:flex;gap:10px;justify-content:flex-end;flex-wrap:wrap;margin-top:18px
 <script>
 document.getElementById('yr') && (document.getElementById('yr').textContent = new Date().getFullYear());
 
-/* ── PASSWORD TOGGLE ── */
+/* â”€â”€ PASSWORD TOGGLE â”€â”€ */
 var EYE_ON  = '<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>';
 var EYE_OFF = '<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19m-6.72-1.07a3 3 0 1 1-4.24-4.24"/><line x1="1" y1="1" x2="23" y2="23"/></svg>';
 function togglePassword(inputId, btn) {
@@ -848,7 +848,7 @@ async function saveStory() {
   var nameV = document.getElementById('storyName').value.trim();
   if (!nameV) { showMsg('storyMsg', currentLang==='ro'?'Numele familiei este obligatoriu.':'Family name is required.', 'error'); return; }
   btn.disabled = true;
-  var slug = nameV.toLowerCase().normalize('NFD').replace(/[̀-ͯ]/g, '').replace(/[^a-z0-9]+/g, '-').replace(/^-+|-+$/g, '');
+  var slug = nameV.toLowerCase().normalize('NFD').replace(/[Ì€-Í¯]/g, '').replace(/[^a-z0-9]+/g, '-').replace(/^-+|-+$/g, '');
   var updates = {
     name: nameV,
     display_name: nameV,
@@ -1109,7 +1109,7 @@ function renderPhotos(photos) {
     var title = (currentLang === 'en' && p.title_en) ? p.title_en : (p.title_ro || (currentLang === 'ro' ? 'Fara titlu' : 'Untitled'));
     var cat = CAT_LABELS[p.category] || p.category || '';
     var year = p.year ? p.year : '';
-    var meta = [cat, year].filter(Boolean).join(' · ');
+    var meta = [cat, year].filter(Boolean).join(' Â· ');
     var storagePath = extractStoragePath(p.path || '');
     var imgSrc = resolvePhotoUrl(p.path || '');
     var isPrivate = !!p.is_private;
@@ -1497,7 +1497,7 @@ function initDashboard() {
 }
 if (window.supabase) { initDashboard(); } else { document.addEventListener('supabase:ready', initDashboard); }
 
-// ── WIRE-UP: all event listeners ──────────────────────────
+// â”€â”€ WIRE-UP: all event listeners â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 document.addEventListener('DOMContentLoaded', function() {
   // Add member button (replaces inline onclick)
   var amb = document.getElementById('addMemberBtn');
@@ -1545,7 +1545,7 @@ function escHtml(s) {
   function slugify(text) {
     return String(text || '')
       .toLowerCase()
-      .normalize('NFD').replace(/[̀-ͯ]/g, '')
+      .normalize('NFD').replace(/[Ì€-Í¯]/g, '')
       .replace(/[^a-z0-9]+/g, '-')
       .replace(/^-+|-+$/g, '');
   }
@@ -1694,5 +1694,6 @@ function escHtml(s) {
 <script src="js/transitions.js" defer></script>
 </body>
 </html>
+
 
 
