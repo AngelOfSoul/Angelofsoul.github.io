@@ -1,0 +1,252 @@
+<!DOCTYPE html>
+<html lang="ro" style="background:#0a0a0a;">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="description" content="Galerie v2 Calnic Online - Album de familie si Arhiva satului, intr-un singur loc.">
+<meta name="author" content="Calnic Online">
+<meta name="robots" content="index, follow">
+<meta property="og:title" content="Galerie - Calnic Online">
+<meta property="og:description" content="Album de familie si Arhiva satului, intr-un singur loc.">
+<meta property="og:type" content="website">
+<meta property="og:url" content="https://calniconline.ro/galeriev2.html">
+<meta property="og:image" content="https://calniconline.ro/og-image.png">
+<meta name="twitter:card" content="summary_large_image">
+<title>Galerie - Calnic Online</title>
+
+<link rel="icon" type="image/svg+xml" href="favicon.svg">
+<link rel="icon" type="image/x-icon" href="favicon.ico">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;500&family=EB+Garamond:ital,wght@0,400;0,500;1,400&family=Playfair+Display:wght@400;600&display=swap" rel="stylesheet">
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js" defer></script>
+<script src="js/config.js" defer></script>
+<script src="js/supabase.js" defer></script>
+<script src="js/utils.js" defer></script>
+<script src="js/admin-nav.js" defer></script>
+
+<link rel="stylesheet" href="css/tokens.css">
+<link rel="stylesheet" href="css/style.css">
+<link rel="stylesheet" href="css/premium.css">
+<link rel="stylesheet" href="css/navbar-heraldic.css">
+<link rel="stylesheet" href="css/tree-ui.css">
+<link rel="stylesheet" href="css/galeriev2.css">
+</head>
+<body>
+<div class="lang-bar">
+  <span class="lang-label">LIMBA / LANGUAGE</span>
+  <button class="lang-btn active" onclick="setLang('ro')" id="btn-ro">RO</button>
+  <button class="lang-btn" onclick="setLang('en')" id="btn-en">EN</button>
+</div>
+
+<header class="site-header">
+  <img class="banner-img" src="banner-calnic.png" alt="Calnic Online">
+  <div class="header-divider"></div>
+  <div class="header-motto">
+    <div class="header-sub">Satul nostru - Amintirile noastre</div>
+  </div>
+</header>
+
+<div class="nav-wrapper">
+  <div class="nav-gold-line"></div>
+  <nav>
+    <a class="nav-link" href="index.html"><span class="nl" data-ro="Acasa" data-en="Homepage">Acasa</span></a>
+    <a class="nav-link" href="istorie.html"><span class="nl" data-ro="Istoria Satului" data-en="Village History">Istoria Satului</span></a>
+    <a class="nav-link" href="familiile.html"><span class="nl" data-ro="Familiile" data-en="Families">Familiile</span></a>
+    <a class="nav-link" href="genealogie.html"><span class="nl" data-ro="Genealogie" data-en="Genealogy">Genealogie</span></a>
+    <a class="nav-link active" href="galeriev2.html"><span class="nl" data-ro="Galerie" data-en="Gallery">Galerie</span></a>
+    <a class="nav-link" href="contact.html"><span class="nl" data-ro="Contact" data-en="Contact">Contact</span></a>
+    <a class="nav-link" href="intrebari.html"><span class="nl" data-ro="Intrebari" data-en="FAQ">Intrebari</span></a>
+    <div class="nav-right">
+      <a class="nav-login" href="login.html">&#128274; <span class="nl" data-ro="Profilul meu" data-en="My profile">Profilul meu</span></a>
+    </div>
+    <button class="hamburger" id="hamburgerBtn">&#9776;</button>
+  </nav>
+</div>
+
+<div class="nav-mobile-menu" id="navMobileMenu">
+  <a class="nav-mobile-link" href="index.html">&#8962; Acasa</a>
+  <a class="nav-mobile-link" href="istorie.html">&#128506; Istoria Satului</a>
+  <a class="nav-mobile-link" href="familiile.html">&#128106; Familiile</a>
+  <a class="nav-mobile-link" href="genealogie.html">&#127803; Genealogie</a>
+  <a class="nav-mobile-link active" href="galeriev2.html">&#128248; Galerie</a>
+  <a class="nav-mobile-link" href="contact.html">&#9993; Contact</a>
+  <a class="nav-mobile-link" href="intrebari.html">&#10067; Intrebari</a>
+  <a class="nav-mobile-login" href="login.html">&#128274; Profilul meu</a>
+</div>
+
+<main class="gal2-wrap">
+  <section class="section-head">
+    <span class="section-head-title">Galerie</span>
+  </section>
+  <section class="gal2-hero">
+    <h1 class="gal2-title">Galerie</h1>
+    <p class="gal2-sub">Album de familie si Arhiva satului, intr-un singur loc.</p>
+  </section>
+
+  <section class="gal2-tabs" role="tablist" aria-label="Taburi principale galerie">
+    <button id="gal2-tab-family" class="gal2-tab active" type="button" data-tab="family">Album de familie</button>
+    <button id="gal2-tab-archive" class="gal2-tab" type="button" data-tab="archive">Arhiva satului</button>
+  </section>
+
+  <section id="gal2-family-panel" class="gal2-panel active" aria-labelledby="gal2-tab-family">
+    <div class="gal2-panel-head">
+      <p class="gal2-panel-intro">Exploreaza familiile, albumele si amintirile pastrate de fiecare ramura.</p>
+      <div class="gal2-search-wrap">
+        <input id="gal2-family-search" class="gal2-input" type="text" placeholder="Cauta familie...">
+      </div>
+    </div>
+
+    <div id="gal2-family-grid" class="gal2-family-grid"></div>
+
+    <div id="gal2-family-detail" class="gal2-family-detail hidden">
+      <div class="gal2-detail-head">
+        <button id="gal2-back-families" class="gal2-btn secondary" type="button">Inapoi la familii</button>
+        <h2 id="gal2-detail-name" class="gal2-detail-name">Familie</h2>
+        <p id="gal2-detail-desc" class="gal2-detail-desc"></p>
+        <div id="gal2-detail-badges" class="gal2-detail-badges"></div>
+        <div id="gal2-family-actions" class="gal2-modal-actions">
+          <button id="gal2-add-family-btn" class="gal2-btn hidden" type="button">Adauga media</button>
+          <button id="gal2-set-all-public" class="gal2-btn secondary hidden" type="button">Fa tot public</button>
+          <button id="gal2-set-all-private" class="gal2-btn secondary hidden" type="button">Fa tot privat</button>
+        </div>
+      </div>
+      <div id="gal2-album-bar" class="gal2-album-bar"></div>
+      <div id="gal2-family-media-grid" class="gal2-media-grid"></div>
+    </div>
+  </section>
+
+  <section id="gal2-archive-panel" class="gal2-panel" aria-labelledby="gal2-tab-archive">
+    <div class="gal2-panel-head">
+      <p class="gal2-panel-intro">Imagini, documente si materiale video care pastreaza memoria satului.</p>
+      <button id="gal2-add-archive-btn" class="gal2-btn hidden" type="button">Adauga in arhiva</button>
+    </div>
+    <div id="gal2-archive-filters" class="gal2-filter-row">
+      <button class="gal2-filter active" data-archive-filter="all" type="button">Toate</button>
+      <button class="gal2-filter" data-archive-filter="gallery" type="button">Galerie</button>
+      <button class="gal2-filter" data-archive-filter="documents" type="button">Documente</button>
+    </div>
+    <div id="gal2-archive-grid" class="gal2-media-grid"></div>
+  </section>
+
+  <section id="gal2-status" class="gal2-status" aria-live="polite"></section>
+</main>
+
+<div id="gal2-media-overlay" class="gal2-overlay" role="dialog" aria-modal="true">
+  <div class="gal2-modal gal2-modal-media">
+    <button id="gal2-media-close" class="gal2-modal-close" type="button">&#10005;</button>
+    <button id="gal2-media-prev" class="gal2-nav-arrow left" type="button">&#8592;</button>
+    <button id="gal2-media-next" class="gal2-nav-arrow right" type="button">&#8594;</button>
+    <div class="gal2-modal-media-wrap">
+      <div class="gal2-modal-visual">
+        <img id="gal2-media-image" alt="">
+      </div>
+      <div class="gal2-modal-info">
+        <h3 id="gal2-media-title"></h3>
+        <div id="gal2-media-badges" class="gal2-detail-badges"></div>
+        <p id="gal2-media-desc"></p>
+        <div id="gal2-media-meta" class="gal2-meta-grid"></div>
+        <div class="gal2-modal-actions">
+          <a id="gal2-media-video-link" class="gal2-btn hidden" target="_blank" rel="noopener">Vezi video</a>
+          <button id="gal2-media-download" class="gal2-btn" type="button">Descarca</button>
+          <button id="gal2-media-edit-visibility" class="gal2-btn secondary hidden" type="button">Schimba public/privat</button>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div id="gal2-form-overlay" class="gal2-overlay" role="dialog" aria-modal="true">
+  <div class="gal2-modal gal2-modal-form">
+    <button id="gal2-form-close" class="gal2-modal-close" type="button">&#10005;</button>
+    <h3 id="gal2-form-title">Adauga material</h3>
+    <p class="gal2-modal-sub">Formular unificat pentru Album de familie si Arhiva satului.</p>
+
+    <div class="gal2-form-top-row">
+      <label class="gal2-label">Tip material</label>
+      <select id="gal2-form-type" class="gal2-input">
+        <option value="photo">Poza</option>
+        <option value="video">Video extern</option>
+        <option value="document">Document</option>
+      </select>
+    </div>
+
+    <div class="gal2-form-grid">
+      <div class="gal2-field">
+        <label class="gal2-label">Titlu *</label>
+        <input id="gal2-form-title-input" class="gal2-input" type="text" placeholder="Titlu material">
+      </div>
+      <div class="gal2-field">
+        <label class="gal2-label">An / perioada</label>
+        <input id="gal2-form-year-input" class="gal2-input" type="text" placeholder="ex. 1980">
+      </div>
+      <div id="gal2-form-url-wrap" class="gal2-field hidden">
+        <label class="gal2-label">Link video extern *</label>
+        <input id="gal2-form-url-input" class="gal2-input" type="url" placeholder="https://...">
+      </div>
+      <div class="gal2-field">
+        <label class="gal2-label">Categorie</label>
+        <input id="gal2-form-category-input" class="gal2-input" type="text" placeholder="ex. Cetatea Calnic">
+      </div>
+      <div class="gal2-field gal2-field-full">
+        <label class="gal2-label">Imagine *</label>
+        <input id="gal2-form-file-input" class="gal2-input" type="file" accept="image/*">
+      </div>
+      <div class="gal2-field gal2-field-full">
+        <label class="gal2-label">Descriere</label>
+        <textarea id="gal2-form-desc-input" class="gal2-input gal2-textarea" placeholder="Descriere material"></textarea>
+      </div>
+      <div class="gal2-field">
+        <label class="gal2-label">Vizibilitate</label>
+        <select id="gal2-form-visibility" class="gal2-input">
+          <option value="public">Public</option>
+          <option value="private">Privat</option>
+        </select>
+      </div>
+    </div>
+
+    <div class="gal2-modal-actions">
+      <button id="gal2-form-cancel" class="gal2-btn secondary" type="button">Anuleaza</button>
+      <button id="gal2-form-save" class="gal2-btn" type="button">Salveaza</button>
+    </div>
+    <div id="gal2-form-msg" class="gal2-form-msg" aria-live="polite"></div>
+  </div>
+</div>
+
+<div id="gal2-pin-overlay" class="gal2-overlay" role="dialog" aria-modal="true">
+  <div class="gal2-modal gal2-pin-modal">
+    <h3>Acces privat</h3>
+    <p>Aceasta familie este protejata cu PIN. Introdu PIN-ul pentru a continua.</p>
+    <div class="gal2-pin-row">
+      <input id="gal2-pin-input" class="gal2-input" type="password" maxlength="8" autocomplete="off" placeholder="PIN">
+      <button id="gal2-pin-toggle" class="gal2-pin-toggle" type="button">&#128065;</button>
+    </div>
+    <div class="gal2-modal-actions">
+      <button id="gal2-pin-submit" class="gal2-btn" type="button">Acceseaza</button>
+      <button id="gal2-pin-cancel" class="gal2-btn secondary" type="button">Inchide</button>
+    </div>
+    <div id="gal2-pin-msg" class="gal2-form-msg"></div>
+  </div>
+</div>
+
+<a class="scroll-top" id="scrollTop" onclick="window.scrollTo({top:0,behavior:'smooth'})" title="Sus">&#8679;</a>
+<a class="scroll-bottom" id="scrollBottom" onclick="window.scrollTo({top:document.body.scrollHeight,behavior:'smooth'})" title="Jos">&#8681;</a>
+
+<footer>
+  <div style="max-width:960px;margin:0 auto;display:flex;flex-wrap:wrap;align-items:center;justify-content:center;gap:6px 16px;">
+    <span><span class="g">Calnic</span> &nbsp;&#183;&nbsp; Alba &nbsp;&#183;&nbsp; Romania &nbsp;&#183;&nbsp; <span id="yr"></span></span>
+    <span style="color:#2a2a2a;">&#183;</span>
+    <span style="font-style:italic;">Sat cu suflet, memorie vie</span>
+    <span style="color:#2a2a2a;">&#183;</span>
+    <a href="intrebari.html" style="color:#7a5828;font-size:13px;font-style:normal;letter-spacing:1px;">Intrebari frecvente</a>
+    <span style="color:#2a2a2a;">&#183;</span>
+    <a href="contact.html" style="color:#7a5828;font-size:13px;font-style:normal;letter-spacing:1px;">Contact</a>
+  </div>
+</footer>
+
+<script src="js/scroll-effects.js" defer></script>
+<script src="js/transitions.js" defer></script>
+<script src="js/galeriev2.js" defer></script>
+</body>
+</html>

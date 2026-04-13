@@ -1,14 +1,14 @@
-<!DOCTYPE html>
+﻿<!DOCTYPE html>
 <html lang="ro" style="background:#0a0a0a;">
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<meta name="description" content="Galeria foto a satului Calnic, Alba, Transilvania — imagini vechi si noi din sat, cetatea UNESCO, viata comunitatii.">
+<meta name="description" content="Galeria foto a satului Calnic, Alba, Transilvania â€” imagini vechi si noi din sat, cetatea UNESCO, viata comunitatii.">
 <meta name="keywords" content="Calnic, galerie foto, Alba, Transilvania, cetatea Calnic, fotografii vechi, sat Romania">
 <meta name="author" content="Calnic Online">
 <meta name="robots" content="index, follow">
-<meta property="og:title" content="Galerie Foto — Calnic Online">
-<meta property="og:description" content="Fotografii din Calnic, Alba — cetatea UNESCO, viata satului, familii si natura.">
+<meta property="og:title" content="Galerie Foto â€” Calnic Online">
+<meta property="og:description" content="Fotografii din Calnic, Alba â€” cetatea UNESCO, viata satului, familii si natura.">
 <meta property="og:type" content="website">
 <meta property="og:url" content="https://calniconline.ro/galerie.html">
 <meta property="og:image" content="https://calniconline.ro/og-image.png">
@@ -16,11 +16,11 @@
 <meta property="og:image:height" content="630">
 <meta property="og:locale" content="ro_RO">
 <meta name="twitter:card" content="summary_large_image">
-<meta name="twitter:title" content="Galerie Foto — Calnic Online">
-<meta name="twitter:description" content="Fotografii din Calnic, Alba — cetatea UNESCO, viata satului, familii si natura.">
+<meta name="twitter:title" content="Galerie Foto â€” Calnic Online">
+<meta name="twitter:description" content="Fotografii din Calnic, Alba â€” cetatea UNESCO, viata satului, familii si natura.">
 <meta name="twitter:image" content="https://calniconline.ro/og-image.png">
 <link rel="canonical" href="https://calniconline.ro/galerie.html">
-<title>Galerie Foto — Calnic Online</title>
+<title>Galerie Foto â€” Calnic Online</title>
 
 <link rel="icon" type="image/svg+xml" href="favicon.svg">
 <link rel="icon" type="image/x-icon" href="favicon.ico">
@@ -30,7 +30,12 @@
 <script src="js/tree-access-guard.js" defer></script>
 <script src="js/utils.js" defer></script>
 <script src="js/admin-nav.js" defer></script>
-<script type="application/ld+json">{"@context":"https://schema.org","@type":"WebPage","name":"Galerie Foto — Calnic Online","description":"Galeria foto a satului Calnic, Alba, Transilvania — imagini vechi si noi din sat, cetatea UNESCO, viata comunitatii.","url":"https://calniconline.ro/galerie.html","isPartOf":{"@type":"WebSite","name":"Calnic Online","url":"https://calniconline.ro"}}</script>
+<script>
+if (window.location.pathname.toLowerCase().indexOf('galerie.html') >= 0) {
+  window.location.replace('galeriev2.html' + (window.location.search || '') + (window.location.hash || ''));
+}
+</script>
+<script type="application/ld+json">{"@context":"https://schema.org","@type":"WebPage","name":"Galerie Foto â€” Calnic Online","description":"Galeria foto a satului Calnic, Alba, Transilvania â€” imagini vechi si noi din sat, cetatea UNESCO, viata comunitatii.","url":"https://calniconline.ro/galerie.html","isPartOf":{"@type":"WebSite","name":"Calnic Online","url":"https://calniconline.ro"}}</script>
 
 <style>
 /* Page-specific CSS for galerie.html */
@@ -1021,7 +1026,7 @@ function openLb(id) {
   capEl.textContent = cap; capEl.style.display = cap ? 'block' : 'none';
   var ded = currentLang === 'ro' ? p.dedicatieRo : p.dedicatieEn;
   var dedEl = document.getElementById('lb-dedication');
-  dedEl.textContent = ded ? '✦ ' + ded : ''; dedEl.style.display = ded ? 'block' : 'none';
+  dedEl.textContent = ded ? 'âœ¦ ' + ded : ''; dedEl.style.display = ded ? 'block' : 'none';
   document.getElementById('lb-by').innerHTML = '<a href="familiile.html">' + escH(currentLang === 'ro' ? p.byRo : p.byEn) + '</a>';
   document.getElementById('lb-year').textContent = p.year || (currentLang === 'ro' ? 'Necunoscut' : 'Unknown');
   document.getElementById('lb-cat').textContent = getCatLabel(p.cat, currentLang);
@@ -1393,7 +1398,7 @@ document.addEventListener('keydown', function(e) {
 document.addEventListener('calnic:langchange', function(e) { applyPageLang(e.detail.lang); });
 applyPageLang(window.CalnicUtils ? window.CalnicUtils.lang() : currentLang);
 
-/* ── Load real photos from Supabase on ready ── */
+/* â”€â”€ Load real photos from Supabase on ready â”€â”€ */
 function loadPhotosFromSupabase() {
   if (!hasLiveSupabase()) return;
   window.supabase.auth.getUser().then(function(userRes) {
