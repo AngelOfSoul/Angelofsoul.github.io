@@ -1265,6 +1265,9 @@ async function changePIN() {
 
 async function togglePhotoPrivacy(photoId, makePrivate) {
   if (!window.supabase || !photoId || !currentUser) return;
+  var toast = (window.CalnicUtils && typeof window.CalnicUtils.showToast === 'function')
+    ? window.CalnicUtils.showToast
+    : function(){};
   var upd = await window.supabase
     .from('photos')
     .update({ is_private: !!makePrivate })
@@ -1277,6 +1280,9 @@ async function togglePhotoPrivacy(photoId, makePrivate) {
   showMsg('photosMsg', makePrivate
     ? (currentLang === 'ro' ? 'Fotografia a fost setata ca privata.' : 'Photo set to private.')
     : (currentLang === 'ro' ? 'Fotografia a fost setata ca publica.' : 'Photo set to public.'), 'success');
+  toast(makePrivate
+    ? (currentLang === 'ro' ? 'Poza este acum privata.' : 'Photo is now private.')
+    : (currentLang === 'ro' ? 'Poza este acum publica.' : 'Photo is now public.'), 'ok', 2400);
   await loadPhotos();
 }
 

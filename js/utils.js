@@ -143,12 +143,14 @@
         'bottom:80px',
         'left:50%',
         'transform:translateX(-50%)',
-        'padding:10px 22px',
+        'padding:10px 16px',
         'border-radius:3px',
         'font-family:"EB Garamond",serif',
         'font-size:14px',
         'z-index:99999',
         'display:none',
+        'opacity:0',
+        'transition:opacity .18s ease',
         'box-shadow:0 4px 16px rgba(0,0,0,.6)',
         'white-space:nowrap',
         'pointer-events:none',
@@ -165,11 +167,14 @@
     toast.style.background = c.bg;
     toast.style.border = '1px solid ' + c.border;
     toast.style.color = c.color;
-    toast.textContent = text;
+    var icon = type === 'ok' ? '✓' : (type === 'err' ? '✕' : '•');
+    toast.textContent = icon + ' ' + text;
     toast.style.display = 'block';
+    toast.style.opacity = '1';
     clearTimeout(toast._timer);
     toast._timer = setTimeout(function () {
-      toast.style.display = 'none';
+      toast.style.opacity = '0';
+      setTimeout(function () { toast.style.display = 'none'; }, 180);
     }, duration || 4000);
   }
 

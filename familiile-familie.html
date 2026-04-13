@@ -904,22 +904,25 @@ function getFamilyVisibilityToggleLabel() {
 function toggleFamilyVisibility() {
   if (!window.supabase || !FAM || !isOwner) return;
   var nextVis = String(FAM.visibility || 'public').toLowerCase() === 'private' ? 'public' : 'private';
+  var toast = (window.CalnicUtils && typeof window.CalnicUtils.showToast === 'function')
+    ? window.CalnicUtils.showToast
+    : function(msg){ try { alert(msg); } catch(_e){} };
   window.supabase
     .from('families')
     .update({ visibility: nextVis })
     .eq('id', FAM.id)
     .then(function(res) {
       if (res && res.error) {
-        alert((currentLang === 'ro' ? 'Nu am putut actualiza vizibilitatea familiei: ' : 'Could not update family visibility: ') + res.error.message);
+        toast((currentLang === 'ro' ? 'Nu am putut actualiza vizibilitatea familiei: ' : 'Could not update family visibility: ') + res.error.message, 'err', 3200);
         return;
       }
       FAM.visibility = nextVis;
       populateDOM();
       var btn = document.getElementById('toggleFamilyVisibilityBtn');
       if (btn) btn.textContent = getFamilyVisibilityToggleLabel();
-      alert(nextVis === 'private'
+      toast(nextVis === 'private'
         ? (currentLang === 'ro' ? 'Familia este acum privata.' : 'Family is now private.')
-        : (currentLang === 'ro' ? 'Familia este acum publica.' : 'Family is now public.'));
+        : (currentLang === 'ro' ? 'Familia este acum publica.' : 'Family is now public.'), 'ok', 2600);
     });
 }
 

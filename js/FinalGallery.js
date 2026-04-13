@@ -15,6 +15,13 @@
   function esc(s) { return String(s == null ? '' : s).replace(/[&<>"']/g, function (m) { return ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' })[m]; }); }
   function isEn() { return (localStorage.getItem('calnic-lang') || 'ro') === 'en'; }
   function tr(ro, en) { return isEn() ? en : ro; }
+  function toast(ro, en, type, duration) {
+    try {
+      if (window.CalnicUtils && typeof window.CalnicUtils.showToast === 'function') {
+        window.CalnicUtils.showToast(tr(ro, en), type || 'info', duration || 2400);
+      }
+    } catch (e) {}
+  }
   function status(msg, bad) { if (!el.status) return; el.status.textContent = msg || ''; el.status.style.color = bad ? '#d39a9a' : '#b9a175'; }
   function famName(f) { return (f && (f.display_name || f.name)) || 'Familie'; }
   function famPrivate(f) { return !!(f && (f.is_private === true || f.visibility === 'private')); }
@@ -75,7 +82,10 @@
     if (!rows.length) { container.innerHTML = '<div class="gal2-status">' + tr('Nu exista materiale in aceasta selectie.', 'No items in this selection.') + '</div>'; return; }
     container.innerHTML = rows.map(function (p) {
       var img = imgUrl(p.path) || 'data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="600" height="360"><rect width="600" height="360" fill="%23130f0b"/><text x="50%" y="50%" fill="%23c8a65d" dominant-baseline="middle" text-anchor="middle" font-size="22">Calnic Online</text></svg>';
-      return '<article class="gal2-media-card" data-id="' + esc(p.id) + '"><div class="gal2-media-img-wrap"><img src="' + esc(img) + '" alt=""></div><div class="gal2-media-body"><h4 class="gal2-media-title">' + esc(p.title_ro || p.title_en || tr('Material', 'Item')) + '</h4><div class="gal2-media-meta">' + esc(mediaTypeLabel(mediaType(p))) + ' &middot; ' + esc(p.year || '-') + '</div></div></article>';
+      var ownerMark = canManagePhoto(p)
+        ? '<span class="gal2-vis-tag ' + (p.is_private ? 'private' : 'public') + '">' + (p.is_private ? tr('Privat', 'Private') : tr('Public', 'Public')) + '</span>'
+        : '';
+      return '<article class="gal2-media-card" data-id="' + esc(p.id) + '"><div class="gal2-media-img-wrap">' + ownerMark + '<img src="' + esc(img) + '" alt=""></div><div class="gal2-media-body"><h4 class="gal2-media-title">' + esc(p.title_ro || p.title_en || tr('Material', 'Item')) + '</h4><div class="gal2-media-meta">' + esc(mediaTypeLabel(mediaType(p))) + ' &middot; ' + esc(p.year || '-') + '</div></div></article>';
     }).join('');
     Array.prototype.forEach.call(container.querySelectorAll('.gal2-media-card'), function (c) { c.addEventListener('click', function () { openMedia(c.getAttribute('data-id'), rows); }); });
   }
@@ -149,6 +159,7 @@
     var r = await sb().from('photos').update({ is_private: v }).eq('id', p.id); if (r.error) { status(tr('Eroare', 'Error') + ': ' + r.error.message, true); return; }
     p.is_private = v; st.photos = st.photos.map(function (x) { if (x.id === p.id) x.is_private = v; return x; });
     drawMediaModal(); drawFamilyCards(); drawFamilyDetail(); drawArchive(); status(tr('Vizibilitatea a fost actualizata.', 'Visibility updated.'));
+    toast(v ? 'Poza a devenit privata.' : 'Poza a devenit publica.', v ? 'Photo is now private.' : 'Photo is now public.', 'ok');
   }
 
   function openForm(ctx) { st.formCtx = ctx; el.formOverlay.classList.add('open'); document.body.style.overflow = 'hidden'; el.formTitle.textContent = ctx.scope === 'family' ? tr('Adauga media in familia curenta', 'Add media to current family') : tr('Adauga media in Arhiva satului', 'Add media to village archive'); el.formMsg.textContent = ''; el.formType.value = 'photo'; formTypeUi(); }
@@ -182,6 +193,7 @@
     var ids = famPhotos(f.id).filter(canManagePhoto).map(function (p) { return p.id; }); if (!ids.length) { status(tr('Nu ai drepturi de modificare pentru materialele acestei familii.', 'You do not have rights to update this family media.'), true); return; }
     var r = await sb().from('photos').update({ is_private: !!v }).in('id', ids); if (r.error) { status(tr('Eroare', 'Error') + ': ' + r.error.message, true); return; }
     await loadPhotos(); drawFamilyCards(); drawFamilyDetail(); drawArchive(); status(v ? tr('Toate materialele au fost trecute pe privat.', 'All items were set to private.') : tr('Toate materialele au fost trecute pe public.', 'All items were set to public.'));
+    toast(v ? 'Toate pozele tale sunt acum private.' : 'Toate pozele tale sunt acum publice.', v ? 'All your photos are now private.' : 'All your photos are now public.', 'ok', 2800);
   }
 
   function openPin(famId) { st.pinPending = famId; el.pinInput.value = ''; el.pinMsg.textContent = ''; el.pinOverlay.classList.add('open'); document.body.style.overflow = 'hidden'; setTimeout(function () { el.pinInput.focus(); }, 20); }
