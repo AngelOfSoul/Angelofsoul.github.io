@@ -18,7 +18,7 @@
   function famPrivate(f) { return !!(f && (f.is_private === true || f.visibility === 'private' || f.show_members === false || f.show_photos === false)); }
   function ownFam(familyId) { return st.ownFam.indexOf(String(familyId)) >= 0; }
   function canManageFam(id) { return st.isAdmin || ownFam(id); }
-  function canManagePhoto(p) { return st.isAdmin || (st.user && p.uploader_id === st.user.id) || (p.family_id && ownFam(p.family_id)); }
+  function canManagePhoto(p) { return !!(st.user && p && p.uploader_id && String(p.uploader_id) === String(st.user.id)); }
   function canViewPhoto(p) { return !p.is_private || canManagePhoto(p) || (p.family_id && st.pinByFam[String(p.family_id)]); }
   function mediaType(p) { var c = String(p.category || '').toLowerCase(); if (c.indexOf('document') >= 0) return 'document'; if (c.indexOf('video') >= 0 || p.video_url) return 'video'; return 'photo'; }
   function imgUrl(path) { if (!path || !okSb()) return ''; try { var u = sb().storage.from('photos').getPublicUrl(path); return (u && u.data && u.data.publicUrl) || ''; } catch (e) { return ''; } }
@@ -65,6 +65,7 @@
     el.detailName.textContent = famName(f);
     el.detailDesc.textContent = f.description_short_ro || f.description_ro || f.description || '';
     var can = canManageFam(f.id), all = famPhotos(f.id), vis = visFamPhotos(f.id);
+    var canBulk = can && all.length > 0 && all.every(canManagePhoto);
     var pub = all.filter(function (p) { return !p.is_private; }).length;
     if (el.detailBadges) {
       el.detailBadges.innerHTML =
@@ -75,8 +76,8 @@
     }
     if (famPrivate(f) && !can && !st.pinByFam[String(f.id)]) vis = [];
     el.addFamilyBtn.classList.toggle('hidden', !can);
-    el.setAllPublicBtn.classList.toggle('hidden', !can || !all.length);
-    el.setAllPrivateBtn.classList.toggle('hidden', !can || !all.length);
+    el.setAllPublicBtn.classList.toggle('hidden', !canBulk);
+    el.setAllPrivateBtn.classList.toggle('hidden', !canBulk);
 
     var map = { all: { k: 'all', l: 'Toate', c: vis.length } };
     vis.forEach(function (p) { var k = String((p.category || 'fara-categorie')).toLowerCase(); if (!map[k]) map[k] = { k: k, l: p.category || 'Fara categorie', c: 0 }; map[k].c += 1; });
@@ -156,7 +157,7 @@
 
   async function setAllVis(v) {
     var f = st.fam.find(function (x) { return String(x.id) === String(st.selFam); }); if (!f || !okSb() || !canManageFam(f.id)) return;
-    var ids = famPhotos(f.id).map(function (p) { return p.id; }); if (!ids.length) return;
+    var ids = famPhotos(f.id).filter(canManagePhoto).map(function (p) { return p.id; }); if (!ids.length) { status('Nu ai drepturi de modificare pentru materialele acestei familii.', true); return; }
     var r = await sb().from('photos').update({ is_private: !!v }).in('id', ids); if (r.error) { status('Eroare: ' + r.error.message, true); return; }
     await loadPhotos(); drawFamilyCards(); drawFamilyDetail(); drawArchive(); status(v ? 'Toate materialele au fost trecute pe privat.' : 'Toate materialele au fost trecute pe public.');
   }
@@ -222,6 +223,15 @@
     status('Incarc datele...');
     try { await loadAuth(); await loadFamilies(); await loadPhotos(); drawFamilyCards(); drawFamilyDetail(); drawArchive(); el.addArchiveBtn.classList.toggle('hidden', !st.isAdmin); status(''); }
     catch (e) { status('Nu am putut incarca datele: ' + ((e && e.message) || 'eroare necunoscuta'), true); }
+
+    try {
+      var qp = new URLSearchParams(window.location.search || '');
+      var qFamily = qp.get('family');
+      if (qFamily) {
+        openFamily(qFamily);
+        switchTab('family');
+      }
+    } catch (err) {}
   }
 
   if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', boot); else boot();

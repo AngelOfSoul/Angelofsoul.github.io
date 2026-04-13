@@ -21,7 +21,7 @@
 1. visitor opens public family -> sees public materials only
 2. visitor opens private family -> pin modal appears before private content
 3. correct pin -> private content becomes visible for that family only
-4. owner toggles photo visibility in media modal
+4. uploader toggles photo visibility in media modal
 5. owner bulk action: `Fa tot public` / `Fa tot privat`
 6. admin can add item in archive, non-admin cannot
 7. upload photo into family and refresh -> item remains visible
