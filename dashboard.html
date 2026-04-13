@@ -1582,7 +1582,7 @@ function escHtml(s) {
     const user = session.user;
     const name = String(input && input.value || '').trim();
     if (!name) {
-      showMsg('familyModalMsg', 'Introdu numele familiei.', 'err');
+      showMsg('familyModalMsg', 'Introdu numele familiei.', 'error');
       return;
     }
 
