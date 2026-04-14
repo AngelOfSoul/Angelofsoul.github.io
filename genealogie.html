@@ -729,7 +729,7 @@ document.getElementById('pfBtn').addEventListener('click',function(){
   if(!from||!to||from===to){result.classList.add('on');result.textContent=t('Selecteaza doua familii diferite.','Select two different families.');return;}
   var path=bfs(from,to);
   if(path){
-    var names=path.map(nameById).join(' → ');
+    var names=path.map(nameById).join(' -> ');
     result.classList.add('on');
     result.innerHTML='<div style="margin-bottom:8px;">'+escH(names)+'</div><a class="fc-link" href="arborele-satului.html?from='+encodeURIComponent(from)+'&to='+encodeURIComponent(to)+'">&#127794; '+escH(t('Deschide traseul in arborele satului','Open path in village tree'))+'</a>';
   }else{
@@ -765,7 +765,7 @@ function doSearch(q){
 }
 
 function renderSearchResults(results,q,res){
-  if(!results.length){res.innerHTML='<div class="sr-item" style="pointer-events:none;">'+(lang()==='en'?'No results for Â«':'Niciun rezultat pentru Â«')+escH(q)+'Â».</div>';res.classList.add('open');return;}
+  if(!results.length){res.innerHTML='<div class="sr-item" style="pointer-events:none;">'+(lang()==='en'?'No results for «':'Niciun rezultat pentru «')+escH(q)+'».</div>';res.classList.add('open');return;}
   res.innerHTML='';
   results.slice(0,12).forEach(function(r){
     var item=document.createElement('div');item.className='sr-item';
@@ -815,12 +815,13 @@ function initScrollBtns(){
   if(st)st.addEventListener('click',function(){window.scrollTo({top:0,behavior:'smooth'});});
   if(sb)sb.addEventListener('click',function(){window.scrollTo({top:document.body.scrollHeight,behavior:'smooth'});});
 }
-function initHamburger(){var h=document.getElementById('hamburgerBtn'),m=document.getElementById('navMobileMenu');if(!h||!m)return;h.addEventListener('click',function(){var o=m.classList.toggle('open');h.textContent=o?'✕':'☰';});}
+function initHamburger(){var h=document.getElementById('hamburgerBtn'),m=document.getElementById('navMobileMenu');if(!h||!m)return;h.addEventListener('click',function(){var o=m.classList.toggle('open');h.textContent=o?'?':'?';});}
 </script>
 <script src="js/scroll-effects.js" defer></script>
 <script src="js/transitions.js" defer></script>
 </body>
 </html>
+
 
 
 

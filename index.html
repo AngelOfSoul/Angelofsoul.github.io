@@ -1005,9 +1005,9 @@ to{transform:rotate(360deg);}
 
 </div><!-- end guest-view -->
 
-<!-- â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â• -->
+<!-- =================================================== -->
 <!-- LOGGED-IN VIEW — shown only when user has a session -->
-<!-- â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â• -->
+<!-- =================================================== -->
 <div id="member-view" class="member-view">
 
   <!-- lang bar (same as guest) -->
@@ -1189,7 +1189,7 @@ function applyPageLang(lang) {
 document.addEventListener('calnic:langchange', function(e) { applyPageLang(e.detail.lang); });
 applyPageLang(window.CalnicUtils ? window.CalnicUtils.lang() : currentLang);
 
-/* â”€â”€ ADMIN NAV LINK — visible only to admin account â”€â”€ */
+/* -- ADMIN NAV LINK — visible only to admin account -- */
 function checkAdminNavLink() {
   if (!window.supabase) return;
   window.supabase.auth.getUser().then(function(res) {
@@ -1213,13 +1213,13 @@ function checkAdminNavLink() {
 if (window.supabase) { checkAdminNavLink(); } else { document.addEventListener('supabase:ready', checkAdminNavLink); }
 </script>
 
-<!-- â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â• -->
+<!-- =============================================================== -->
 <!-- LOGGED-IN HOMEPAGE LOGIC                                        -->
-<!-- â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â• -->
+<!-- =============================================================== -->
 <script>
 (function() {
 
-  /* â”€â”€ helpers â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */
+  /* -- helpers ------------------------------------------------- */
   var MONTH_NAMES_RO = ['Ian','Feb','Mar','Apr','Mai','Iun','Iul','Aug','Sep','Oct','Noi','Dec'];
   var MONTH_FULL_RO  = ['ianuarie','februarie','martie','aprilie','mai','iunie','iulie','august','septembrie','octombrie','noiembrie','decembrie'];
 
@@ -1753,7 +1753,7 @@ if (window.supabase) { checkAdminNavLink(); } else { document.addEventListener('
 
     if (!window.supabase) return;
 
-    /* â”€â”€ load family data â”€â”€ */
+    /* -- load family data -- */
     (async function(){
       async function findFamilyForUser(userId) {
         function ownsFamily(row) {
@@ -1855,7 +1855,7 @@ if (window.supabase) { checkAdminNavLink(); } else { document.addEventListener('
       if (sp) sp.textContent = 'în arhiva familiei tale';
     })();
 
-    /* â”€â”€ milestone counters â”€â”€ */
+    /* -- milestone counters -- */
     Promise.all([
       supabase.from('families').select('id', { count:'exact', head:true }),
       supabase.from('members').select('id',  { count:'exact', head:true }),
@@ -1870,7 +1870,7 @@ if (window.supabase) { checkAdminNavLink(); } else { document.addEventListener('
       animateCount(document.getElementById('li-m-photos'),   pCount);
     });
 
-    /* â”€â”€ activity feed — recent families â”€â”€ */
+    /* -- activity feed — recent families -- */
     window.supabase
       .from('families')
       .select('name, created_at')
@@ -1878,7 +1878,7 @@ if (window.supabase) { checkAdminNavLink(); } else { document.addEventListener('
       .limit(5)
       .then(function(res) { renderActivity(res.data); });
 
-    /* â”€â”€ announcements â”€â”€ */
+    /* -- announcements -- */
     window.supabase
       .from('announcements')
       .select('*')
@@ -1891,7 +1891,7 @@ if (window.supabase) { checkAdminNavLink(); } else { document.addEventListener('
     loadActivePolls(session.user.id);
   }
 
-  /* â”€â”€ boot: wait for supabase, then check session â”€â”€ */
+  /* -- boot: wait for supabase, then check session -- */
   function boot() {
     if (!window.supabase) return; /* no Supabase configured — stay on guest view */
     window.supabase.auth.getUser().then(function(res) {
@@ -1900,7 +1900,7 @@ if (window.supabase) { checkAdminNavLink(); } else { document.addEventListener('
       if (user) {
         showMemberView(session || { user: user });
       }
-      /* no session â†’ guest view stays visible (default) */
+      /* no session -> guest view stays visible (default) */
     });
   }
 

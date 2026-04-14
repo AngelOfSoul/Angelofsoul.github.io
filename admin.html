@@ -983,14 +983,14 @@ left:23px;
 </head>
 <body>
 
-<!-- â”€â”€ LOADING SCREEN â”€â”€ -->
+<!-- -- LOADING SCREEN -- -->
 <div id="loading-screen" class="access-screen">
   <div class="access-spinner"></div>
   <div class="access-title">Se verifica accesul...</div>
   <div class="access-sub">Calnic Online Admin</div>
 </div>
 
-<!-- â”€â”€ ACCESS DENIED SCREEN â”€â”€ -->
+<!-- -- ACCESS DENIED SCREEN -- -->
 <div id="denied-screen" class="access-screen" style="display:none;">
   <div style="font-size:48px;margin-bottom:8px;">&#128274;</div>
   <div class="access-title">Acces restrictionat</div>
@@ -998,7 +998,7 @@ left:23px;
   <a href="index.html" class="access-btn">Inapoi la site</a>
 </div>
 
-<!-- â”€â”€ ADMIN PANEL â”€â”€ -->
+<!-- -- ADMIN PANEL -- -->
 <div id="admin-panel">
 <div class="adm-wrap">
 
@@ -1054,7 +1054,7 @@ left:23px;
     <!-- CONTENT -->
     <div class="content" id="main-content">
 
-      <!-- â•â• DASHBOARD â•â• -->
+      <!-- == DASHBOARD == -->
       <div class="sec active" id="sec-dashboard">
         <div class="sec-hdr">
           <div class="ct-title">Panou de control</div>
@@ -1089,7 +1089,7 @@ left:23px;
         </div>
       </div>
 
-      <!-- â•â• BACKUP â•â• -->
+      <!-- == BACKUP == -->
       <div class="sec" id="sec-backup">
         <div class="sec-hdr">
           <div class="ct-title">Backup si recuperare</div>
@@ -1129,7 +1129,7 @@ left:23px;
         </div>
       </div>
 
-      <!-- â•â• TOOLS â•â• -->
+      <!-- == TOOLS == -->
       <div class="sec" id="sec-tools">
         <div class="sec-hdr">
           <div class="ct-title">Unelte tehnice</div>
@@ -1240,7 +1240,7 @@ left:23px;
         <div class="sql-result" id="sql-result"></div>
       </div>
 
-      <!-- â•â• USERS â•â• -->
+      <!-- == USERS == -->
       <div class="sec" id="sec-users">
         <div class="sec-hdr">
           <div class="ct-title">Utilizatori</div>
@@ -1295,7 +1295,7 @@ left:23px;
         <div class="ab-status" id="ab-status"></div>
       </div>
 
-      <!-- â•â• ANNOUNCEMENTS â•â• -->
+      <!-- == ANNOUNCEMENTS == -->
       <div class="sec" id="sec-ann">
         <div class="sec-hdr">
           <div class="ct-title">Anunturi</div>
@@ -1372,7 +1372,7 @@ left:23px;
         <div id="poll-suggestions-list"><div style="color:var(--gold-m);font-style:italic;font-size:13px;">Se incarca sugestiile...</div></div>
       </div>
 
-      <!-- â•â• FAMILIES â•â• -->
+      <!-- == FAMILIES == -->
       <div class="sec" id="sec-families">
         <div class="sec-hdr">
           <div class="ct-title">Familii inregistrate</div>
@@ -1382,7 +1382,7 @@ left:23px;
         <div id="families-list"><div style="color:var(--gold-m);font-style:italic;font-size:13px;">Se incarca familiile...</div></div>
       </div>
 
-      <!-- â•â• MESSAGES â•â• -->
+      <!-- == MESSAGES == -->
       <div class="sec" id="sec-msg">
         <div class="sec-hdr">
           <div class="ct-title">Mesaj catre toate familiile</div>
@@ -1440,7 +1440,7 @@ left:23px;
         </div>
       </div>
 
-      <!-- â•â• CONTACT â•â• -->
+      <!-- == CONTACT == -->
       <div class="sec" id="sec-contact">
         <div class="sec-hdr">
           <div class="ct-title">Mesaje Contact</div>
@@ -1474,7 +1474,7 @@ left:23px;
         </div>
       </div>
 
-      <!-- â•â• LOGS â•â• -->
+      <!-- == LOGS == -->
       <div class="sec" id="sec-logs">
         <div class="sec-hdr">
           <div class="ct-title">Jurnale</div>
@@ -1510,7 +1510,7 @@ left:23px;
         </div>
       </div>
 
-      <!-- â•â• PHOTOS â•â• -->
+      <!-- == PHOTOS == -->
       <div class="sec" id="sec-photos">
         <div class="sec-hdr">
           <div class="ct-title">Manager fotografii</div>
@@ -1530,7 +1530,7 @@ left:23px;
         <div class="photo-grid" id="photo-grid"><div style="color:var(--gold-m);font-style:italic;font-size:13px;">Se incarca fotografiile...</div></div>
       </div>
 
-      <!-- â•â• HELP GUIDE â•â• -->
+      <!-- == HELP GUIDE == -->
       <div class="help-guide" id="sec-help">
         <button class="help-back" onclick="nav(document.querySelector('.sb-item'),'dashboard')">&#8592; Inapoi la panou</button>
         <div class="ct-title">Ghid complet — Panou Admin</div>
@@ -1590,10 +1590,10 @@ left:23px;
 <script src="js/badge-ui.js"></script>
 <script src="js/admin-badges.js"></script>
 <script>
-/* â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+/* ===================================================
    ADMIN.HTML — Calnic Online
    Protected: requires Supabase auth + is_admin = true
-   â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â• */
+   =================================================== */
 
 var ADMIN_EMAIL = '';
 var MONTHS_RO = ['ian','feb','mar','apr','mai','iun','iul','aug','sep','oct','noi','dec'];
@@ -1622,7 +1622,7 @@ function loadAdminEmailMap() {
   });
 }
 
-/* â”€â”€ BOOT â”€â”€ */
+/* -- BOOT -- */
 function initAdminAuth() {
   var sb = window.supabaseClient || window.appSupabase || window.sb || window.supabase;
   if (!sb || !sb.auth || typeof sb.auth.getUser !== 'function') {
@@ -1691,7 +1691,7 @@ function showScreen(which) {
   if (which === 'denied') document.getElementById('denied-screen').style.display  = 'flex';
 }
 
-/* â”€â”€ NAV â”€â”€ */
+/* -- NAV -- */
 function nav(el, id) {
   document.querySelectorAll('.sb-item').forEach(function(s){ s.classList.remove('active'); });
   document.querySelectorAll('.sec, .help-guide').forEach(function(s){ s.classList.remove('active'); });
@@ -1707,7 +1707,7 @@ function nav(el, id) {
   closeTips();
 }
 
-/* â”€â”€ TOOLTIPS â”€â”€ */
+/* -- TOOLTIPS -- */
 function tip(id, e) {
   if (e) e.stopPropagation();
   var box = document.getElementById(id);
@@ -1719,19 +1719,19 @@ function tip(id, e) {
 function closeTips() { document.querySelectorAll('.tip-box').forEach(function(t){ t.classList.remove('show'); }); }
 document.addEventListener('click', closeTips);
 
-/* â”€â”€ HELP ACCORDION â”€â”€ */
+/* -- HELP ACCORDION -- */
 function togHS(hdr) {
   hdr.classList.toggle('open');
   hdr.nextElementSibling.classList.toggle('open');
 }
 
-/* â”€â”€ LOGOUT â”€â”€ */
+/* -- LOGOUT -- */
 function doLogout() {
   if (!confirm('Esti sigur ca vrei sa te deconectezi din panoul admin?')) return;
   window.supabase.auth.signOut().then(function(){ window.location.href = 'login.html'; });
 }
 
-/* â”€â”€ ADMIN LOG â”€â”€ */
+/* -- ADMIN LOG -- */
 function logAccess() {
   if (!window.supabase) return;
   supabase.from('admin_logs').insert({
@@ -1752,7 +1752,7 @@ function logAction(action, details) {
   }).then(function(){}).catch(function(){});
 }
 
-/* â”€â”€ FORMAT HELPERS â”€â”€ */
+/* -- FORMAT HELPERS -- */
 function fmtDate(iso) {
   if (!iso) return '—';
   var d = new Date(iso);
@@ -1768,7 +1768,7 @@ function daysAgo(iso) {
   return 'acum ' + Math.floor(diff/30) + ' luni';
 }
 
-/* â”€â”€ DASHBOARD â”€â”€ */
+/* -- DASHBOARD -- */
 function loadDashboard() {
   if (!window.supabase) return;
   Promise.all([
@@ -1926,7 +1926,7 @@ function deleteUserAccount(userId, email, familyName) {
   });
 }
 
-/* â”€â”€ BACKUP â”€â”€ */
+/* -- BACKUP -- */
 function doBackup() {
   if (!window.supabase) { showMsg('bk-msg','Supabase nu este disponibil.','error'); return; }
   var btn = document.getElementById('bk-btn');
@@ -2039,7 +2039,7 @@ function doRestore() {
   alert('Restaurarea completa va fi implementata in versiunea finala. Datele tale sunt in siguranta.');
 }
 
-/* â”€â”€ TOOLS â”€â”€ */
+/* -- TOOLS -- */
 function setRepStatus(id, text, cls) {
   var el = document.getElementById(id);
   if (!el) return;
@@ -2363,7 +2363,7 @@ function composerApply(el, action) {
   }
 }
 
-/* â”€â”€ ANNOUNCEMENTS â”€â”€ */
+/* -- ANNOUNCEMENTS -- */
 function loadAnnouncements() {
   var sb = getSB();
   if (!sb || typeof sb.from !== 'function') return;
@@ -2834,7 +2834,7 @@ function deletePoll(id) {
   });
 }
 
-/* â”€â”€ FAMILIES â”€â”€ */
+/* -- FAMILIES -- */
 function loadFamilies() {
   if (!window.supabase) return;
   supabase.from('families').select('*').order('name').then(function(r){
@@ -3063,7 +3063,7 @@ function deleteFamily(id, name) {
   });
 }
 
-/* â”€â”€ CONTACT â”€â”€ */
+/* -- CONTACT -- */
 function loadContactMessages() {
   if (!window.supabase) return;
   supabase.from('contact_messages').select('*').order('created_at', {ascending:false}).limit(20)
@@ -3660,7 +3660,7 @@ function chatModerationAction(action, id) {
   });
 }
 
-/* â”€â”€ MESSAGES â”€â”€ */
+/* -- MESSAGES -- */
 function doSendMsg() {
   var subj = document.getElementById('msg-subject').value.trim();
   var body = document.getElementById('msg-body').value.trim();
@@ -3697,7 +3697,7 @@ function doPreviewMsg() {
   showMsg('msg-result', 'Previzualizare: Subiect: "' + subj + '" · Mesaj: "' + body.slice(0,80) + (body.length>80?'...':'') + '"', 'info');
 }
 
-/* â”€â”€ LOGS â”€â”€ */
+/* -- LOGS -- */
 function loadLogs() {
   var sb = getSB();
   if (!sb || typeof sb.from !== 'function') return;
@@ -3803,7 +3803,7 @@ function clearLogs(kind) {
   });
 }
 
-/* â”€â”€ PHOTOS â”€â”€ */
+/* -- PHOTOS -- */
 function loadPhotos() {
   var sb = getSB();
   if (!sb) return;
@@ -4046,7 +4046,7 @@ function replyPhotoReporter(photoId) {
   }
 }
 
-/* â”€â”€ HELPER: show message â”€â”€ */
+/* -- HELPER: show message -- */
 function showMsg(elId, text, type) {
   var el = document.getElementById(elId);
   if (!el) return;
@@ -4055,7 +4055,7 @@ function showMsg(elId, text, type) {
   if (type === 'success') setTimeout(function(){ el.className = 'df-msg'; el.innerHTML = ''; }, 5000);
 }
 
-/* â”€â”€ INIT â”€â”€ */
+/* -- INIT -- */
 renderBkHistory();
 </script>
 <script src="js/scroll-effects.js" defer></script>

@@ -1125,7 +1125,7 @@ nav{flex-wrap:nowrap;overflow:hidden;}
 <script>
 'use strict';
 
-// â”€â”€ HELPERS â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+// -- HELPERS ----------------------------------------------
 // escH, parseYear — din utils.js (globale)
 function lang(){return localStorage.getItem('calnic-lang')||'ro';}
 function t(ro,en){return lang()==='en'?en:ro;}
@@ -1147,7 +1147,7 @@ document.addEventListener('DOMContentLoaded',function(){
   document.getElementById('confirmModal').addEventListener('click',function(e){if(e.target===this)_closeConfirm(false);});
 });
 
-// â”€â”€ RELATION INFERENCE â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+// -- RELATION INFERENCE ----------------------------------
 var _inferProposals=[];
 function relNorm(raw){
   var r=String(raw||'').trim().toLowerCase();
@@ -1243,7 +1243,7 @@ function inferRelations(fromId,toId,relType){
   relType=relNorm(relType);
   var proposals=[];
 
-  // â”€â”€ SPOUSE inference: suggest each other's existing children â”€
+  // -- SPOUSE inference: suggest each other's existing children -
   if(relType==='sot'||relType==='sotie'||relType==='spouse'){
     [[fromId,toId],[toId,fromId]].forEach(function(pair){
       var pid=pair[0], spId=pair[1];
@@ -1265,9 +1265,9 @@ function inferRelations(fromId,toId,relType){
     return;
   }
 
-  // â”€â”€ SIBLING inference: share known parents â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+  // -- SIBLING inference: share known parents ----------------
   if(relType==='frate'||relType==='sora'){
-    // For each pair (child, sibling): parents of child â†’ suggest as parents of sibling
+    // For each pair (child, sibling): parents of child -> suggest as parents of sibling
     [[fromId,toId],[toId,fromId]].forEach(function(pair){
       var childId=pair[0], sibId=pair[1];
       var sibM=S.members.find(function(m){return m.id===sibId;});
@@ -1384,7 +1384,7 @@ function inferRelations(fromId,toId,relType){
     return;
   }
 
-  // â”€â”€ PARENT/CHILD inference: other-parent + grandparents â”€â”€
+  // -- PARENT/CHILD inference: other-parent + grandparents --
   var BIO=['tata','mama','fiu','fiica'];
   if(BIO.indexOf(relType)===-1)return;
   var parentId,childId;
@@ -1458,12 +1458,12 @@ document.addEventListener('DOMContentLoaded',function(){
   });
 });
 
-// â”€â”€ STATE â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+// -- STATE ------------------------------------------------
 var S={familyId:null,family:null,members:[],relations:[],sessionUid:null,isOwner:false,relationsLoadError:null,zoom:.88,panX:0,panY:0,panning:false,lastMouse:{x:0,y:0},selectedId:null,editingId:null,addVis:'public',editVis:'public',ttTimer:null,reqId:0,undoTimer:null,resizeObs:null,realtimeCh:null,origVals:{}};
 var CARD_W=110,GEN_Y={3:30,2:180,1:340,0:490},GEN_GAP_X=28;
 var _layoutBounds=null;
 
-// â”€â”€ INIT â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+// -- INIT -------------------------------------------------
 document.getElementById('yr').textContent=new Date().getFullYear();
 (function(){var params=new URLSearchParams(window.location.search);S.familyId=params.get('family')||params.get('id')||localStorage.getItem('calnic-familyId');if(S.familyId)localStorage.setItem('calnic-familyId',S.familyId);})();
 applyLang(lang());initLang();initGuide();initKeyboard();initZoomPan();initUI();
@@ -1478,7 +1478,7 @@ function boot(){
   }).catch(function(err){showErr(t('Eroare autentificare','Authentication error'),err.message);});
 }
 
-// â”€â”€ LOAD â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+// -- LOAD -------------------------------------------------
 function isUuidValue(value){
   return /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i.test(String(value||'').trim());
 }
@@ -1651,7 +1651,7 @@ function resolveMemberPhotoUrl(photoPath){
   return base?(base+'/storage/v1/object/public/photos/'+encodeURI(storagePath)):storagePath;
 }
 
-// â”€â”€ SYNC MEMBERS COUNT â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+// -- SYNC MEMBERS COUNT -----------------------------------
 function syncMembersCount(){
   if(!S.familyId||!window.supabase)return;
   supabase.from('members').select('id',{count:'exact',head:true}).eq('family_id',S.familyId).then(function(r){
@@ -1662,7 +1662,7 @@ function syncMembersCount(){
   });
 }
 
-// â”€â”€ RENDER â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+// -- RENDER -----------------------------------------------
 function render(){
   var cv=document.getElementById('treeCanvas'),svg=document.getElementById('connSvg');
   Array.from(cv.children).forEach(function(el){if(el!==svg)cv.removeChild(el);});
@@ -1692,7 +1692,7 @@ function render(){
   applyXform(); // also calls updateGenLabels + drawMinimap
 }
 
-// â”€â”€ RELATION METADATA â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+// -- RELATION METADATA ------------------------------------
 // up: how many generations OLDER the target is relative to anchor
 // positive = older (higher in tree), negative = younger (lower in tree)
 var REL_META={
@@ -1739,16 +1739,16 @@ function roleToGen(role){
   if(r==='bunic'||r==='bunica'||r==='grandparent'||r==='grandfather'||r==='grandmother')return 0;
   if(r==='parinte'||r==='tata'||r==='mama'||r==='father'||r==='mother'||r==='parent'||r==='step')return 1;
   if(r==='copil'||r==='fiu'||r==='fiica'||r==='child'||r==='son'||r==='daughter')return 3;
-  // spouse, sibling, other, member, and any unknown role â†’ default generation 2
+  // spouse, sibling, other, member, and any unknown role -> default generation 2
   return 2;
 }
 
 // inferGen is no longer needed — computeLayout uses BFS from relations
 function inferGen(anchorId, targetId, relType){ /* no-op: BFS handles generation */ }
 
-// â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+// -----------------------------------------------------------------
 // GENEALOGY TREE LAYOUT ENGINE
-// â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+// -----------------------------------------------------------------
 // Only direct one-step parent/child relations are used for tree structure.
 // bunic/strabunic etc. are used for labels only — they're inferred via the
 // tata/mama chain and should NOT create direct layout links.
@@ -1764,7 +1764,7 @@ function computeLayout(){
   var ROW_H  = 220;
   var PAD    = 60;
 
-  // 1. Build parentâ†’child + spouse maps using ONLY direct relations
+  // 1. Build parent->child + spouse maps using ONLY direct relations
   var childrenOf={}, parentsOf={}, spousePairs={};
   S.members.forEach(function(m){childrenOf[m.id]=[];parentsOf[m.id]=[];});
 
@@ -1825,7 +1825,7 @@ function computeLayout(){
       if(ga!==sg){genOf[r.from_member_id]=sg;_anyChange=true;}
       if(gb!==sg){genOf[r.to_member_id]=sg;_anyChange=true;}
     });
-    // Push UP: if a child is at gen G, its parents must be at gen â‰¥ G-1
+    // Push UP: if a child is at gen G, its parents must be at gen >= G-1
     // (fixes cases where sibling-alignment bumped a child's gen above parent+1)
     S.members.forEach(function(m){
       var g=genOf[m.id];
@@ -1838,7 +1838,7 @@ function computeLayout(){
     });
     if(!_anyChange)break;
   }
-  // Any still-null member (fully disconnected) â†’ gen 0
+  // Any still-null member (fully disconnected) -> gen 0
   S.members.forEach(function(m){if(genOf[m.id]===null)genOf[m.id]=0;});
   // Sync back
   S.members.forEach(function(m){m.generation=genOf[m.id];});
@@ -1903,7 +1903,7 @@ function computeLayout(){
   return layout;
 }
 
-// â”€â”€ DIRECTIONAL RELATION LABEL â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+// -- DIRECTIONAL RELATION LABEL --------------------------------
 function relLabel(relType, fromId, toId){
   relType=relNorm(relType);
   var meta=REL_META[relType];
@@ -1928,7 +1928,7 @@ function relLabel(relType, fromId, toId){
   return map[relType]||relType;
 }
 
-// â”€â”€ CONNECTORS â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+// -- CONNECTORS ------------------------------------------------
 function drawConnectors(svg,layout){
   svg.innerHTML='';
   if(!S.relations.length&&S.members.length>1){drawHeuristic(svg,layout);return;}
@@ -1946,7 +1946,7 @@ function drawConnectors(svg,layout){
     var par,chi,bio=r.is_biological!==false;
     if(LAYOUT_PAR[rt]){par=b;chi=a;bio=REL_META[rt]?REL_META[rt].bio!==false:bio;}
     else if(LAYOUT_CHI[rt]){par=a;chi=b;bio=REL_META[rt]?REL_META[rt].bio!==false:bio;}
-    else return; // bunic/strabunic/ext â†’ skip tree lines
+    else return; // bunic/strabunic/ext -> skip tree lines
     if(!layout[par]||!layout[chi])return;
     if(!childrenOf2[par])childrenOf2[par]=[];
     if(!childrenOf2[par].find(function(x){return x.id===chi;}))
@@ -1967,7 +1967,7 @@ function drawConnectors(svg,layout){
     addLine(svg,x1,y,x2,y,'#d4a84a',2,null);
     var tx=mkSvg('text');tx.setAttribute('x',(x1+x2)/2);tx.setAttribute('y',y-4);
     tx.setAttribute('text-anchor','middle');tx.setAttribute('font-size','13');
-    tx.setAttribute('fill','#d4a84a');tx.textContent='â™¥';svg.appendChild(tx);
+    tx.setAttribute('fill','#d4a84a');tx.textContent='?';svg.appendChild(tx);
   });
 
   // Parent-child lines
@@ -2018,7 +2018,7 @@ function drawConnectors(svg,layout){
   });
 
   // Sibling indicator lines — only drawn when siblings have NO shared parent in the tree
-  // (once a parent is linked, the structural parentâ†’child lines make it obvious)
+  // (once a parent is linked, the structural parent->child lines make it obvious)
   var drawnSib={};
   S.relations.forEach(function(r){
     var rt=relNorm(r.relation_type);
@@ -2156,7 +2156,7 @@ function showErr(title,sub){
 }
 function showNetErr(msg){showErr(t('Nu s-a putut conecta la baza de date','Could not connect to the database'),t('Verifica conexiunea la internet si incearca din nou. Detalii: ','Check your internet connection and try again. Details: ')+escH(msg));}
 
-// â”€â”€ HOVER TOOLTIP â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+// -- HOVER TOOLTIP ----------------------------------------
 function startTT(m,cardEl){
   clearTimeout(S.ttTimer);
   S.ttTimer=setTimeout(function(){
@@ -2178,7 +2178,7 @@ function startTT(m,cardEl){
 }
 function hideTT(){clearTimeout(S.ttTimer);document.getElementById('htip').classList.remove('on');}
 
-// â”€â”€ DETAIL PANEL â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+// -- DETAIL PANEL -----------------------------------------
 function openDetail(id){
   var m=S.members.find(function(x){return x.id===id;});if(!m)return;
   S.selectedId=id;hideTT();
@@ -2243,7 +2243,7 @@ function highlightFamily(id){
   S.highlightedId=id;
 }
 
-// â”€â”€ EDITOR MODAL â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+// -- EDITOR MODAL -----------------------------------------
 function openEditor(id){
   var m=S.members.find(function(x){return x.id===id;});if(!m)return;
   S.editingId=id;S.origVals={};
@@ -2424,7 +2424,7 @@ function doRemoveRel(relId,item){
   }).catch(function(err){showMsg('ef-msg','error',err.message);});
 }
 
-// â”€â”€ RELATION MODAL â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+// -- RELATION MODAL ------------------------------------------
 (function(){
   var selRelType=null;
   var editingRelId=null;
@@ -2700,7 +2700,7 @@ document.getElementById('delExecuteBtn').addEventListener('click',function(){
   }).catch(function(err){btn.disabled=false;btn.textContent=t('Sterge definitiv','Delete permanently');var dmsg=document.getElementById('del-msg');if(dmsg){dmsg.className='m-msg error';dmsg.textContent=err.message;dmsg.style.display='block';}});
 });
 
-// â”€â”€ ADD PERSON MODAL â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+// -- ADD PERSON MODAL -------------------------------------
 function openAddModal(){
   S.addVis='public';setVisUI('add','public');
   ['af-name','af-birth','af-death','af-prof','af-bio'].forEach(function(id){var el=document.getElementById(id);if(el)el.value='';});
@@ -2732,7 +2732,7 @@ document.getElementById('af-save-btn').addEventListener('click',function(){
 });
 document.getElementById('af-cancel-btn').addEventListener('click',closeAddModal);
 
-// â”€â”€ UNDO â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+// -- UNDO -------------------------------------------------
 function showUndo(msg,action){
   clearTimeout(S.undoTimer);
   document.getElementById('undoMsg').textContent=msg;
@@ -2742,7 +2742,7 @@ function showUndo(msg,action){
   S.undoTimer=setTimeout(function(){toast.classList.remove('on');},5000);
 }
 
-// â”€â”€ CONNECT TO VILLAGE â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+// -- CONNECT TO VILLAGE -----------------------------------
 var _missingConnectedToVillageCol=false;
 document.getElementById('connectVillageBtn').addEventListener('click',function(){
   if(!S.familyId||!window.supabase)return;
@@ -2765,7 +2765,7 @@ document.getElementById('connectVillageBtn').addEventListener('click',function()
   }).catch(function(err){alert(err.message);});
 });
 
-// â”€â”€ EXPORT â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+// -- EXPORT -----------------------------------------------
 document.getElementById('exportBtn').addEventListener('click',function(){
   var btn=this;btn.disabled=true;btn.innerHTML='&#8659; '+t('Se exporta...','Exporting...');
   if(typeof html2canvas==='undefined'){var sc=document.createElement('script');sc.src='https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js';sc.onload=function(){doExport(btn);};sc.onerror=function(){btn.disabled=false;btn.innerHTML='&#8659; '+t('Salveaza ca imagine','Save as image');alert(t('Export esuat.','Export failed.'));};document.head.appendChild(sc);}else{doExport(btn);}
@@ -2778,7 +2778,7 @@ function doExport(btn){
 }
 function showExportToast(msg){var e=document.getElementById('exportToast');e.textContent=msg;e.style.display='block';setTimeout(function(){e.style.display='none';},2400);}
 
-// â”€â”€ REALTIME â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+// -- REALTIME ---------------------------------------------
 function subscribeRT(){
   if(!S.familyId||!window.supabase)return;
   if(S.realtimeCh)window.supabase.removeChannel(S.realtimeCh);
@@ -2788,7 +2788,7 @@ function subscribeRT(){
     .subscribe(function(st){if(st==='CLOSED')setTimeout(subscribeRT,3000);});
 }
 
-// â”€â”€ ZOOM / PAN â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+// -- ZOOM / PAN --------------------------------------------
 function applyXform(){
   // Keep top-most nodes away from the clipped top edge to avoid semicircle leftovers.
   var minPanY=getMinPanY();
@@ -2808,7 +2808,7 @@ function getMinPanY(){
   }
   return 12;
 }
-// Dynamic gen-Y map built after each render — keyed by gen number â†’ Y px in canvas space
+// Dynamic gen-Y map built after each render — keyed by gen number -> Y px in canvas space
 var _genYMap={};
 function updateGenLabels(){
   var stage=document.getElementById('treeStage');
@@ -2914,7 +2914,7 @@ function initZoomPan(){
   if(window.ResizeObserver){S.resizeObs=new ResizeObserver(debounce(function(){if(S.members.length)render();center();},150));S.resizeObs.observe(stage);}
 }
 
-// â”€â”€ MINIMAP â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+// -- MINIMAP -----------------------------------------------
 function drawMinimap(W,H){
   var mc=document.getElementById('mmCanvas'),vp=document.getElementById('mmVp');if(!mc)return;
   var cv=document.getElementById('treeCanvas');W=W||parseFloat(cv.style.width)||800;H=H||parseFloat(cv.style.height)||680;
@@ -2926,7 +2926,7 @@ function drawMinimap(W,H){
   vp.style.left=Math.max(0,vx)+3+'px';vp.style.top=Math.max(0,vy)+3+'px';vp.style.width=Math.min(mw,vw)+'px';vp.style.height=Math.min(mh,vh)+'px';
 }
 
-// â”€â”€ KEYBOARD â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+// -- KEYBOARD ---------------------------------------------
 function initKeyboard(){
   document.addEventListener('keydown',function(e){
     if(e.target.matches('input,textarea,select'))return;
@@ -2939,7 +2939,7 @@ function initKeyboard(){
   });
 }
 
-// â”€â”€ UI INIT â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+// -- UI INIT -----------------------------------------------
 function initUI(){
   ['mt0','mt1','mt2','mt3','mt4'].forEach(function(id,i){var el=document.getElementById(id);if(el)el.addEventListener('click',function(){switchTab(i);});});
   document.getElementById('editorOverlay').addEventListener('click',function(e){if(e.target===this)closeEditor();});
@@ -2959,14 +2959,14 @@ function initUI(){
   document.querySelectorAll('.dp-sc').forEach(function(el){el.style.webkitOverflowScrolling='touch';});
 }
 
-// â”€â”€ GUIDE â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+// -- GUIDE ------------------------------------------------
 function initGuide(){if(!localStorage.getItem('calnic-tree-guide-seen'))document.getElementById('guideOverlay').classList.add('open');}
 function closeGuide(){localStorage.setItem('calnic-tree-guide-seen','1');document.getElementById('guideOverlay').classList.remove('open');}
 function showGuide(){document.getElementById('guideOverlay').classList.add('open');}
 document.getElementById('guideDismissBtn').addEventListener('click',closeGuide);
 document.getElementById('guideSkipBtn').addEventListener('click',closeGuide);
 
-// â”€â”€ LANG â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+// -- LANG -------------------------------------------------
 function applyLang(l){
   document.getElementById('btn-ro').classList.toggle('active',l==='ro');
   document.getElementById('btn-en').classList.toggle('active',l==='en');
@@ -2980,7 +2980,7 @@ function initLang(){
 
 function updateTitle(){if(!S.family)return;document.title=S.family.name+' \u2014 Calnic Online';document.getElementById('treeTitle').textContent='\u{1F337} '+S.family.name;}
 
-// â”€â”€ SCROLL BUTTONS â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+// -- SCROLL BUTTONS ---------------------------------------
 function initScrollBtns(){
   var st=document.getElementById('scrollTop'),sb=document.getElementById('scrollBottom');
   function upd(){var sc=window.scrollY>300,at=(window.innerHeight+window.scrollY)>=document.body.scrollHeight-100;if(st){st.style.opacity=sc?'1':'0';st.style.pointerEvents=sc?'auto':'none';}if(sb){sb.style.opacity=at?'0':'1';sb.style.pointerEvents=at?'none':'auto';}}
@@ -2989,7 +2989,7 @@ function initScrollBtns(){
   if(sb)sb.addEventListener('click',function(){window.scrollTo({top:document.body.scrollHeight,behavior:'smooth'});});
 }
 
-// â”€â”€ HAMBURGER â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+// -- HAMBURGER --------------------------------------------
 function initHamburger(){var h=document.getElementById('hamburgerBtn'),m=document.getElementById('navMobileMenu');if(!h||!m)return;h.addEventListener('click',function(){var o=m.classList.toggle('open');h.textContent=o?'\u2715':'\u2630';});}
 
 // Re-center once the full page layout is complete (fallback for blank tree)

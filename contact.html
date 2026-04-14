@@ -813,7 +813,7 @@ document.addEventListener('calnic:langchange', function(e) { applyPageLang(e.det
 applyPageLang(window.CalnicUtils ? window.CalnicUtils.lang() : currentLang);
 initContactFields();
 
-/* â”€â”€ NAV SESSION CHECK â”€â”€ */
+/* -- NAV SESSION CHECK -- */
 function checkNavSession() {
   if (!window.supabase) return;
   window.supabase.auth.getUser().then(function(res) {
