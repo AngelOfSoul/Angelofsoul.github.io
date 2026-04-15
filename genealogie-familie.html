@@ -922,6 +922,26 @@ nav{flex-wrap:nowrap;overflow:hidden;}
   </div>
 </div>
 
+<!-- TREE HEALTH MODAL -->
+<div class="modal-overlay" id="healthModal" role="dialog" aria-modal="true">
+  <div class="modal-box" style="max-width:560px;">
+    <div class="modal-top"></div>
+    <div class="modal-body">
+      <div style="display:flex;align-items:center;gap:10px;margin-bottom:12px;padding-bottom:10px;border-bottom:1px solid #2a2010;">
+        <div style="font-family:'Playfair Display',serif;font-size:16px;color:var(--gold);flex:1;">&#9881; <span data-ro="Verificare arbore" data-en="Tree health check">Verificare arbore</span></div>
+        <button onclick="closeHealthModal()" style="background:none;border:none;color:var(--muted);font-size:22px;cursor:pointer;line-height:1;padding:0 0 0 8px;" title="Inchide">&times;</button>
+      </div>
+      <div id="healthSummary" style="font-size:12px;color:var(--muted);margin-bottom:10px;"></div>
+      <div id="healthList" style="display:flex;flex-direction:column;gap:8px;max-height:340px;overflow:auto;"></div>
+      <div id="healthMsg" class="m-msg" style="display:none;margin-top:10px;"></div>
+      <div class="modal-acts" style="margin-top:12px;">
+        <button class="ma-save" id="healthApplyAllBtn" data-ro="Aplica fixurile recomandate" data-en="Apply recommended fixes">Aplica fixurile recomandate</button>
+        <button class="ma-cancel" id="healthCloseBtn" data-ro="Inchide" data-en="Close">Inchide</button>
+      </div>
+    </div>
+  </div>
+</div>
+
 <!-- ADD PERSON MODAL -->
 <div class="modal-overlay" id="addOverlay" role="dialog" aria-modal="true">
   <div class="modal-box">
@@ -978,6 +998,7 @@ nav{flex-wrap:nowrap;overflow:hidden;}
     <div class="tip-wrap"><button class="tree-btn" id="addPersonBtn">&#43; <span data-ro="Adauga persoana" data-en="Add person">Adauga persoana</span></button><div class="tip"><span class="tip-title" data-ro="Adauga o persoana noua" data-en="Add a new person">Adauga o persoana noua</span><span data-ro="Deschide formularul pentru a adauga un nou membru in arborele familiei." data-en="Opens the form to add a new family member to the tree.">Deschide formularul pentru a adauga un nou membru in arborele familiei.</span></div></div>
     <div class="tip-wrap"><button class="tree-btn green" id="connectVillageBtn">&#127807; <span data-ro="Conecteaza la Sat" data-en="Connect to Village">Conecteaza la Sat</span></button><div class="tip"><span class="tip-title" data-ro="Arborele Satului" data-en="Village Tree">Arborele Satului</span><span data-ro="Conecteaza familia ta la arborele mare al satului Calnic." data-en="Connect your family to the Calnic village tree.">Conecteaza familia ta la arborele mare al satului Calnic.</span></div></div>
     <div class="tip-wrap"><button class="tree-btn" id="hlFamilyBtn"><span data-ro="Evidentiaza familia directa" data-en="Highlight direct family">Evidentiaza familia directa</span></button><div class="tip"><span class="tip-title" data-ro="Evidentiaza" data-en="Highlight">Evidentiaza</span><span data-ro="Selecteaza o persoana, apoi apasa acest buton pentru a evidentia familia directa." data-en="Select a person, then press this to highlight their direct family.">Selecteaza o persoana, apoi apasa acest buton pentru a evidentia familia directa.</span></div></div>
+    <div class="tip-wrap"><button class="tree-btn" id="healthCheckBtn">&#9881; <span data-ro="Verifica arborele" data-en="Check tree">Verifica arborele</span></button><div class="tip"><span class="tip-title" data-ro="Sanatate arbore" data-en="Tree health">Sanatate arbore</span><span data-ro="Detecteaza conflicte de relatii si propune corectii rapide." data-en="Detects relation conflicts and suggests quick fixes.">Detecteaza conflicte de relatii si propune corectii rapide.</span></div></div>
     <div class="tip-wrap"><button class="tree-btn" id="exportBtn">&#8659; <span data-ro="Salveaza ca imagine" data-en="Save as image">Salveaza ca imagine</span></button><div class="tip"><span class="tip-title">Export PNG</span><span data-ro="Salveaza arborele complet ca imagine PNG, potrivita pentru tiparit." data-en="Save the complete tree as a PNG image, suitable for printing.">Salveaza arborele complet ca imagine PNG, potrivita pentru tiparit.</span></div></div>
     <div class="tip-wrap"><button class="tree-btn" id="helpBtn">&#63; <span data-ro="Ajutor" data-en="Help">Ajutor</span></button><div class="tip"><span class="tip-title" data-ro="Ghid rapid" data-en="Quick guide">Ghid rapid</span><span data-ro="Arata ghidul de utilizare al arborelui." data-en="Shows the tree usage guide.">Arata ghidul de utilizare al arborelui.</span></div></div>
     <span class="tree-hint" data-ro="Trage=navigare &middot; ESC=inchide" data-en="Drag=navigate &middot; ESC=close">Trage=navigare &middot; ESC=inchide</span>
@@ -1153,6 +1174,161 @@ document.addEventListener('DOMContentLoaded',function(){
   document.getElementById('confirmCancelBtn').addEventListener('click',function(){_closeConfirm(false);});
   document.getElementById('confirmModal').addEventListener('click',function(e){if(e.target===this)_closeConfirm(false);});
 });
+
+// -- TREE HEALTH CHECK -----------------------------------
+var _healthIssues=[];
+function _yearsGap(olderId,youngerId){
+  var o=_memberById(olderId),y=_memberById(youngerId);
+  if(!o||!y)return null;
+  var oy=Number(o.birth_year||0),yy=Number(y.birth_year||0);
+  if(!oy||!yy)return null;
+  return yy-oy;
+}
+function _validateRelationBeforeSave(fromId,toId,relType){
+  var rt=relNorm(relType);
+  var parentRoles={tata:1,mama:1,step:1,adopted:1,parent:1};
+  var childRoles={fiu:1,fiica:1,child:1};
+  if(parentRoles[rt]||childRoles[rt]){
+    var statedParent=parentRoles[rt]?toId:fromId;
+    var statedChild=parentRoles[rt]?fromId:toId;
+    var gap1=_yearsGap(statedParent,statedChild);
+    var gap2=_yearsGap(statedChild,statedParent);
+    if(gap1!=null&&gap1<12){
+      if(gap2!=null&&gap2>=12){
+        return t('Directia relatiei pare inversata dupa anii de nastere. Inverseaza relatia sau corecteaza anii.','Relation direction seems reversed by birth years. Reverse relation or correct years.');
+      }
+      return t('Diferenta de varsta este prea mica pentru relatie parinte-copil.','Age gap is too small for a parent-child relation.');
+    }
+  }
+  if(rt==='bunic'||rt==='bunica'||rt==='grandparent'){
+    var g=_yearsGap(toId,fromId);
+    if(g!=null&&g<24)return t('Diferenta de varsta este prea mica pentru relatie bunic-nepot.','Age gap is too small for a grandparent-grandchild relation.');
+  }
+  if(rt==='strabunic'||rt==='strabunica'){
+    var sg=_yearsGap(toId,fromId);
+    if(sg!=null&&sg<36)return t('Diferenta de varsta este prea mica pentru relatie strabunic-stranepot.','Age gap is too small for a great-grandparent relation.');
+  }
+  return '';
+}
+function _buildTreeHealthIssues(){
+  var issues=[],dupes={},addedCycle={};
+  S.relations.forEach(function(r){
+    var rt=relNorm(r.relation_type);
+    var key=[r.from_member_id,r.to_member_id,rt].join('|');
+    if(dupes[key]){
+      issues.push({
+        kind:'duplicate',
+        severity:'warn',
+        relId:r.id,
+        msg:t('Legatura duplicata detectata. Poti sterge duplicatul.', 'Duplicate relation detected. You can delete the duplicate.'),
+        action:'delete-relation'
+      });
+    }else dupes[key]=r.id;
+  });
+  S.relations.forEach(function(r){
+    var rt=relNorm(r.relation_type);
+    var parentRoles={tata:1,mama:1,step:1,adopted:1,parent:1};
+    var childRoles={fiu:1,fiica:1,child:1};
+    if(!(parentRoles[rt]||childRoles[rt]))return;
+    var statedParent=parentRoles[rt]?r.to_member_id:r.from_member_id;
+    var statedChild=parentRoles[rt]?r.from_member_id:r.to_member_id;
+    if(!_isPlausibleParent(statedParent,statedChild)&&_isPlausibleParent(statedChild,statedParent)){
+      issues.push({
+        kind:'direction',
+        severity:'error',
+        relId:r.id,
+        msg:t('Directia relatiei pare inversata dupa anii de nastere.', 'Relation direction appears reversed by birth years.'),
+        action:'flip-type',
+        newType:parentRoles[rt]?'child':'parent'
+      });
+    }
+    var e=_resolveParentChildFromRelation(r);
+    if(!e)return;
+    if(_parentChildExists(e.parentId,e.childId)){
+      var cKey=[e.parentId,e.childId].sort().join('|');
+      if(!addedCycle[cKey]){
+        addedCycle[cKey]=1;
+        issues.push({
+          kind:'cycle',
+          severity:'error',
+          relId:r.id,
+          msg:t('Conflict circular parinte-copil detectat intre doi membri.', 'Circular parent-child conflict detected between two members.'),
+          action:null
+        });
+      }
+    }
+  });
+  return issues;
+}
+function _renderHealthModal(){
+  var summary=document.getElementById('healthSummary');
+  var list=document.getElementById('healthList');
+  var applyAll=document.getElementById('healthApplyAllBtn');
+  if(!summary||!list||!applyAll)return;
+  if(!_healthIssues.length){
+    summary.textContent=t('Nu au fost gasite probleme in arbore.', 'No tree issues were detected.');
+    list.innerHTML='';
+    applyAll.style.display='none';
+    return;
+  }
+  var fixable=_healthIssues.filter(function(i){return !!i.action;});
+  summary.textContent=t('Au fost detectate '+_healthIssues.length+' problema(e).', _healthIssues.length+' issue(s) detected.');
+  list.innerHTML=_healthIssues.map(function(i,idx){
+    var sev=i.severity==='error'?'#c0392b':'#b58a3a';
+    var btn=i.action?('<button class="tree-btn" data-health-fix="'+idx+'" style="padding:5px 10px;font-size:11px;margin-top:6px;">'+escH(t('Aplica fix','Apply fix'))+'</button>'):'';
+    return '<div style="border:1px solid var(--b1);background:var(--s2);padding:10px 12px;border-left:3px solid '+sev+';">'
+      +'<div style="font-size:12px;color:var(--text);line-height:1.5;">'+escH(i.msg)+'</div>'+btn+'</div>';
+  }).join('');
+  applyAll.style.display=fixable.length?'inline-flex':'none';
+}
+function openHealthModal(){
+  _healthIssues=_buildTreeHealthIssues();
+  _renderHealthModal();
+  var m=document.getElementById('healthModal');
+  if(m)m.classList.add('open');
+}
+function closeHealthModal(){
+  var m=document.getElementById('healthModal');
+  if(m)m.classList.remove('open');
+}
+async function _applyHealthFix(issue){
+  if(!issue||!issue.action||!issue.relId) return;
+  if(issue.action==='flip-type'){
+    var up=await supabase.from('member_relations').update({relation_type:issue.newType}).eq('id',issue.relId).select();
+    if(up.error)throw new Error(up.error.message||'health-fix-failed');
+    S.relations=S.relations.map(function(r){return r.id===issue.relId?Object.assign({},r,{relation_type:issue.newType}):r;});
+    return;
+  }
+  if(issue.action==='delete-relation'){
+    var del=await supabase.from('member_relations').delete().eq('id',issue.relId);
+    if(del.error)throw new Error(del.error.message||'health-delete-failed');
+    S.relations=S.relations.filter(function(r){return r.id!==issue.relId;});
+  }
+}
+async function applyAllHealthFixes(){
+  var msg=document.getElementById('healthMsg');
+  var btn=document.getElementById('healthApplyAllBtn');
+  var targets=_healthIssues.filter(function(i){return !!i.action;});
+  if(!targets.length)return;
+  btn.disabled=true;
+  btn.textContent=t('Se aplica...','Applying...');
+  var ok=0,fail=0;
+  for(var i=0;i<targets.length;i++){
+    try{await _applyHealthFix(targets[i]);ok++;}catch(_e){fail++;}
+  }
+  btn.disabled=false;
+  btn.textContent=t('Aplica fixurile recomandate','Apply recommended fixes');
+  if(msg){
+    msg.style.display='block';
+    msg.className='m-msg '+(fail?'error':'success');
+    msg.textContent=fail
+      ?t('Au fost aplicate '+ok+' fixuri, '+fail+' au esuat.','Applied '+ok+' fixes, '+fail+' failed.')
+      :t('Fixurile recomandate au fost aplicate.','Recommended fixes applied.');
+  }
+  render();
+  _healthIssues=_buildTreeHealthIssues();
+  _renderHealthModal();
+}
 
 // -- RELATION INFERENCE ----------------------------------
 var _inferProposals=[];
@@ -2719,6 +2895,8 @@ function doRemoveRel(relId,item){
     if(!selRelType){err.textContent=t('Selecteaza tipul legaturii.','Select a relation type.');err.style.display='block';return;}
     var targetId=document.getElementById('relPersonSelect').value;
     if(!targetId){err.textContent=t('Selecteaza o persoana.','Select a person.');err.style.display='block';return;}
+    var vErr=_validateRelationBeforeSave(S.editingId,targetId,selRelType);
+    if(vErr){err.textContent=vErr;err.style.display='block';return;}
     // Duplicate check (only for new relations, not edits)
     if(!editingRelId){
       var isDup=S.relations.some(function(r){return(r.from_member_id===S.editingId&&r.to_member_id===targetId)||(r.from_member_id===targetId&&r.to_member_id===S.editingId);});
@@ -2731,7 +2909,7 @@ function doRemoveRel(relId,item){
     var capturedFrom=normalized.from,capturedTo=normalized.to,capturedType=normalized.type;
     var wasInsert=!editingRelId;
     var promise=editingRelId
-      ?supabase.from('member_relations').update({relation_type:selRelType,is_biological:bio}).eq('id',editingRelId).select()
+      ?supabase.from('member_relations').update({relation_type:capturedType,is_biological:bio}).eq('id',editingRelId).select()
       :supabase.from('member_relations').insert({from_member_id:capturedFrom,to_member_id:capturedTo,relation_type:capturedType,is_biological:bio,confidence:100}).select();
     promise.then(function(r){
         btn.disabled=false;btn.textContent=t('Salveaza','Save');
@@ -2741,7 +2919,7 @@ function doRemoveRel(relId,item){
           var newRel=(r.data&&r.data[0])||{id:'tmp_'+Date.now(),from_member_id:capturedFrom,to_member_id:capturedTo,relation_type:capturedType,is_biological:bio,confidence:100};
           S.relations.push(newRel);
         } else {
-          S.relations=S.relations.map(function(x){return x.id===editingRelId?Object.assign({},x,{relation_type:selRelType,is_biological:bio}):x;});
+          S.relations=S.relations.map(function(x){return x.id===editingRelId?Object.assign({},x,{relation_type:capturedType,is_biological:bio}):x;});
         }
         closeModal();
         render();
@@ -3043,7 +3221,7 @@ function initKeyboard(){
   document.addEventListener('keydown',function(e){
     if(e.target.matches('input,textarea,select'))return;
     switch(e.key){
-      case 'Escape':if(document.getElementById('inferModal').classList.contains('open'))closeInferModal();else if(document.getElementById('confirmModal').classList.contains('open'))_closeConfirm(false);else if(document.getElementById('deleteModal').classList.contains('open'))closeDeleteModal();else if(document.getElementById('editorOverlay').classList.contains('open'))closeEditor();else if(document.getElementById('addOverlay').classList.contains('open'))closeAddModal();else if(document.getElementById('guideOverlay').classList.contains('open'))closeGuide();else closeDetail();break;
+      case 'Escape':if(document.getElementById('inferModal').classList.contains('open'))closeInferModal();else if(document.getElementById('confirmModal').classList.contains('open'))_closeConfirm(false);else if(document.getElementById('deleteModal').classList.contains('open'))closeDeleteModal();else if(document.getElementById('healthModal').classList.contains('open'))closeHealthModal();else if(document.getElementById('editorOverlay').classList.contains('open'))closeEditor();else if(document.getElementById('addOverlay').classList.contains('open'))closeAddModal();else if(document.getElementById('guideOverlay').classList.contains('open'))closeGuide();else closeDetail();break;
       case ' ':e.preventDefault();center();break;
       case 'n':case 'N':if(S.isOwner)openAddModal();break;
       case '?':showGuide();break;
@@ -3056,6 +3234,7 @@ function initUI(){
   ['mt0','mt1','mt2','mt3','mt4'].forEach(function(id,i){var el=document.getElementById(id);if(el)el.addEventListener('click',function(){switchTab(i);});});
   document.getElementById('editorOverlay').addEventListener('click',function(e){if(e.target===this)closeEditor();});
   document.getElementById('deleteModal').addEventListener('click',function(e){if(e.target===this)closeDeleteModal();});
+  document.getElementById('healthModal').addEventListener('click',function(e){if(e.target===this)closeHealthModal();});
   document.getElementById('addOverlay').addEventListener('click',function(e){if(e.target===this)closeAddModal();});
   document.getElementById('dpClose').addEventListener('click',closeDetail);
   document.getElementById('dpClose2').addEventListener('click',closeDetail);
@@ -3067,6 +3246,31 @@ function initUI(){
     openAddModal();
   });
   document.getElementById('hlFamilyBtn').addEventListener('click',function(){highlightFamily(S.selectedId);});
+  document.getElementById('healthCheckBtn').addEventListener('click',openHealthModal);
+  document.getElementById('healthCloseBtn').addEventListener('click',closeHealthModal);
+  document.getElementById('healthApplyAllBtn').addEventListener('click',applyAllHealthFixes);
+  document.getElementById('healthList').addEventListener('click',async function(e){
+    var b=e.target.closest('button[data-health-fix]');
+    if(!b)return;
+    var idx=parseInt(b.getAttribute('data-health-fix'),10);
+    var issue=_healthIssues[idx];
+    if(!issue||!issue.action)return;
+    b.disabled=true;
+    try{
+      await _applyHealthFix(issue);
+      render();
+      _healthIssues=_buildTreeHealthIssues();
+      _renderHealthModal();
+    }catch(err){
+      var msg=document.getElementById('healthMsg');
+      if(msg){
+        msg.style.display='block';
+        msg.className='m-msg error';
+        msg.textContent=err&&err.message?err.message:t('Fixul nu a putut fi aplicat.','Could not apply fix.');
+      }
+      b.disabled=false;
+    }
+  });
   document.getElementById('helpBtn').addEventListener('click',showGuide);
   document.querySelectorAll('.dp-sc').forEach(function(el){el.style.webkitOverflowScrolling='touch';});
 }
