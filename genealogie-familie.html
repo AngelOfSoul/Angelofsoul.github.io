@@ -1129,6 +1129,13 @@ nav{flex-wrap:nowrap;overflow:hidden;}
 // escH, parseYear — din utils.js (globale)
 function lang(){return localStorage.getItem('calnic-lang')||'ro';}
 function t(ro,en){return lang()==='en'?en:ro;}
+function uiAlert(msg,title){
+  if(window.CalnicUtils && typeof window.CalnicUtils.dialogAlert==='function'){
+    return window.CalnicUtils.dialogAlert(msg,{title:title||'Calnic Online'});
+  }
+  try{alert(msg);}catch(_e){}
+  return Promise.resolve(true);
+}
 function showMsg(id,type,txt){var e=document.getElementById(id);if(!e)return;e.className='m-msg '+type;e.textContent=txt;e.style.display='block';setTimeout(function(){e.style.display='none';},5000);}
 var _confirmCb=null;
 function showConfirm(msg,onOk){
@@ -1164,13 +1171,58 @@ function relNorm(raw){
   };
   return map[r]||r;
 }
+function _memberById(id){
+  return S.members.find(function(m){return m.id===id;})||null;
+}
+function _isPlausibleParent(parentId,childId){
+  var p=_memberById(parentId),c=_memberById(childId);
+  if(!p||!c)return true;
+  var py=Number(p.birth_year||0),cy=Number(c.birth_year||0);
+  if(!py||!cy)return true;
+  return py<=cy-12;
+}
+function _resolveParentChildFromRelation(r){
+  var PT=['tata','mama','step','adopted','parent'],CT=['fiu','fiica','child'];
+  var rt=relNorm(r&&r.relation_type);
+  var a=r&&r.from_member_id,b=r&&r.to_member_id;
+  if(!a||!b)return null;
+  var parentId=null,childId=null;
+  if(PT.indexOf(rt)!==-1){childId=a;parentId=b;}
+  else if(CT.indexOf(rt)!==-1){parentId=a;childId=b;}
+  else return null;
+  // Auto-repair contradictory orientation when both years are known.
+  if(!_isPlausibleParent(parentId,childId)&&_isPlausibleParent(childId,parentId)){
+    var tmp=parentId;parentId=childId;childId=tmp;
+  }
+  return {parentId:parentId,childId:childId,relType:rt};
+}
+function _autoNormalizeDirectRelation(fromId,toId,relType){
+  var rt=relNorm(relType);
+  var parentRoles={tata:1,mama:1,step:1,adopted:1,parent:1};
+  var childRoles={fiu:1,fiica:1,child:1};
+  // Stored meaning in this app: relation_type describes TO relative to FROM.
+  // If years clearly contradict, convert to the inverse direct role automatically.
+  if(parentRoles[rt]){
+    // expected parent=to, child=from
+    if(!_isPlausibleParent(toId,fromId)&&_isPlausibleParent(fromId,toId)){
+      return {from:fromId,to:toId,type:'child'};
+    }
+    return {from:fromId,to:toId,type:rt};
+  }
+  if(childRoles[rt]){
+    // expected parent=from, child=to
+    if(!_isPlausibleParent(fromId,toId)&&_isPlausibleParent(toId,fromId)){
+      return {from:fromId,to:toId,type:'parent'};
+    }
+    return {from:fromId,to:toId,type:rt};
+  }
+  return {from:fromId,to:toId,type:rt};
+}
 function _relHasBetween(idA,idB){return S.relations.some(function(r){return(r.from_member_id===idA&&r.to_member_id===idB)||(r.from_member_id===idB&&r.to_member_id===idA);});}
 function _parentChildExists(childId,parentId){
-  var PT=['tata','mama','step','adopted','parent'],CT=['fiu','fiica','child'];
   return S.relations.some(function(r){
-    var rt=relNorm(r.relation_type);
-    return(r.from_member_id===childId&&r.to_member_id===parentId&&PT.indexOf(rt)!==-1)||
-           (r.from_member_id===parentId&&r.to_member_id===childId&&CT.indexOf(rt)!==-1);
+    var e=_resolveParentChildFromRelation(r);
+    return !!(e&&e.childId===childId&&e.parentId===parentId);
   });
 }
 function _getSpousesOf(memberId){
@@ -1186,11 +1238,12 @@ function _getSpousesOf(memberId){
   return res;
 }
 function _getParentsOf(memberId){
-  var PT=['tata','mama','step','adopted','parent'],CT=['fiu','fiica','child'],res=[];
+  var res=[];
   S.relations.forEach(function(r){
-    var rt=relNorm(r.relation_type);
-    if(r.from_member_id===memberId&&PT.indexOf(rt)!==-1)res.push({memberId:r.to_member_id,relType:rt});
-    else if(r.to_member_id===memberId&&CT.indexOf(rt)!==-1)res.push({memberId:r.from_member_id,relType:null});
+    var e=_resolveParentChildFromRelation(r);
+    if(!e||e.childId!==memberId)return;
+    // Keep legacy shape (relType nullable) so existing inference logic still works.
+    res.push({memberId:e.parentId,relType:(e.relType==='fiu'||e.relType==='fiica'||e.relType==='child')?null:e.relType});
   });
   return res;
 }
@@ -1205,17 +1258,11 @@ function _getSiblingsOf(memberId){
   return res;
 }
 function _getChildrenOf(memberId){
-  var PT=['tata','mama','step','adopted','parent'],CT=['fiu','fiica','child'],res=[];
+  var res=[];
   S.relations.forEach(function(r){
-    var rt=relNorm(r.relation_type);
-    // child -> parent links (tata/mama/step/adopted OR fiu/fiica) => child is "from"
-    if(r.to_member_id===memberId&&(PT.indexOf(rt)!==-1||CT.indexOf(rt)!==-1)){
-      res.push({memberId:r.from_member_id,relType:rt});
-    }
-    // parent -> child links (fiu/fiica) => child is "to"
-    else if(r.from_member_id===memberId&&CT.indexOf(rt)!==-1){
-      res.push({memberId:r.to_member_id,relType:rt});
-    }
+    var e=_resolveParentChildFromRelation(r);
+    if(!e||e.parentId!==memberId)return;
+    res.push({memberId:e.childId,relType:e.relType});
   });
   return res;
 }
@@ -1276,9 +1323,11 @@ function inferRelations(fromId,toId,relType){
         if(!_parentChildExists(sibId,par.memberId)){
           var pm=S.members.find(function(m){return m.id===par.memberId;});
           if(!pm)return;
-          var pType=par.relType||'tata'; // relType is null when found via fiu/fiica — default tata
+          var pType=par.relType||'parent'; // unknown gender => neutral parent
           var lbl=REL_META[pType]?REL_META[pType].l:pType;
-          proposals.push({from:sibId,to:par.memberId,type:pType,bio:true,text:pm.name+' este '+lbl+' lui '+sibM.name});
+          if(_isPlausibleParent(par.memberId,sibId)){
+            proposals.push({from:sibId,to:par.memberId,type:pType,bio:true,text:pm.name+' este '+lbl+' lui '+sibM.name});
+          }
         }
       });
     });
@@ -1323,14 +1372,14 @@ function inferRelations(fromId,toId,relType){
         var parentM=S.members.find(function(m){return m.id===parentCandidateId;});
         if(!parentM)return;
 
-        if(!_parentChildExists(descendantId,parentCandidateId)){
+        if(!_parentChildExists(descendantId,parentCandidateId)&&_isPlausibleParent(parentCandidateId,descendantId)){
           var pType=_guessParentType(parentCandidateId);
           var pLbl=REL_META[pType]?REL_META[pType].l:pType;
           out.push({from:descendantId,to:parentCandidateId,type:pType,bio:true,text:parentM.name+' este '+pLbl+' lui '+dm.name});
         }
 
         _getSpousesOf(parentCandidateId).forEach(function(sp){
-          if(_parentChildExists(descendantId,sp.memberId))return;
+          if(_parentChildExists(descendantId,sp.memberId)||!_isPlausibleParent(sp.memberId,descendantId))return;
           var spM=S.members.find(function(m){return m.id===sp.memberId;});
           if(!spM)return;
           var spType=sp.parentType||_guessParentType(sp.memberId);
@@ -1392,7 +1441,7 @@ function inferRelations(fromId,toId,relType){
   else{parentId=fromId;childId=toId;}
   // 1. Suggest other parent (spouse of parentId) for this child
   _getSpousesOf(parentId).forEach(function(sp){
-    if(!_parentChildExists(childId,sp.memberId)){
+    if(!_parentChildExists(childId,sp.memberId)&&_isPlausibleParent(sp.memberId,childId)){
       var sm=S.members.find(function(m){return m.id===sp.memberId;});
       var cm=S.members.find(function(m){return m.id===childId;});
       if(sm&&cm){var lbl=REL_META[sp.parentType]?REL_META[sp.parentType].l:sp.parentType;proposals.push({from:childId,to:sp.memberId,type:sp.parentType,bio:true,text:sm.name+' este '+lbl+' lui '+cm.name});}
@@ -1400,7 +1449,7 @@ function inferRelations(fromId,toId,relType){
   });
   // 2. Suggest grandparents (parents of parentId) for this child
   _getParentsOf(parentId).forEach(function(gp){
-    if(!_parentChildExists(childId,gp.memberId)){
+    if(!_parentChildExists(childId,gp.memberId)&&_isPlausibleParent(gp.memberId,childId)){
       // relType null means found via inverse fiu/fiica — guess gender from their own relations
       var effectiveType=gp.relType||_guessParentType(gp.memberId);
       var gpType=effectiveType==='mama'?'bunica':'bunic';
@@ -1413,7 +1462,7 @@ function inferRelations(fromId,toId,relType){
   var pType=relType==='tata'||relType==='step'||relType==='adopted'?relType:(relType==='mama'?'mama':_guessParentType(parentId));
   var pm=S.members.find(function(m){return m.id===parentId;});
   _getSiblingsOf(childId).forEach(function(sibId){
-    if(!_parentChildExists(sibId,parentId)){
+    if(!_parentChildExists(sibId,parentId)&&_isPlausibleParent(parentId,sibId)){
       var sibM=S.members.find(function(m){return m.id===sibId;});
       if(sibM&&pm){var lbl=REL_META[pType]?REL_META[pType].l:pType;proposals.push({from:sibId,to:parentId,type:pType,bio:true,text:pm.name+' este '+lbl+' lui '+sibM.name});}
     }
@@ -1771,18 +1820,10 @@ function computeLayout(){
   S.relations.forEach(function(r){
     var rt=relNorm(r.relation_type), a=r.from_member_id, b=r.to_member_id;
     if(LAYOUT_SPO[rt]){spousePairs[a]=b;spousePairs[b]=a;return;}
-    if(LAYOUT_PAR[rt]){
-      // from=child, to=parent
-      if(childrenOf[b]&&childrenOf[b].indexOf(a)===-1)childrenOf[b].push(a);
-      if(parentsOf[a]&&parentsOf[a].indexOf(b)===-1)parentsOf[a].push(b);
-      return;
-    }
-    if(LAYOUT_CHI[rt]){
-      // from=parent, to=child
-      if(childrenOf[a]&&childrenOf[a].indexOf(b)===-1)childrenOf[a].push(b);
-      if(parentsOf[b]&&parentsOf[b].indexOf(a)===-1)parentsOf[b].push(a);
-      return;
-    }
+    var e=_resolveParentChildFromRelation(r);
+    if(!e)return;
+    if(childrenOf[e.parentId]&&childrenOf[e.parentId].indexOf(e.childId)===-1)childrenOf[e.parentId].push(e.childId);
+    if(parentsOf[e.childId]&&parentsOf[e.childId].indexOf(e.parentId)===-1)parentsOf[e.childId].push(e.parentId);
   });
 
   // 2. BFS generation assignment — roots (no parents) start at gen 0
@@ -1943,10 +1984,10 @@ function drawConnectors(svg,layout){
   S.relations.forEach(function(r){
     var rt=relNorm(r.relation_type), a=r.from_member_id, b=r.to_member_id;
     if(LAYOUT_SPO[rt]){spousePairs2[a]=b;spousePairs2[b]=a;return;}
-    var par,chi,bio=r.is_biological!==false;
-    if(LAYOUT_PAR[rt]){par=b;chi=a;bio=REL_META[rt]?REL_META[rt].bio!==false:bio;}
-    else if(LAYOUT_CHI[rt]){par=a;chi=b;bio=REL_META[rt]?REL_META[rt].bio!==false:bio;}
-    else return; // bunic/strabunic/ext -> skip tree lines
+    var e=_resolveParentChildFromRelation(r);
+    if(!e)return; // bunic/strabunic/ext -> skip tree lines
+    var par=e.parentId,chi=e.childId,bio=r.is_biological!==false;
+    if(REL_META[rt]&&REL_META[rt].bio===false)bio=false;
     if(!layout[par]||!layout[chi])return;
     if(!childrenOf2[par])childrenOf2[par]=[];
     if(!childrenOf2[par].find(function(x){return x.id===chi;}))
@@ -2615,8 +2656,9 @@ function doRemoveRel(relId,item){
     }
     var btn=this;btn.disabled=true;btn.textContent=t('Se salveaza...','Saving...');
     inferGen(S.editingId, targetId, selRelType);
-    var bio=REL_META[selRelType]?REL_META[selRelType].bio!==false:true;
-    var capturedFrom=S.editingId,capturedTo=targetId,capturedType=selRelType;
+    var normalized=_autoNormalizeDirectRelation(S.editingId,targetId,selRelType);
+    var bio=REL_META[normalized.type]?REL_META[normalized.type].bio!==false:true;
+    var capturedFrom=normalized.from,capturedTo=normalized.to,capturedType=normalized.type;
     var wasInsert=!editingRelId;
     var promise=editingRelId
       ?supabase.from('member_relations').update({relation_type:selRelType,is_biological:bio}).eq('id',editingRelId).select()
@@ -2755,26 +2797,26 @@ document.getElementById('connectVillageBtn').addEventListener('click',function()
     if(r.error){
       var msg=(r.error&&r.error.message)?String(r.error.message):'';
       var missingCol = msg.indexOf('connected_to_village')!==-1 && msg.indexOf('families')!==-1;
-      if(!missingCol){alert(msg||'Eroare la conectare.');return;}
+      if(!missingCol){uiAlert(msg||'Eroare la conectare.');return;}
       _missingConnectedToVillageCol=true;
       // Backward compatibility: some DB schemas do not yet have connected_to_village.
       // Keep UI flow functional without blocking the user with alerts.
     }
     if(S.family)S.family.connected_to_village=true;
     showExportToast(t('Familie conectata la arborele satului!','Family connected to the village tree!'));
-  }).catch(function(err){alert(err.message);});
+  }).catch(function(err){uiAlert(err.message);});
 });
 
 // -- EXPORT -----------------------------------------------
 document.getElementById('exportBtn').addEventListener('click',function(){
   var btn=this;btn.disabled=true;btn.innerHTML='&#8659; '+t('Se exporta...','Exporting...');
-  if(typeof html2canvas==='undefined'){var sc=document.createElement('script');sc.src='https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js';sc.onload=function(){doExport(btn);};sc.onerror=function(){btn.disabled=false;btn.innerHTML='&#8659; '+t('Salveaza ca imagine','Save as image');alert(t('Export esuat.','Export failed.'));};document.head.appendChild(sc);}else{doExport(btn);}
+  if(typeof html2canvas==='undefined'){var sc=document.createElement('script');sc.src='https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js';sc.onload=function(){doExport(btn);};sc.onerror=function(){btn.disabled=false;btn.innerHTML='&#8659; '+t('Salveaza ca imagine','Save as image');uiAlert(t('Export esuat.','Export failed.'));};document.head.appendChild(sc);}else{doExport(btn);}
 });
 function doExport(btn){
   html2canvas(document.getElementById('treeCanvas'),{backgroundColor:'#0a0a0a',scale:2,useCORS:true,logging:false}).then(function(c){
     var l=document.createElement('a');l.download=(S.family?S.family.name.replace(/[^a-zA-Z0-9]/g,'-'):'arbore')+'.png';l.href=c.toDataURL('image/png');l.click();
     btn.disabled=false;btn.innerHTML='&#8659; '+t('Salveaza ca imagine','Save as image');showExportToast(t('Export salvat!','Export saved!'));
-  }).catch(function(){btn.disabled=false;btn.innerHTML='&#8659; '+t('Salveaza ca imagine','Save as image');alert(t('Export esuat. Incercati din nou.','Export failed. Please try again.'));});
+  }).catch(function(){btn.disabled=false;btn.innerHTML='&#8659; '+t('Salveaza ca imagine','Save as image');uiAlert(t('Export esuat. Incercati din nou.','Export failed. Please try again.'));});
 }
 function showExportToast(msg){var e=document.getElementById('exportToast');e.textContent=msg;e.style.display='block';setTimeout(function(){e.style.display='none';},2400);}
 
@@ -2951,7 +2993,7 @@ function initUI(){
   document.getElementById('dpPhotoBtn').addEventListener('click',function(){if(S.selectedId){openEditor(S.selectedId);switchTab(2);}});
   document.getElementById('dpHighlight').addEventListener('click',function(){highlightFamily(S.selectedId);});
   document.getElementById('addPersonBtn').addEventListener('click',function(){
-    if(!S.isOwner){alert(t('Doar proprietarul familiei poate adauga persoane.','Only the family owner can add people.'));return;}
+    if(!S.isOwner){uiAlert(t('Doar proprietarul familiei poate adauga persoane.','Only the family owner can add people.'));return;}
     openAddModal();
   });
   document.getElementById('hlFamilyBtn').addEventListener('click',function(){highlightFamily(S.selectedId);});

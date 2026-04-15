@@ -1091,8 +1091,10 @@ function filterFamilies() {
   } else {
     noRes.style.display = 'none';
     var html = filtered.map(buildCard).join('');
-    var addLbl = lang === 'ro' ? 'Inregistreaza-ti familia' : 'Register your family';
-    html += '<a class="fc-add" href="login.html"><div class="fc-add-plus">+</div><div class="fc-add-lbl">' + addLbl + '</div></a>';
+    if (!familiesCurrentUserId) {
+      var addLbl = lang === 'ro' ? 'Inregistreaza-ti familia' : 'Register your family';
+      html += '<a class="fc-add" href="login.html"><div class="fc-add-plus">+</div><div class="fc-add-lbl">' + addLbl + '</div></a>';
+    }
     grid.innerHTML = html;
     var total = lang === 'ro'
       ? filtered.length + ' ' + (filtered.length === 1 ? 'familie' : 'familii')

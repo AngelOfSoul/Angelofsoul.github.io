@@ -47,6 +47,7 @@
   var currentTransform = d3.zoomIdentity;
   var selectedNodeId = null;
   var highlightedPathKeys = {};
+  var focusRequestSeq = 0;
 
   function clamp(value, min, max) {
     if (value < min) return min;
@@ -223,6 +224,7 @@
   function focusNode(nodeId, duration) {
     var node = nodeById(nodeId);
     if (!node || !isFinite(node.x) || !isFinite(node.y)) return;
+    var focusSeq = ++focusRequestSeq;
     var w = shell.clientWidth || 900, h = 760;
     var liveTransform = d3.zoomTransform(svgEl);
     var k = (liveTransform && isFinite(liveTransform.k)) ? liveTransform.k : 1;
@@ -231,7 +233,10 @@
       .transition()
       .duration(duration || 650)
       .call(zoom.transform, tr)
-      .on('end', function () { openFamilyDetails(node); });
+      .on('end', function () {
+        if (focusSeq !== focusRequestSeq) return;
+        openFamilyDetails(node);
+      });
   }
 
   function linkKey(a, b) { return [String(a), String(b)].sort().join('::'); }
@@ -309,6 +314,8 @@
       .on('mousemove', null)
       .on('mouseleave', null)
       .on('click', function (event, d) {
+        // Cancel any in-flight auto-focus (URL/localStorage), then lock to the clicked node.
+        focusRequestSeq++;
         selectedNodeId = d.id;
         redrawStyles();
         openFamilyDetails(d);
