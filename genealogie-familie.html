@@ -1174,6 +1174,51 @@ function relNorm(raw){
 function _memberById(id){
   return S.members.find(function(m){return m.id===id;})||null;
 }
+var _orderModelCache={key:'',older:{}};
+function _buildOrderModelKey(){
+  var mCount=(S.members&&S.members.length)||0;
+  var parts=['m:'+mCount,'r:'+((S.relations&&S.relations.length)||0)];
+  (S.relations||[]).forEach(function(r){
+    parts.push([r.from_member_id,r.to_member_id,relNorm(r.relation_type)].join('>'));
+  });
+  return parts.join('|');
+}
+function _ensureOrderModel(){
+  var key=_buildOrderModelKey();
+  if(_orderModelCache.key===key)return _orderModelCache.older;
+  var olderAdj={};
+  (S.members||[]).forEach(function(m){olderAdj[m.id]=[];});
+  (S.relations||[]).forEach(function(r){
+    var rt=relNorm(r.relation_type),meta=REL_META[rt];
+    if(!meta||!isFinite(meta.up)||meta.up===0)return;
+    var a=r.from_member_id,b=r.to_member_id;
+    if(!a||!b||!olderAdj[a]||!olderAdj[b])return;
+    // up > 0 => target is older; up < 0 => source is older
+    var older=(meta.up>0)?b:a;
+    var younger=(meta.up>0)?a:b;
+    if(olderAdj[older].indexOf(younger)===-1)olderAdj[older].push(younger);
+  });
+  var olderReach={};
+  Object.keys(olderAdj).forEach(function(src){
+    var seen={},q=[src];
+    while(q.length){
+      var cur=q.shift();
+      (olderAdj[cur]||[]).forEach(function(nx){
+        if(seen[nx])return;
+        seen[nx]=1;
+        q.push(nx);
+      });
+    }
+    delete seen[src];
+    olderReach[src]=seen;
+  });
+  _orderModelCache={key:key,older:olderReach};
+  return olderReach;
+}
+function _isLikelyOlder(a,b){
+  var older=_ensureOrderModel();
+  return !!(older&&older[a]&&older[a][b]);
+}
 function _isPlausibleParent(parentId,childId){
   var p=_memberById(parentId),c=_memberById(childId);
   if(!p||!c)return true;
@@ -1193,6 +1238,13 @@ function _resolveParentChildFromRelation(r){
   // Auto-repair contradictory orientation when both years are known.
   if(!_isPlausibleParent(parentId,childId)&&_isPlausibleParent(childId,parentId)){
     var tmp=parentId;parentId=childId;childId=tmp;
+  }else if(_isPlausibleParent(parentId,childId)===_isPlausibleParent(childId,parentId)){
+    // If years are missing/inconclusive, use broader relation graph ordering.
+    var parentOlder=_isLikelyOlder(parentId,childId);
+    var childOlder=_isLikelyOlder(childId,parentId);
+    if(!parentOlder&&childOlder){
+      var t2=parentId;parentId=childId;childId=t2;
+    }
   }
   return {parentId:parentId,childId:childId,relType:rt};
 }
@@ -1826,61 +1878,71 @@ function computeLayout(){
     if(parentsOf[e.childId]&&parentsOf[e.childId].indexOf(e.parentId)===-1)parentsOf[e.childId].push(e.parentId);
   });
 
-  // 2. BFS generation assignment — roots (no parents) start at gen 0
-  var genOf={};
-  S.members.forEach(function(m){genOf[m.id]=null;});
-  var roots=S.members.filter(function(m){return !parentsOf[m.id].length;});
-  if(!roots.length)roots=S.members.slice(0,1); // cycle fallback
+  // 2. Generation assignment using all known kin-distance constraints.
+  // Build "older -> younger (min generation difference)" edges.
+  var genOf={}, olderToYounger=[], incomingOlder={};
+  S.members.forEach(function(m){genOf[m.id]=0;incomingOlder[m.id]=0;});
 
-  // Seed roots at gen 0
-  roots.forEach(function(m){genOf[m.id]=0;});
-  // Multi-pass relaxation (Bellman-Ford style for longest path).
-  // Guaranteed to converge in O(depth) passes for a DAG.
-  // Cycles: stops after at most n passes — no infinite loop possible.
-  for(var _pass=0;_pass<n;_pass++){
-    var _anyChange=false;
-    S.members.forEach(function(m){
-      var g=genOf[m.id];
-      if(g===null)return;
-      // Align spouse to same gen (always take the max of the two)
-      var sp2=spousePairs[m.id];
-      if(sp2!=null){
-        var spg=genOf[sp2];
-        var sg=Math.max(g,spg!=null?spg:g);
-        if(genOf[m.id]!==sg){genOf[m.id]=sg;_anyChange=true;}
-        if(genOf[sp2]!==sg){genOf[sp2]=sg;_anyChange=true;}
-      }
-      // Push gen+1 to each child
-      (childrenOf[m.id]||[]).forEach(function(cid){
-        var cg=genOf[m.id]+1;
-        if(genOf[cid]===null||genOf[cid]<cg){genOf[cid]=cg;_anyChange=true;}
-      });
+  // Direct parent-child constraints (always diff 1)
+  Object.keys(childrenOf).forEach(function(pid){
+    (childrenOf[pid]||[]).forEach(function(cid){
+      olderToYounger.push({older:pid,younger:cid,diff:1});
+      incomingOlder[cid]=(incomingOlder[cid]||0)+1;
     });
-    // Align siblings (frate/sora) to the same generation as the highest-gen sibling
+  });
+
+  // Additional constraints from declared relation distances (bunic/strabunic/etc.)
+  S.relations.forEach(function(r){
+    var rt=relNorm(r.relation_type),meta=REL_META[rt];
+    if(!meta||!isFinite(meta.up)||meta.up===0)return;
+    var a=r.from_member_id,b=r.to_member_id;
+    if(!a||!b||genOf[a]==null||genOf[b]==null)return;
+    var diff=Math.abs(meta.up),older=(meta.up>0)?b:a,younger=(meta.up>0)?a:b;
+    olderToYounger.push({older:older,younger:younger,diff:Math.max(1,diff)});
+    incomingOlder[younger]=(incomingOlder[younger]||0)+1;
+  });
+
+  // Roots = nodes that have no older-known ancestor in constraints.
+  var roots=S.members.filter(function(m){return !(incomingOlder[m.id]>0);});
+  if(!roots.length)roots=S.members.slice(0,1); // cycle fallback
+  roots.forEach(function(m){genOf[m.id]=0;});
+
+  // Relax constraints (longest-path style with bounded passes).
+  for(var _pass=0;_pass<n*2;_pass++){
+    var _anyChange=false;
+    olderToYounger.forEach(function(e){
+      if(genOf[e.older]==null)return;
+      var need=genOf[e.older]+e.diff;
+      if(genOf[e.younger]==null||genOf[e.younger]<need){
+        genOf[e.younger]=need;_anyChange=true;
+      }
+    });
+
+    // Spouses stay on same generation.
+    Object.keys(spousePairs).forEach(function(id){
+      var sp=spousePairs[id];if(sp==null)return;
+      var sg=Math.max(genOf[id]||0,genOf[sp]||0);
+      if(genOf[id]!==sg){genOf[id]=sg;_anyChange=true;}
+      if(genOf[sp]!==sg){genOf[sp]=sg;_anyChange=true;}
+    });
+
+    // Siblings stay on same generation.
     S.relations.forEach(function(r){
       var rt=relNorm(r.relation_type);
       if(rt!=='frate'&&rt!=='sora'&&rt!=='sibling')return;
-      var ga=genOf[r.from_member_id], gb=genOf[r.to_member_id];
-      if(ga===null&&gb===null)return;
-      var sg=Math.max(ga!=null?ga:0, gb!=null?gb:0);
-      if(ga!==sg){genOf[r.from_member_id]=sg;_anyChange=true;}
-      if(gb!==sg){genOf[r.to_member_id]=sg;_anyChange=true;}
-    });
-    // Push UP: if a child is at gen G, its parents must be at gen >= G-1
-    // (fixes cases where sibling-alignment bumped a child's gen above parent+1)
-    S.members.forEach(function(m){
-      var g=genOf[m.id];
-      if(g===null||g===0)return;
-      (parentsOf[m.id]||[]).forEach(function(pid){
-        var pg=genOf[pid];
-        var needed=g-1;
-        if(pg===null||pg<needed){genOf[pid]=needed;_anyChange=true;}
-      });
+      var ga=genOf[r.from_member_id]||0,gb=genOf[r.to_member_id]||0,sg=Math.max(ga,gb);
+      if(genOf[r.from_member_id]!==sg){genOf[r.from_member_id]=sg;_anyChange=true;}
+      if(genOf[r.to_member_id]!==sg){genOf[r.to_member_id]=sg;_anyChange=true;}
     });
     if(!_anyChange)break;
   }
-  // Any still-null member (fully disconnected) -> gen 0
-  S.members.forEach(function(m){if(genOf[m.id]===null)genOf[m.id]=0;});
+
+  // Normalize so top generation starts at 0.
+  var minGen=Infinity;
+  S.members.forEach(function(m){if(isFinite(genOf[m.id])&&genOf[m.id]<minGen)minGen=genOf[m.id];});
+  if(!isFinite(minGen))minGen=0;
+  S.members.forEach(function(m){genOf[m.id]=Math.max(0,(genOf[m.id]||0)-minGen);});
+
   // Sync back
   S.members.forEach(function(m){m.generation=genOf[m.id];});
 
@@ -2056,6 +2118,14 @@ function drawConnectors(svg,layout){
     var meta=REL_META[rt];if(!meta||!meta.isExt)return;
     var pa=layout[r.from_member_id],pb=layout[r.to_member_id];if(!pa||!pb)return;
     addLine(svg,pa.x+CARD_W/2,pa.y+avMid(r.from_member_id),pb.x+CARD_W/2,pb.y+avMid(r.to_member_id),'#70a870',1.5,'4 3');
+  });
+
+  // Ancestor distance links (bunic/strabunic etc.) when relation skips generations.
+  S.relations.forEach(function(r){
+    var rt=relNorm(r.relation_type),meta=REL_META[rt];
+    if(!meta||!isFinite(meta.up)||Math.abs(meta.up)<=1)return;
+    var pa=layout[r.from_member_id],pb=layout[r.to_member_id];if(!pa||!pb)return;
+    addLine(svg,pa.x+CARD_W/2,pa.y+avMid(r.from_member_id),pb.x+CARD_W/2,pb.y+avMid(r.to_member_id),'#9a8748',1.2,'5 4');
   });
 
   // Sibling indicator lines — only drawn when siblings have NO shared parent in the tree
