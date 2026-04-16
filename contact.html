@@ -690,7 +690,7 @@ function initContactFields() {
   }, { once: true });
 }
 
-function submitForm() {
+async function submitForm() {
   var name = document.getElementById('inp-name').value.trim();
   var email = document.getElementById('inp-email').value.trim();
   var msg = document.getElementById('inp-msg').value.trim();
@@ -698,11 +698,11 @@ function submitForm() {
   var family = document.getElementById('inp-family').value.trim();
 
   if (!name || !email || !msg) {
-    alert(currentLang === 'ro' ? 'Te rugam completeaza: Nume, Email si Mesaj.' : 'Please fill in: Name, Email and Message.');
+    await uiAlert(currentLang === 'ro' ? 'Te rugam completeaza: Nume, Email si Mesaj.' : 'Please fill in: Name, Email and Message.');
     return;
   }
   if (!email.includes('@')) {
-    alert(currentLang === 'ro' ? 'Adresa de email nu este valida.' : 'Email address is not valid.');
+    await uiAlert(currentLang === 'ro' ? 'Adresa de email nu este valida.' : 'Email address is not valid.');
     return;
   }
 
@@ -748,7 +748,7 @@ function submitForm() {
     });
   }
 
-  Promise.all([sendFormspree(data), saveToAdminInbox(data)]).then(function(results) {
+  Promise.all([sendFormspree(data), saveToAdminInbox(data)]).then(async function(results) {
     var sentMail = !!results[0];
     var savedAdmin = !!results[1];
     if (sentMail && savedAdmin) {
@@ -758,25 +758,25 @@ function submitForm() {
     }
 
     if (savedAdmin && !sentMail) {
-      alert(currentLang === 'ro'
+      await uiAlert(currentLang === 'ro'
         ? 'Mesajul a fost salvat in Admin Panel, dar NU a plecat emailul catre admin. Verifica Formspree.'
         : 'Message was saved in Admin Panel, but the admin email was NOT sent. Check Formspree.');
     } else if (sentMail && !savedAdmin) {
-      alert(currentLang === 'ro'
+      await uiAlert(currentLang === 'ro'
         ? 'Emailul a fost trimis, dar mesajul NU s-a salvat in Admin Panel. Verifica tabela contact_messages/RLS.'
         : 'Email was sent, but message was NOT saved in Admin Panel. Check contact_messages table/RLS.');
     } else {
-      alert(currentLang === 'ro'
+      await uiAlert(currentLang === 'ro'
         ? 'Eroare la trimitere. Nu s-a putut livra nici emailul, nici salvarea in admin.'
         : 'Sending failed. Neither email delivery nor admin save succeeded.');
     }
 
     btn.disabled = false;
     btnLbl.textContent = currentLang === 'ro' ? 'TRIMITE MESAJUL' : 'SEND MESSAGE';
-  }).catch(function() {
+  }).catch(async function() {
     btn.disabled = false;
     btnLbl.textContent = currentLang === 'ro' ? 'TRIMITE MESAJUL' : 'SEND MESSAGE';
-    alert(currentLang === 'ro' ? 'Eroare de retea. Verificati conexiunea si incercati din nou.' : 'Network error. Check your connection and try again.');
+    await uiAlert(currentLang === 'ro' ? 'Eroare de retea. Verificati conexiunea si incercati din nou.' : 'Network error. Check your connection and try again.');
   });
 }
 
@@ -788,6 +788,13 @@ function toggleFaq(el) {
 }
 
 var currentLang = localStorage.getItem('calnic-lang') || 'ro';
+function uiAlert(msg, title) {
+  if (window.CalnicUtils && typeof window.CalnicUtils.dialogAlert === 'function') {
+    return window.CalnicUtils.dialogAlert(msg, { title: title || 'Calnic Online' });
+  }
+  alert(msg);
+  return Promise.resolve(true);
+}
 
 function applyPageLang(lang) {
   currentLang = lang;

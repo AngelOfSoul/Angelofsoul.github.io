@@ -2405,6 +2405,8 @@ function relLabel(relType, fromId, toId){
 function drawConnectors(svg,layout){
   svg.innerHTML='';
   if(!S.relations.length&&S.members.length>1){drawHeuristic(svg,layout);return;}
+  var SHOW_EXTENDED_DASHED=false; // hide green dashed (extended-family visual links)
+  var SHOW_ANCESTOR_DISTANCE_DASHED=false; // hide yellow dashed (direct bunic/strabunic shortcut links)
 
   // avMid(id): vertical center of avatar from node top — varies by gen/tree size
   function avMid(id){var l=layout[id];return l?Math.round((l.avSz||68)/2):34;}
@@ -2500,20 +2502,24 @@ function drawConnectors(svg,layout){
   });
 
   // Extended family dashed green lines
-  S.relations.forEach(function(r){
-    var rt=relNorm(r.relation_type);
-    var meta=REL_META[rt];if(!meta||!meta.isExt)return;
-    var pa=layout[r.from_member_id],pb=layout[r.to_member_id];if(!pa||!pb)return;
-    addLine(svg,pa.x+CARD_W/2,pa.y+avMid(r.from_member_id),pb.x+CARD_W/2,pb.y+avMid(r.to_member_id),'#70a870',1.5,'4 3');
-  });
+  if(SHOW_EXTENDED_DASHED){
+    S.relations.forEach(function(r){
+      var rt=relNorm(r.relation_type);
+      var meta=REL_META[rt];if(!meta||!meta.isExt)return;
+      var pa=layout[r.from_member_id],pb=layout[r.to_member_id];if(!pa||!pb)return;
+      addLine(svg,pa.x+CARD_W/2,pa.y+avMid(r.from_member_id),pb.x+CARD_W/2,pb.y+avMid(r.to_member_id),'#70a870',1.5,'4 3');
+    });
+  }
 
   // Ancestor distance links (bunic/strabunic etc.) when relation skips generations.
-  S.relations.forEach(function(r){
-    var rt=relNorm(r.relation_type),meta=REL_META[rt];
-    if(!meta||!isFinite(meta.up)||Math.abs(meta.up)<=1)return;
-    var pa=layout[r.from_member_id],pb=layout[r.to_member_id];if(!pa||!pb)return;
-    addLine(svg,pa.x+CARD_W/2,pa.y+avMid(r.from_member_id),pb.x+CARD_W/2,pb.y+avMid(r.to_member_id),'#9a8748',1.2,'5 4');
-  });
+  if(SHOW_ANCESTOR_DISTANCE_DASHED){
+    S.relations.forEach(function(r){
+      var rt=relNorm(r.relation_type),meta=REL_META[rt];
+      if(!meta||!isFinite(meta.up)||Math.abs(meta.up)<=1)return;
+      var pa=layout[r.from_member_id],pb=layout[r.to_member_id];if(!pa||!pb)return;
+      addLine(svg,pa.x+CARD_W/2,pa.y+avMid(r.from_member_id),pb.x+CARD_W/2,pb.y+avMid(r.to_member_id),'#9a8748',1.2,'5 4');
+    });
+  }
 
   // Sibling indicator lines — only drawn when siblings have NO shared parent in the tree
   // (once a parent is linked, the structural parent->child lines make it obvious)

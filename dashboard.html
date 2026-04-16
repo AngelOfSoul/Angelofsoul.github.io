@@ -705,6 +705,26 @@ function togglePassword(inputId, btn) {
 }
 
 var currentLang = localStorage.getItem('calnic-lang') || 'ro';
+
+function uiAlert(msg, title) {
+  if (window.CalnicUtils && typeof window.CalnicUtils.dialogAlert === 'function') {
+    return window.CalnicUtils.dialogAlert(msg, { title: title || 'Calnic Online' });
+  }
+  alert(msg);
+  return Promise.resolve(true);
+}
+function uiConfirm(msg, title) {
+  if (window.CalnicUtils && typeof window.CalnicUtils.dialogConfirm === 'function') {
+    return window.CalnicUtils.dialogConfirm(msg, { title: title || 'Calnic Online' });
+  }
+  return Promise.resolve(confirm(msg));
+}
+function uiPrompt(msg, defVal, title) {
+  if (window.CalnicUtils && typeof window.CalnicUtils.dialogPrompt === 'function') {
+    return window.CalnicUtils.dialogPrompt(msg, defVal || '', { title: title || 'Calnic Online' });
+  }
+  return Promise.resolve(prompt(msg, defVal || ''));
+}
 var familyData = null;
 var familyId = null;
 var currentUser = null;
@@ -981,7 +1001,7 @@ async function addMember() {
 }
 
 async function deleteMember(memberId) {
-  var ok = confirm(currentLang === 'ro' ? 'Stergi acest membru?' : 'Delete this member?');
+  var ok = await uiConfirm(currentLang === 'ro' ? 'Stergi acest membru?' : 'Delete this member?');
   if (!ok) return;
   var res = await supabase.from('members').delete().eq('id', memberId);
   if (!res.error) {
@@ -1050,7 +1070,7 @@ async function addTimeline() {
 }
 
 async function deleteTimeline(entryId) {
-  var ok = confirm(currentLang === 'ro' ? 'Stergi acest eveniment?' : 'Delete this event?');
+  var ok = await uiConfirm(currentLang === 'ro' ? 'Stergi acest eveniment?' : 'Delete this event?');
   if (!ok) return;
   var res = await supabase.from('timeline').delete().eq('id', entryId);
   if (!res.error) {
@@ -1159,7 +1179,7 @@ async function loadPhotos() {
 }
 
 async function deletePhoto(photoId, storagePath) {
-  var ok = confirm(currentLang === 'ro' ? 'Stergi aceasta fotografie? Actiunea nu poate fi anulata.' : 'Delete this photo? This cannot be undone.');
+  var ok = await uiConfirm(currentLang === 'ro' ? 'Stergi aceasta fotografie? Actiunea nu poate fi anulata.' : 'Delete this photo? This cannot be undone.');
   if (!ok) return;
   var storageErr = null;
   if (storagePath) {
@@ -1300,10 +1320,11 @@ async function deleteCurrentFamily() {
   }
 
   var familyName = String(familyData.name || familyData.display_name || '').trim();
-  var typed = prompt(
+  var typed = await uiPrompt(
     currentLang === 'ro'
       ? ('Pentru confirmare, scrie exact numele familiei: ' + familyName)
-      : ('To confirm, type the exact family name: ' + familyName)
+      : ('To confirm, type the exact family name: ' + familyName),
+    ''
   );
   if (typed === null) return;
   if (String(typed).trim() !== familyName) {
@@ -1311,7 +1332,7 @@ async function deleteCurrentFamily() {
     return;
   }
 
-  var confirmed = confirm(currentLang === 'ro'
+  var confirmed = await uiConfirm(currentLang === 'ro'
     ? 'Sigur vrei sa stergi familia? Actiunea este ireversibila.'
     : 'Are you sure you want to delete this family? This cannot be undone.');
   if (!confirmed) return;

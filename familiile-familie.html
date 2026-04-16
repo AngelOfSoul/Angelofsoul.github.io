@@ -913,6 +913,13 @@ function getFamilyVisibilityToggleLabel() {
     : (currentLang === 'ro' ? 'Fa familia privata' : 'Make family private');
 }
 
+function uiConfirm(msg, title) {
+  if (window.CalnicUtils && typeof window.CalnicUtils.dialogConfirm === 'function') {
+    return window.CalnicUtils.dialogConfirm(msg, { title: title || 'Calnic Online' });
+  }
+  return Promise.resolve(confirm(msg));
+}
+
 function toggleFamilyVisibility() {
   if (!window.supabase || !FAM || !isOwner) return;
   var nextVis = String(FAM.visibility || 'public').toLowerCase() === 'private' ? 'public' : 'private';
@@ -2062,10 +2069,10 @@ document.getElementById('fme-photo-save').addEventListener('click', function() {
     }).catch(function(e){ btn.disabled=false; btn.textContent='Salveaza poza'; fmeShowMsg(1,'err',e.message); });
 });
 
-document.getElementById('fme-photo-del').addEventListener('click', function() {
+document.getElementById('fme-photo-del').addEventListener('click', async function() {
   if (!isOwner) return;
   var id = _memEditId; if (!id || !window.supabase) return;
-  if (!confirm('Stergi poza acestei persoane?')) return;
+  if (!await uiConfirm('Stergi poza acestei persoane?')) return;
   supabase.from('members').update({photo_url: null}).eq('id', id).then(function(r) {
     if (r.error) { fmeShowMsg(1,'err',r.error.message); return; }
     MEMBERS = MEMBERS.map(function(m){ return m.id===id ? Object.assign({},m,{photo_url:null}) : m; });

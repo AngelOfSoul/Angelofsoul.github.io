@@ -178,6 +178,144 @@
     }, duration || 4000);
   }
 
+  var _dlgRefs = null;
+  var _dlgQueue = Promise.resolve();
+
+  function queueDialog(openFn) {
+    _dlgQueue = _dlgQueue.then(openFn, openFn);
+    return _dlgQueue;
+  }
+
+  function ensureDialogUi() {
+    if (_dlgRefs) return _dlgRefs;
+
+    var styleId = 'calnic-dialog-style';
+    if (!document.getElementById(styleId)) {
+      var style = document.createElement('style');
+      style.id = styleId;
+      style.textContent = [
+        '.calnic-dlg-backdrop{position:fixed;inset:0;display:none;align-items:center;justify-content:center;padding:18px;background:rgba(0,0,0,.72);z-index:100000;}',
+        '.calnic-dlg-backdrop.open{display:flex;}',
+        '.calnic-dlg{width:min(520px,100%);background:linear-gradient(180deg,#141414,#0e0e0e);border:1px solid #8a6a30;border-radius:4px;box-shadow:0 20px 60px rgba(0,0,0,.6);padding:18px;}',
+        '.calnic-dlg-title{font-family:"Playfair Display",serif;font-size:24px;color:#d4a84a;margin:0 0 8px;}',
+        '.calnic-dlg-msg{font-family:"EB Garamond",serif;color:#ece4d0;font-size:18px;line-height:1.45;white-space:pre-wrap;}',
+        '.calnic-dlg-input{width:100%;margin-top:12px;background:#111;border:1px solid #3a2f1d;border-radius:2px;padding:10px 12px;color:#ece4d0;font-family:"EB Garamond",serif;font-size:18px;outline:none;}',
+        '.calnic-dlg-input:focus{border-color:#b08030;}',
+        '.calnic-dlg-actions{display:flex;justify-content:flex-end;gap:10px;margin-top:16px;flex-wrap:wrap;}',
+        '.calnic-dlg-btn{min-width:112px;padding:9px 16px;border-radius:2px;border:1px solid #3f2f18;background:#111;color:#d4a84a;font-family:"Playfair Display",serif;letter-spacing:1px;cursor:pointer;}',
+        '.calnic-dlg-btn:hover{border-color:#b08030;color:#e6c97f;}',
+        '.calnic-dlg-btn.primary{background:linear-gradient(180deg,#2a1d0e,#181107);border-color:#b08030;color:#f0d79f;}',
+      ].join('');
+      document.head.appendChild(style);
+    }
+
+    var root = document.createElement('div');
+    root.className = 'calnic-dlg-backdrop';
+    root.innerHTML = '' +
+      '<div class="calnic-dlg" role="dialog" aria-modal="true" aria-labelledby="calnic-dlg-title">' +
+        '<h3 id="calnic-dlg-title" class="calnic-dlg-title">Calnic Online</h3>' +
+        '<div class="calnic-dlg-msg" id="calnic-dlg-msg"></div>' +
+        '<input id="calnic-dlg-input" class="calnic-dlg-input" type="text" autocomplete="off">' +
+        '<div class="calnic-dlg-actions">' +
+          '<button id="calnic-dlg-cancel" class="calnic-dlg-btn"></button>' +
+          '<button id="calnic-dlg-ok" class="calnic-dlg-btn primary"></button>' +
+        '</div>' +
+      '</div>';
+    document.body.appendChild(root);
+
+    _dlgRefs = {
+      root: root,
+      title: root.querySelector('#calnic-dlg-title'),
+      msg: root.querySelector('#calnic-dlg-msg'),
+      input: root.querySelector('#calnic-dlg-input'),
+      ok: root.querySelector('#calnic-dlg-ok'),
+      cancel: root.querySelector('#calnic-dlg-cancel')
+    };
+    return _dlgRefs;
+  }
+
+  function openDialog(type, message, options) {
+    options = options || {};
+    return new Promise(function (resolve) {
+      var refs = ensureDialogUi();
+      var active = document.activeElement;
+      var done = false;
+      var labels = {
+        title: options.title || 'Calnic Online',
+        ok: options.okText || t('OK', 'OK'),
+        cancel: options.cancelText || t('Anuleaza', 'Cancel')
+      };
+
+      refs.title.textContent = labels.title;
+      refs.msg.textContent = String(message == null ? '' : message);
+      refs.input.value = options.defaultValue == null ? '' : String(options.defaultValue);
+      refs.input.style.display = type === 'prompt' ? 'block' : 'none';
+      refs.cancel.style.display = type === 'alert' ? 'none' : 'inline-block';
+      refs.ok.textContent = labels.ok;
+      refs.cancel.textContent = labels.cancel;
+
+      function close(result) {
+        if (done) return;
+        done = true;
+        refs.root.classList.remove('open');
+        refs.ok.removeEventListener('click', onOk);
+        refs.cancel.removeEventListener('click', onCancel);
+        refs.root.removeEventListener('click', onBackdrop);
+        document.removeEventListener('keydown', onKeyDown, true);
+        if (active && active.focus) {
+          try { active.focus(); } catch (e) {}
+        }
+        resolve(result);
+      }
+
+      function onOk() {
+        close(type === 'prompt' ? String(refs.input.value || '') : true);
+      }
+      function onCancel() {
+        if (type === 'alert') close(true);
+        else close(type === 'prompt' ? null : false);
+      }
+      function onBackdrop(e) {
+        if (e.target === refs.root) onCancel();
+      }
+      function onKeyDown(e) {
+        if (!refs.root.classList.contains('open')) return;
+        if (e.key === 'Escape') {
+          e.preventDefault();
+          onCancel();
+        } else if (e.key === 'Enter') {
+          if (type !== 'prompt' || document.activeElement === refs.input) {
+            e.preventDefault();
+            onOk();
+          }
+        }
+      }
+
+      refs.ok.addEventListener('click', onOk);
+      refs.cancel.addEventListener('click', onCancel);
+      refs.root.addEventListener('click', onBackdrop);
+      document.addEventListener('keydown', onKeyDown, true);
+
+      refs.root.classList.add('open');
+      setTimeout(function () {
+        if (type === 'prompt') refs.input.focus();
+        else refs.ok.focus();
+      }, 0);
+    });
+  }
+
+  function dialogAlert(message, options) {
+    return queueDialog(function () { return openDialog('alert', message, options); });
+  }
+  function dialogConfirm(message, options) {
+    return queueDialog(function () { return openDialog('confirm', message, options); });
+  }
+  function dialogPrompt(message, defaultValue, options) {
+    var opts = options || {};
+    opts.defaultValue = defaultValue == null ? '' : defaultValue;
+    return queueDialog(function () { return openDialog('prompt', message, opts); });
+  }
+
   /**
    * Afiseaza o eroare de retea/supabase intr-un container.
    * @param {string} containerId   ID-ul elementului container
@@ -362,6 +500,9 @@
     showMsg:        showMsg,
     showToast:      showToast,
     showErr:        showErr,
+    dialogAlert:    dialogAlert,
+    dialogConfirm:  dialogConfirm,
+    dialogPrompt:   dialogPrompt,
     // Navigatie
     initHamburger:  initHamburger,
     initScrollBtns: initScrollBtns,
@@ -378,6 +519,9 @@
   w.formatYear  = formatYear;
   w.showMsg     = showMsg;
   w.showToast   = showToast;
+  w.dialogAlert = dialogAlert;
+  w.dialogConfirm = dialogConfirm;
+  w.dialogPrompt = dialogPrompt;
   w.getParam    = getParam;
   w.getSession  = getSession;
   w.getUser     = getUser;
