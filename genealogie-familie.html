@@ -358,7 +358,7 @@ font-size:9px;color:#786040;font-style:italic;margin-top:6px;text-align:center;b
 }
 
 .dp {
-position:fixed;top:0;right:0;width:290px;max-width:100vw;height:100dvh;background:#0e0e0e;border-left:1px solid #c8983a;z-index:50;display:flex;flex-direction:column;transform:translateX(102%);transition:transform .26s cubic-bezier(.4,0,.2,1);box-shadow:-8px 0 32px rgba(0,0,0,.7);
+position:fixed;top:var(--dpTop,0px);right:0;width:290px;max-width:100vw;height:calc(100dvh - var(--dpTop,0px));background:#0e0e0e;border-left:1px solid #c8983a;z-index:50;display:flex;flex-direction:column;transform:translateX(102%);transition:transform .26s cubic-bezier(.4,0,.2,1);box-shadow:-8px 0 32px rgba(0,0,0,.7);
 }
 
 .dp.open {
@@ -1589,13 +1589,6 @@ function _resolveParentChildFromRelation(r){
   // Auto-repair contradictory orientation when both years are known.
   if(!_isPlausibleParent(parentId,childId)&&_isPlausibleParent(childId,parentId)){
     var tmp=parentId;parentId=childId;childId=tmp;
-  }else if(_isPlausibleParent(parentId,childId)===_isPlausibleParent(childId,parentId)){
-    // If years are missing/inconclusive, use broader relation graph ordering.
-    var parentOlder=_isLikelyOlder(parentId,childId);
-    var childOlder=_isLikelyOlder(childId,parentId);
-    if(!parentOlder&&childOlder){
-      var t2=parentId;parentId=childId;childId=t2;
-    }
   }
   return {parentId:parentId,childId:childId,relType:rt};
 }
@@ -2220,14 +2213,31 @@ function computeLayout(){
   // 1. Build parent->child + spouse maps using ONLY direct relations
   var childrenOf={}, parentsOf={}, spousePairs={};
   S.members.forEach(function(m){childrenOf[m.id]=[];parentsOf[m.id]=[];});
+  function _addParentChildEdgeSafe(parentId,childId){
+    if(!parentId||!childId||parentId===childId)return;
+    if(!childrenOf[parentId]||!childrenOf[childId]||!parentsOf[parentId]||!parentsOf[childId])return;
+    // If reverse already exists, keep the plausible direction and drop the other.
+    var hasReverse=childrenOf[childId].indexOf(parentId)!==-1;
+    if(hasReverse){
+      var fwd=_isPlausibleParent(parentId,childId);
+      var rev=_isPlausibleParent(childId,parentId);
+      if(!fwd&&rev){
+        return; // keep reverse direction
+      }
+      // keep forward direction (or inconclusive): remove reverse
+      childrenOf[childId]=childrenOf[childId].filter(function(x){return x!==parentId;});
+      parentsOf[parentId]=parentsOf[parentId].filter(function(x){return x!==childId;});
+    }
+    if(childrenOf[parentId].indexOf(childId)===-1)childrenOf[parentId].push(childId);
+    if(parentsOf[childId].indexOf(parentId)===-1)parentsOf[childId].push(parentId);
+  }
 
   S.relations.forEach(function(r){
     var rt=relNorm(r.relation_type), a=r.from_member_id, b=r.to_member_id;
     if(LAYOUT_SPO[rt]){spousePairs[a]=b;spousePairs[b]=a;return;}
     var e=_resolveParentChildFromRelation(r);
     if(!e)return;
-    if(childrenOf[e.parentId]&&childrenOf[e.parentId].indexOf(e.childId)===-1)childrenOf[e.parentId].push(e.childId);
-    if(parentsOf[e.childId]&&parentsOf[e.childId].indexOf(e.parentId)===-1)parentsOf[e.childId].push(e.parentId);
+    _addParentChildEdgeSafe(e.parentId,e.childId);
   });
 
   // 2. Generation assignment using all known kin-distance constraints.
@@ -2244,14 +2254,22 @@ function computeLayout(){
   });
 
   // Additional constraints from declared relation distances (bunic/strabunic/etc.)
+  function _normalizeAncestorConstraint(a,b,up){
+    var older=(up>0)?b:a, younger=(up>0)?a:b;
+    var gap=_yearsGap(older,younger);
+    if(gap!=null&&gap<0){
+      var t=older;older=younger;younger=t;
+    }
+    return {older:older,younger:younger,diff:Math.max(1,Math.abs(up||1))};
+  }
   S.relations.forEach(function(r){
     var rt=relNorm(r.relation_type),meta=REL_META[rt];
     if(!meta||!isFinite(meta.up)||meta.up===0)return;
     var a=r.from_member_id,b=r.to_member_id;
     if(!a||!b||genOf[a]==null||genOf[b]==null)return;
-    var diff=Math.abs(meta.up),older=(meta.up>0)?b:a,younger=(meta.up>0)?a:b;
-    olderToYounger.push({older:older,younger:younger,diff:Math.max(1,diff)});
-    incomingOlder[younger]=(incomingOlder[younger]||0)+1;
+    var nc=_normalizeAncestorConstraint(a,b,meta.up);
+    olderToYounger.push({older:nc.older,younger:nc.younger,diff:nc.diff});
+    incomingOlder[nc.younger]=(incomingOlder[nc.younger]||0)+1;
   });
 
   // Roots = nodes that have no older-known ancestor in constraints.
@@ -2394,6 +2412,25 @@ function drawConnectors(svg,layout){
   function cardBot(id){var l=layout[id];return l?(l.cardH||110):110;}
   var childrenOf2={},spousePairs2={};
   S.members.forEach(function(m){childrenOf2[m.id]=[];});
+  function _hasChildEdge(parentId,childId){
+    var list=childrenOf2[parentId]||[];
+    return !!list.find(function(x){return x.id===childId;});
+  }
+  function _removeChildEdge(parentId,childId){
+    if(!childrenOf2[parentId])return;
+    childrenOf2[parentId]=childrenOf2[parentId].filter(function(x){return x.id!==childId;});
+  }
+  function _addChildEdgeSafe(parentId,childId,bio){
+    if(!parentId||!childId||parentId===childId)return;
+    if(!childrenOf2[parentId]||!childrenOf2[childId])return;
+    if(_hasChildEdge(childId,parentId)){
+      var fwd=_isPlausibleParent(parentId,childId);
+      var rev=_isPlausibleParent(childId,parentId);
+      if(!fwd&&rev)return; // keep reverse
+      _removeChildEdge(childId,parentId); // keep forward
+    }
+    if(!_hasChildEdge(parentId,childId))childrenOf2[parentId].push({id:childId,bio:bio});
+  }
 
   S.relations.forEach(function(r){
     var rt=relNorm(r.relation_type), a=r.from_member_id, b=r.to_member_id;
@@ -2403,9 +2440,7 @@ function drawConnectors(svg,layout){
     var par=e.parentId,chi=e.childId,bio=r.is_biological!==false;
     if(REL_META[rt]&&REL_META[rt].bio===false)bio=false;
     if(!layout[par]||!layout[chi])return;
-    if(!childrenOf2[par])childrenOf2[par]=[];
-    if(!childrenOf2[par].find(function(x){return x.id===chi;}))
-      childrenOf2[par].push({id:chi,bio:bio});
+    _addChildEdgeSafe(par,chi,bio);
   });
 
   // Spouse lines
@@ -2644,6 +2679,7 @@ function hideTT(){clearTimeout(S.ttTimer);document.getElementById('htip').classL
 // -- DETAIL PANEL -----------------------------------------
 function openDetail(id){
   var m=S.members.find(function(x){return x.id===id;});if(!m)return;
+  updateDetailPanelOffset();
   S.selectedId=id;hideTT();
   document.querySelectorAll('.pn').forEach(function(n){n.classList.remove('sel','dim','hl');n.classList.toggle('sel',n.getAttribute('data-id')===id);});S.highlightedId=null;
   var ph=document.getElementById('dpPhoto');ph.innerHTML='';
@@ -2691,6 +2727,25 @@ function openDetail(id){
 }
 
 function closeDetail(){document.getElementById('detailPanel').classList.remove('open');document.querySelectorAll('.pn').forEach(function(n){n.classList.remove('sel','dim','hl');});S.selectedId=null;S.highlightedId=null;}
+
+function getStickyNavBottomOffset(){
+  var sels=['.nav-wrapper','nav','.lang-bar'];
+  var best=0;
+  sels.forEach(function(sel){
+    var el=document.querySelector(sel);
+    if(!el)return;
+    var cs=window.getComputedStyle(el);
+    if(cs.position!=='sticky'&&cs.position!=='fixed')return;
+    var r=el.getBoundingClientRect();
+    if(r.top<=0&&r.bottom>0)best=Math.max(best,Math.round(r.bottom));
+  });
+  return best;
+}
+function updateDetailPanelOffset(){
+  var dp=document.getElementById('detailPanel');
+  if(!dp)return;
+  dp.style.setProperty('--dpTop',getStickyNavBottomOffset()+'px');
+}
 
 function clearHighlight(){
   document.querySelectorAll('.pn').forEach(function(n){n.classList.remove('hl','dim');});
@@ -3455,6 +3510,7 @@ function initUI(){
     }
   });
   _setAutoFitEnabled(_autoFitEnabled);
+  updateDetailPanelOffset();
   document.getElementById('helpBtn').addEventListener('click',showGuide);
   document.querySelectorAll('.dp-sc').forEach(function(el){el.style.webkitOverflowScrolling='touch';});
 }
@@ -3487,13 +3543,15 @@ function initScrollBtns(){
   window.addEventListener('scroll',upd);window.addEventListener('load',upd);setTimeout(upd,100);
   if(st)st.addEventListener('click',function(){window.scrollTo({top:0,behavior:'smooth'});});
   if(sb)sb.addEventListener('click',function(){window.scrollTo({top:document.body.scrollHeight,behavior:'smooth'});});
+  window.addEventListener('scroll',updateDetailPanelOffset,{passive:true});
+  window.addEventListener('resize',updateDetailPanelOffset);
 }
 
 // -- HAMBURGER --------------------------------------------
 function initHamburger(){var h=document.getElementById('hamburgerBtn'),m=document.getElementById('navMobileMenu');if(!h||!m)return;h.addEventListener('click',function(){var o=m.classList.toggle('open');h.textContent=o?'\u2715':'\u2630';});}
 
 // Re-center once the full page layout is complete (fallback for blank tree)
-window.addEventListener('load',function(){if(S.members.length)center();});
+window.addEventListener('load',function(){if(S.members.length)center();updateDetailPanelOffset();});
 </script>
 
 <script src="js/scroll-effects.js" defer></script>
