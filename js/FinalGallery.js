@@ -381,9 +381,18 @@
     el.addArchiveBtn.addEventListener('click', function () { openForm({ scope: 'archive' }); });
     el.addFamilyBtn.addEventListener('click', function () { if (st.selFam) openForm({ scope: 'family', familyId: st.selFam }); });
     el.videoRequestBtn.addEventListener('click', function () { if (st.selFam) openVideoRequest({ familyId: st.selFam }); });
-    el.newAlbumBtn.addEventListener('click', function () {
+    el.newAlbumBtn.addEventListener('click', async function () {
       if (!st.selFam) return;
-      var v = window.prompt(tr('Nume album nou', 'New album name'), '');
+      var v;
+      if (window.CalnicUtils && typeof window.CalnicUtils.dialogPrompt === 'function') {
+        v = await window.CalnicUtils.dialogPrompt(
+          tr('Nume album nou', 'New album name'),
+          '',
+          { title: tr('Album nou', 'New album') }
+        );
+      } else {
+        v = window.prompt(tr('Nume album nou', 'New album name'), '');
+      }
       if (v == null) return;
       var name = String(v || '').trim();
       if (!name) {
@@ -415,6 +424,10 @@
     cache(); bind(); $('yr').textContent = String(new Date().getFullYear()); switchTab('family');
     if (el.familySearch) {
       // Prevent browser autofill (email/username) from polluting family search.
+      el.familySearch.setAttribute('autocomplete', 'off');
+      el.familySearch.setAttribute('autocorrect', 'off');
+      el.familySearch.setAttribute('autocapitalize', 'off');
+      el.familySearch.setAttribute('spellcheck', 'false');
       el.familySearch.readOnly = true;
       setTimeout(function () {
         if (el.familySearch) el.familySearch.readOnly = false;
@@ -432,6 +445,7 @@
         }
       };
       setTimeout(clearAutofill, 200);
+      el.familySearch.addEventListener('focus', clearAutofill);
       var guardTimer = setInterval(function () {
         clearAutofill();
         if (Date.now() > autofillGuardUntil) clearInterval(guardTimer);

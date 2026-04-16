@@ -965,6 +965,24 @@ async function loadFamiliiFromSupabase() {
 }
 if (window.supabase) { loadFamiliiFromSupabase(); } else { document.addEventListener('supabase:ready', loadFamiliiFromSupabase); }
 
+function refreshFamiliesAuthState() {
+  if (!window.supabase || !window.supabase.auth) return;
+  window.supabase.auth.getUser().then(function(res){
+    var user = res && res.data ? (res.data.user || null) : null;
+    var nextId = user ? user.id : null;
+    if (String(nextId || '') !== String(familiesCurrentUserId || '')) {
+      familiesCurrentUserId = nextId;
+      if (supabaseLoaded) filterFamilies();
+    }
+  }).catch(function(){});
+}
+if (window.supabase && window.supabase.auth && typeof window.supabase.auth.onAuthStateChange === 'function') {
+  try {
+    window.supabase.auth.onAuthStateChange(function(){ refreshFamiliesAuthState(); });
+  } catch (_e) {}
+}
+refreshFamiliesAuthState();
+
 var currentLang = localStorage.getItem('calnic-lang') || 'ro';
 var currentAlpha = 'all';
 

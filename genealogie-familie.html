@@ -932,9 +932,12 @@ nav{flex-wrap:nowrap;overflow:hidden;}
         <button onclick="closeHealthModal()" style="background:none;border:none;color:var(--muted);font-size:22px;cursor:pointer;line-height:1;padding:0 0 0 8px;" title="Inchide">&times;</button>
       </div>
       <div id="healthSummary" style="font-size:12px;color:var(--muted);margin-bottom:10px;"></div>
+      <div id="healthScenariosSummary" style="display:none;font-size:12px;color:var(--muted);margin-bottom:10px;padding:8px 10px;border:1px solid var(--b1);background:var(--s1);"></div>
       <div id="healthList" style="display:flex;flex-direction:column;gap:8px;max-height:340px;overflow:auto;"></div>
+      <div id="healthFixLog" style="display:none;margin-top:10px;padding:8px 10px;border:1px solid var(--b1);background:var(--s1);"></div>
       <div id="healthMsg" class="m-msg" style="display:none;margin-top:10px;"></div>
       <div class="modal-acts" style="margin-top:12px;">
+        <button class="ma-cancel" id="healthRunScenariosBtn" data-ro="Ruleaza scenarii test" data-en="Run test scenarios">Ruleaza scenarii test</button>
         <button class="ma-save" id="healthApplyAllBtn" data-ro="Aplica fixurile recomandate" data-en="Apply recommended fixes">Aplica fixurile recomandate</button>
         <button class="ma-cancel" id="healthCloseBtn" data-ro="Inchide" data-en="Close">Inchide</button>
       </div>
@@ -999,6 +1002,7 @@ nav{flex-wrap:nowrap;overflow:hidden;}
     <div class="tip-wrap"><button class="tree-btn green" id="connectVillageBtn">&#127807; <span data-ro="Conecteaza la Sat" data-en="Connect to Village">Conecteaza la Sat</span></button><div class="tip"><span class="tip-title" data-ro="Arborele Satului" data-en="Village Tree">Arborele Satului</span><span data-ro="Conecteaza familia ta la arborele mare al satului Calnic." data-en="Connect your family to the Calnic village tree.">Conecteaza familia ta la arborele mare al satului Calnic.</span></div></div>
     <div class="tip-wrap"><button class="tree-btn" id="hlFamilyBtn"><span data-ro="Evidentiaza familia directa" data-en="Highlight direct family">Evidentiaza familia directa</span></button><div class="tip"><span class="tip-title" data-ro="Evidentiaza" data-en="Highlight">Evidentiaza</span><span data-ro="Selecteaza o persoana, apoi apasa acest buton pentru a evidentia familia directa." data-en="Select a person, then press this to highlight their direct family.">Selecteaza o persoana, apoi apasa acest buton pentru a evidentia familia directa.</span></div></div>
     <div class="tip-wrap"><button class="tree-btn" id="healthCheckBtn">&#9881; <span data-ro="Verifica arborele" data-en="Check tree">Verifica arborele</span></button><div class="tip"><span class="tip-title" data-ro="Sanatate arbore" data-en="Tree health">Sanatate arbore</span><span data-ro="Detecteaza conflicte de relatii si propune corectii rapide." data-en="Detects relation conflicts and suggests quick fixes.">Detecteaza conflicte de relatii si propune corectii rapide.</span></div></div>
+    <div class="tip-wrap"><button class="tree-btn" id="autoFitToggleBtn" data-on="0">&#10697; <span data-ro="Auto-recentrare: OFF" data-en="Auto-fit: OFF">Auto-recentrare: OFF</span></button><div class="tip"><span class="tip-title" data-ro="Auto-recentrare" data-en="Auto-fit">Auto-recentrare</span><span data-ro="Reincadreaza automat arborele dupa modificari mari (membri/relatii)." data-en="Automatically re-fits the tree after major changes (members/relations).">Reincadreaza automat arborele dupa modificari mari (membri/relatii).</span></div></div>
     <div class="tip-wrap"><button class="tree-btn" id="exportBtn">&#8659; <span data-ro="Salveaza ca imagine" data-en="Save as image">Salveaza ca imagine</span></button><div class="tip"><span class="tip-title">Export PNG</span><span data-ro="Salveaza arborele complet ca imagine PNG, potrivita pentru tiparit." data-en="Save the complete tree as a PNG image, suitable for printing.">Salveaza arborele complet ca imagine PNG, potrivita pentru tiparit.</span></div></div>
     <div class="tip-wrap"><button class="tree-btn" id="helpBtn">&#63; <span data-ro="Ajutor" data-en="Help">Ajutor</span></button><div class="tip"><span class="tip-title" data-ro="Ghid rapid" data-en="Quick guide">Ghid rapid</span><span data-ro="Arata ghidul de utilizare al arborelui." data-en="Shows the tree usage guide.">Arata ghidul de utilizare al arborelui.</span></div></div>
     <span class="tree-hint" data-ro="Trage=navigare &middot; ESC=inchide" data-en="Drag=navigate &middot; ESC=close">Trage=navigare &middot; ESC=inchide</span>
@@ -1177,12 +1181,54 @@ document.addEventListener('DOMContentLoaded',function(){
 
 // -- TREE HEALTH CHECK -----------------------------------
 var _healthIssues=[];
+var _healthFixLog=[];
+var _autoFitEnabled=(function(){
+  try{return localStorage.getItem('calnic-tree-auto-fit')==='1';}catch(_e){return false;}
+})();
+var _autoFitTimer=null;
 function _yearsGap(olderId,youngerId){
   var o=_memberById(olderId),y=_memberById(youngerId);
   if(!o||!y)return null;
   var oy=Number(o.birth_year||0),yy=Number(y.birth_year||0);
   if(!oy||!yy)return null;
   return yy-oy;
+}
+function _setAutoFitEnabled(v){
+  _autoFitEnabled=!!v;
+  try{localStorage.setItem('calnic-tree-auto-fit',_autoFitEnabled?'1':'0');}catch(_e){}
+  var b=document.getElementById('autoFitToggleBtn');
+  if(!b)return;
+  b.setAttribute('data-on',_autoFitEnabled?'1':'0');
+  b.classList.toggle('green',_autoFitEnabled);
+  var txt=b.querySelector('span');
+  if(txt){
+    txt.textContent=_autoFitEnabled
+      ?t('Auto-recentrare: ON','Auto-fit: ON')
+      :t('Auto-recentrare: OFF','Auto-fit: OFF');
+  }
+}
+function _scheduleAutoFit(){
+  if(!_autoFitEnabled||!S.members.length)return;
+  clearTimeout(_autoFitTimer);
+  _autoFitTimer=setTimeout(function(){fitTree();},220);
+}
+function _severityLabel(sev){
+  if(sev==='error')return t('Critic','Critical');
+  if(sev==='warn')return t('Avertisment','Warning');
+  return t('Info','Info');
+}
+function _severityColor(sev){
+  if(sev==='error')return '#c0392b';
+  if(sev==='warn')return '#b58a3a';
+  return '#6f8197';
+}
+function _logHealthFix(entry){
+  _healthFixLog.unshift({
+    ts:Date.now(),
+    text:entry&&entry.text?entry.text:t('Fix aplicat.','Fix applied.'),
+    ok:!(entry&&entry.ok===false)
+  });
+  if(_healthFixLog.length>8)_healthFixLog.length=8;
 }
 function _validateRelationBeforeSave(fromId,toId,relType){
   var rt=relNorm(relType);
@@ -1208,6 +1254,14 @@ function _validateRelationBeforeSave(fromId,toId,relType){
     var sg=_yearsGap(toId,fromId);
     if(sg!=null&&sg<36)return t('Diferenta de varsta este prea mica pentru relatie strabunic-stranepot.','Age gap is too small for a great-grandparent relation.');
   }
+  // Optional SQL-side validator (if present in DB). If function is missing, ignore.
+  try{
+    if(window.supabase&&window.supabase.rpc){
+      window.supabase.rpc('validate_direct_relation',{p_from_id:fromId,p_to_id:toId,p_relation_type:rt})
+        .then(function(_r){})
+        .catch(function(_e){});
+    }
+  }catch(_e){}
   return '';
 }
 function _buildTreeHealthIssues(){
@@ -1244,44 +1298,131 @@ function _buildTreeHealthIssues(){
     }
     var e=_resolveParentChildFromRelation(r);
     if(!e)return;
+    // Reciprocal conflict means both directions exist:
+    // A is parent of B AND B is parent of A.
     if(_parentChildExists(e.parentId,e.childId)){
-      var cKey=[e.parentId,e.childId].sort().join('|');
+      var cKey=[e.childId,e.parentId].sort().join('|');
       if(!addedCycle[cKey]){
         addedCycle[cKey]=1;
         issues.push({
-          kind:'cycle',
+          kind:'reciprocal',
           severity:'error',
           relId:r.id,
           msg:t('Conflict circular parinte-copil detectat intre doi membri.', 'Circular parent-child conflict detected between two members.'),
-          action:null
+          action:'delete-relation'
         });
       }
     }
   });
   return issues;
 }
+function _runHealthScenarios(){
+  var scenarios=[
+    {
+      id:'parent_chain_orderless',
+      label:t('Lant parinte-copil introdus in ordine amestecata','Parent-child chain entered in mixed order'),
+      run:function(){
+        // Expect: mama should be above copil, bunic above mama.
+        var a={id:'a',from_member_id:'mama',to_member_id:'copil',relation_type:'child'};
+        var b={id:'b',from_member_id:'mama',to_member_id:'bunic',relation_type:'mama'};
+        var ra=_resolveParentChildFromRelation(a);
+        var rb=_resolveParentChildFromRelation(b);
+        return !!(ra&&rb&&ra.parentId==='mama'&&ra.childId==='copil'&&rb.parentId==='bunic'&&rb.childId==='mama');
+      }
+    },
+    {
+      id:'reciprocal_detect',
+      label:t('Detectie conflict reciproc parinte-copil','Detect reciprocal parent-child conflict'),
+      run:function(){
+        var bak=S.relations.slice();
+        S.relations=[
+          {id:'r1',from_member_id:'copil',to_member_id:'mama',relation_type:'mama'},
+          {id:'r2',from_member_id:'mama',to_member_id:'copil',relation_type:'mama'}
+        ];
+        var found=_buildTreeHealthIssues().some(function(i){return i.kind==='reciprocal';});
+        S.relations=bak;
+        return found;
+      }
+    },
+    {
+      id:'duplicate_detect',
+      label:t('Detectie duplicate','Duplicate detection'),
+      run:function(){
+        var bak=S.relations.slice();
+        S.relations=[
+          {id:'r1',from_member_id:'a',to_member_id:'b',relation_type:'frate'},
+          {id:'r2',from_member_id:'a',to_member_id:'b',relation_type:'frate'}
+        ];
+        var found=_buildTreeHealthIssues().some(function(i){return i.kind==='duplicate';});
+        S.relations=bak;
+        return found;
+      }
+    }
+  ];
+  var out=scenarios.map(function(s){
+    var ok=false;
+    try{ok=!!s.run();}catch(_e){ok=false;}
+    return {id:s.id,label:s.label,ok:ok};
+  });
+  return out;
+}
 function _renderHealthModal(){
   var summary=document.getElementById('healthSummary');
   var list=document.getElementById('healthList');
   var applyAll=document.getElementById('healthApplyAllBtn');
+  var fixLog=document.getElementById('healthFixLog');
   if(!summary||!list||!applyAll)return;
   if(!_healthIssues.length){
     summary.textContent=t('Nu au fost gasite probleme in arbore.', 'No tree issues were detected.');
     list.innerHTML='';
     applyAll.style.display='none';
+    if(fixLog){
+      if(_healthFixLog.length){
+        fixLog.style.display='block';
+        fixLog.innerHTML='<div style="font-size:12px;color:var(--gold);margin-bottom:6px;">'+escH(t('Ultimele fixuri aplicate','Last applied fixes'))+'</div>'
+          +_healthFixLog.map(function(x){
+            var tm=new Date(x.ts).toLocaleTimeString('ro-RO',{hour:'2-digit',minute:'2-digit'});
+            var c=x.ok?'#7fb06e':'#c77a7a';
+            return '<div style="font-size:12px;color:var(--muted);line-height:1.45;"><span style="color:'+c+';">&#9679;</span> ['+escH(tm)+'] '+escH(x.text)+'</div>';
+          }).join('');
+      }else fixLog.style.display='none';
+    }
     return;
   }
   var fixable=_healthIssues.filter(function(i){return !!i.action;});
-  summary.textContent=t('Au fost detectate '+_healthIssues.length+' problema(e).', _healthIssues.length+' issue(s) detected.');
+  var cntErr=_healthIssues.filter(function(i){return i.severity==='error';}).length;
+  var cntWarn=_healthIssues.filter(function(i){return i.severity==='warn';}).length;
+  var cntInfo=_healthIssues.filter(function(i){return i.severity!=='error'&&i.severity!=='warn';}).length;
+  summary.textContent=t(
+    'Probleme detectate: '+_healthIssues.length+' (Critice: '+cntErr+', Avertismente: '+cntWarn+', Info: '+cntInfo+').',
+    'Issues detected: '+_healthIssues.length+' (Critical: '+cntErr+', Warnings: '+cntWarn+', Info: '+cntInfo+').'
+  );
   list.innerHTML=_healthIssues.map(function(i,idx){
-    var sev=i.severity==='error'?'#c0392b':'#b58a3a';
+    var sev=_severityColor(i.severity);
+    var sevLbl=_severityLabel(i.severity);
     var btn=i.action?('<button class="tree-btn" data-health-fix="'+idx+'" style="padding:5px 10px;font-size:11px;margin-top:6px;">'+escH(t('Aplica fix','Apply fix'))+'</button>'):'';
     return '<div style="border:1px solid var(--b1);background:var(--s2);padding:10px 12px;border-left:3px solid '+sev+';">'
+      +'<div style="font-size:11px;color:'+sev+';text-transform:uppercase;letter-spacing:.5px;margin-bottom:4px;">'+escH(sevLbl)+'</div>'
       +'<div style="font-size:12px;color:var(--text);line-height:1.5;">'+escH(i.msg)+'</div>'+btn+'</div>';
   }).join('');
   applyAll.style.display=fixable.length?'inline-flex':'none';
+  if(fixLog){
+    if(_healthFixLog.length){
+      fixLog.style.display='block';
+      fixLog.innerHTML='<div style="font-size:12px;color:var(--gold);margin-bottom:6px;">'+escH(t('Ultimele fixuri aplicate','Last applied fixes'))+'</div>'
+        +_healthFixLog.map(function(x){
+          var tm=new Date(x.ts).toLocaleTimeString('ro-RO',{hour:'2-digit',minute:'2-digit'});
+          var c=x.ok?'#7fb06e':'#c77a7a';
+          return '<div style="font-size:12px;color:var(--muted);line-height:1.45;"><span style="color:'+c+';">&#9679;</span> ['+escH(tm)+'] '+escH(x.text)+'</div>';
+        }).join('');
+    }else fixLog.style.display='none';
+  }
 }
 function openHealthModal(){
+  var msg=document.getElementById('healthMsg');
+  if(msg)msg.style.display='none';
+  var sc=document.getElementById('healthScenariosSummary');
+  if(sc)sc.style.display='none';
   _healthIssues=_buildTreeHealthIssues();
   _renderHealthModal();
   var m=document.getElementById('healthModal');
@@ -1291,18 +1432,29 @@ function closeHealthModal(){
   var m=document.getElementById('healthModal');
   if(m)m.classList.remove('open');
 }
-async function _applyHealthFix(issue){
+async function _applyHealthFix(issue,skipConfirm){
   if(!issue||!issue.action||!issue.relId) return;
   if(issue.action==='flip-type'){
     var up=await supabase.from('member_relations').update({relation_type:issue.newType}).eq('id',issue.relId).select();
     if(up.error)throw new Error(up.error.message||'health-fix-failed');
     S.relations=S.relations.map(function(r){return r.id===issue.relId?Object.assign({},r,{relation_type:issue.newType}):r;});
+    _logHealthFix({text:t('Relatie normalizata automat.','Relation normalized automatically.')});
     return;
   }
   if(issue.action==='delete-relation'){
+    if(!skipConfirm){
+      var ok=await (window.CalnicUtils&&window.CalnicUtils.dialogConfirm
+        ?window.CalnicUtils.dialogConfirm(
+          t('Aceasta legatura va fi stearsa definitiv. Continui?','This relation will be permanently deleted. Continue?'),
+          {title:t('Confirmare stergere','Delete confirmation')}
+        )
+        :Promise.resolve(confirm(t('Aceasta legatura va fi stearsa definitiv. Continui?','This relation will be permanently deleted. Continue?'))));
+      if(!ok)return;
+    }
     var del=await supabase.from('member_relations').delete().eq('id',issue.relId);
     if(del.error)throw new Error(del.error.message||'health-delete-failed');
     S.relations=S.relations.filter(function(r){return r.id!==issue.relId;});
+    _logHealthFix({text:t('Legatura conflictuala a fost stearsa.','Conflicting relation was deleted.')});
   }
 }
 async function applyAllHealthFixes(){
@@ -1310,11 +1462,21 @@ async function applyAllHealthFixes(){
   var btn=document.getElementById('healthApplyAllBtn');
   var targets=_healthIssues.filter(function(i){return !!i.action;});
   if(!targets.length)return;
+  var hasDelete=targets.some(function(i){return i.action==='delete-relation';});
+  if(hasDelete){
+    var okAll=await (window.CalnicUtils&&window.CalnicUtils.dialogConfirm
+      ?window.CalnicUtils.dialogConfirm(
+        t('Unele fixuri vor sterge legaturi conflictuale. Continui cu aplicarea tuturor?','Some fixes will delete conflicting relations. Continue applying all fixes?'),
+        {title:t('Confirmare fixuri','Fix confirmation')}
+      )
+      :Promise.resolve(confirm(t('Unele fixuri vor sterge legaturi conflictuale. Continui cu aplicarea tuturor?','Some fixes will delete conflicting relations. Continue applying all fixes?'))));
+    if(!okAll)return;
+  }
   btn.disabled=true;
   btn.textContent=t('Se aplica...','Applying...');
   var ok=0,fail=0;
   for(var i=0;i<targets.length;i++){
-    try{await _applyHealthFix(targets[i]);ok++;}catch(_e){fail++;}
+    try{await _applyHealthFix(targets[i],true);ok++;}catch(_e){fail++;}
   }
   btn.disabled=false;
   btn.textContent=t('Aplica fixurile recomandate','Apply recommended fixes');
@@ -1326,8 +1488,21 @@ async function applyAllHealthFixes(){
       :t('Fixurile recomandate au fost aplicate.','Recommended fixes applied.');
   }
   render();
+  _scheduleAutoFit();
   _healthIssues=_buildTreeHealthIssues();
   _renderHealthModal();
+}
+function runHealthScenarios(){
+  var out=_runHealthScenarios();
+  var box=document.getElementById('healthScenariosSummary');
+  if(!box)return;
+  var pass=out.filter(function(x){return x.ok;}).length;
+  box.style.display='block';
+  box.innerHTML='<div style="font-size:12px;color:var(--gold);margin-bottom:6px;">'+escH(t('Scenarii test','Test scenarios'))+'</div>'
+    +'<div style="font-size:12px;color:var(--muted);margin-bottom:6px;">'+escH(t('Rezultat: '+pass+'/'+out.length+' scenarii trecute.','Result: '+pass+'/'+out.length+' scenarios passed.'))+'</div>'
+    +out.map(function(x){
+      return '<div style="font-size:12px;color:var(--muted);line-height:1.45;"><span style="color:'+(x.ok?'#7fb06e':'#c77a7a')+';">'+(x.ok?'&#10003;':'&#10007;')+'</span> '+escH(x.label)+'</div>';
+    }).join('');
 }
 
 // -- RELATION INFERENCE ----------------------------------
@@ -1730,6 +1905,7 @@ document.addEventListener('DOMContentLoaded',function(){
       inserted.forEach(function(rel){S.relations.push(rel);});
       closeInferModal();
       render();
+      _scheduleAutoFit();
       if(capturedEditing){openEditor(capturedEditing);switchTab(1);}
     }).catch(function(e){btn.disabled=false;btn.textContent=t('Adauga selectate','Add selected');});
   });
@@ -2588,7 +2764,7 @@ document.getElementById('ef-save-btn').addEventListener('click',function(){
       S.members=S.members.map(function(m){return m.id===id?Object.assign({},m,upd):m;});
       document.querySelectorAll('.changed').forEach(function(f){f.classList.remove('changed');});document.getElementById('changePill').classList.remove('on');
       Object.keys(S.origVals).forEach(function(k){var e=document.getElementById(k);if(e)S.origVals[k]=e.value;});
-      showMsg('ef-msg-dates','success',t('Salvat!','Saved!'));render();if(S.selectedId===id)openDetail(id);
+      showMsg('ef-msg-dates','success',t('Salvat!','Saved!'));render();_scheduleAutoFit();if(S.selectedId===id)openDetail(id);
     }).catch(function(err){btn.disabled=false;btn.textContent=t('Salveaza modificarile','Save changes');showMsg('ef-msg-dates','error',err.message);});
 });
 
@@ -2632,7 +2808,7 @@ document.getElementById('ef-save-vis-btn').addEventListener('click',function(){
   supabase.from('members').update({visibility:S.editVis,is_living:isLiving,confidence:conf}).eq('id',id)
     .then(function(r){btn.disabled=false;if(r.error){showMsg('ef-msg-vis','error',r.error.message);return;}
       S.members=S.members.map(function(m){return m.id===id?Object.assign({},m,{visibility:S.editVis,is_living:isLiving,confidence:conf}):m;});
-      showMsg('ef-msg-vis','success',t('Vizibilitate salvata!','Visibility saved!'));render();
+      showMsg('ef-msg-vis','success',t('Vizibilitate salvata!','Visibility saved!'));render();_scheduleAutoFit();
     }).catch(function(err){btn.disabled=false;showMsg('ef-msg-vis','error',err.message);});
 });
 
@@ -2661,7 +2837,7 @@ document.getElementById('photoSaveBtn').addEventListener('click',function(){
       btn.disabled=false;btn.textContent=t('Salveaza poza','Save photo');
       if(ur.error){showMsg('ef-msg-photo','error',ur.error.message);return;}
       S.members=S.members.map(function(m){return m.id===id?Object.assign({},m,{photo_url:url}):m;});
-      pendingFile=null;showMsg('ef-msg-photo','success',t('Poza salvata!','Photo saved!'));render();
+      pendingFile=null;showMsg('ef-msg-photo','success',t('Poza salvata!','Photo saved!'));render();_scheduleAutoFit();
     });
   }).catch(function(err){btn.disabled=false;btn.textContent=t('Salveaza poza','Save photo');showMsg('ef-msg-photo','error',err.message);});
 });
@@ -2673,7 +2849,7 @@ document.getElementById('photoDeleteBtn').addEventListener('click',function(){
     if(r.error){showMsg('ef-msg-photo','error',r.error.message);return;}
     S.members=S.members.map(function(m){return m.id===id?Object.assign({},m,{photo_url:null}):m;});
     var pp=document.getElementById('photoPreviewCircle');pp.innerHTML='';var m=S.members.find(function(x){return x.id===id;});if(m)pp.textContent=(m.initial||(m.name?m.name.charAt(0):'?')).toUpperCase();
-    showMsg('ef-msg-photo','success',t('Poza stearsa.','Photo deleted.'));render();
+    showMsg('ef-msg-photo','success',t('Poza stearsa.','Photo deleted.'));render();_scheduleAutoFit();
   });
   });
 });
@@ -2707,7 +2883,7 @@ function doRemoveRel(relId,item){
   supabase.from('member_relations').delete().eq('id',relId).then(function(r){
     if(r.error){showMsg('ef-msg','error',r.error.message);return;}
     S.relations=S.relations.filter(function(x){return x.id!==relId;});
-    item.style.opacity='.3';setTimeout(function(){item.remove();},300);render();
+    item.style.opacity='.3';setTimeout(function(){item.remove();},300);render();_scheduleAutoFit();
   }).catch(function(err){showMsg('ef-msg','error',err.message);});
 }
 
@@ -2924,6 +3100,7 @@ function doRemoveRel(relId,item){
         closeModal();
         render();
         if(wasInsert)center();
+        _scheduleAutoFit();
         if(capturedFrom){openEditor(capturedFrom);switchTab(1);}
         if(wasInsert)inferRelations(capturedFrom,capturedTo,capturedType);
       }).catch(function(e){btn.disabled=false;btn.textContent=t('Salveaza','Save');err.textContent=e.message;err.style.display='block';});
@@ -2986,7 +3163,7 @@ document.getElementById('delExecuteBtn').addEventListener('click',function(){
   supabase.from('members').delete().eq('id',id).then(function(r){
     if(r.error){btn.disabled=false;btn.textContent=t('Sterge definitiv','Delete permanently');var dmsg=document.getElementById('del-msg');if(dmsg){dmsg.className='m-msg error';dmsg.textContent=r.error.message;dmsg.style.display='block';}return;}
     S.members=S.members.filter(function(x){return x.id!==id;});S.relations=S.relations.filter(function(r){return r.from_member_id!==id&&r.to_member_id!==id;});
-    closeDeleteModal();closeDetail();syncMembersCount();showUndo(t(m.name+' a fost sters.',''+m.name+' was deleted.'),null);render();
+    closeDeleteModal();closeDetail();syncMembersCount();showUndo(t(m.name+' a fost sters.',''+m.name+' was deleted.'),null);render();_scheduleAutoFit();
   }).catch(function(err){btn.disabled=false;btn.textContent=t('Sterge definitiv','Delete permanently');var dmsg=document.getElementById('del-msg');if(dmsg){dmsg.className='m-msg error';dmsg.textContent=err.message;dmsg.style.display='block';}});
 });
 
@@ -3017,7 +3194,7 @@ document.getElementById('af-save-btn').addEventListener('click',function(){
     if(r.data&&r.data[0])S.members.push(r.data[0]);
     syncMembersCount();
     showMsg('af-msg','success',t('Persoana adaugata in arbore!','Person added to tree!'));
-    setTimeout(function(){closeAddModal();render();},1200);
+    setTimeout(function(){closeAddModal();render();_scheduleAutoFit();},1200);
   }).catch(function(err){btn.disabled=false;btn.textContent=t('Adauga in arbore','Add to tree');showMsg('af-msg','error',err.message);});
 });
 document.getElementById('af-cancel-btn').addEventListener('click',closeAddModal);
@@ -3247,7 +3424,12 @@ function initUI(){
   });
   document.getElementById('hlFamilyBtn').addEventListener('click',function(){highlightFamily(S.selectedId);});
   document.getElementById('healthCheckBtn').addEventListener('click',openHealthModal);
+  document.getElementById('autoFitToggleBtn').addEventListener('click',function(){
+    _setAutoFitEnabled(!_autoFitEnabled);
+    if(_autoFitEnabled)_scheduleAutoFit();
+  });
   document.getElementById('healthCloseBtn').addEventListener('click',closeHealthModal);
+  document.getElementById('healthRunScenariosBtn').addEventListener('click',runHealthScenarios);
   document.getElementById('healthApplyAllBtn').addEventListener('click',applyAllHealthFixes);
   document.getElementById('healthList').addEventListener('click',async function(e){
     var b=e.target.closest('button[data-health-fix]');
@@ -3259,6 +3441,7 @@ function initUI(){
     try{
       await _applyHealthFix(issue);
       render();
+      _scheduleAutoFit();
       _healthIssues=_buildTreeHealthIssues();
       _renderHealthModal();
     }catch(err){
@@ -3271,6 +3454,7 @@ function initUI(){
       b.disabled=false;
     }
   });
+  _setAutoFitEnabled(_autoFitEnabled);
   document.getElementById('helpBtn').addEventListener('click',showGuide);
   document.querySelectorAll('.dp-sc').forEach(function(el){el.style.webkitOverflowScrolling='touch';});
 }

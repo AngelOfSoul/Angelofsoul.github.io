@@ -48,6 +48,8 @@
   var selectedNodeId = null;
   var highlightedPathKeys = {};
   var focusRequestSeq = 0;
+  var userLockedSelection = false;
+  var initialStateApplied = false;
 
   function clamp(value, min, max) {
     if (value < min) return min;
@@ -316,6 +318,7 @@
       .on('click', function (event, d) {
         // Cancel any in-flight auto-focus (URL/localStorage), then lock to the clicked node.
         focusRequestSeq++;
+        userLockedSelection = true;
         selectedNodeId = d.id;
         redrawStyles();
         openFamilyDetails(d);
@@ -600,6 +603,8 @@
   }
 
   function applyInitialState() {
+    if (initialStateApplied || userLockedSelection) return;
+    initialStateApplied = true;
     var q = params();
     var from = q.get('from');
     var to = q.get('to');
@@ -630,6 +635,7 @@
     if (!value || !graphData) return;
     var match = graphData.graph.nodes.find(function (n) { return String(n.label || '').toLowerCase() === value || String(n.label || '').toLowerCase().indexOf(value) !== -1; });
     if (match) {
+      userLockedSelection = true;
       selectedNodeId = match.id;
       redrawStyles();
       applyPath(null);
@@ -668,6 +674,7 @@
   if (searchInput) searchInput.addEventListener('change', searchByLabel);
   if (searchInput) searchInput.addEventListener('keydown', function (e) { if (e.key === 'Enter') searchByLabel(); });
   if (clearBtn) clearBtn.addEventListener('click', function () {
+    userLockedSelection = true;
     selectedNodeId = null;
     hideFamilyDetails();
     applyPath(null);
@@ -679,6 +686,7 @@
   if (zoomInBtn) zoomInBtn.addEventListener('click', function () { zoomByFactor(1.14); });
   if (zoomOutBtn) zoomOutBtn.addEventListener('click', function () { zoomByFactor(1 / 1.14); });
   if (findBtn) findBtn.addEventListener('click', function () {
+    userLockedSelection = true;
     var from = relationFrom.value, to = relationTo.value;
     if (!from || !to || from === to) {
       status(t('Alege doua familii diferite.', 'Choose two different families.'));
